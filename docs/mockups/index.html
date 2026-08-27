@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>ChemLab — Simulation Workbench Mockups</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: light-dark(#f3f7f7, #0d1417);
+      --surface: light-dark(#ffffff, #172126);
+      --text: light-dark(#172326, #edf6f5);
+      --muted: light-dark(#65767a, #a7b8bb);
+      --line: light-dark(#d8e3e2, #34474a);
+      --primary: light-dark(#0b766f, #5de4d3);
+      --primary-soft: light-dark(#d9f3ef, #123b37);
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 32px 20px;
+    }
+    main { margin: 0 auto; max-width: 920px; }
+    h1 { font-size: clamp(1.6rem, 4vw, 2.35rem); font-weight: 600; margin: 0 0 10px; }
+    p { color: var(--muted); line-height: 1.6; }
+    .grid { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 28px; }
+    .choice { background: var(--surface); border: 1px solid var(--line); padding: 22px; }
+    .choice h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 8px; }
+    .preview {
+      align-items: center;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: flex;
+      font-weight: 600;
+      height: 150px;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+    a {
+      background: var(--primary);
+      color: light-dark(#ffffff, #09201e);
+      display: inline-block;
+      font-weight: 600;
+      margin-top: 8px;
+      padding: 10px 14px;
+      text-decoration: none;
+    }
+    @media (max-width: 680px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>ChemLab · Simulation Workbench</h1>
+    <p>Hai bản mô phỏng giao diện cho cùng một lượt thí nghiệm. Đây là dữ liệu minh họa UI, chưa phải kết quả hóa học chuẩn.</p>
+    <div class="grid">
+      <section class="choice">
+        <div class="preview">Bố cục bàn thí nghiệm rộng</div>
+        <h2>Phiên bản máy tính</h2>
+        <p>Hiển thị đồng thời tiến trình, trạng thái thí nghiệm và bảng thao tác.</p>
+        <a href="simulation-workbench-desktop.html">Mở bản máy tính</a>
+      </section>
+      <section class="choice">
+        <div class="preview">Luồng xếp dọc cho điện thoại</div>
+        <h2>Phiên bản điện thoại</h2>
+        <p>Giữ đủ chức năng nhưng ưu tiên thông tin theo thứ tự sử dụng trên màn hình nhỏ.</p>
+        <a href="simulation-workbench-mobile.html">Mở bản điện thoại</a>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

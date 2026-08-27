@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>ChemLab — Bàn thí nghiệm trên máy tính</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: light-dark(#f3f7f7, #0d1417);
+      --surface: light-dark(#ffffff, #172126);
+      --surface-soft: light-dark(#edf5f4, #1d2b2f);
+      --text: light-dark(#172326, #edf6f5);
+      --muted: light-dark(#65767a, #a7b8bb);
+      --line: light-dark(#d8e3e2, #34474a);
+      --primary: light-dark(#0b766f, #5de4d3);
+      --primary-ink: light-dark(#ffffff, #09201e);
+      --primary-soft: light-dark(#d9f3ef, #123b37);
+      --blue: light-dark(#2d6f9f, #72b8e8);
+      --blue-soft: light-dark(#dcecf7, #173244);
+      --warning: light-dark(#9a5b0b, #f5bd62);
+      --warning-soft: light-dark(#fff2da, #3b2a12);
+      --success: light-dark(#237a4b, #70d79e);
+      --solid: light-dark(#248fbd, #58bde7);
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      min-width: 980px;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app-nav {
+      align-items: center;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 20px;
+    }
+    .nav-left, .nav-right, .inline { align-items: center; display: flex; gap: 12px; }
+    .brand { color: var(--primary); font-weight: 700; }
+    .nav-link { color: var(--muted); text-decoration: none; }
+    .nav-link.active { color: var(--text); font-weight: 600; }
+    .save-dot { background: var(--success); height: 8px; width: 8px; }
+    .avatar { align-items: center; background: var(--primary-soft); color: var(--primary); display: flex; height: 32px; justify-content: center; width: 32px; }
+    .experiment-head { background: var(--surface); border-bottom: 1px solid var(--line); padding: 15px 20px; }
+    .head-row { align-items: flex-end; display: flex; justify-content: space-between; gap: 24px; }
+    .breadcrumb, .muted, .unit, .label { color: var(--muted); }
+    h1 { font-size: 1.3rem; margin: 4px 0; }
+    .goal { color: var(--muted); }
+    .progress-wrap { min-width: 190px; }
+    .progress-track { background: var(--line); height: 7px; margin-top: 7px; }
+    .progress-value { background: var(--primary); height: 100%; width: 52%; }
+    .workspace { display: grid; gap: 12px; grid-template-columns: 220px minmax(420px, 1fr) 320px; padding: 12px; }
+    .panel { background: var(--surface); border: 1px solid var(--line); min-width: 0; }
+    .panel-head { align-items: center; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; padding: 11px 12px; }
+    .panel-title, .step-name { font-weight: 600; }
+    .panel-body { padding: 12px; }
+    .subtle { background: transparent; border: 0; color: var(--primary); padding: 5px 0; }
+    .step { display: grid; gap: 8px; grid-template-columns: 24px 1fr; padding-bottom: 17px; position: relative; }
+    .step:not(:last-child)::after { background: var(--line); content: ""; height: calc(100% - 19px); left: 11px; position: absolute; top: 25px; width: 2px; }
+    .step-dot { align-items: center; background: var(--surface-soft); border: 1px solid var(--line); display: flex; height: 23px; justify-content: center; width: 23px; z-index: 1; }
+    .step.done .step-dot { background: var(--primary); border-color: var(--primary); color: var(--primary-ink); }
+    .step.current .step-dot { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
+    .step-detail { color: var(--muted); margin-top: 3px; }
+    .lab-scene { background: linear-gradient(180deg, var(--surface-soft), var(--surface)); display: grid; gap: 16px; grid-template-columns: minmax(190px, .8fr) minmax(260px, 1.2fr); min-height: 270px; padding: 18px; }
+    .visual-zone { align-items: center; display: flex; flex-direction: column; justify-content: center; }
+    .beaker { border: 3px solid var(--line); border-top: 0; height: 155px; overflow: hidden; position: relative; width: 134px; }
+    .beaker::before, .beaker::after { background: var(--line); content: ""; height: 3px; position: absolute; top: 0; width: 25px; z-index: 4; }
+    .beaker::before { left: 0; } .beaker::after { right: 0; }
+    .solution { background: var(--blue-soft); bottom: 0; height: 67%; left: 0; position: absolute; right: 0; }
+    .solution-surface { background: var(--blue); height: 3px; left: 0; position: absolute; right: 0; top: 33%; }
+    .sediment { background: var(--solid); bottom: 0; height: 18%; left: 0; opacity: .76; position: absolute; right: 0; }
+    .particle { background: var(--solid); height: 6px; opacity: .85; position: absolute; width: 6px; z-index: 2; }
+    .p1 { bottom: 34%; left: 24%; } .p2 { bottom: 50%; left: 62%; } .p3 { bottom: 42%; left: 43%; } .p4 { bottom: 25%; left: 75%; }
+    .phenomenon { color: var(--blue); margin-top: 11px; text-align: center; }
+    .metric-list { display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .metric { background: var(--surface); border: 1px solid var(--line); padding: 10px; }
+    .metric-value { font-size: 1.18rem; font-weight: 700; margin-top: 5px; }
+    .metric.good .metric-value { color: var(--success); } .metric.warn .metric-value { color: var(--warning); }
+    .mini-chart { background: var(--surface); border: 1px solid var(--line); margin-top: 8px; padding: 8px; }
+    .mini-chart svg { display: block; height: 76px; width: 100%; }
+    .axis { stroke: var(--line); stroke-width: 1; } .chart-line { fill: none; stroke: var(--primary); stroke-width: 2.5; } .point { fill: var(--surface); stroke: var(--primary); stroke-width: 2; }
+    .tabs { border-top: 1px solid var(--line); }
+    .tab-row { align-items: center; border-bottom: 1px solid var(--line); display: flex; gap: 8px; padding: 0 12px; }
+    .tab-button { background: transparent; border: 0; color: var(--muted); padding: 11px 8px; }
+    .tab-button.active { box-shadow: inset 0 -2px 0 var(--primary); color: var(--text); }
+    .tab-pane { display: none; padding: 13px; } .tab-pane.active { display: block; }
+    .insight { display: grid; gap: 12px; grid-template-columns: 1fr auto; }
+    .equation { background: var(--primary-soft); color: var(--primary); padding: 9px 11px; white-space: nowrap; }
+    .form-group { margin-bottom: 13px; }
+    .form-label { display: block; margin-bottom: 6px; }
+    .product-select, .product-input { background: var(--bg); border: 1px solid var(--line); color: var(--text); min-height: 40px; padding: 8px 9px; width: 100%; }
+    .input-unit { align-items: center; display: grid; gap: 7px; grid-template-columns: 1fr auto; }
+    .reagents { display: grid; gap: 6px; grid-template-columns: repeat(3, 1fr); }
+    .reagent { background: var(--bg); border: 1px solid var(--line); color: var(--muted); min-height: 40px; }
+    .reagent.selected { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
+    .preview { background: var(--surface-soft); border-left: 3px solid var(--primary); margin: 13px 0; padding: 10px; }
+    .warning { background: var(--warning-soft); color: var(--warning); margin-bottom: 12px; padding: 10px; }
+    .primary { background: var(--primary); border: 0; color: var(--primary-ink); min-height: 43px; padding: 9px 14px; width: 100%; }
+    .secondary { background: var(--surface-soft); border: 0; color: var(--text); min-height: 39px; padding: 8px 12px; }
+    .footer { align-items: center; background: var(--surface); border-top: 1px solid var(--line); display: flex; justify-content: space-between; padding: 12px 20px; }
+    .demo-banner { background: var(--warning-soft); color: var(--warning); padding: 9px 20px; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">Dữ liệu minh họa giao diện — chưa phải kết quả hóa học chuẩn.</div>
+  <nav class="app-nav" aria-label="Điều hướng chính">
+    <div class="nav-left"><span class="brand">ChemLab</span><a class="nav-link active" href="#">Thí nghiệm</a><a class="nav-link" href="#">Phòng lab của tôi</a><a class="nav-link" href="#">Nguồn khoa học</a></div>
+    <div class="nav-right"><span class="inline"><span class="save-dot"></span><span id="desktop-save">Đã lưu lúc 14:32</span></span><span class="avatar">NA</span></div>
+  </nav>
+  <header class="experiment-head">
+    <div class="head-row">
+      <div><div class="breadcrumb">Thí nghiệm / Xử lý nước / Lượt thử #2</div><h1>Loại bỏ Cu²⁺ bằng kết tủa hóa học</h1><div class="goal">Mục tiêu: Cu hòa tan ≤ 2 mg/L, hoàn tất tách rắn – lỏng và giữ pH trong vùng kịch bản.</div></div>
+      <div class="progress-wrap"><div class="inline"><span class="label">Tiến độ lượt thử</span><strong id="desktop-progress-label">52%</strong></div><div class="progress-track"><div id="desktop-progress" class="progress-value"></div></div></div>
+    </div>
+  </header>
+  <main class="workspace">
+    <section class="panel">
+      <div class="panel-head"><span class="panel-title">Tiến trình</span><button class="subtle" type="button">Xem lịch sử</button></div>
+      <div class="panel-body">
+        <div class="step done"><span class="step-dot">✓</span><div><div class="step-name">Đo mẫu ban đầu</div><div class="step-detail">pH 3,2 · Cu 100 mg/L</div></div></div>
+        <div class="step done"><span class="step-dot">✓</span><div><div class="step-name">Thêm NaOH</div><div class="step-detail">4,6 mL · 1,0 M</div></div></div>
+        <div class="step current"><span class="step-dot">3</span><div><div class="step-name">Điều chỉnh pH</div><div class="step-detail">Đang chọn liều bổ sung</div></div></div>
+        <div class="step"><span class="step-dot">4</span><div><div class="step-name">Khuấy và lắng</div><div class="step-detail">Chưa thực hiện</div></div></div>
+        <div class="step"><span class="step-dot">5</span><div><div class="step-name">Lọc và đo đầu ra</div><div class="step-detail">Bắt buộc trước khi kết thúc</div></div></div>
+        <button class="subtle" type="button">+ Tạo nhánh so sánh từ đây</button>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><span class="panel-title">Trạng thái hiện tại</span><span class="muted">Lượt thử #2</span></div>
+      <div class="lab-scene">
+        <div class="visual-zone"><div class="beaker" role="img" aria-label="Cốc phản ứng có dung dịch màu xanh và kết tủa đang hình thành"><div class="solution"></div><div class="solution-surface"></div><span class="particle p1"></span><span class="particle p2"></span><span class="particle p3"></span><span class="particle p4"></span><div class="sediment"></div></div><div class="phenomenon">Xuất hiện kết tủa xanh, chưa lắng hoàn toàn</div></div>
+        <div>
+          <div class="metric-list">
+            <div class="metric"><span class="label">pH hiện tại</span><div id="desktop-ph" class="metric-value">7,80</div><span class="unit">Mục tiêu 8,5–9,5</span></div>
+            <div class="metric warn"><span class="label">Cu²⁺ dự kiến</span><div class="metric-value">12,4 mg/L</div><span class="unit">Chưa đạt ≤ 2 mg/L</span></div>
+            <div class="metric"><span class="label">Kết tủa</span><div class="metric-value">0,14 g</div><span class="unit">Ước tính theo mô hình</span></div>
+            <div class="metric good"><span class="label">Bảo toàn Cu</span><div class="metric-value">99,8%</div><span class="unit">Trong sai số tính toán</span></div>
+          </div>
+          <div class="mini-chart"><div class="inline"><span class="label">pH theo thao tác</span><span class="muted">4 bước gần nhất</span></div><svg viewBox="0 0 300 76" role="img" aria-label="Đồ thị pH tăng qua bốn thao tác"><line class="axis" x1="8" y1="65" x2="292" y2="65"></line><line class="axis" x1="8" y1="8" x2="8" y2="65"></line><polyline class="chart-line" points="12,58 98,45 190,30 286,17"></polyline><circle class="point" cx="12" cy="58" r="4"></circle><circle class="point" cx="98" cy="45" r="4"></circle><circle class="point" cx="190" cy="30" r="4"></circle><circle class="point" cx="286" cy="17" r="4"></circle></svg></div>
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="tab-row" role="tablist"><button class="tab-button active" type="button" data-pane="feedback">Phản hồi</button><button class="tab-button" type="button" data-pane="formula">Công thức & dữ liệu</button><button class="tab-button" type="button" data-pane="source">Nguồn & giới hạn</button></div>
+        <div id="desktop-pane-feedback" class="tab-pane active"><div class="insight"><div><strong>Điều vừa xảy ra</strong><div class="muted">pH tăng làm Cu²⁺ bắt đầu chuyển sang pha rắn. Mẫu vẫn cần khuấy, lắng và lọc trước khi đánh giá đầu ra.</div></div><span class="equation">Cu²⁺ + 2OH⁻ → Cu(OH)₂↓</span></div></div>
+        <div id="desktop-pane-formula" class="tab-pane"><strong>Dữ liệu trung gian</strong><div class="muted">Số mol Cu ban đầu · số mol OH⁻ đã thêm · chất giới hạn · lượng kết tủa lý thuyết.</div></div>
+        <div id="desktop-pane-source" class="tab-pane"><strong>Căn cứ và giới hạn</strong><div class="muted">Tài liệu EPA và nghiên cứu kết tủa Cu được liên kết theo phiên bản. Mô hình không đại diện cho mọi nước thải thực.</div></div>
+      </div>
+    </section>
+    <aside class="panel">
+      <div class="panel-head"><span class="panel-title">Thao tác tiếp theo</span><span class="muted">Bước 3</span></div>
+      <div class="panel-body">
+        <div class="form-group"><label class="form-label" for="desktop-action">Loại thao tác</label><select id="desktop-action" class="product-select"><option>Thêm chất kết tủa</option><option>Khuấy</option><option>Chờ lắng</option><option>Lọc</option><option>Đo mẫu</option></select></div>
+        <div class="form-group"><span class="form-label">Chất được chọn</span><div class="reagents"><button class="reagent selected" type="button">NaOH</button><button class="reagent" type="button">Ca(OH)₂</button><button class="reagent" type="button">Na₂CO₃</button></div></div>
+        <div class="form-group"><label class="form-label" for="desktop-concentration">Nồng độ</label><div class="input-unit"><input id="desktop-concentration" class="product-input" value="1,0"><span class="unit">mol/L</span></div></div>
+        <div class="form-group"><label class="form-label" for="desktop-volume">Thể tích bổ sung</label><div class="input-unit"><input id="desktop-volume" class="product-input" value="0,8"><span class="unit">mL</span></div></div>
+        <div class="preview"><strong>Dự kiến sau thao tác</strong><div class="muted">pH khoảng 8,7 · Cu²⁺ giảm thêm · phát sinh kết tủa.</div></div>
+        <div class="warning">Cần khuấy và lọc trước khi dùng kết quả Cu tổng để kết thúc.</div>
+        <button id="desktop-run" class="primary" type="button">Thực hiện thao tác</button>
+        <button class="subtle" type="button">Xem cách hệ thống tính</button>
+      </div>
+    </aside>
+  </main>
+  <footer class="footer"><div class="inline"><button class="secondary" type="button">Hoàn tác bước cuối</button><button class="secondary" type="button">Đặt lại lượt thử</button></div><div class="inline"><span class="muted">Tự động lưu vào tài khoản</span><button class="secondary" type="button">Kết thúc & xem báo cáo</button></div></footer>
+  <script>
+    const desktopTabs = document.querySelectorAll('.tab-button');
+    desktopTabs.forEach((button) => button.addEventListener('click', () => {
+      desktopTabs.forEach((tab) => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach((pane) => pane.classList.remove('active'));
+      button.classList.add('active');
+      document.getElementById('desktop-pane-' + button.dataset.pane).classList.add('active');
+    }));
+    document.querySelectorAll('.reagent').forEach((button) => button.addEventListener('click', () => {
+      document.querySelectorAll('.reagent').forEach((item) => item.classList.remove('selected'));
+      button.classList.add('selected');
+    }));
+    document.getElementById('desktop-run').addEventListener('click', () => {
+      document.getElementById('desktop-save').textContent = 'Đang lưu…';
+      document.getElementById('desktop-ph').textContent = '8,70';
+      document.getElementById('desktop-progress').style.width = '68%';
+      document.getElementById('desktop-progress-label').textContent = '68%';
+      window.setTimeout(() => { document.getElementById('desktop-save').textContent = 'Đã lưu vừa xong'; }, 550);
+    });
+  </script>
+</body>
+</html>

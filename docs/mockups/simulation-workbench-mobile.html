@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>ChemLab — Bàn thí nghiệm trên điện thoại</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: light-dark(#e9efef, #091013);
+      --surface: light-dark(#ffffff, #172126);
+      --surface-soft: light-dark(#eef5f4, #1d2b2f);
+      --text: light-dark(#172326, #edf6f5);
+      --muted: light-dark(#65767a, #a7b8bb);
+      --line: light-dark(#d8e3e2, #34474a);
+      --primary: light-dark(#0b766f, #5de4d3);
+      --primary-ink: light-dark(#ffffff, #09201e);
+      --primary-soft: light-dark(#d9f3ef, #123b37);
+      --blue: light-dark(#2d6f9f, #72b8e8);
+      --blue-soft: light-dark(#dcecf7, #173244);
+      --warning: light-dark(#9a5b0b, #f5bd62);
+      --warning-soft: light-dark(#fff2da, #3b2a12);
+      --success: light-dark(#237a4b, #70d79e);
+      --solid: light-dark(#248fbd, #58bde7);
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .phone { background: var(--bg); margin: 0 auto; max-width: 430px; min-height: 100vh; padding-bottom: 78px; }
+    .demo-banner { background: var(--warning-soft); color: var(--warning); padding: 8px 14px; text-align: center; }
+    .topbar { align-items: center; background: var(--surface); border-bottom: 1px solid var(--line); display: flex; gap: 10px; justify-content: space-between; padding: 11px 14px; }
+    .topbar-left, .save-state, .inline { align-items: center; display: flex; gap: 8px; }
+    .icon-button { align-items: center; background: var(--surface-soft); border: 0; color: var(--text); display: flex; height: 38px; justify-content: center; width: 38px; }
+    .brand { color: var(--primary); font-weight: 700; }
+    .save-dot { background: var(--success); height: 8px; width: 8px; }
+    .save-state { color: var(--muted); }
+    .experiment-head { background: var(--surface); border-bottom: 1px solid var(--line); padding: 14px; }
+    .breadcrumb, .muted, .label, .unit { color: var(--muted); }
+    h1 { font-size: 1.18rem; margin: 5px 0; }
+    .goal { color: var(--muted); line-height: 1.45; }
+    .progress-row { align-items: center; display: flex; justify-content: space-between; margin-top: 13px; }
+    .progress-track { background: var(--line); height: 7px; margin-top: 7px; }
+    .progress-value { background: var(--primary); height: 100%; width: 52%; }
+    .section { background: var(--surface); border-bottom: 1px solid var(--line); margin-top: 10px; }
+    .section-head { align-items: center; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; padding: 11px 14px; }
+    .section-title { font-weight: 700; }
+    .section-body { padding: 14px; }
+    .lab-visual { align-items: center; background: linear-gradient(180deg, var(--surface-soft), var(--surface)); display: grid; gap: 14px; grid-template-columns: 124px 1fr; padding: 14px; }
+    .beaker { border: 3px solid var(--line); border-top: 0; height: 132px; margin: 0 auto; overflow: hidden; position: relative; width: 108px; }
+    .beaker::before, .beaker::after { background: var(--line); content: ""; height: 3px; position: absolute; top: 0; width: 21px; z-index: 4; }
+    .beaker::before { left: 0; } .beaker::after { right: 0; }
+    .solution { background: var(--blue-soft); bottom: 0; height: 67%; left: 0; position: absolute; right: 0; }
+    .solution-surface { background: var(--blue); height: 3px; left: 0; position: absolute; right: 0; top: 33%; }
+    .sediment { background: var(--solid); bottom: 0; height: 18%; left: 0; opacity: .76; position: absolute; right: 0; }
+    .particle { background: var(--solid); height: 6px; opacity: .85; position: absolute; width: 6px; z-index: 2; }
+    .p1 { bottom: 34%; left: 24%; } .p2 { bottom: 50%; left: 62%; } .p3 { bottom: 42%; left: 43%; } .p4 { bottom: 25%; left: 75%; }
+    .metric { border-bottom: 1px solid var(--line); padding: 8px 0; }
+    .metric:last-child { border-bottom: 0; }
+    .metric-value { font-size: 1.12rem; font-weight: 700; margin-top: 3px; }
+    .metric.warn .metric-value { color: var(--warning); }
+    .phenomenon { background: var(--blue-soft); color: var(--blue); line-height: 1.45; padding: 10px 14px; }
+    .feedback { background: var(--primary-soft); border-left: 3px solid var(--primary); line-height: 1.5; padding: 11px 12px; }
+    .equation { color: var(--primary); display: block; font-weight: 700; margin-top: 7px; }
+    .form-group { margin-bottom: 13px; }
+    .form-label { display: block; margin-bottom: 6px; }
+    .product-select, .product-input { background: var(--bg); border: 1px solid var(--line); color: var(--text); font-size: 16px; min-height: 44px; padding: 9px 10px; width: 100%; }
+    .input-unit { align-items: center; display: grid; gap: 8px; grid-template-columns: 1fr auto; }
+    .reagents { display: grid; gap: 7px; grid-template-columns: repeat(3, 1fr); }
+    .reagent { background: var(--bg); border: 1px solid var(--line); color: var(--muted); min-height: 44px; }
+    .reagent.selected { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
+    .preview { background: var(--surface-soft); border-left: 3px solid var(--primary); line-height: 1.45; margin: 13px 0; padding: 10px; }
+    .warning { background: var(--warning-soft); color: var(--warning); line-height: 1.45; padding: 10px; }
+    details { background: var(--surface); border-bottom: 1px solid var(--line); }
+    summary { cursor: pointer; font-weight: 700; min-height: 48px; padding: 14px; }
+    .detail-body { color: var(--muted); line-height: 1.55; padding: 0 14px 14px; }
+    .timeline-item { border-left: 2px solid var(--line); padding: 0 0 14px 12px; }
+    .timeline-item.done { border-color: var(--primary); }
+    .timeline-item strong { display: block; }
+    .bottom-action { background: var(--surface); border-top: 1px solid var(--line); bottom: 0; left: 50%; max-width: 430px; padding: 10px 14px; position: fixed; transform: translateX(-50%); width: 100%; z-index: 10; }
+    .primary { background: var(--primary); border: 0; color: var(--primary-ink); min-height: 48px; padding: 10px 14px; width: 100%; }
+    .action-status { color: var(--muted); margin-bottom: 8px; text-align: center; }
+    .report-link { background: transparent; border: 0; color: var(--primary); padding: 9px 0; width: 100%; }
+    @media (max-width: 350px) {
+      .lab-visual { grid-template-columns: 1fr; }
+      .reagents { grid-template-columns: 1fr; }
+    }
+    @media (min-width: 500px) {
+      body { padding: 20px; }
+      .phone { border: 1px solid var(--line); box-shadow: 0 18px 45px light-dark(rgba(20, 48, 47, .12), rgba(0, 0, 0, .3)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="demo-banner">Dữ liệu minh họa UI — chưa phải kết quả hóa học chuẩn</div>
+    <header class="topbar">
+      <div class="topbar-left"><button class="icon-button" type="button" aria-label="Quay lại">←</button><span class="brand">ChemLab</span></div>
+      <span class="save-state"><span class="save-dot"></span><span id="mobile-save">Đã lưu</span></span>
+    </header>
+    <section class="experiment-head">
+      <div class="breadcrumb">Xử lý nước · Lượt thử #2</div>
+      <h1>Loại bỏ Cu²⁺ bằng kết tủa</h1>
+      <div class="goal">Cu hòa tan ≤ 2 mg/L · hoàn tất tách rắn – lỏng · giữ pH trong vùng kịch bản.</div>
+      <div class="progress-row"><span class="label">Tiến độ lượt thử</span><strong id="mobile-progress-label">52%</strong></div>
+      <div class="progress-track"><div id="mobile-progress" class="progress-value"></div></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head"><span class="section-title">1. Trạng thái hiện tại</span><span class="muted">Bước 3/5</span></div>
+      <div class="lab-visual">
+        <div class="beaker" role="img" aria-label="Cốc phản ứng có dung dịch màu xanh và kết tủa đang hình thành"><div class="solution"></div><div class="solution-surface"></div><span class="particle p1"></span><span class="particle p2"></span><span class="particle p3"></span><span class="particle p4"></span><div class="sediment"></div></div>
+        <div>
+          <div class="metric"><span class="label">pH hiện tại</span><div id="mobile-ph" class="metric-value">7,80</div><span class="unit">Mục tiêu 8,5–9,5</span></div>
+          <div class="metric warn"><span class="label">Cu²⁺ dự kiến</span><div class="metric-value">12,4 mg/L</div><span class="unit">Chưa đạt ≤ 2 mg/L</span></div>
+          <div class="metric"><span class="label">Kết tủa</span><div class="metric-value">0,14 g</div><span class="unit">Ước tính theo mô hình</span></div>
+        </div>
+      </div>
+      <div class="phenomenon">Xuất hiện kết tủa xanh; mẫu chưa lắng hoàn toàn.</div>
+      <div class="section-body"><div class="feedback"><strong>Điều vừa xảy ra</strong><br>pH tăng làm Cu²⁺ bắt đầu chuyển sang pha rắn. Cần tiếp tục khuấy, lắng và lọc.<span class="equation">Cu²⁺ + 2OH⁻ → Cu(OH)₂↓</span></div></div>
+    </section>
+
+    <details>
+      <summary>2. Tiến trình đã thực hiện</summary>
+      <div class="detail-body">
+        <div class="timeline-item done"><strong>Đo mẫu ban đầu</strong>pH 3,2 · Cu 100 mg/L</div>
+        <div class="timeline-item done"><strong>Thêm NaOH</strong>4,6 mL · 1,0 M</div>
+        <div class="timeline-item"><strong>Điều chỉnh pH</strong>Đang chọn liều bổ sung</div>
+        <button class="report-link" type="button">+ Tạo nhánh so sánh từ đây</button>
+      </div>
+    </details>
+
+    <section class="section">
+      <div class="section-head"><span class="section-title">3. Thao tác tiếp theo</span><span class="muted">Tự lưu</span></div>
+      <div class="section-body">
+        <div class="form-group"><label class="form-label" for="mobile-action">Loại thao tác</label><select id="mobile-action" class="product-select"><option>Thêm chất kết tủa</option><option>Khuấy</option><option>Chờ lắng</option><option>Lọc</option><option>Đo mẫu</option></select></div>
+        <div class="form-group"><span class="form-label">Chất được chọn</span><div class="reagents"><button class="reagent selected" type="button">NaOH</button><button class="reagent" type="button">Ca(OH)₂</button><button class="reagent" type="button">Na₂CO₃</button></div></div>
+        <div class="form-group"><label class="form-label" for="mobile-concentration">Nồng độ</label><div class="input-unit"><input id="mobile-concentration" class="product-input" value="1,0"><span class="unit">mol/L</span></div></div>
+        <div class="form-group"><label class="form-label" for="mobile-volume">Thể tích bổ sung</label><div class="input-unit"><input id="mobile-volume" class="product-input" value="0,8"><span class="unit">mL</span></div></div>
+        <div id="mobile-preview" class="preview"><strong>Dự kiến sau thao tác</strong><br>pH khoảng 8,7 · Cu²⁺ giảm thêm · phát sinh kết tủa.</div>
+        <div class="warning">Cần khuấy và lọc trước khi dùng kết quả Cu tổng để kết thúc.</div>
+      </div>
+    </section>
+
+    <details>
+      <summary>4. Công thức & dữ liệu trung gian</summary>
+      <div class="detail-body">Số mol Cu ban đầu · số mol OH⁻ đã thêm · chất giới hạn · lượng kết tủa lý thuyết · kiểm tra bảo toàn khối lượng.</div>
+    </details>
+    <details>
+      <summary>5. Nguồn & giới hạn mô hình</summary>
+      <div class="detail-body">Liên kết tài liệu EPA và nghiên cứu kết tủa Cu theo phiên bản. Mô hình dùng dung dịch tổng hợp và không đại diện cho mọi nước thải thực.</div>
+    </details>
+    <button class="report-link" type="button">Kết thúc và xem báo cáo lượt thử</button>
+
+    <div class="bottom-action">
+      <div id="mobile-action-status" class="action-status">Thao tác sẽ được lưu vào tài khoản</div>
+      <button id="mobile-run" class="primary" type="button">Thực hiện thao tác</button>
+    </div>
+  </div>
+  <script>
+    const mobileReagents = document.querySelectorAll('.reagent');
+    mobileReagents.forEach((button) => button.addEventListener('click', () => {
+      mobileReagents.forEach((item) => item.classList.remove('selected'));
+      button.classList.add('selected');
+      document.getElementById('mobile-preview').innerHTML = '<strong>Dự kiến sau thao tác</strong><br>Đã chọn ' + button.textContent + ' · kết quả sẽ được tính trong phạm vi mô hình.';
+    }));
+    document.getElementById('mobile-run').addEventListener('click', () => {
+      const save = document.getElementById('mobile-save');
+      const status = document.getElementById('mobile-action-status');
+      save.textContent = 'Đang lưu…';
+      status.textContent = 'Đang tính kết quả và đồng bộ…';
+      document.getElementById('mobile-ph').textContent = '8,70';
+      document.getElementById('mobile-progress').style.width = '68%';
+      document.getElementById('mobile-progress-label').textContent = '68%';
+      window.setTimeout(() => { save.textContent = 'Đã lưu'; status.textContent = 'Đã lưu thao tác vừa thực hiện'; }, 550);
+    });
+  </script>
+</body>
+</html>
