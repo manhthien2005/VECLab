@@ -11,7 +11,59 @@
 
 > **Nhãn bắt buộc:** Mô hình dựa trên tài liệu; chưa được nhóm phát triển kiểm chứng bằng thí nghiệm độc lập.
 
+## Tổng quan nhanh
+
+| | Nội dung |
+| --- | --- |
+| 🎯 **Mục đích** | Đặc tả kết tủa Cu trong dung dịch CuSO₄ tổng hợp bằng ba route ở 25 °C. |
+| 👥 **Dành cho** | Chemistry engine, backend simulation, content và QA khoa học. |
+| ✅ **Sau khi đọc** | Biết species bundle, solid reference phase, solver, workflow và golden outputs. |
+| ⚠️ **Lưu ý** | Đây là equilibrium model hẹp; mixing/settling/filtering không phải mô hình động học thiết bị thật. |
+
+## Đọc tài liệu này khi nào?
+
+- Khi triển khai Copper Precipitation domain module.
+- Khi phân biệt free Cu²⁺ với total dissolved Cu.
+- Khi viết workflow mix–settle–filter, report hoặc scoring.
+
+## Các quyết định chính
+
+- NaOH/Ca(OH)₂ dùng Cu(OH)₂ mới kết tủa làm pha rắn tham chiếu.
+- Na₂CO₃ dùng malachite làm pha tham chiếu, không giả CuCO₃ tinh khiết.
+- Solver tính activity Davies và đầy đủ hydroxo, sulfate, carbonate complexes trong bundle.
+- Settling không đổi hóa học; filter là bộ tách lý tưởng được công bố rõ.
+- Nước thải thật, complexant, high ionic strength và jar-test nằm ngoài model.
+
+## Mục lục
+
+<!-- TOC:START -->
+- [1. Quyết định khoa học chính](#1-quyết-định-khoa-học-chính)
+- [2. Kịch bản tham chiếu](#2-kịch-bản-tham-chiếu)
+- [3. Tỷ lệ liều và miền đầu vào](#3-tỷ-lệ-liều-và-miền-đầu-vào)
+- [4. Luồng trạng thái](#4-luồng-trạng-thái)
+- [5. Mô hình trạng thái](#5-mô-hình-trạng-thái)
+- [6. Mô hình hoạt độ](#6-mô-hình-hoạt-độ)
+- [7. Các cấu tử bắt buộc](#7-các-cấu-tử-bắt-buộc)
+- [8. Bộ log K 25 °C](#8-bộ-log-k-25-c)
+- [9. Phương trình pha rắn](#9-phương-trình-pha-rắn)
+- [10. Bộ giải cân bằng](#10-bộ-giải-cân-bằng)
+- [11. Cu hòa tan và khối lượng pha rắn](#11-cu-hòa-tan-và-khối-lượng-pha-rắn)
+- [12. Khuấy, lắng và lọc](#12-khuấy-lắng-và-lọc)
+- [13. Ba họ quy trình](#13-ba-họ-quy-trình)
+- [14. Nhánh sai và phục hồi](#14-nhánh-sai-và-phục-hồi)
+- [15. Kết quả đầu ra](#15-kết-quả-đầu-ra)
+- [16. Cách chấm điểm](#16-cách-chấm-điểm)
+- [17. Các ca chuẩn (golden cases)](#17-các-ca-chuẩn-golden-cases)
+- [18. Các bất biến](#18-các-bất-biến)
+- [19. Giới hạn khoa học](#19-giới-hạn-khoa-học)
+- [20. An toàn](#20-an-toàn)
+- [21. Ma trận nguồn chính](#21-ma-trận-nguồn-chính)
+- [22. Tiêu chí nghiệm thu](#22-tiêu-chí-nghiệm-thu)
+- [23. Tài liệu liên quan](#23-tài-liệu-liên-quan)
+<!-- TOC:END -->
+
 ---
+
 
 ## 1. Quyết định khoa học chính
 
@@ -28,6 +80,7 @@ Engine tính **tổng Cu hòa tan** gồm free Cu²⁺ và các complex hydroxo,
 Mixing kích hoạt phép giải cân bằng; settling không đổi hóa học; filtration là bộ tách lý tưởng định nghĩa trong model.
 
 ---
+
 
 ## 2. Kịch bản tham chiếu
 
@@ -62,7 +115,8 @@ Liều reagent làm thay đổi số mol nhưng volume normalization giữ 1,000
 
 ---
 
-## 3. Dose ratio và miền input
+
+## 3. Tỷ lệ liều và miền đầu vào
 
 ### 3.1. Định nghĩa
 
@@ -106,7 +160,7 @@ Cửa sổ là quyết định thiết kế của simulator, không phải liề
 - Carbonate route: pH ≤ 9,0.
 - Ngoài miền vẫn có thể hiển thị exploratory result nếu solver hội tụ, nhưng hard gate không chấm khoa học và phải gắn cảnh báo.
 
-### 3.5. Parameter contract
+### 3.5. Hợp đồng tham số
 
 Người học điều khiển bảy dimension:
 
@@ -120,7 +174,7 @@ Người học điều khiển bảy dimension:
 
 Mixing time/rpm và settling duration không là numeric parameter vì scenario không có kinetics/jar-test data.
 
-### 3.6. Event budget
+### 3.6. Giới hạn sự kiện
 
 - Tối đa 50 dose actions.
 - Tối đa 200 accepted events.
@@ -128,7 +182,8 @@ Mixing time/rpm và settling duration không là numeric parameter vì scenario 
 
 ---
 
-## 4. State machine
+
+## 4. Luồng trạng thái
 
 ```text
 prepared
@@ -141,7 +196,7 @@ prepared
 → completed
 ```
 
-### 4.1. Actions
+### 4.1. Hành động
 
 | Action | Từ state | Điều kiện | Đến state |
 | --- | --- | --- | --- |
@@ -154,7 +209,7 @@ prepared
 | `measure_filtrate_cu` | `filtered` | filter complete | `measured` |
 | `complete` | `measured` | validity gate đủ | `completed` |
 
-### 4.2. Invalid transitions
+### 4.2. Chuyển trạng thái không hợp lệ
 
 - Settle trước mix: chặn.
 - Filter trước settle: chặn.
@@ -162,11 +217,11 @@ prepared
 - Dose sau filter: chặn; restart/new attempt.
 - Thêm dose sau mix/settle: xóa downstream measurement/settling state và bắt buộc mix lại.
 
-### 4.3. Recovery quá liều
+### 4.3. Xử lý quá liều
 
 Không thêm acid correction trong scenario 1.0.0. Acid có thể hòa tan lại solid và mở thêm cân bằng. Recovery là undo trước filter hoặc restart/new attempt.
 
-### 4.4. Reversibility
+### 4.4. Khả năng hoàn tác
 
 | Action | Reversible? | Boundary/restored state |
 | --- | --- | --- |
@@ -183,7 +238,8 @@ Undo là rollback mô phỏng, không được mô tả như thao tác lấy hó
 
 ---
 
-## 5. State model
+
+## 5. Mô hình trạng thái
 
 ```ts
 type CopperRoute = 'naoh' | 'calcium-hydroxide' | 'sodium-carbonate'
@@ -214,7 +270,7 @@ type CopperPrecipitationState = {
 }
 ```
 
-### 5.1. Equilibrium result
+### 5.1. Kết quả cân bằng
 
 ```ts
 type CopperEquilibriumResult = {
@@ -234,7 +290,8 @@ type CopperEquilibriumResult = {
 
 ---
 
-## 6. Activity model
+
+## 6. Mô hình hoạt độ
 
 Ionic strength:
 
@@ -260,7 +317,8 @@ Davies chỉ dùng trong miền ionic strength đã khóa; không dùng cho brin
 
 ---
 
-## 7. Species bắt buộc
+
+## 7. Các cấu tử bắt buộc
 
 ### 7.1. Dùng cho cả ba route
 
@@ -295,6 +353,7 @@ Không ép gypsum thành solid trong reference concentration.
 - NaCO₃⁻, NaHCO₃(aq).
 
 ---
+
 
 ## 8. Bộ log K 25 °C
 
@@ -331,7 +390,8 @@ Bundle log K là bất biến của scenario 1.0.0.
 
 ---
 
-## 9. Solid phase equations
+
+## 9. Phương trình pha rắn
 
 ### 9.1. Cu(OH)₂ mới kết tủa
 
@@ -372,7 +432,8 @@ Phép đo sơ cấp báo `3,5 ± 0,6 × 10⁻³⁴` ở 25 °C: [Symes & Kester,
 
 ---
 
-## 10. Equilibrium solver
+
+## 10. Bộ giải cân bằng
 
 Giải đồng thời:
 
@@ -397,7 +458,7 @@ solidAmountMolL × SI = 0
 3. Nếu SI > 0, giải nhánh `SI = 0`.
 4. Chỉ nhận solid branch khi `s >= 0`.
 
-### 10.3. Numerical method
+### 10.3. Phương pháp số
 
 - Log-activity variables.
 - Damped Newton hoặc nonlinear least squares có line search.
@@ -412,13 +473,14 @@ solidAmountMolL × SI = 0
 - Max iterations được ghi calculation trace.
 - Không hội tụ: domain error; không commit action.
 
-### 10.5. Mass balance acceptance
+### 10.5. Điều kiện cân bằng khối lượng
 
 Run được chấm khi relative Cu/S/C balance ≤ 1 × 10⁻⁶.
 
 ---
 
-## 11. Dissolved Cu và solid mass
+
+## 11. Cu hòa tan và khối lượng pha rắn
 
 Total dissolved Cu:
 
@@ -435,14 +497,14 @@ CuDissolvedTotal =
   + carbonate complexes khi route carbonate
 ```
 
-### 11.1. Solid moles
+### 11.1. Số mol pha rắn
 
 ```text
 sHydroxide = TCu - CuDissolvedTotal
 sMalachite = (TCu - CuDissolvedTotal) / 2
 ```
 
-### 11.2. Solid dry theoretical mass
+### 11.2. Khối lượng khô lý thuyết của pha rắn
 
 ```text
 massMg = 1000 × volumeL × solidAmountMolL × molarMassGmol
@@ -458,7 +520,8 @@ removalPercent = 100 × (1 - CuDissolvedTotal / TCu0)
 
 ---
 
-## 12. Mixing, settling và filtration
+
+## 12. Khuấy, lắng và lọc
 
 ### 12.1. Mix
 
@@ -486,7 +549,8 @@ Simulator dùng ideal filter boundary, không mô phỏng membrane pore distribu
 
 ---
 
-## 13. Ba process family
+
+## 13. Ba họ quy trình
 
 ### 13.1. NaOH
 
@@ -531,6 +595,7 @@ Không xác nhận phase bằng màu. Carbonate precipitate thực có thể c�
 
 ---
 
+
 ## 14. Nhánh sai và phục hồi
 
 | Trường hợp | Mã | Hành vi |
@@ -549,7 +614,8 @@ Không xác nhận phase bằng màu. Carbonate precipitate thực có thể c�
 
 ---
 
-## 15. Output
+
+## 15. Kết quả đầu ra
 
 ### 15.1. Khoa học
 
@@ -564,7 +630,7 @@ Không xác nhận phase bằng màu. Carbonate precipitate thực có thể c�
 - Dose ratio/equivalents.
 - Element/charge residuals.
 
-### 15.2. Workflow
+### 15.2. Quy trình thao tác
 
 - Stage.
 - Solid location.
@@ -584,7 +650,7 @@ massNa2CO3_g = RC × nCu0 × 105.9888
 
 Report hiển thị reagent mass, equivalents, theoretical solid mass và safety categories. Cost index bên dưới là quy ước sư phạm versioned, không phải bảng giá.
 
-### 15.4. Pedagogical cost index 1.0.0
+### 15.4. Chỉ số chi phí sư phạm 1.0.0
 
 Coefficients theo mmol reagent: NaOH 1,00; Ca(OH)₂ 1,30; Na₂CO₃ 1,00.
 
@@ -595,7 +661,7 @@ relativeCostIndex = rawCost / (2 × initialCuMmol)
 
 NaOH R=2 benchmark có index 1,00; Ca(OH)₂ R=1 có 0,65; Na₂CO₃ R=1,5 có 0,75. Đây là quy ước giáo dục, không phải giá tiền hoặc kết luận kinh tế.
 
-### 15.5. Pedagogical safety index 1.0.0
+### 15.5. Chỉ số an toàn sư phạm 1.0.0
 
 ```text
 safetyIndex = clamp(100 - sum(committedPenaltyPoints), 0, 100)
@@ -617,7 +683,8 @@ Model validity fail → index N/A. Hazard profiles CuSO₄/NaOH/Ca(OH)₂/Na₂C
 
 ---
 
-## 16. Scoring
+
+## 16. Cách chấm điểm
 
 ### 16.1. Hard validity gate
 
@@ -662,7 +729,8 @@ Fail gate: không có final science score; hiển thị lý do.
 
 ---
 
-## 17. Golden cases
+
+## 17. Các ca chuẩn (golden cases)
 
 Điều kiện: 1 L, 100 mg/L Cu, 25 °C, Davies, carbonate kín, ideal filter.
 
@@ -693,7 +761,8 @@ CP-G00 dùng tolerance pH ±0,01 và dissolved Cu ±0,001 mg/L.
 
 ---
 
-## 18. Invariant
+
+## 18. Các bất biến
 
 1. Cu total = dissolved Cu + solid Cu trong tolerance.
 2. Sulfate total conserved.
@@ -707,6 +776,7 @@ CP-G00 dùng tolerance pH ±0,01 và dissolved Cu ±0,001 mg/L.
 10. Same state/action/version cho same output.
 
 ---
+
 
 ## 19. Giới hạn khoa học
 
@@ -725,6 +795,7 @@ EPA nhấn mạnh pH/liều tối ưu của nước thải thật phải jar-tes
 
 ---
 
+
 ## 20. An toàn
 
 UI hiển thị:
@@ -738,6 +809,7 @@ Nguồn:
 - [NIOSH — Calcium hydroxide](https://www.cdc.gov/niosh/chemicals/pel88/pell-pages/1305-62.html)
 
 ---
+
 
 ## 21. Ma trận nguồn chính
 
@@ -771,6 +843,7 @@ Chi tiết mapping cấp claim nằm tại [Scientific Evidence Register](../sci
 
 ---
 
+
 ## 22. Tiêu chí nghiệm thu
 
 - CP-G00 initial oracle và CP-G01…G06 đạt tolerance tương ứng.
@@ -789,6 +862,7 @@ Chi tiết mapping cấp claim nằm tại [Scientific Evidence Register](../sci
 - Replay deterministic.
 
 ---
+
 
 ## 23. Tài liệu liên quan
 

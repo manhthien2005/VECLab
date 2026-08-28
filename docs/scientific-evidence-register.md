@@ -6,7 +6,48 @@
 
 > Sổ này trả lời câu hỏi: “Tuyên bố, con số hoặc nhánh quy trình trong sản phẩm dựa vào nguồn nào, tại điều kiện nào và được phép dùng đến đâu?” Nó không chứng nhận mô hình đã được đội kiểm chứng bằng thí nghiệm độc lập.
 
+## Tổng quan nhanh
+
+| | Nội dung |
+| --- | --- |
+| 🎯 **Mục đích** | Cho phép truy ngược mọi claim, hằng số và quy trình về nguồn cùng điều kiện áp dụng. |
+| 👥 **Dành cho** | Người phụ trách hóa học, content, simulation engine và QA. |
+| ✅ **Sau khi đọc** | Biết source key, claim key, evidence status và gap nào đang được chấp nhận có chủ ý. |
+| ⚠️ **Lưu ý** | Nguồn chứng minh quy trình có thật không đồng nghĩa mô hình dự đoán đúng mọi mẫu thực tế. |
+
+## Đọc tài liệu này khi nào?
+
+- Khi thêm hoặc thay một hằng số, công thức, warning hay source.
+- Khi cần kiểm tra calculation trace có resolve đúng claim/source key hay không.
+- Trước khi phát hành một scenario release mới.
+
+## Các quyết định chính
+
+- Source key và claim key là hai namespace tách biệt, bất biến trong một release.
+- Video chỉ hỗ trợ procedure/hiện tượng, không cấp constant định lượng.
+- Golden values là model-derived và phải được cross-check độc lập.
+- Khoảng trống bằng chứng được thu hẹp bằng scope, không lấp bằng hệ số giả.
+- Cost/safety index là quy ước sư phạm, không phải claim khoa học hoặc giá thị trường.
+
+## Mục lục
+
+<!-- TOC:START -->
+- [1. Cách sử dụng](#1-cách-sử-dụng)
+- [2. Quy tắc release evidence](#2-quy-tắc-release-evidence)
+- [3. Register — Trung hòa axit](#3-register--trung-hòa-axit)
+- [4. Register — Kết tủa Cu](#4-register--kết-tủa-cu)
+- [5. Register — Phân loại nhựa](#5-register--phân-loại-nhựa)
+- [6. Safety register dùng chung](#6-safety-register-dùng-chung)
+- [7. Evidence card schema](#7-evidence-card-schema)
+- [8. Hồ sơ golden case provenance](#8-hồ-sơ-golden-case-provenance)
+- [9. Evidence gaps đã biết và cách xử lý](#9-evidence-gaps-đã-biết-và-cách-xử-lý)
+- [10. Quy tắc trích dẫn trong sản phẩm](#10-quy-tắc-trích-dẫn-trong-sản-phẩm)
+- [11. Release gate theo thí nghiệm](#11-release-gate-theo-thí-nghiệm)
+- [12. Tài liệu liên quan](#12-tài-liệu-liên-quan)
+<!-- TOC:END -->
+
 ---
+
 
 ## 1. Cách sử dụng
 
@@ -46,6 +87,7 @@ Không dùng status `experimentally-validated-by-team` vì đội không có ben
 
 ---
 
+
 ## 2. Quy tắc release evidence
 
 Một claim số học được phát hành khi có:
@@ -66,6 +108,7 @@ Một process branch được phát hành khi có:
 - Không suy từ process existence thành industrial performance prediction.
 
 ---
+
 
 ## 3. Register — Trung hòa axit
 
@@ -114,6 +157,7 @@ Một process branch được phát hành khi có:
 
 ---
 
+
 ## 4. Register — Kết tủa Cu
 
 | Source key | Loại | Citation/URL | Vị trí hoặc dữ liệu dùng | Status |
@@ -156,6 +200,7 @@ Một process branch được phát hành khi có:
 IUPAC critical review và EPA report cho thấy “Ksp của Cu(OH)₂” không phải một con số phổ quát do phase/particle/surface/aging. Scenario khóa `log Kd=8,89` và gọi rõ **fresh precipitate model**. Không dùng value này để dự đoán sludge/wastewater ngoài scenario.
 
 ---
+
 
 ## 5. Register — Phân loại nhựa
 
@@ -200,6 +245,7 @@ Quelal et al. báo một số cặp nồng độ–mật độ không khớp b�
 
 ---
 
+
 ## 6. Safety register dùng chung
 
 | Source key | Hóa chất/material | Wording được phép |
@@ -225,6 +271,7 @@ Các chỉ số dưới đây là **quy ước sản phẩm**, không phải cla
 Calculation trace cho hai index dùng `decisionKeys` thay vì giả một `sourceKey` khoa học.
 
 ---
+
 
 ## 7. Evidence card schema
 
@@ -255,6 +302,7 @@ Scenario bundle lưu source keys/claim keys. UI render citation từ registry, k
 
 ---
 
+
 ## 8. Hồ sơ golden case provenance
 
 Mỗi golden fixture phải lưu:
@@ -283,6 +331,7 @@ Cross-check chứng minh implementation target nội bộ nhất quán, không b
 
 ---
 
+
 ## 9. Evidence gaps đã biết và cách xử lý
 
 | Gap | Quyết định scope |
@@ -300,6 +349,7 @@ Không dùng một hệ số giả để “lấp” gap.
 
 ---
 
+
 ## 10. Quy tắc trích dẫn trong sản phẩm
 
 - Hiển thị organization/author, title, year và link.
@@ -311,6 +361,7 @@ Không dùng một hệ số giả để “lấp” gap.
 - Source unavailable tạm thời không làm mất final report metadata đã snapshot.
 
 ---
+
 
 ## 11. Release gate theo thí nghiệm
 
@@ -339,6 +390,7 @@ Không dùng một hệ số giả để “lấp” gap.
 - Ethanol/brine safety/environment wording.
 
 ---
+
 
 ## 12. Tài liệu liên quan
 

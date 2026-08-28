@@ -11,7 +11,59 @@
 
 > **Nhãn bắt buộc:** Mô hình dựa trên tài liệu; chưa được nhóm phát triển kiểm chứng bằng thí nghiệm độc lập.
 
+## Tổng quan nhanh
+
+| | Nội dung |
+| --- | --- |
+| 🎯 **Mục đích** | Đặc tả phân loại PP, HDPE, PS và PET bằng nước, ethanol–nước và NaCl. |
+| 👥 **Dành cho** | Material engine, frontend dòng vật liệu, content và QA khoa học. |
+| ✅ **Sau khi đọc** | Biết stream state, density presets, purity/recovery, scoring và mass-balance invariants. |
+| ⚠️ **Lưu ý** | Ideal layer dùng mật độ đại diện; empirical recovery chỉ là evidence card đúng điều kiện nguồn. |
+
+## Đọc tài liệu này khi nào?
+
+- Khi triển khai Plastic Separation domain module hoặc cây dòng vật liệu.
+- Khi thêm medium preset, target-resin goal hoặc evidence card.
+- Khi kiểm tra mass closure, purity, recovery và resource ledger.
+
+## Các quyết định chính
+
+- Engine tách lớp ideal deterministic khỏi dữ liệu empirical theo thiết bị/feed.
+- Medium density lấy từ bảng chuẩn ở 20 °C; không nội suy concentration tùy ý.
+- Có hai goal: cô lập resin mục tiêu hoặc cô lập cả bốn resin.
+- Range-guard tạo unresolved stream và không tạo separation score.
+- EPS, nhãn, filler, bọt khí và kinetics nằm ngoài benchmark.
+
+## Mục lục
+
+<!-- TOC:START -->
+- [1. Mục tiêu giáo dục](#1-mục-tiêu-giáo-dục)
+- [2. Hai lớp kết quả](#2-hai-lớp-kết-quả)
+- [3. Mẫu benchmark](#3-mẫu-benchmark)
+- [4. Mật độ polymer](#4-mật-độ-polymer)
+- [5. Môi trường phân tách](#5-môi-trường-phân-tách)
+- [6. Chuẩn hóa bể phân tách và sổ tài nguyên](#6-chuẩn-hóa-bể-phân-tách-và-sổ-tài-nguyên)
+- [7. Luồng trạng thái](#7-luồng-trạng-thái)
+- [8. Hành động và điều kiện trước](#8-hành-động-và-điều-kiện-trước)
+- [9. Phương trình phân loại lý tưởng](#9-phương-trình-phân-loại-lý-tưởng)
+- [10. Mass balance, purity, recovery và yield](#10-mass-balance-purity-recovery-và-yield)
+- [11. Thẻ bằng chứng thực nghiệm](#11-thẻ-bằng-chứng-thực-nghiệm)
+- [12. Ba họ quy trình hoàn chỉnh](#12-ba-họ-quy-trình-hoàn-chỉnh)
+- [13. Quy trình một cấp hợp lệ nhưng chưa hoàn tất](#13-quy-trình-một-cấp-hợp-lệ-nhưng-chưa-hoàn-tất)
+- [14. Nhánh lỗi và phục hồi](#14-nhánh-lỗi-và-phục-hồi)
+- [15. Kết quả đầu ra](#15-kết-quả-đầu-ra)
+- [16. Cách chấm điểm](#16-cách-chấm-điểm)
+- [17. Các ca chuẩn (golden cases)](#17-các-ca-chuẩn-golden-cases)
+- [18. Các bất biến](#18-các-bất-biến)
+- [19. An toàn và môi trường](#19-an-toàn-và-môi-trường)
+- [20. Giới hạn](#20-giới-hạn)
+- [21. Ma trận nguồn chính](#21-ma-trận-nguồn-chính)
+- [22. Tiêu chí nghiệm thu](#22-tiêu-chí-nghiệm-thu)
+- [23. Tài liệu liên quan](#23-tài-liệu-liên-quan)
+<!-- TOC:END -->
+
 ---
+
 
 ## 1. Mục tiêu giáo dục
 
@@ -27,6 +79,7 @@ Người học phải:
 - Phân biệt mô hình lý tưởng với recovery thực nghiệm phụ thuộc thiết bị/feed.
 
 ---
+
 
 ## 2. Hai lớp kết quả
 
@@ -46,6 +99,7 @@ Người học phải:
 - Không trộn empirical recovery vào ideal score.
 
 ---
+
 
 ## 3. Mẫu benchmark
 
@@ -72,7 +126,7 @@ Nguồn lab gốc dùng 3 g mỗi polymer, mảnh 0,3–0,5 cm và nhiều polym
 - Không biofilm, dầu hoặc chất hoạt động bề mặt.
 - Polymer mass không đổi trong quá trình.
 
-### 3.2. Exploration composition
+### 3.2. Thành phần ở chế độ khám phá
 
 Người học có thể đổi khối lượng từng resin trong miền:
 
@@ -84,7 +138,7 @@ Khi khác benchmark, UI gắn nhãn:
 
 > Kết quả được ngoại suy tuyến tính từ mô hình mật độ lý tưởng; không phải mẻ đã được nghiên cứu thực nghiệm trực tiếp.
 
-### 3.3. Parameter contract
+### 3.3. Hợp đồng tham số
 
 Người học điều khiển bảy dimension:
 
@@ -97,6 +151,7 @@ Người học điều khiển bảy dimension:
 7. Số thứ tự và điểm dừng của các stage.
 
 ---
+
 
 ## 4. Mật độ polymer
 
@@ -112,6 +167,7 @@ Representative density dùng cho golden scoring. Density range dùng cho technic
 OECD báo range sản phẩm có thể rộng do grade/additive, vì vậy không suy kết quả sang mọi vật phẩm: [OECD ENV/JM/MONO(2019)10, Table 8](https://one.oecd.org/document/ENV/JM/MONO%282019%2910/en/pdf).
 
 ---
+
 
 ## 5. Môi trường phân tách
 
@@ -156,7 +212,8 @@ Một số bài báo báo cặp concentration–density không khớp bảng alc
 
 ---
 
-## 6. Bath normalization và resource ledger
+
+## 6. Chuẩn hóa bể phân tách và sổ tài nguyên
 
 Scenario dùng bath normalization để so sánh tài nguyên, không tuyên bố là thể tích pilot/lab nguồn:
 
@@ -204,7 +261,8 @@ Chỉ số này dùng so sánh trong cùng scenario normalization, không phải
 
 ---
 
-## 7. State machine
+
+## 7. Luồng trạng thái
 
 ```text
 DRY_READY
@@ -217,7 +275,7 @@ DRY_READY
   → DRY_READY hoặc FINAL
 ```
 
-### 7.1. Stream state
+### 7.1. Trạng thái dòng vật liệu
 
 ```ts
 type PolymerMassVector = {
@@ -239,7 +297,7 @@ type MaterialStream = {
 }
 ```
 
-### 7.2. Scenario state
+### 7.2. Trạng thái kịch bản
 
 ```ts
 type PlasticSeparationState = {
@@ -262,7 +320,8 @@ type PlasticSeparationState = {
 
 ---
 
-## 8. Actions và preconditions
+
+## 8. Hành động và điều kiện trước
 
 | Action | Preconditions | Kết quả |
 | --- | --- | --- |
@@ -287,7 +346,7 @@ type PlasticSeparationState = {
 - Invalid concentration không đổi state.
 - Empirical missing mass chỉ nằm trong `EvidenceCardAccounting`; không đi vào ideal/range mass tree.
 
-### 8.2. Completion contract
+### 8.2. Điều kiện hoàn thành
 
 Chung:
 
@@ -301,7 +360,7 @@ Theo goal:
 - `isolate-all-resins`: bốn finalized product riêng, mỗi product ứng với đúng một resin; không unresolved mass.
 - `range-guard`: được complete để xem report nhưng goal/score là N/A nếu còn unresolved.
 
-### 8.3. Reversibility
+### 8.3. Khả năng hoàn tác
 
 | Action | Reversible? | Boundary/restored state |
 | --- | --- | --- |
@@ -312,7 +371,7 @@ Theo goal:
 | `finalize_product` | Không | final stream bất biến trong attempt |
 | `complete_attempt` | Không | completed attempt bất biến |
 
-### 8.4. Event budget
+### 8.4. Giới hạn sự kiện
 
 - Tối đa 20 separation stages.
 - Tối đa 200 accepted events.
@@ -323,6 +382,7 @@ Theo goal:
 `wait_settle` dùng một bước UI 4 phút theo benchmark lab reference. Đây là quy tắc scenario; engine ideal không tính settling velocity và không tuyên bố 4 phút tối ưu cho mọi mảnh.
 
 ---
+
 
 ## 9. Phương trình phân loại lý tưởng
 
@@ -365,6 +425,7 @@ Range-guard là exploration partition thật: resin không được bảo đảm
 
 ---
 
+
 ## 10. Mass balance, purity, recovery và yield
 
 ### 10.1. Stage balance
@@ -402,7 +463,8 @@ Zero-denominator metric trả `not-applicable`, không trả 0 hoặc NaN.
 
 ---
 
-## 11. Empirical evidence card
+
+## 11. Thẻ bằng chứng thực nghiệm
 
 Chỉ khi source báo đủ recovery `R` và purity `P`:
 
@@ -434,7 +496,8 @@ Các số này chỉ hiển thị trong card có source/condition, không thay i
 
 ---
 
-## 12. Ba process family hoàn chỉnh
+
+## 12. Ba họ quy trình hoàn chỉnh
 
 ### 12.1. Water-first — route mặc định để minh họa all-resins
 
@@ -487,7 +550,8 @@ Không route nào trong ba route complete được gọi “tốt nhất” tuy�
 
 ---
 
-## 13. Process một stage hợp lệ nhưng chưa hoàn tất
+
+## 13. Quy trình một cấp hợp lệ nhưng chưa hoàn tất
 
 | Medium | Kết quả |
 | --- | --- |
@@ -510,6 +574,7 @@ Các route dừng sớm tạo trade-off stages/resources có ý nghĩa mà all-r
 
 ---
 
+
 ## 14. Nhánh lỗi và phục hồi
 
 | Trường hợp | Mã | Kết quả | Phục hồi |
@@ -527,7 +592,8 @@ Các route dừng sớm tạo trade-off stages/resources có ý nghĩa mà all-r
 
 ---
 
-## 15. Output
+
+## 15. Kết quả đầu ra
 
 ### 15.1. Mỗi stream
 
@@ -558,7 +624,7 @@ Các route dừng sớm tạo trade-off stages/resources có ý nghĩa mà all-r
 - Wastewater load.
 - LCA/carbon footprint.
 
-### 15.4. Pedagogical cost index 1.0.0
+### 15.4. Chỉ số chi phí sư phạm 1.0.0
 
 Không dùng tiền tệ. Coefficient theo mỗi liter fresh bath:
 
@@ -574,7 +640,7 @@ relativeCostIndex = waterL×1 + naclBathL×2 + ethanolBathL×5
 
 Với bath normalization 1 L: target PP =5; PET =2; HDPE =6; PS =3; complete all-resins =8. Đây là quy ước giáo dục versioned, không phải cost công nghiệp.
 
-### 15.5. Pedagogical safety index 1.0.0
+### 15.5. Chỉ số an toàn sư phạm 1.0.0
 
 ```text
 safetyIndex = clamp(100 - sum(committedPenaltyPoints), 0, 100)
@@ -589,7 +655,8 @@ Model/out-of-scope material invalid → index N/A. Ethanol flammability và brin
 
 ---
 
-## 16. Scoring
+
+## 16. Cách chấm điểm
 
 ### 16.1. Goal `isolate-all-resins`
 
@@ -639,7 +706,8 @@ Ngưỡng 99,5% là rubric giáo dục, không phải hằng số khoa học ho�
 
 ---
 
-## 17. Golden cases
+
+## 17. Các ca chuẩn (golden cases)
 
 Vector theo thứ tự `[PP, HDPE, PS, PET]`, đơn vị g.
 
@@ -672,7 +740,8 @@ Vector theo thứ tự `[PP, HDPE, PS, PET]`, đơn vị g.
 
 ---
 
-## 18. Invariant
+
+## 18. Các bất biến
 
 1. Parent stream closed sau split.
 2. Child masses sum parent mass trong tolerance.
@@ -686,6 +755,7 @@ Vector theo thứ tự `[PP, HDPE, PS, PET]`, đơn vị g.
 10. Final product không chạy stage mới.
 
 ---
+
 
 ## 19. An toàn và môi trường
 
@@ -702,6 +772,7 @@ Nguồn:
 
 ---
 
+
 ## 20. Giới hạn
 
 - Không settling velocity/viscosity/surface tension/turbulence.
@@ -714,6 +785,7 @@ Nguồn:
 - Không plant scale, LCA hoặc “zero pollution”.
 
 ---
+
 
 ## 21. Ma trận nguồn chính
 
@@ -745,6 +817,7 @@ Chi tiết mapping cấp claim nằm tại [Scientific Evidence Register](../sci
 
 ---
 
+
 ## 22. Tiêu chí nghiệm thu
 
 - Tám golden case đạt tolerance/semantics tương ứng.
@@ -764,6 +837,7 @@ Chi tiết mapping cấp claim nằm tại [Scientific Evidence Register](../sci
 - Replay event chain deterministic.
 
 ---
+
 
 ## 23. Tài liệu liên quan
 

@@ -8,7 +8,61 @@
 
 > Tài liệu này định nghĩa dữ liệu cần tồn tại và các bất biến phải giữ. DDL cuối cùng có thể thay đổi cú pháp nhưng không được thay đổi ý nghĩa nếu chưa cập nhật tài liệu.
 
+## Tổng quan nhanh
+
+| | Nội dung |
+| --- | --- |
+| 🎯 **Mục đích** | Định nghĩa cách lưu tài khoản, attempt, event, snapshot, report và đồng bộ. |
+| 👥 **Dành cho** | Backend, database, simulation service và QA bảo mật dữ liệu. |
+| ✅ **Sau khi đọc** | Hiểu vòng đời attempt, transaction, idempotency, RLS và guest import. |
+| ⚠️ **Lưu ý** | DDL là schema logic; migration cuối có thể đổi cú pháp nhưng phải giữ invariant. |
+
+## Đọc tài liệu này khi nào?
+
+- Trước khi tạo migration, repository hoặc RPC mutation.
+- Khi xử lý resume, conflict, undo, reset, branch hoặc completed report.
+- Khi kiểm tra người dùng có thể truy cập dữ liệu nào.
+
+## Các quyết định chính
+
+- Event log là lịch sử; current snapshot tối ưu việc mở lại.
+- Completed attempt và final report snapshot là bất biến.
+- Browser không được ghi trực tiếp trusted state, score hoặc event.
+- Retry dùng action ID và fingerprint; concurrent edit dùng revision conflict.
+- Guest import bắt buộc replay action inputs bằng exact scenario release trên server.
+
+## Mục lục
+
+<!-- TOC:START -->
+- [1. Mục tiêu](#1-mục-tiêu)
+- [2. Nguyên tắc dữ liệu](#2-nguyên-tắc-dữ-liệu)
+- [3. Định danh và version](#3-định-danh-và-version)
+- [4. Trạng thái vòng đời attempt](#4-trạng-thái-vòng-đời-attempt)
+- [5. Bảng profiles](#5-bảng-profiles)
+- [6. Bảng attempts](#6-bảng-attempts)
+- [7. Bảng attempt_events](#7-bảng-attempt_events)
+- [8. Bảng guest_imports](#8-bảng-guest_imports)
+- [9. Nội dung kịch bản không nằm trong bảng user data](#9-nội-dung-kịch-bản-không-nằm-trong-bảng-user-data)
+- [10. Shape của state dùng chung](#10-shape-của-state-dùng-chung)
+- [11. State chuyên môn](#11-state-chuyên-môn)
+- [12. Server calculation và atomic commit RPC](#12-server-calculation-và-atomic-commit-rpc)
+- [13. Optimistic concurrency](#13-optimistic-concurrency)
+- [14. Branch, undo cuối và reset](#14-branch-undo-cuối-và-reset)
+- [15. Complete và final report snapshot](#15-complete-và-final-report-snapshot)
+- [16. Guest store](#16-guest-store)
+- [17. RLS và grants](#17-rls-và-grants)
+- [18. Indexes](#18-indexes)
+- [19. Query/use case chính](#19-queryuse-case-chính)
+- [20. Retention và xóa](#20-retention-và-xóa)
+- [21. Data migration](#21-data-migration)
+- [22. Invariants bắt buộc](#22-invariants-bắt-buộc)
+- [23. Ví dụ event chain](#23-ví-dụ-event-chain)
+- [24. Tiêu chí nghiệm thu dữ liệu](#24-tiêu-chí-nghiệm-thu-dữ-liệu)
+- [25. Tài liệu liên quan](#25-tài-liệu-liên-quan)
+<!-- TOC:END -->
+
 ---
+
 
 ## 1. Mục tiêu
 
@@ -27,6 +81,7 @@ Mô hình dữ liệu phải hỗ trợ:
 - Phiên bản hóa scenario, engine và scoring.
 
 ---
+
 
 ## 2. Nguyên tắc dữ liệu
 
@@ -62,6 +117,7 @@ Guest data trong IndexedDB dùng cùng domain state/action/event semantics nhưn
 
 ---
 
+
 ## 3. Định danh và version
 
 ### 3.1. ID
@@ -83,6 +139,7 @@ Mỗi attempt lưu:
 Release manifest trong repository resolve các version con. MVP không ghép hoặc migrate attempt giữa release và không dùng timestamp thay version khoa học.
 
 ---
+
 
 ## 4. Trạng thái vòng đời attempt
 
@@ -122,6 +179,7 @@ create type attempt_status as enum (
 
 ---
 
+
 ## 5. Bảng profiles
 
 ### 5.1. Mục đích
@@ -149,6 +207,7 @@ create table profiles (
 - Email đọc từ auth identity, không duplicate nếu không có nhu cầu nghiệp vụ.
 
 ---
+
 
 ## 6. Bảng attempts
 
@@ -228,6 +287,7 @@ create table attempts (
 - Branch RPC kiểm tra parent cùng owner/release và lưu origin snapshot trong cùng transaction.
 
 ---
+
 
 ## 7. Bảng attempt_events
 
@@ -324,6 +384,7 @@ Lifecycle action types tối thiểu trong một attempt: `completed`, `stopped`
 
 ---
 
+
 ## 8. Bảng guest_imports
 
 ### 8.1. Mục đích
@@ -358,6 +419,7 @@ create table guest_imports (
 
 ---
 
+
 ## 9. Nội dung kịch bản không nằm trong bảng user data
 
 Scenario/evidence được version theo release trong repository:
@@ -377,6 +439,7 @@ Runtime registry phải giữ version cần để đọc attempt còn được h
 Manifest resolve state schema, engine implementation, scoring, projector, content locale bundle và evidence metadata. Evidence/content không dùng file global không version cho completed report.
 
 ---
+
 
 ## 10. Shape của state dùng chung
 
@@ -436,6 +499,7 @@ type GoalStatus = {
 
 ---
 
+
 ## 11. State chuyên môn
 
 Chi tiết field nằm trong từng experiment spec. Tất cả phải hỗ trợ:
@@ -474,6 +538,7 @@ Chi tiết field nằm trong từng experiment spec. Tất cả phải hỗ tr�
 - Resource ledger.
 
 ---
+
 
 ## 12. Server calculation và atomic commit RPC
 
@@ -520,6 +585,7 @@ RPC không grant cho anon/authenticated và chỉ được gọi từ BFF với 
 
 ---
 
+
 ## 13. Optimistic concurrency
 
 Client gửi `expectedRevision`; server chạy engine, RPC kiểm tra lại revision dưới row lock.
@@ -545,6 +611,7 @@ Nếu 0 row được update:
 Không tự merge hai action chain.
 
 ---
+
 
 ## 14. Branch, undo cuối và reset
 
@@ -573,6 +640,7 @@ Không tự merge hai action chain.
 - Người dùng có thể xóa attempt stopped bằng action riêng.
 
 ---
+
 
 ## 15. Complete và final report snapshot
 
@@ -712,6 +780,7 @@ type ResolvedCitation = {
 
 ---
 
+
 ## 16. Guest store
 
 ### 16.1. IndexedDB stores
@@ -742,6 +811,7 @@ Portable guest event phân biệt `occurredAt` do browser ghi với `recordedAt`
 Không đặt số lượt khách cố định trong scope; giới hạn thực tế phụ thuộc browser quota và UI phải xử lý failure.
 
 ---
+
 
 ## 17. RLS và grants
 
@@ -795,6 +865,7 @@ Tài liệu Supabase nhấn mạnh grants và RLS là hai lớp riêng: [Row Lev
 
 ---
 
+
 ## 18. Indexes
 
 Tối thiểu:
@@ -817,6 +888,7 @@ create index attempts_parent_idx
 Không index mọi JSONB field. Chỉ thêm expression index khi query thật được xác định.
 
 ---
+
 
 ## 19. Query/use case chính
 
@@ -842,6 +914,7 @@ Chỉ đọc hai completed attempts cùng exact release của cùng user. Dùng 
 
 ---
 
+
 ## 20. Retention và xóa
 
 - Attempt cloud được giữ đến khi người dùng xóa hoặc tài khoản bị xóa theo vận hành hệ thống.
@@ -853,6 +926,7 @@ Chỉ đọc hai completed attempts cùng exact release của cùng user. Dùng 
 - Backup/log retention là chính sách vận hành riêng; UI không hứa xóa tức thì khỏi mọi backup nếu hạ tầng chưa bảo đảm điều đó.
 
 ---
+
 
 ## 21. Data migration
 
@@ -876,6 +950,7 @@ Chỉ đọc hai completed attempts cùng exact release của cùng user. Dùng 
 
 ---
 
+
 ## 22. Invariants bắt buộc
 
 1. `last_sequence` bằng sequence event cuối hoặc 0 khi chưa có event.
@@ -893,6 +968,7 @@ Chỉ đọc hai completed attempts cùng exact release của cùng user. Dùng 
 13. User A không đọc/ghi/xóa data của user B.
 
 ---
+
 
 ## 23. Ví dụ event chain
 
@@ -931,6 +1007,7 @@ Không dùng các giá trị demo UI làm golden chemistry data.
 
 ---
 
+
 ## 24. Tiêu chí nghiệm thu dữ liệu
 
 - Transaction không để event và snapshot lệch nhau.
@@ -951,6 +1028,7 @@ Không dùng các giá trị demo UI làm golden chemistry data.
 - Exact release rule khóa cross-release resume/compare.
 
 ---
+
 
 ## 25. Tài liệu liên quan
 

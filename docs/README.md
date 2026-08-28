@@ -2,10 +2,48 @@
 
 ## Nền tảng mô phỏng quy trình hóa học có căn cứ khoa học
 
-**Cập nhật:** 27/08/2026<br>
+**Cập nhật:** 28/08/2026<br>
 **Trạng thái bộ tài liệu:** Đã biên soạn cho phạm vi MVP một học kỳ
 
+## Tổng quan nhanh
+
+| | Nội dung |
+| --- | --- |
+| 🎯 **Mục đích** | Là bản đồ điều hướng và quy tắc ưu tiên cho toàn bộ tài liệu VECLab. |
+| 👥 **Dành cho** | Tất cả thành viên trước khi đọc hoặc chỉnh sửa tài liệu chuyên sâu. |
+| ✅ **Sau khi đọc** | Biết nên mở file nào, tài liệu nào là nguồn quyết định và xử lý mâu thuẫn ra sao. |
+| ⚠️ **Lưu ý** | Đây là trang điều hướng; công thức và hợp đồng kỹ thuật nằm trong các đặc tả chuyên ngành. |
+
+## Đọc tài liệu này khi nào?
+
+- Khi mới tham gia dự án.
+- Khi chưa biết yêu cầu nằm ở Core Scope, Web Scope hay experiment spec.
+- Trước khi sửa một quyết định đã được phiên bản hóa.
+
+## Các quyết định chính
+
+- Hai tài liệu scope quyết định sản phẩm; ba experiment spec quyết định mô hình khoa học.
+- Scientific Evidence Register quyết định nguồn của claim và hằng số.
+- Verification and Acceptance quyết định điều kiện được phép gọi là hoàn thành.
+- Hai tài liệu cũ chỉ có giá trị lịch sử, không được dùng thay nguồn hiện hành.
+
+## Mục lục
+
+<!-- TOC:START -->
+- [1. Bắt đầu từ đâu](#1-bắt-đầu-từ-đâu)
+- [2. Tài liệu nguồn quyết định](#2-tài-liệu-nguồn-quyết-định)
+- [3. Mockup giao diện](#3-mockup-giao-diện)
+- [4. Tài liệu nền/tham khảo](#4-tài-liệu-nềntham-khảo)
+- [5. Thứ tự ưu tiên khi có mâu thuẫn](#5-thứ-tự-ưu-tiên-khi-có-mâu-thuẫn)
+- [6. Định nghĩa trạng thái tài liệu](#6-định-nghĩa-trạng-thái-tài-liệu)
+- [7. Nomenclature dùng chung](#7-nomenclature-dùng-chung)
+- [8. Đường đọc theo nhu cầu](#8-đường-đọc-theo-nhu-cầu)
+- [9. Quy tắc thay đổi](#9-quy-tắc-thay-đổi)
+- [10. Disclaimer chung](#10-disclaimer-chung)
+<!-- TOC:END -->
+
 ---
+
 
 ## 1. Bắt đầu từ đâu
 
@@ -20,6 +58,7 @@ Mọi thành viên nên đọc theo thứ tự:
 Không dùng tài liệu tổng quan cũ để thay quyết định trong các file trên.
 
 ---
+
 
 ## 2. Tài liệu nguồn quyết định
 
@@ -37,6 +76,7 @@ Không dùng tài liệu tổng quan cũ để thay quyết định trong các f
 
 ---
 
+
 ## 3. Mockup giao diện
 
 - [Trang mở nhanh](mockups/index.html)
@@ -46,6 +86,7 @@ Không dùng tài liệu tổng quan cũ để thay quyết định trong các f
 Mockup là tài liệu bố cục, không phải source code production và số liệu trong mockup không phải golden chemistry data.
 
 ---
+
 
 ## 4. Tài liệu nền/tham khảo
 
@@ -57,6 +98,7 @@ Mockup là tài liệu bố cục, không phải source code production và số
 Khi có khác biệt, ưu tiên tài liệu ở mục 2.
 
 ---
+
 
 ## 5. Thứ tự ưu tiên khi có mâu thuẫn
 
@@ -91,6 +133,7 @@ Nếu implementation fixture khác spec, sửa fixture/code hoặc cập nhật 
 
 ---
 
+
 ## 6. Định nghĩa trạng thái tài liệu
 
 | Nhãn | Ý nghĩa |
@@ -105,6 +148,7 @@ Nếu implementation fixture khác spec, sửa fixture/code hoặc cập nhật 
 Không có nhãn nào nghĩa là bench validation bởi đội.
 
 ---
+
 
 ## 7. Nomenclature dùng chung
 
@@ -122,6 +166,7 @@ Không có nhãn nào nghĩa là bench validation bởi đội.
 | Ideal filter/separator | Quy tắc định nghĩa của simulator, không phải hiệu suất thiết bị thật |
 
 ---
+
 
 ## 8. Đường đọc theo nhu cầu
 
@@ -161,6 +206,7 @@ Không có nhãn nào nghĩa là bench validation bởi đội.
 
 ---
 
+
 ## 9. Quy tắc thay đổi
 
 - Thay đổi scope phải cập nhật Core/Web Scope trước.
@@ -171,6 +217,7 @@ Không có nhãn nào nghĩa là bench validation bởi đội.
 - Không thêm experiment thứ tư trước khi ba bài đạt acceptance gates.
 
 ---
+
 
 ## 10. Disclaimer chung
 

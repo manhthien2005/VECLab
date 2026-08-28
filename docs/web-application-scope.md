@@ -17,7 +17,53 @@
 - Khi có khác biệt về nội dung hóa học, Core Project Scope được ưu tiên.
 - Khi có khác biệt về hành vi hoặc phạm vi web, tài liệu Web Application Scope này được ưu tiên.
 
+## Tổng quan nhanh
+
+| | Nội dung |
+| --- | --- |
+| 🎯 **Mục đích** | Khóa các trang, luồng người dùng, tài khoản, lưu dữ liệu và responsive của web. |
+| 👥 **Dành cho** | Product, frontend, backend, UX và QA. |
+| ✅ **Sau khi đọc** | Biết web phải xây chín khu vực nào và hành vi nào bắt buộc hoạt động xuyên suốt. |
+| ⚠️ **Lưu ý** | Nội dung và công thức khoa học vẫn do Core Scope và experiment specs quyết định. |
+
+## Đọc tài liệu này khi nào?
+
+- Trước khi thiết kế route, màn hình hoặc luồng xác thực.
+- Khi cần phân biệt chế độ khách với tài khoản người học.
+- Khi xác định một chức năng web có nằm ngoài MVP hay không.
+
+## Các quyết định chính
+
+- Web có chế độ khách đầy đủ và một vai trò tài khoản người học.
+- Dữ liệu khách lưu trên trình duyệt; dữ liệu tài khoản tự lưu vào database và tiếp tục đa thiết bị.
+- Simulation Workbench dùng bố cục đã duyệt cho desktop và mobile.
+- Báo cáo đọc từ snapshot đã lưu và có thể in/lưu PDF bằng trình duyệt.
+- Không có tài khoản giảng viên, CMS, social login, AI, mobile app riêng hoặc offline hoàn chỉnh.
+
+## Mục lục
+
+<!-- TOC:START -->
+- [1. Tóm tắt quyết định](#1-tóm-tắt-quyết-định)
+- [2. Mục tiêu của sản phẩm web](#2-mục-tiêu-của-sản-phẩm-web)
+- [3. Đối tượng và quyền sử dụng](#3-đối-tượng-và-quyền-sử-dụng)
+- [4. Bản đồ chín khu vực chức năng](#4-bản-đồ-chín-khu-vực-chức-năng)
+- [5. Các luồng sử dụng chính](#5-các-luồng-sử-dụng-chính)
+- [6. Lưu dữ liệu và đồng bộ](#6-lưu-dữ-liệu-và-đồng-bộ)
+- [7. Hành vi của mô phỏng trên web](#7-hành-vi-của-mô-phỏng-trên-web)
+- [8. Báo cáo, in PDF và so sánh](#8-báo-cáo-in-pdf-và-so-sánh)
+- [9. Ngôn ngữ và nội dung](#9-ngôn-ngữ-và-nội-dung)
+- [10. Thiết bị và responsive](#10-thiết-bị-và-responsive)
+- [11. Xử lý lỗi và trạng thái bất thường](#11-xử-lý-lỗi-và-trạng-thái-bất-thường)
+- [12. Bảo mật và quyền riêng tư ở mức scope](#12-bảo-mật-và-quyền-riêng-tư-ở-mức-scope)
+- [13. Cấu trúc khái niệm của web](#13-cấu-trúc-khái-niệm-của-web)
+- [14. Tiêu chí hoàn thành phạm vi web](#14-tiêu-chí-hoàn-thành-phạm-vi-web)
+- [15. Ngoài phạm vi web](#15-ngoài-phạm-vi-web)
+- [16. Mockup tham chiếu đã duyệt](#16-mockup-tham-chiếu-đã-duyệt)
+- [17. Kết luận chốt scope](#17-kết-luận-chốt-scope)
+<!-- TOC:END -->
+
 ---
+
 
 ## 1. Tóm tắt quyết định
 
@@ -45,6 +91,7 @@ Web gồm chín khu vực chức năng:
 Không gian mô phỏng sử dụng bố cục “bàn thí nghiệm cân bằng”: người dùng nhìn thấy tiến trình, trạng thái, thao tác và phản hồi trong cùng một không gian. Trên điện thoại, các phần này được xếp dọc theo thứ tự sử dụng.
 
 ---
+
 
 ## 2. Mục tiêu của sản phẩm web
 
@@ -76,6 +123,7 @@ Chọn thí nghiệm
 ```
 
 ---
+
 
 ## 3. Đối tượng và quyền sử dụng
 
@@ -122,6 +170,7 @@ Người học đã đăng nhập được phép:
 - Nội dung thí nghiệm và nguồn được phát hành cùng ứng dụng, không chỉnh sửa qua CMS.
 
 ---
+
 
 ## 4. Bản đồ chín khu vực chức năng
 
@@ -322,6 +371,7 @@ Không xây hồ sơ xã hội, ảnh đại diện tải lên, theo dõi ngư�
 
 ---
 
+
 ## 5. Các luồng sử dụng chính
 
 ### 5.1. Khách thực hiện thí nghiệm
@@ -383,6 +433,7 @@ Phòng lab của tôi
 ```
 
 ---
+
 
 ## 6. Lưu dữ liệu và đồng bộ
 
@@ -452,6 +503,7 @@ Khi một thiết bị gửi thay đổi dựa trên trạng thái cũ:
 
 ---
 
+
 ## 7. Hành vi của mô phỏng trên web
 
 ### 7.1. Xác nhận thao tác
@@ -496,6 +548,7 @@ Cách phân lớp này giúp sinh viên mới không bị quá tải nhưng vẫ
 
 ---
 
+
 ## 8. Báo cáo, in PDF và so sánh
 
 ### 8.1. Nguồn của báo cáo
@@ -521,6 +574,7 @@ Báo cáo không phải:
 
 ---
 
+
 ## 9. Ngôn ngữ và nội dung
 
 - Giao diện sử dụng tiếng Việt.
@@ -531,6 +585,7 @@ Báo cáo không phải:
 - Cấu trúc nội dung có thể tách khỏi giao diện để không cản trở việc bổ sung ngôn ngữ sau này, nhưng việc dịch không nằm trong scope.
 
 ---
+
 
 ## 10. Thiết bị và responsive
 
@@ -559,6 +614,7 @@ Laptop là trải nghiệm được ưu tiên, nhưng điện thoại không đ�
 Không xây ứng dụng iOS hoặc Android riêng. Phiên bản mobile là giao diện responsive của cùng ứng dụng web.
 
 ---
+
 
 ## 11. Xử lý lỗi và trạng thái bất thường
 
@@ -603,6 +659,7 @@ Hệ thống phải chặn và giải thích khi:
 
 ---
 
+
 ## 12. Bảo mật và quyền riêng tư ở mức scope
 
 - Mật khẩu không được lưu dưới dạng văn bản thuần trong database ứng dụng.
@@ -614,6 +671,7 @@ Hệ thống phải chặn và giải thích khi:
 - Không công khai báo cáo bằng đường dẫn mở nếu chưa có một tính năng chia sẻ được duyệt; tính năng đó hiện ngoài phạm vi.
 
 ---
+
 
 ## 13. Cấu trúc khái niệm của web
 
@@ -650,6 +708,7 @@ Simulation Core phải độc lập với giao diện để cùng một thao tá
 
 ---
 
+
 ## 14. Tiêu chí hoàn thành phạm vi web
 
 Web scope được xem là đạt khi:
@@ -677,6 +736,7 @@ Web scope được xem là đạt khi:
 
 ---
 
+
 ## 15. Ngoài phạm vi web
 
 Không thực hiện trong phiên bản này:
@@ -703,6 +763,7 @@ Không thực hiện trong phiên bản này:
 
 ---
 
+
 ## 16. Mockup tham chiếu đã duyệt
 
 Các file mockup dùng để định hình bố cục, không phải mã nguồn production:
@@ -721,6 +782,7 @@ Quyết định giao diện chính:
 - Trạng thái tự động lưu phải nhìn thấy được.
 
 ---
+
 
 ## 17. Kết luận chốt scope
 

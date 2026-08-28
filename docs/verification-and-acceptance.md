@@ -6,7 +6,60 @@
 
 > Tài liệu này định nghĩa điều gì phải đúng và bằng chứng nào cần có trước khi tuyên bố sản phẩm hoàn thành. Nó không thay thế thí nghiệm bench và không tạo claim “đã kiểm chứng thực nghiệm bởi đội”.
 
+## Tổng quan nhanh
+
+| | Nội dung |
+| --- | --- |
+| 🎯 **Mục đích** | Biến mọi yêu cầu khoa học, dữ liệu và web thành acceptance gates có thể kiểm tra. |
+| 👥 **Dành cho** | QA, người xây engine, backend, frontend và người duyệt release. |
+| ✅ **Sau khi đọc** | Biết test nào bắt buộc, tolerance nào áp dụng và bằng chứng nào phải lưu. |
+| ⚠️ **Lưu ý** | Golden tests chứng minh code khớp model; không chứng minh model đã được đội kiểm chứng bench. |
+
+## Đọc tài liệu này khi nào?
+
+- Trước khi viết test hoặc tuyên bố một module đã hoàn thành.
+- Khi cần phân biệt scientific model validation với web acceptance.
+- Trước mỗi release hoặc thay scenario release.
+
+## Các quyết định chính
+
+- Release phải qua năm gate: scope/evidence, domain, state/data, web và security/accessibility.
+- Mỗi thí nghiệm có golden cases, invalid cases và invariants riêng.
+- Guest, auth, RLS, idempotency, report và responsive đều có luồng E2E bắt buộc.
+- WCAG 2.2 AA là mục tiêu cho core flows; performance dùng Core Web Vitals làm release goal.
+- Không gọi một mục là accepted nếu test chưa chạy trên release hiện tại.
+
+## Mục lục
+
+<!-- TOC:START -->
+- [1. Bốn lớp xác nhận](#1-bốn-lớp-xác-nhận)
+- [2. Acceptance gates](#2-acceptance-gates)
+- [3. Công cụ và tầng test](#3-công-cụ-và-tầng-test)
+- [4. Quy tắc tolerance](#4-quy-tắc-tolerance)
+- [5. Acid neutralization test set](#5-acid-neutralization-test-set)
+- [6. Copper precipitation test set](#6-copper-precipitation-test-set)
+- [7. Plastic separation test set](#7-plastic-separation-test-set)
+- [8. Process Core tests](#8-process-core-tests)
+- [9. Schema và unit tests](#9-schema-và-unit-tests)
+- [10. Persistence và transaction tests](#10-persistence-và-transaction-tests)
+- [11. Guest mode tests](#11-guest-mode-tests)
+- [12. Auth và profile tests](#12-auth-và-profile-tests)
+- [13. RLS và authorization tests](#13-rls-và-authorization-tests)
+- [14. Branch, undo và reset tests](#14-branch-undo-và-reset-tests)
+- [15. Report và compare tests](#15-report-và-compare-tests)
+- [16. End-to-end core flows](#16-end-to-end-core-flows)
+- [17. Responsive matrix](#17-responsive-matrix)
+- [18. Accessibility target](#18-accessibility-target)
+- [19. Performance/reliability targets](#19-performancereliability-targets)
+- [20. Content/evidence tests](#20-contentevidence-tests)
+- [21. Traceability matrix](#21-traceability-matrix)
+- [22. Test evidence phải lưu](#22-test-evidence-phải-lưu)
+- [23. Definition of accepted](#23-definition-of-accepted)
+- [24. Tài liệu liên quan](#24-tài-liệu-liên-quan)
+<!-- TOC:END -->
+
 ---
+
 
 ## 1. Bốn lớp xác nhận
 
@@ -20,6 +73,7 @@
 Chỉ được tuyên bố ba lớp đầu trong phạm vi tương ứng. Bench validation luôn ghi “chưa thực hiện”.
 
 ---
+
 
 ## 2. Acceptance gates
 
@@ -67,6 +121,7 @@ Không release nếu Gate A–E còn failure mức blocking.
 
 ---
 
+
 ## 3. Công cụ và tầng test
 
 | Tầng | Công cụ mục tiêu | Phạm vi |
@@ -84,6 +139,7 @@ Không release nếu Gate A–E còn failure mức blocking.
 Vitest transform TypeScript nhưng type-check chạy riêng: [Vitest Writing Tests](https://vitest.dev/guide/learn/writing-tests). Playwright tests dùng isolated context và user-visible behavior: [Playwright Writing Tests](https://playwright.dev/docs/writing-tests), [Best Practices](https://playwright.dev/docs/best-practices). Supabase cung cấp pgTAP/RLS test flow: [Testing Overview](https://supabase.com/docs/guides/local-development/testing/overview).
 
 ---
+
 
 ## 4. Quy tắc tolerance
 
@@ -108,6 +164,7 @@ Mỗi metric dùng tolerance ghi trong experiment spec. Không dùng một toler
 Mọi bảng golden phải ghi rõ đây là regression tolerance của implementation so với model khóa.
 
 ---
+
 
 ## 5. Acid neutralization test set
 
@@ -163,6 +220,7 @@ Nguồn quyết định: [Acid Neutralization Specification](experiments/acid-ne
 - Model invalid: không dùng 0 thay N/A.
 
 ---
+
 
 ## 6. Copper precipitation test set
 
@@ -227,6 +285,7 @@ CP-G00…CP-G06 đã được tái tạo bằng một log-activity/Davies/specia
 - Rejected command không đổi safety index.
 
 ---
+
 
 ## 7. Plastic separation test set
 
@@ -293,6 +352,7 @@ PS-G01…PS-G08 đã được kiểm tra bằng một deterministic partition/go
 
 ---
 
+
 ## 8. Process Core tests
 
 ### 8.1. Determinism
@@ -322,6 +382,7 @@ PS-G01…PS-G08 đã được kiểm tra bằng một deterministic partition/go
 
 ---
 
+
 ## 9. Schema và unit tests
 
 - Reject missing fields.
@@ -334,6 +395,7 @@ PS-G01…PS-G08 đã được kiểm tra bằng một deterministic partition/go
 - Unknown release returns content error, không fallback current silently.
 
 ---
+
 
 ## 10. Persistence và transaction tests
 
@@ -364,6 +426,7 @@ PS-G01…PS-G08 đã được kiểm tra bằng một deterministic partition/go
 
 ---
 
+
 ## 11. Guest mode tests
 
 | ID | Flow | Expected |
@@ -387,6 +450,7 @@ Guest payload không được coi là trusted chỉ vì hash chain hợp lệ.
 
 ---
 
+
 ## 12. Auth và profile tests
 
 - Sign up email/password.
@@ -402,6 +466,7 @@ Guest payload không được coi là trusted chỉ vì hash chain hợp lệ.
 Không test social login vì ngoài scope.
 
 ---
+
 
 ## 13. RLS và authorization tests
 
@@ -428,6 +493,7 @@ Supabase yêu cầu test grants và policies cho allow/deny: [RLS Guide](https:/
 Tất cả phải bị chặn.
 
 ---
+
 
 ## 14. Branch, undo và reset tests
 
@@ -456,6 +522,7 @@ MVP chỉ undo action hiệu lực cuối cùng khi experiment đánh dấu reve
 
 ---
 
+
 ## 15. Report và compare tests
 
 ### 15.1. Report
@@ -483,6 +550,7 @@ Cases:
 - Guest report → không vào cloud comparison list cho đến khi import.
 
 ---
+
 
 ## 16. End-to-end core flows
 
@@ -518,6 +586,7 @@ Hai browser context sửa cùng attempt; second action conflict và draft đư�
 
 ---
 
+
 ## 17. Responsive matrix
 
 | Viewport | Core requirement |
@@ -540,6 +609,7 @@ Test trên Chromium, Firefox và WebKit qua Playwright project khi môi trườn
 - Keyboard focus visible.
 
 ---
+
 
 ## 18. Accessibility target
 
@@ -564,6 +634,7 @@ Mục tiêu: WCAG 2.2 Level AA cho core flows, không tuyên bố certification 
 - Auth không yêu cầu cognitive puzzle ngoài khả năng accessible auth.
 
 ---
+
 
 ## 19. Performance/reliability targets
 
@@ -591,6 +662,7 @@ Sau deploy, đo mobile/desktop:
 
 ---
 
+
 ## 20. Content/evidence tests
 
 - Mọi `source_key` resolve.
@@ -606,6 +678,7 @@ Sau deploy, đo mobile/desktop:
   - “khối lượng bùn thực” khi chỉ tính dry theoretical solid.
 
 ---
+
 
 ## 21. Traceability matrix
 
@@ -625,6 +698,7 @@ Sau deploy, đo mobile/desktop:
 
 ---
 
+
 ## 22. Test evidence phải lưu
 
 - Test command/commit/build ID.
@@ -642,6 +716,7 @@ Không lưu token, password hoặc personal data thật trong test artifact.
 
 ---
 
+
 ## 23. Definition of accepted
 
 Một scope item được accepted khi:
@@ -656,6 +731,7 @@ Một scope item được accepted khi:
 “Test được viết” không đồng nghĩa accepted nếu chưa chạy.
 
 ---
+
 
 ## 24. Tài liệu liên quan
 

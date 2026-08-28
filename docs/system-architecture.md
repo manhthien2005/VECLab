@@ -8,7 +8,56 @@
 
 > Tài liệu này triển khai các ranh giới kỹ thuật từ [Core Project Scope](core-project-scope.md) và [Web Application Scope](web-application-scope.md). Nó không thay đổi phạm vi sản phẩm hoặc nội dung khoa học đã được chốt.
 
+## Tổng quan nhanh
+
+| | Nội dung |
+| --- | --- |
+| 🎯 **Mục đích** | Chuyển hai tài liệu scope thành ranh giới kỹ thuật có thể triển khai. |
+| 👥 **Dành cho** | Technical lead, frontend, backend và người xây simulation engine. |
+| ✅ **Sau khi đọc** | Hiểu kiến trúc monolith theo mô-đun, luồng action và quyền sở hữu từng lớp. |
+| ⚠️ **Lưu ý** | Experiment spec mới là nguồn quyết định công thức và hằng số của từng bài. |
+
+## Đọc tài liệu này khi nào?
+
+- Trước khi khởi tạo codebase hoặc thêm một module mới.
+- Khi cần xác định logic thuộc UI, application service, domain hay persistence.
+- Khi thiết kế mutation, guest import, report hoặc authorization.
+
+## Các quyết định chính
+
+- Dùng một web monolith Next.js/TypeScript với module boundaries rõ, không microservice.
+- Domain engine là hàm thuần, xác định và không phụ thuộc React/database.
+- Máy chủ xác nhận kết quả cloud và commit event/snapshot qua RPC nguyên tử.
+- Guest chạy cùng domain package trong trình duyệt và lưu IndexedDB.
+- Scenario release khóa đồng thời engine, scoring, state, content và evidence.
+
+## Mục lục
+
+<!-- TOC:START -->
+- [1. Mục tiêu kiến trúc](#1-mục-tiêu-kiến-trúc)
+- [2. Các quyết định kiến trúc chính](#2-các-quyết-định-kiến-trúc-chính)
+- [3. Công nghệ mục tiêu](#3-công-nghệ-mục-tiêu)
+- [4. Cấu trúc code mục tiêu](#4-cấu-trúc-code-mục-tiêu)
+- [5. Hợp đồng dùng chung của simulation engine](#5-hợp-đồng-dùng-chung-của-simulation-engine)
+- [6. Process Core](#6-process-core)
+- [7. Ba domain module](#7-ba-domain-module)
+- [8. Application services](#8-application-services)
+- [9. Luồng thực hiện thao tác cho tài khoản](#9-luồng-thực-hiện-thao-tác-cho-tài-khoản)
+- [10. Luồng chế độ khách](#10-luồng-chế-độ-khách)
+- [11. Auth và authorization](#11-auth-và-authorization)
+- [12. Versioning và reproducibility](#12-versioning-và-reproducibility)
+- [13. Error model](#13-error-model)
+- [14. Báo cáo và print](#14-báo-cáo-và-print)
+- [15. Observability tối thiểu](#15-observability-tối-thiểu)
+- [16. Yêu cầu hiệu năng và giới hạn](#16-yêu-cầu-hiệu-năng-và-giới-hạn)
+- [17. Security boundaries](#17-security-boundaries)
+- [18. Những lựa chọn bị loại](#18-những-lựa-chọn-bị-loại)
+- [19. Tiêu chí nghiệm thu kiến trúc](#19-tiêu-chí-nghiệm-thu-kiến-trúc)
+- [20. Tài liệu liên quan](#20-tài-liệu-liên-quan)
+<!-- TOC:END -->
+
 ---
+
 
 ## 1. Mục tiêu kiến trúc
 
@@ -26,6 +75,7 @@ Kiến trúc phải đạt được các mục tiêu sau:
 - Không cần microservice, message queue hoặc hạ tầng điều phối phức tạp.
 
 ---
+
 
 ## 2. Các quyết định kiến trúc chính
 
@@ -114,6 +164,7 @@ Không chỉ lưu kết quả cuối, vì sản phẩm cần timeline, hoàn tá
 
 ---
 
+
 ## 3. Công nghệ mục tiêu
 
 ### 3.1. Ứng dụng web
@@ -166,6 +217,7 @@ Vercel cung cấp quy trình triển khai trực tiếp cho Next.js và preview 
 - Không tự động nâng major version trong thời gian phát triển nếu không có quyết định riêng.
 
 ---
+
 
 ## 4. Cấu trúc code mục tiêu
 
@@ -243,6 +295,7 @@ tests/
 - Một mô-đun thí nghiệm sở hữu state, actions, engine adapter và tests của chính nó.
 
 ---
+
 
 ## 5. Hợp đồng dùng chung của simulation engine
 
@@ -336,6 +389,7 @@ Report timeline, score, chart, citation và attempt persistence types được �
 
 ---
 
+
 ## 6. Process Core
 
 Process Core sở hữu vòng đời dùng chung:
@@ -372,6 +426,7 @@ validateAction
 - Auth session.
 
 ---
+
 
 ## 7. Ba domain module
 
@@ -412,6 +467,7 @@ Sở hữu:
 Nguồn quyết định chi tiết: [Plastic Separation Specification](experiments/plastic-density-separation-spec.md).
 
 ---
+
 
 ## 8. Application services
 
@@ -463,6 +519,7 @@ Trách nhiệm:
 
 ---
 
+
 ## 9. Luồng thực hiện thao tác cho tài khoản
 
 ```text
@@ -504,6 +561,7 @@ Nếu action ID đã tồn tại cùng fingerprint, trả event cũ dù expected
 
 ---
 
+
 ## 10. Luồng chế độ khách
 
 ```text
@@ -534,6 +592,7 @@ Browser adapter có thể dùng IndexedDB để lưu structured data và nhiều
 Guest complete tạo `final_report_snapshot` cục bộ và render cùng report UI. Route `/attempts` và `/reports` là shell dùng storage mode; tên route group không được dùng như auth guard.
 
 ---
+
 
 ## 11. Auth và authorization
 
@@ -566,6 +625,7 @@ Supabase cảnh báo không cache response có `Set-Cookie` của session refres
 
 ---
 
+
 ## 12. Versioning và reproducibility
 
 Mỗi attempt lưu tối thiểu `scenario_key`, `scenario_release_id` và `content_locale`. Release registry resolve engine/scoring/state/content/evidence bundle.
@@ -578,6 +638,7 @@ Mỗi attempt lưu tối thiểu `scenario_key`, `scenario_release_id` và `cont
 - Không sửa/recompute completed history bằng release mới.
 
 ---
+
 
 ## 13. Error model
 
@@ -610,6 +671,7 @@ Không trả stack trace, SQL error hoặc secret cho client.
 
 ---
 
+
 ## 14. Báo cáo và print
 
 - Report page đọc final snapshot.
@@ -619,6 +681,7 @@ Không trả stack trace, SQL error hoặc secret cho client.
 - Không lưu binary PDF vào database.
 
 ---
+
 
 ## 15. Observability tối thiểu
 
@@ -649,6 +712,7 @@ Không xây analytics học tập nâng cao.
 
 ---
 
+
 ## 16. Yêu cầu hiệu năng và giới hạn
 
 - Một action của kịch bản MVP phải tính đồng bộ trong thời gian đủ cho phản hồi tương tác; không cần job queue.
@@ -661,6 +725,7 @@ Không xây analytics học tập nâng cao.
 Ngưỡng nghiệm thu chi tiết nằm tại [Verification and Acceptance](verification-and-acceptance.md).
 
 ---
+
 
 ## 17. Security boundaries
 
@@ -676,6 +741,7 @@ Ngưỡng nghiệm thu chi tiết nằm tại [Verification and Acceptance](veri
 - Security headers/CSP chỉ cho phép script/style/resource cần thiết của ứng dụng.
 
 ---
+
 
 ## 18. Những lựa chọn bị loại
 
@@ -701,6 +767,7 @@ Không dùng vì server cần xác nhận event và state được lưu, đồng
 
 ---
 
+
 ## 19. Tiêu chí nghiệm thu kiến trúc
 
 - Domain engine test được mà không chạy web/database.
@@ -716,6 +783,7 @@ Không dùng vì server cần xác nhận event và state được lưu, đồng
 - Không có dependency bắt buộc vào microservice, queue, AI hoặc CMS.
 
 ---
+
 
 ## 20. Tài liệu liên quan
 

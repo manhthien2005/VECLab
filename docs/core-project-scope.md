@@ -11,7 +11,52 @@
 
 > Phạm vi màn hình, tài khoản, dữ liệu, đồng bộ, báo cáo và responsive được chốt riêng tại [Báo cáo phạm vi ứng dụng web](web-application-scope.md).
 
+## Tổng quan nhanh
+
+| | Nội dung |
+| --- | --- |
+| 🎯 **Mục đích** | Khóa sản phẩm lõi, ba thí nghiệm và giới hạn khoa học của MVP. |
+| 👥 **Dành cho** | Toàn team, người duyệt đề tài và người phụ trách nội dung hóa học. |
+| ✅ **Sau khi đọc** | Biết dự án làm gì, làm tới đâu, cần thu thập gì và đầu ra bắt buộc là gì. |
+| ⚠️ **Lưu ý** | Tài liệu này không mô tả chi tiết UI, database hoặc thuật toán solver. |
+
+## Đọc tài liệu này khi nào?
+
+- Trước khi đề xuất thêm thí nghiệm hoặc tính năng lõi.
+- Khi cần xác định một yêu cầu có thuộc MVP hay không.
+- Khi cần giải thích giá trị đề tài cho team hoặc người hướng dẫn.
+
+## Các quyết định chính
+
+- MVP có đúng ba bài: trung hòa axit, kết tủa Cu²⁺ và phân loại nhựa nổi–chìm.
+- Mỗi bài có nhiều quy trình hợp lệ nhưng chỉ trong miền đã có bằng chứng.
+- Điểm 0–100% là mức đạt mục tiêu mô phỏng, không phải xác suất thành công thực tế.
+- Mỗi bài bắt buộc có hồ sơ nguồn, giả định, golden cases và disclaimer.
+- Chemistry sandbox tổng quát, AI quyết định kết quả, 3D và chứng nhận pháp lý nằm ngoài phạm vi.
+
+## Mục lục
+
+<!-- TOC:START -->
+- [1. Tóm tắt quyết định](#1-tóm-tắt-quyết-định)
+- [2. Định vị sản phẩm](#2-định-vị-sản-phẩm)
+- [3. Đối tượng sử dụng](#3-đối-tượng-sử-dụng)
+- [4. Trải nghiệm lõi chung](#4-trải-nghiệm-lõi-chung)
+- [5. Thí nghiệm 1 — Trung hòa dung dịch axit](#5-thí-nghiệm-1--trung-hòa-dung-dịch-axit)
+- [6. Thí nghiệm 2 — Loại bỏ Cu²⁺ bằng kết tủa hóa học](#6-thí-nghiệm-2--loại-bỏ-cu-bằng-kết-tủa-hóa-học)
+- [7. Thí nghiệm 3 — Phân loại nhựa bằng phương pháp nổi – chìm](#7-thí-nghiệm-3--phân-loại-nhựa-bằng-phương-pháp-nổi--chìm)
+- [8. Cách biểu diễn kết quả và mức độ thành công](#8-cách-biểu-diễn-kết-quả-và-mức-độ-thành-công)
+- [9. Hồ sơ bằng chứng bắt buộc](#9-hồ-sơ-bằng-chứng-bắt-buộc)
+- [10. Dữ liệu và nội dung cần tiếp tục tìm](#10-dữ-liệu-và-nội-dung-cần-tiếp-tục-tìm)
+- [11. Ví dụ trải nghiệm cụ thể](#11-ví-dụ-trải-nghiệm-cụ-thể)
+- [12. Thành phần sản phẩm nằm trong phạm vi](#12-thành-phần-sản-phẩm-nằm-trong-phạm-vi)
+- [13. Kết quả cuối cùng bắt buộc phải có](#13-kết-quả-cuối-cùng-bắt-buộc-phải-có)
+- [14. Ngoài phạm vi lõi](#14-ngoài-phạm-vi-lõi)
+- [15. Hướng phát triển cốt lõi](#15-hướng-phát-triển-cốt-lõi)
+- [16. Kết luận chốt scope](#16-kết-luận-chốt-scope)
+<!-- TOC:END -->
+
 ---
+
 
 ## 1. Tóm tắt quyết định
 
@@ -30,6 +75,7 @@ Mỗi thí nghiệm phải có nhiều hướng xử lý hợp lệ, nhưng toà
 Sản phẩm cung cấp **mức độ đạt mục tiêu mô phỏng**, không tuyên bố xác suất thành công ngoài thực tế. Do nhóm không có điều kiện làm thí nghiệm độc lập, mọi kết quả phải được ghi rõ là mô hình dựa trên tài liệu và chỉ có giá trị trong phạm vi giả định đã công bố.
 
 ---
+
 
 ## 2. Định vị sản phẩm
 
@@ -57,6 +103,7 @@ Sản phẩm không phải:
 
 ---
 
+
 ## 3. Đối tượng sử dụng
 
 ### 3.1. Người dùng chính
@@ -81,6 +128,7 @@ Sản phẩm chỉ có một nền tảng mô phỏng, không xây một phiên 
 Người có chuyên môn có thể sử dụng lớp thông tin kỹ thuật để xem xét mô hình, nhưng không được hiểu kết quả như một khuyến nghị vận hành thực tế.
 
 ---
+
 
 ## 4. Trải nghiệm lõi chung
 
@@ -122,6 +170,7 @@ Hệ thống phải:
 - Giải thích rõ vì sao một thao tác không thể thực hiện trong trạng thái hiện tại.
 
 ---
+
 
 ## 5. Thí nghiệm 1 — Trung hòa dung dịch axit
 
@@ -196,6 +245,7 @@ Việc chia liều, đo lại và tinh chỉnh tạo ra nhiều chuỗi thao tá
 - Kết quả chỉ đúng cho các chất, điều kiện và giả định được cấu hình.
 
 ---
+
 
 ## 6. Thí nghiệm 2 — Loại bỏ Cu²⁺ bằng kết tủa hóa học
 
@@ -272,6 +322,7 @@ Trong từng nhánh, người dùng có thể thêm một lần, thêm theo nhi�
 
 ---
 
+
 ## 7. Thí nghiệm 3 — Phân loại nhựa bằng phương pháp nổi – chìm
 
 ### 7.1. Mục tiêu
@@ -341,6 +392,7 @@ Người dùng có thể ưu tiên độ tinh khiết hoặc tỷ lệ thu hồi
 
 ---
 
+
 ## 8. Cách biểu diễn kết quả và mức độ thành công
 
 ### 8.1. Ba lớp kết quả
@@ -375,6 +427,7 @@ Người dùng phải xem được:
 
 ---
 
+
 ## 9. Hồ sơ bằng chứng bắt buộc
 
 Một thí nghiệm hoặc một nhánh quy trình chỉ được coi là sẵn sàng phát hành khi có hồ sơ gồm:
@@ -395,6 +448,7 @@ Một thí nghiệm hoặc một nhánh quy trình chỉ được coi là sẵn 
 Video là bằng chứng bổ trợ cho quy trình và hiện tượng. Video không được dùng một mình để xác lập công thức, hằng số hoặc kết quả định lượng.
 
 ---
+
 
 ## 10. Dữ liệu và nội dung cần tiếp tục tìm
 
@@ -441,6 +495,7 @@ Phần này xác định những gì dự án bắt buộc phải thu thập tr�
 
 ---
 
+
 ## 11. Ví dụ trải nghiệm cụ thể
 
 ### 11.1. Ví dụ — Kết tủa Cu²⁺
@@ -476,6 +531,7 @@ Người dùng sẽ thấy một quy trình ít bước có thể thu hồi nhan
 
 ---
 
+
 ## 12. Thành phần sản phẩm nằm trong phạm vi
 
 Phiên bản lõi bao gồm:
@@ -498,6 +554,7 @@ Phiên bản lõi bao gồm:
 
 ---
 
+
 ## 13. Kết quả cuối cùng bắt buộc phải có
 
 Phạm vi lõi được xem là đạt khi có đầy đủ:
@@ -518,6 +575,7 @@ Phạm vi lõi được xem là đạt khi có đầy đủ:
 14. Sản phẩm hiển thị rõ rằng nhóm chưa kiểm chứng mô hình bằng thí nghiệm độc lập.
 
 ---
+
 
 ## 14. Ngoài phạm vi lõi
 
@@ -543,6 +601,7 @@ Các mục trên chỉ được xem xét sau phạm vi lõi và không phải đ
 
 ---
 
+
 ## 15. Hướng phát triển cốt lõi
 
 Giá trị chính của dự án không nằm ở số lượng thí nghiệm, mà nằm ở việc chứng minh được một cấu trúc mô phỏng quy trình có thể tái sử dụng:
@@ -565,6 +624,7 @@ Ba thí nghiệm được cố ý chọn để chứng minh hai điều:
 Vì vậy, dự án cần ưu tiên ba bài có chiều sâu, có bằng chứng và có khả năng khám phá. Việc thêm nhiều bài nhưng thiếu dữ liệu, giải thích hoặc kiểm chứng tài liệu sẽ làm giảm giá trị khoa học của sản phẩm.
 
 ---
+
 
 ## 16. Kết luận chốt scope
 

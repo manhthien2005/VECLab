@@ -11,7 +11,58 @@
 
 > **Nhãn bắt buộc:** Mô hình dựa trên tài liệu; chưa được nhóm phát triển kiểm chứng bằng thí nghiệm độc lập.
 
+## Tổng quan nhanh
+
+| | Nội dung |
+| --- | --- |
+| 🎯 **Mục đích** | Đặc tả mô hình trung hòa HCl bằng NaOH, Ca(OH)₂ hoặc Na₂CO₃ ở 25 °C. |
+| 👥 **Dành cho** | Chemistry engine, content, frontend giải thích và QA khoa học. |
+| ✅ **Sau khi đọc** | Có đủ state, action, solver, scoring, golden cases và giới hạn để triển khai. |
+| ⚠️ **Lưu ý** | pH* là mô hình nồng độ lý tưởng; route carbonate dùng hệ carbon vô cơ kín. |
+
+## Đọc tài liệu này khi nào?
+
+- Khi triển khai hoặc kiểm tra Acid Neutralization domain module.
+- Khi viết calculation trace, phản hồi hoặc scoring của bài trung hòa.
+- Khi thay constant bundle, exploration range hoặc golden fixture.
+
+## Các quyết định chính
+
+- Benchmark dùng 25,00 mL HCl 0,01000 M; exploration vẫn giới hạn HCl và 25 °C.
+- NaOH dùng nghiệm charge balance liên tục; Ca(OH)₂ tính thêm CaOH⁺.
+- Na₂CO₃ bắt buộc giải cân bằng carbonate kín, không chỉ đếm hai đương lượng.
+- Dung dịch Ca(OH)₂ phải trong, đã lọc và chuẩn hóa; vôi sữa nằm ngoài model.
+- Measurement cũ bị vô hiệu ngay khi thêm hóa chất mới.
+
+## Mục lục
+
+<!-- TOC:START -->
+- [1. Mục tiêu giáo dục](#1-mục-tiêu-giáo-dục)
+- [2. Kịch bản chuẩn](#2-kịch-bản-chuẩn)
+- [3. Miền đầu vào](#3-miền-đầu-vào)
+- [4. Mô hình trạng thái](#4-mô-hình-trạng-thái)
+- [5. Hành động và điều kiện](#5-hành-động-và-điều-kiện)
+- [6. Hằng số mô hình](#6-hằng-số-mô-hình)
+- [7. Thuật toán NaOH](#7-thuật-toán-naoh)
+- [8. Thuật toán Ca(OH)₂](#8-thuật-toán-caoh)
+- [9. Thuật toán Na₂CO₃](#9-thuật-toán-naco)
+- [10. Dữ liệu giải thích phép tính bắt buộc](#10-dữ-liệu-giải-thích-phép-tính-bắt-buộc)
+- [11. Các chiến lược định liều hợp lệ](#11-các-chiến-lược-định-liều-hợp-lệ)
+- [12. Nhánh sai và phục hồi](#12-nhánh-sai-và-phục-hồi)
+- [13. Kết quả trả về](#13-kết-quả-trả-về)
+- [14. Cách chấm điểm](#14-cách-chấm-điểm)
+- [15. Các ca chuẩn (golden cases)](#15-các-ca-chuẩn-golden-cases)
+- [16. Kiểm tra hợp lệ và bất biến](#16-kiểm-tra-hợp-lệ-và-bất-biến)
+- [17. Giả định và giới hạn](#17-giả-định-và-giới-hạn)
+- [18. An toàn và cách diễn đạt](#18-an-toàn-và-cách-diễn-đạt)
+- [19. Những tính năng loại khỏi scenario 1.0.0](#19-những-tính-năng-loại-khỏi-scenario-100)
+- [20. Ma trận nguồn chính](#20-ma-trận-nguồn-chính)
+- [21. Tiêu chí nghiệm thu thí nghiệm](#21-tiêu-chí-nghiệm-thu-thí-nghiệm)
+- [22. Tài liệu liên quan](#22-tài-liệu-liên-quan)
+<!-- TOC:END -->
+
 ---
+
 
 ## 1. Mục tiêu giáo dục
 
@@ -26,6 +77,7 @@ Người học phải:
 - Hiểu giới hạn của mô hình nồng độ lý tưởng và hệ carbon kín.
 
 ---
+
 
 ## 2. Kịch bản chuẩn
 
@@ -74,6 +126,7 @@ Dải này là rubric sư phạm, không phải ngưỡng pháp luật hoặc tu
 
 ---
 
+
 ## 3. Miền đầu vào
 
 ### 3.1. Liều chất trung hòa benchmark
@@ -112,7 +165,7 @@ Không cho nhập aliquot tùy ý trong scenario 1.0.0. Việc dùng tập giá 
 - Không trộn Ca²⁺ với carbonate trong cùng lượt vì sẽ mở thêm cân bằng/kết tủa ngoài mô hình.
 - Muốn thử route khác phải tạo lượt mới hoặc branch từ trạng thái ban đầu.
 
-### 3.4. Parameter contract
+### 3.4. Hợp đồng tham số
 
 Benchmark cố định sample, temperature và stock concentrations để giữ evidence validity. Người học điều khiển sáu dimension có ý nghĩa:
 
@@ -123,7 +176,7 @@ Benchmark cố định sample, temperature và stock concentrations để giữ 
 5. HCl correction aliquot khi quá liều.
 6. Completion decision.
 
-### 3.5. Exploration mode
+### 3.5. Chế độ khám phá
 
 Ngoài benchmark, người học có thể thay đổi:
 
@@ -137,7 +190,7 @@ Ngoài benchmark, người học có thể thay đổi:
 
 Nhiệt độ vẫn khóa 25 °C và acid vẫn là HCl. Golden/benchmark score dùng mục tiêu 6,995. Exploration tính route-specific `E*` bằng solver cho target được chọn và gắn nhãn “ngoài benchmark chuẩn”.
 
-### 3.6. Event budget
+### 3.6. Giới hạn sự kiện
 
 - Tối đa 120 reagent additions trong một attempt.
 - Tối đa 500 accepted events toàn attempt.
@@ -145,7 +198,8 @@ Nhiệt độ vẫn khóa 25 °C và acid vẫn là HCl. Golden/benchmark score 
 
 ---
 
-## 4. State model
+
+## 4. Mô hình trạng thái
 
 ### 4.1. State bất biến
 
@@ -224,6 +278,7 @@ type AcidEquilibriumResult = {
 
 ---
 
+
 ## 5. Hành động và điều kiện
 
 | Action type | Điều kiện trước | State thay đổi | Có event |
@@ -238,7 +293,7 @@ type AcidEquilibriumResult = {
 | `complete` | pH đo ổn định; model valid | completed | Có |
 | `restart` | mọi trạng thái chưa bị xóa | dừng lượt; tạo lượt mới | Không phải action trong lượt cũ |
 
-### 5.1. Reversibility
+### 5.1. Khả năng hoàn tác
 
 | Action | Reversible? | Boundary/restored state |
 | --- | --- | --- |
@@ -272,6 +327,7 @@ modelValid = false
 
 ---
 
+
 ## 6. Hằng số mô hình
 
 | Hằng số | Giá trị implementation | Điều kiện/nguồn |
@@ -287,17 +343,18 @@ modelValid = false
 
 Hằng số carbonate và CaOH⁺ tham chiếu cơ sở dữ liệu PHREEQC của USGS: [PHREEQC User Guide, Attachment B](https://pubs.usgs.gov/wri/1995/4227/report.pdf).
 
-### 6.2. Quy ước khác bài Cu
-
-Bài này dùng `pKw=13,990` và pH* concentration-ideal theo bundle IAPWS/USGS đã khóa. Bài Cu dùng activity model Davies và database convention `log Kw=-14,000`. Không so chữ số pH chi tiết giữa hai bài như cùng một thang mô hình.
-
 ### 6.1. Quy tắc không trộn nguồn
 
 - Bộ hằng số trên là một bundle bất biến của scenario 1.0.0.
 - Không thay riêng một hằng số mà giữ scenario release.
 - Không dùng golden case tạo từ bộ hằng số khác để đánh giá implementation.
 
+### 6.2. Quy ước khác bài Cu
+
+Bài này dùng `pKw=13,990` và pH* concentration-ideal theo bundle IAPWS/USGS đã khóa. Bài Cu dùng activity model Davies và database convention `log Kw=-14,000`. Không so chữ số pH chi tiết giữa hai bài như cùng một thang mô hình.
+
 ---
+
 
 ## 7. Thuật toán NaOH
 
@@ -332,6 +389,7 @@ Không dùng logic ba đoạn acid dư/tương đương/base dư ở gần đi�
 
 ---
 
+
 ## 8. Thuật toán Ca(OH)₂
 
 Tổng calcium:
@@ -363,6 +421,7 @@ f(h) = h + 2[Ca²⁺] + [CaOH⁺] - Kw/h - [Cl⁻] = 0
 Scenario giả định dung dịch trong. Nếu triển khai UI có “vôi sữa”, đó là phạm vi khác và không được gọi engine này.
 
 ---
+
 
 ## 9. Thuật toán Na₂CO₃
 
@@ -414,7 +473,8 @@ Không trả “thể tích CO₂ phát thải”. `[CO₂*]` là carbon hòa ta
 
 ---
 
-## 10. Calculation trace bắt buộc
+
+## 10. Dữ liệu giải thích phép tính bắt buộc
 
 ### 10.1. NaOH
 
@@ -447,6 +507,7 @@ Không trả “thể tích CO₂ phát thải”. `[CO₂*]` là carbon hòa ta
 Trace lưu full precision; UI format riêng.
 
 ---
+
 
 ## 11. Các chiến lược định liều hợp lệ
 
@@ -485,6 +546,7 @@ Không rewind mẫu hóa học cũ.
 
 ---
 
+
 ## 12. Nhánh sai và phục hồi
 
 | Trường hợp | Mã | Hậu quả mô hình | Hành động hợp lệ |
@@ -501,6 +563,7 @@ Không rewind mẫu hóa học cũ.
 | Solver fail | `EQUILIBRIUM_NO_CONVERGENCE` | không có kết quả | không commit action |
 
 ---
+
 
 ## 13. Kết quả trả về
 
@@ -538,7 +601,7 @@ massNa2CO3_g = nNa2CO3 × 105.9888
 massHCl_g    = nCorrectionHCl × 36.4609
 ```
 
-### 13.4. Pedagogical cost index 1.0.0
+### 13.4. Chỉ số chi phí sư phạm 1.0.0
 
 Không dùng tiền tệ hoặc giá thị trường. Coefficient theo mmol reagent:
 
@@ -557,7 +620,7 @@ relativeCostIndex = rawCost / initialHClMmol
 
 Benchmark stoichiometric NaOH có index 1,00. Coefficients là quy ước giáo dục versioned, được lựa chọn để minh họa khác biệt lượng thuốc thử/handling; không phải báo giá.
 
-### 13.5. Pedagogical safety index 1.0.0
+### 13.5. Chỉ số an toàn sư phạm 1.0.0
 
 ```text
 safetyIndex = clamp(100 - sum(committedPenaltyPoints), 0, 100)
@@ -580,7 +643,8 @@ Model invalid → safety index N/A. Hazard profile HCl/NaOH/Ca(OH)₂/Na₂CO₃
 
 ---
 
-## 14. Scoring
+
+## 14. Cách chấm điểm
 
 ### 14.1. Success
 
@@ -635,7 +699,8 @@ Scoring là quyết định sư phạm, không phải hằng số khoa học và
 
 ---
 
-## 15. Golden cases chuẩn
+
+## 15. Các ca chuẩn (golden cases)
 
 Bộ hằng số tại mục 6, `gamma = 1`, có CaOH⁺ và carbon kín.
 
@@ -681,7 +746,8 @@ Tám expected value đã được tính lại độc lập bằng một implemen
 
 ---
 
-## 16. Validation và invariant
+
+## 16. Kiểm tra hợp lệ và bất biến
 
 ### 16.1. Chung
 
@@ -705,6 +771,7 @@ Tám expected value đã được tính lại độc lập bằng một implemen
 
 ---
 
+
 ## 17. Giả định và giới hạn
 
 - HCl/NaOH điện ly hoàn toàn.
@@ -721,7 +788,8 @@ ASTM D1067 nhấn mạnh endpoint và tính phù hợp phụ thuộc matrix, m�
 
 ---
 
-## 18. An toàn và wording
+
+## 18. An toàn và cách diễn đạt
 
 UI hiển thị:
 
@@ -735,6 +803,7 @@ Nguồn hazard:
 - [PubChem — Sodium carbonate](https://pubchem.ncbi.nlm.nih.gov/compound/Sodium-carbonate)
 
 ---
+
 
 ## 19. Những tính năng loại khỏi scenario 1.0.0
 
@@ -752,6 +821,7 @@ Nguồn hazard:
 - Nhãn “đạt quy chuẩn”, “an toàn để xả” hoặc “liều tối ưu thực tế”.
 
 ---
+
 
 ## 20. Ma trận nguồn chính
 
@@ -784,6 +854,7 @@ Chi tiết mapping cấp claim nằm tại [Scientific Evidence Register](../sci
 
 ---
 
+
 ## 21. Tiêu chí nghiệm thu thí nghiệm
 
 - Tám golden case đạt tolerance.
@@ -800,6 +871,7 @@ Chi tiết mapping cấp claim nằm tại [Scientific Evidence Register](../sci
 - Replay cùng event chain trả cùng final state.
 
 ---
+
 
 ## 22. Tài liệu liên quan
 
