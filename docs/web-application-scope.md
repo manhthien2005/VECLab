@@ -4,11 +4,14 @@
 
 **Trạng thái:** Đã được duyệt làm phạm vi web chính thức<br>
 **Ngày chốt:** 27/08/2026<br>
-**Thời lượng dự án:** Một học kỳ, tương đương khoảng 2 tháng<br>
+**Giả định sizing ban đầu:** Một học kỳ ngắn, khoảng 2 tháng<br>
+**Kế hoạch triển khai hiện hành:** Đội 6 người, milestone MVP ngày 07/10/2026<br>
 **Vai trò người dùng:** Người học<br>
 **Ngôn ngữ sản phẩm:** Tiếng Việt
 
 > Tài liệu này xác định sản phẩm web cần xây dựng: các khu vực chức năng, luồng người dùng, cách lưu dữ liệu, hành vi đồng bộ, cách hiển thị kết quả, yêu cầu trên các thiết bị và những nội dung không thuộc phạm vi. Nội dung và mô hình khoa học của ba thí nghiệm được quyết định tại [Báo cáo chốt phạm vi lõi dự án](core-project-scope.md).
+
+> Phân công và checkpoint một tháng nằm tại [Team Delivery Plan](team/README.md); tài liệu này vẫn là nguồn quyết định hành vi web.
 
 ### Quan hệ giữa hai tài liệu scope
 

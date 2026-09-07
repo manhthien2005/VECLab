@@ -4,12 +4,15 @@
 
 **Trạng thái:** Đã chốt làm phạm vi lõi của dự án<br>
 **Ngày chốt:** 27/08/2026<br>
-**Thời lượng dự án:** Một học kỳ, tương đương khoảng 2 tháng<br>
+**Giả định sizing ban đầu:** Một học kỳ ngắn, khoảng 2 tháng<br>
+**Kế hoạch triển khai hiện hành:** Đội 6 người, milestone MVP ngày 07/10/2026<br>
 **Phạm vi quyết định:** Sản phẩm cần làm gì, làm đến đâu, cần thu thập gì và kết quả cuối cùng phải có
 
 > Đây là tài liệu nguồn quyết định cho phạm vi lõi. Khi có khác biệt với các tài liệu tổng quan hoặc thiết kế trước ngày 27/08/2026, tài liệu này được ưu tiên áp dụng.
 
 > Phạm vi màn hình, tài khoản, dữ liệu, đồng bộ, báo cáo và responsive được chốt riêng tại [Báo cáo phạm vi ứng dụng web](web-application-scope.md).
+
+> Phân công và checkpoint một tháng nằm tại [Team Delivery Plan](team/README.md); scope chức năng trong tài liệu này không đổi.
 
 ## Tổng quan nhanh
 

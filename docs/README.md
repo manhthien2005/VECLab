@@ -2,8 +2,10 @@
 
 ## Nền tảng mô phỏng quy trình hóa học có căn cứ khoa học
 
-**Cập nhật:** 28/08/2026<br>
-**Trạng thái bộ tài liệu:** Đã biên soạn cho phạm vi MVP một học kỳ
+**Cập nhật:** 07/09/2026<br>
+**Trạng thái bộ tài liệu:** Scope đã chốt; đội 6 người đang hướng tới milestone MVP ngày 07/10/2026
+
+> Vai trò cá nhân và kế hoạch phối hợp một tháng nằm tại [Team Delivery Plan](team/README.md).
 
 ## Tổng quan nhanh
 
@@ -38,8 +40,9 @@
 - [6. Định nghĩa trạng thái tài liệu](#6-định-nghĩa-trạng-thái-tài-liệu)
 - [7. Nomenclature dùng chung](#7-nomenclature-dùng-chung)
 - [8. Đường đọc theo nhu cầu](#8-đường-đọc-theo-nhu-cầu)
-- [9. Quy tắc thay đổi](#9-quy-tắc-thay-đổi)
-- [10. Disclaimer chung](#10-disclaimer-chung)
+- [9. Tổ chức đội ngũ và milestone](#9-tổ-chức-đội-ngũ-và-milestone)
+- [10. Quy tắc thay đổi](#10-quy-tắc-thay-đổi)
+- [11. Disclaimer chung](#11-disclaimer-chung)
 <!-- TOC:END -->
 
 ---
@@ -207,7 +210,21 @@ Không có nhãn nào nghĩa là bench validation bởi đội.
 ---
 
 
-## 9. Quy tắc thay đổi
+## 9. Tổ chức đội ngũ và milestone
+
+- [Kế hoạch phối hợp đội ngũ](team/README.md)
+- [Thiên — Technical Lead](team/thien-technical-lead.md)
+- [Khoa — Simulation Engine Lead](team/khoa-simulation-lead.md)
+- [Hoàng — Full-stack Application Lead](team/hoang-application-lead.md)
+- [Mạnh — Platform, Data & DevOps Lead](team/manh-platform-devops-lead.md)
+- [Ngân — Product UX Lead](team/ngan-product-ux-lead.md)
+- [Hân — Content, Documentation & QA Lead](team/han-content-qa-lead.md)
+
+Milestone sản phẩm duy nhất: **hoàn thiện MVP trước hoặc trong ngày 07/10/2026**. Các checkpoint theo tuần chỉ dùng để điều phối nội bộ.
+
+---
+
+## 10. Quy tắc thay đổi
 
 - Thay đổi scope phải cập nhật Core/Web Scope trước.
 - Thay công thức, hằng số, source, state schema hoặc scoring làm thay đổi kết quả phải tạo scenario release mới.
@@ -219,7 +236,7 @@ Không có nhãn nào nghĩa là bench validation bởi đội.
 ---
 
 
-## 10. Disclaimer chung
+## 11. Disclaimer chung
 
 > Mô hình dựa trên tài liệu; chưa được nhóm phát triển kiểm chứng bằng thí nghiệm độc lập.
 
