@@ -180,6 +180,7 @@ VECLab/
 ├── .agents/                 # Antigravity AI custom skills & instructions
 ├── .claude/                 # Claude Code workspace configuration & tools
 ├── docs/                    # Tài liệu đặc tả kỹ thuật, kiến trúc và hóa học
+│   ├── design/              # Đặc tả thiết kế giao diện (landing-spec.md)
 │   ├── experiments/         # Đặc tả chi tiết 3 kịch bản thí nghiệm (1.0.0)
 │   ├── team/                # Phân công trách nhiệm 6 thành viên & Delivery plan
 │   ├── core-project-scope.md
@@ -202,7 +203,6 @@ VECLab/
 │   └── shared/              # Tiện ích chung, định dạng dữ liệu, UI cơ bản
 ├── supabase/                # Migrations SQL, hàm RPC, cấu hình RLS & Grants
 ├── tests/                   # Bộ test tự động (Unit, Integration, SQL stubs, Fixtures)
-├── design.md                # Đặc tả hệ thống thiết kế giao diện (Design System)
 ├── eslint.config.mjs        # Cấu hình linter phẳng & kiểm soát ranh giới import
 ├── package.json
 └── tsconfig.json
