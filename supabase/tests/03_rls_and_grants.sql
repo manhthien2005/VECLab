@@ -2,7 +2,7 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 
-SELECT plan(73);
+SELECT plan(75);
 
 -- ---------------------------------------------------------------------------
 -- 1. Catalog assertions: RLS enabled on all three tables
@@ -127,6 +127,10 @@ SELECT ok(has_function_privilege('veclab_server', 'public.get_attempt(uuid,uuid,
 
 SELECT ok(has_function_privilege('service_role', 'public.list_attempts(uuid,text,public.attempt_status,integer,integer)', 'EXECUTE'), 'service_role can EXECUTE list_attempts');
 SELECT ok(has_function_privilege('veclab_server', 'public.list_attempts(uuid,text,public.attempt_status,integer,integer)', 'EXECUTE'), 'veclab_server can EXECUTE list_attempts');
+
+-- R5C-04: Positive EXECUTE grants on veclab_max_attempt_events helper
+SELECT ok(has_function_privilege('service_role', 'public.veclab_max_attempt_events()', 'EXECUTE'), 'service_role can EXECUTE veclab_max_attempt_events');
+SELECT ok(has_function_privilege('veclab_server', 'public.veclab_max_attempt_events()', 'EXECUTE'), 'veclab_server can EXECUTE veclab_max_attempt_events');
 
 -- ---------------------------------------------------------------------------
 -- 6. Runtime RLS simulation (EXISTING-SQL-07, EXISTING-SQL-08, profiles RLS)

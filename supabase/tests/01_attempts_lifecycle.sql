@@ -2,7 +2,7 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 
-SELECT plan(41);
+SELECT plan(51);
 
 -- Fixtures: deterministic test users
 INSERT INTO auth.users (id, email) VALUES
@@ -296,6 +296,13 @@ SELECT results_eq(
   'branch_attempt sets provenance, snapshots, rev 0, seq 0, and origin state_after'
 );
 
+-- R5C-01: branch_attempt inherited_timeline_snapshot matches supplied value
+SELECT is(
+  (SELECT inherited_timeline_snapshot FROM public.attempts WHERE id = 'a0000001-0000-4000-8000-000000000003'),
+  '[{"sequence":1,"actionType":"add_base"}]'::jsonb,
+  'branch_attempt persists inherited_timeline_snapshot matching supplied value'
+);
+
 -- Idempotent retry of branch_attempt
 SELECT is(
   (public.branch_attempt(
@@ -554,6 +561,40 @@ SELECT is(
   'Event added to Attempt 5'
 );
 
+-- R5C-02: Create valid branch child (Attempt 6) referencing Attempt 5
+INSERT INTO public.attempts (
+  id, user_id, scenario_key, scenario_release_id, status,
+  initial_state, current_state, current_projection, projection_version,
+  parent_attempt_id, parent_sequence, branch_origin_snapshot, inherited_timeline_snapshot
+) VALUES (
+  'a0000001-0000-4000-8000-000000000006',
+  '11111111-1111-4111-8111-000000000001',
+  'acid-neutralization',
+  'acid-neutralization@1.0.0',
+  'in_progress',
+  '{"phase":"ready"}'::jsonb,
+  '{"phase":"ready"}'::jsonb,
+  '{"phase":"ready"}'::jsonb,
+  1,
+  'a0000001-0000-4000-8000-000000000005',
+  NULL,
+  '{"originSequence":1,"parentStatus":"stopped"}'::jsonb,
+  '[{"sequence":1,"actionType":"titrate"}]'::jsonb
+);
+
+-- Capture child provenance snapshots before parent deletion
+SELECT is(
+  (SELECT branch_origin_snapshot FROM public.attempts WHERE id = 'a0000001-0000-4000-8000-000000000006'),
+  '{"originSequence":1,"parentStatus":"stopped"}'::jsonb,
+  'Child branch_origin_snapshot captured before parent deletion'
+);
+
+SELECT is(
+  (SELECT inherited_timeline_snapshot FROM public.attempts WHERE id = 'a0000001-0000-4000-8000-000000000006'),
+  '[{"sequence":1,"actionType":"titrate"}]'::jsonb,
+  'Child inherited_timeline_snapshot captured before parent deletion'
+);
+
 -- Non-owner delete rejection
 SELECT results_eq(
   $$ SELECT
@@ -591,6 +632,35 @@ SELECT is(
   (SELECT count(*)::integer FROM public.attempt_events WHERE attempt_id = 'a0000001-0000-4000-8000-000000000005'),
   0,
   'Attempt 5 events are cascaded and removed'
+);
+
+-- R5C-02 runtime child assertions:
+-- Assert child row still exists
+SELECT is(
+  (SELECT count(*)::integer FROM public.attempts WHERE id = 'a0000001-0000-4000-8000-000000000006'),
+  1,
+  'Child attempt still exists after parent deletion'
+);
+
+-- Assert child.parent_attempt_id becomes NULL (runtime ON DELETE SET NULL)
+SELECT is(
+  (SELECT parent_attempt_id FROM public.attempts WHERE id = 'a0000001-0000-4000-8000-000000000006'),
+  NULL,
+  'Child parent_attempt_id becomes NULL after parent deletion (ON DELETE SET NULL runtime verified)'
+);
+
+-- Assert child.branch_origin_snapshot remains unchanged
+SELECT is(
+  (SELECT branch_origin_snapshot FROM public.attempts WHERE id = 'a0000001-0000-4000-8000-000000000006'),
+  '{"originSequence":1,"parentStatus":"stopped"}'::jsonb,
+  'Child branch_origin_snapshot remains unchanged after parent deletion'
+);
+
+-- Assert child.inherited_timeline_snapshot remains unchanged
+SELECT is(
+  (SELECT inherited_timeline_snapshot FROM public.attempts WHERE id = 'a0000001-0000-4000-8000-000000000006'),
+  '[{"sequence":1,"actionType":"titrate"}]'::jsonb,
+  'Child inherited_timeline_snapshot remains unchanged after parent deletion'
 );
 
 -- ---------------------------------------------------------------------------
@@ -696,6 +766,49 @@ SELECT is(
   )),
   2,
   'list_attempts with limit 2 returns exactly 2 attempts'
+);
+
+-- R5C-03: Offset pagination with stable identity verification under ORDER BY updated_at DESC
+UPDATE public.attempts SET updated_at = '2026-01-01 10:00:00+00' WHERE id = 'a0000001-0000-4000-8000-000000000001';
+UPDATE public.attempts SET updated_at = '2026-01-01 11:00:00+00' WHERE id = 'a0000001-0000-4000-8000-000000000002';
+UPDATE public.attempts SET updated_at = '2026-01-01 12:00:00+00' WHERE id = 'a0000001-0000-4000-8000-000000000003';
+UPDATE public.attempts SET updated_at = '2026-01-01 09:00:00+00' WHERE id NOT IN (
+  'a0000001-0000-4000-8000-000000000001',
+  'a0000001-0000-4000-8000-000000000002',
+  'a0000001-0000-4000-8000-000000000003'
+) AND user_id = '11111111-1111-4111-8111-000000000001';
+
+-- Page 0 (limit 1, offset 0) returns Attempt 3
+SELECT is(
+  (public.list_attempts(
+    p_actor_user_id => '11111111-1111-4111-8111-000000000001',
+    p_limit         => 1,
+    p_offset        => 0
+  ) -> 'attempts' -> 0 ->> 'id'),
+  'a0000001-0000-4000-8000-000000000003',
+  'list_attempts page 0 (offset 0) returns most recently updated attempt (Attempt 3)'
+);
+
+-- Page 1 (limit 1, offset 1) shifts to Attempt 2
+SELECT is(
+  (public.list_attempts(
+    p_actor_user_id => '11111111-1111-4111-8111-000000000001',
+    p_limit         => 1,
+    p_offset        => 1
+  ) -> 'attempts' -> 0 ->> 'id'),
+  'a0000001-0000-4000-8000-000000000002',
+  'list_attempts page 1 (non-zero offset 1) shifts to next attempt (Attempt 2)'
+);
+
+-- Page 2 (limit 1, offset 2) shifts to Attempt 1
+SELECT is(
+  (public.list_attempts(
+    p_actor_user_id => '11111111-1111-4111-8111-000000000001',
+    p_limit         => 1,
+    p_offset        => 2
+  ) -> 'attempts' -> 0 ->> 'id'),
+  'a0000001-0000-4000-8000-000000000001',
+  'list_attempts page 2 (non-zero offset 2) shifts to third attempt (Attempt 1)'
 );
 
 SELECT * FROM finish();
