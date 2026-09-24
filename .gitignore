@@ -1,3 +1,89 @@
-.superpowers/
-Thumbs.db
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.npm/
+
+# Next.js & Build Outputs
+.next/
+out/
+build/
+dist/
+
+# Test & Coverage Outputs
+coverage/
+.nyc_output/
+e2e-report/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Environment Files — never commit real credentials (docs/web-application-scope.md §12)
+.env
+.env*.local
+.env.production
+!.env.example
+
+# Vercel
+.vercel/
+
+# Supabase Local Dev Artifacts
+supabase/.temp/
+supabase/.branches/
+supabase/.env*
+
+# Tooling & Compiler Caches
+*.tsbuildinfo
+next-env.d.ts
+.eslintcache
+*.cache
+
+# Python (tools, skills, and agents)
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+venv/
+.venv/
+env/
+
+# IDE & Editor Settings
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Operating System Files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs & Debugging
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Superpowers & Scratch Brainstorms
+.superpowers/
+*.tmp
+*.bak
+*.orig

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="560" viewBox="0 0 1000 560">
+<defs>
+ <linearGradient id="b1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#254B68"/><stop offset="1" stop-color="#102C42"/></linearGradient>
+ <linearGradient id="b2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#57758A"/><stop offset="1" stop-color="#2C4E64"/></linearGradient>
+ <linearGradient id="b3" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7896A8"/><stop offset="1" stop-color="#456779"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#0E2A3E" flood-opacity=".22"/></filter>
+</defs>
+<g transform="translate(80 70)" filter="url(#shadow)">
+ <g transform="translate(230 0) rotate(-5 290 70)"><rect x="0" y="0" width="580" height="120" rx="18" fill="url(#b1)"/><rect x="25" y="21" width="530" height="6" rx="3" fill="#B5D9E9" opacity=".5"/><text x="42" y="73" fill="#F1FAFF" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">Environmental Chemistry</text></g>
+ <g transform="translate(150 132) rotate(2 300 70)"><rect x="0" y="0" width="650" height="124" rx="18" fill="url(#b2)"/><rect x="28" y="21" width="590" height="6" rx="3" fill="#D6E8F0" opacity=".42"/><text x="44" y="77" fill="#F7FBFD" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700">Physical Chemistry</text></g>
+ <g transform="translate(40 272) rotate(-2 355 70)"><rect x="0" y="0" width="720" height="126" rx="18" fill="url(#b3)"/><rect x="30" y="21" width="660" height="6" rx="3" fill="#EAF6FB" opacity=".42"/><text x="46" y="79" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700">Wastewater Engineering</text></g>
+</g></svg>

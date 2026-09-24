@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="900" viewBox="0 0 1000 900">
+<defs>
+ <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#FFFFFF" stop-opacity=".95"/><stop offset="1" stop-color="#DCF6FF" stop-opacity=".35"/></linearGradient>
+ <linearGradient id="water" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#C5F4FF"/><stop offset="1" stop-color="#63C9EE"/></linearGradient>
+ <filter id="shadow" x="-25%" y="-25%" width="150%" height="160%"><feDropShadow dx="0" dy="20" stdDeviation="22" flood-color="#123C56" flood-opacity=".18"/></filter>
+</defs>
+<g filter="url(#shadow)">
+ <ellipse cx="500" cy="180" rx="250" ry="52" fill="#FAFEFF" stroke="#94B9C9" stroke-width="7"/>
+ <path d="M260 180l31 515c4 61 43 95 102 95h214c59 0 98-34 102-95l31-515" fill="url(#glass)" stroke="#94B9C9" stroke-width="8"/>
+ <path d="M284 350h432l-22 337c-3 46-29 70-78 70H384c-49 0-75-24-78-70z" fill="url(#water)" opacity=".7"/>
+ <ellipse cx="500" cy="350" rx="216" ry="35" fill="#D8F8FF" opacity=".95"/>
+ <!-- floating plastics -->
+ <g>
+  <path d="M348 318l42-22 33 28-10 51-52 8-31-28z" fill="#FFD86E" stroke="#E0A928" stroke-width="4"/>
+  <path d="M462 305l43-12 29 30-17 46-49 2-24-31z" fill="#A7E96E" stroke="#63AF3B" stroke-width="4"/>
+  <path d="M564 315l49-18 31 24-8 47-54 12-29-31z" fill="#55D5C1" stroke="#1E9F8F" stroke-width="4"/>
+ </g>
+ <!-- mid plastics -->
+ <g opacity=".92">
+  <rect x="356" y="463" width="78" height="48" rx="15" fill="#B6F0A2" stroke="#5CB257" stroke-width="4" transform="rotate(-13 395 487)"/>
+  <path d="M529 446l54 8 18 48-37 35-55-14-11-46z" fill="#F6D66B" stroke="#C49F27" stroke-width="4"/>
+ </g>
+ <!-- sunk plastics -->
+ <g>
+  <path d="M342 644l55-26 45 27-3 58-56 30-51-27z" fill="#263749" stroke="#0E1D2A" stroke-width="4"/>
+  <rect x="488" y="635" width="94" height="61" rx="18" fill="#46657B" stroke="#1E3443" stroke-width="4" transform="rotate(12 535 666)"/>
+  <path d="M615 636l52-20 39 36-12 56-60 15-37-39z" fill="#1E3A4B" stroke="#0B1D28" stroke-width="4"/>
+ </g>
+ <g fill="#F7FDFF" opacity=".72"><circle cx="353" cy="417" r="9"/><circle cx="652" cy="444" r="10"/><circle cx="436" cy="578" r="7"/><circle cx="595" cy="591" r="12"/></g>
+</g></svg>

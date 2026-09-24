@@ -1,0 +1,129 @@
+{
+  "fixtureVersion": "1.0.0",
+  "modelSpecVersion": "1.0.0",
+  "constantBundle": "acid-neutralization-1.0.0",
+  "provenance": {
+    "sourceKeys": ["IAPWS-KW-2024", "USGS-PHREEQC-1995"],
+    "claimKeys": ["AN-G01-G08"],
+    "derivation": "closed charge-balance model, bisection on pH in [-2, 16]",
+    "independentCheck": true,
+    "independentCheckMethod": "expected pH values recomputed with a standalone solver written directly from spec §7-§9 before the engine existed; all eight agreed exactly"
+  },
+  "benchmark": {
+    "acidVolumeL": 0.025,
+    "acidConcentrationMolL": 0.01,
+    "baseEquivalentConcentrationEqL": 0.01,
+    "targetPH": 6.995,
+    "targetTolerancePH": 0.2
+  },
+  "tolerances": {
+    "phAbsolute": 0.002,
+    "alphaAbsolute": 0.00002,
+    "carbonMassRelativeError": 1e-10,
+    "chargeResidualMolL": 1e-10,
+    "alphaSumAbsolute": 1e-12
+  },
+  "cases": [
+    {
+      "caseId": "AN-G01",
+      "title": "Chưa thêm base",
+      "route": "naoh",
+      "baseVolumeMl": 0.0,
+      "correctionAcidVolumeMl": 0.0,
+      "expected": {
+        "pH": 2.0
+      },
+      "notes": "Pure 0.01000 mol/L HCl. D = (nCl - nNa)/V = 0.01 mol/L, so pH = -log10(0.01) exactly."
+    },
+    {
+      "caseId": "AN-G02",
+      "title": "NaOH 22.50 mL (trước điểm tương đương)",
+      "route": "naoh",
+      "baseVolumeMl": 22.5,
+      "correctionAcidVolumeMl": 0.0,
+      "expected": {
+        "pH": 3.27875
+      },
+      "notes": "Excess acid branch: D = (2.5e-4 - 2.25e-4)/0.0475 L = 5.263158e-4 mol/L."
+    },
+    {
+      "caseId": "AN-G03",
+      "title": "NaOH 25.00 mL (đúng đương lượng)",
+      "route": "naoh",
+      "baseVolumeMl": 25.0,
+      "correctionAcidVolumeMl": 0.0,
+      "expected": {
+        "pH": 6.995
+      },
+      "notes": "D = 0, so h = sqrt(Kw) with pKw = 13.990 giving pH = 13.990/2. This is the benchmark target."
+    },
+    {
+      "caseId": "AN-G04",
+      "title": "Ca(OH)2 27.50 mL (dư base)",
+      "route": "calcium-hydroxide",
+      "baseVolumeMl": 27.5,
+      "correctionAcidVolumeMl": 0.0,
+      "expected": {
+        "pH": 10.64984
+      },
+      "notes": "Excess base with the CaOH+ complex retained in the charge balance."
+    },
+    {
+      "caseId": "AN-G05",
+      "title": "Na2CO3 25.00 mL (hai đương lượng danh nghĩa, hệ kín)",
+      "route": "sodium-carbonate",
+      "baseVolumeMl": 25.0,
+      "correctionAcidVolumeMl": 0.0,
+      "expected": {
+        "pH": 4.47992,
+        "totalInorganicCarbonMolL": 0.0025,
+        "alpha0": 0.98675256,
+        "alpha1": 0.01324743,
+        "alpha2": 0.000000018752
+      },
+      "notes": "Exactly two nominal equivalents yet far from target: the closed carbonate system holds carbon as CO2*. The pedagogical point of this case. Alpha values from spec §15.1."
+    },
+    {
+      "caseId": "AN-G06",
+      "title": "Na2CO3 42.25 mL (đạt target trong hệ kín)",
+      "route": "sodium-carbonate",
+      "baseVolumeMl": 42.25,
+      "correctionAcidVolumeMl": 0.0,
+      "expected": {
+        "pH": 6.99921,
+        "totalInorganicCarbonMolL": 0.003141264,
+        "alpha0": 0.18381434,
+        "alpha1": 0.8158039,
+        "alpha2": 0.000381762,
+        "alpha1PlusTwoAlpha2": 0.816567424
+      },
+      "notes": "alpha1 + 2*alpha2 must equal (nNa - nCl)/CT = 2.565056e-3 / 3.141264e-3 = 0.816567424. This is the independent cross-check on the carbonate speciation. Alpha values from spec §15.1."
+    },
+    {
+      "caseId": "AN-G07",
+      "title": "Ca(OH)2 25.00 mL (đúng đương lượng)",
+      "route": "calcium-hydroxide",
+      "baseVolumeMl": 25.0,
+      "correctionAcidVolumeMl": 0.0,
+      "expected": {
+        "pH": 6.98637
+      },
+      "notes": "Below the NaOH stoichiometric value of 6.995 because CaOH+ consumes hydroxide. An implementation ignoring hydrolysis would report 6.995 here."
+    },
+    {
+      "caseId": "AN-G08",
+      "title": "NaOH 27.50 mL rồi hiệu chỉnh HCl 2.50 mL",
+      "route": "naoh",
+      "baseVolumeMl": 27.5,
+      "correctionAcidVolumeMl": 2.5,
+      "expected": {
+        "pH": 6.995,
+        "relativeCostIndex": 1.2,
+        "safetyIndex": 85,
+        "penaltyCodes": ["CORRECTION_ACID_USED"],
+        "grossEquivalentsMmolEq": 0.3
+      },
+      "notes": "Correction returns D to zero, so pH equals the stoichiometric value. Cost index 0.300/0.2500 = 1.200. Safety 100 - 15 = 85: the excess-base penalty must NOT fire because base equivalents equal exactly 1.1 x E*, and the comparison is strict."
+    }
+  ]
+}
