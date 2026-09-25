@@ -65,4 +65,4 @@ jobs:
 
       - name: Stop Supabase stack (cleanup)
         if: always()
-        run: supabase stop || true
+        run: supabase stop

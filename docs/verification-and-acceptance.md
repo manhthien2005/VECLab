@@ -146,13 +146,13 @@ Hạ tầng kiểm chứng cơ sở dữ liệu VECLab hiện được chuẩn h
 1. **Canonical Deterministic Database-Contract Layer (pgTAP / Supabase CLI):**
    - Vị trí: `supabase/tests/` (5 test files: `00000_smoke.sql`, `01_attempts_lifecycle.sql`, `02_events_and_revisions.sql`, `03_rls_and_grants.sql`, `04_immutability.sql`).
    - Bằng chứng tại bản kiểm toán hiện tại: **170 assertions PASS**, bảo đảm tính toàn vẹn của schema, quan hệ khóa ngoại, trigger hàm, RLS chính sách phân quyền cho anonymous/authenticated, và tính bất biến của completed attempts.
-   - Lệnh thực thi tiêu chuẩn: `npm run test:db` (hoặc `npm run test` tùy context phân giải, ủy quyền trực tiếp cho `supabase test db --local`).
+   - Lệnh thực thi tiêu chuẩn: `npm run test:db` (ủy quyền trực tiếp cho `supabase test db --local`).
 
 2. **Canonical Multi-Session PostgreSQL Race Layer (`tests/concurrency`):**
    - Vị trí: `tests/concurrency/runner.mjs` cùng các kịch bản trong `tests/concurrency/scenarios/`.
    - Bằng chứng tại bản kiểm toán hiện tại: **3 kịch bản concurrency PASS** (`CONC-01` tạo attempt đồng thời, `CONC-02` đua revision update, `CONC-03` đua rẽ nhánh child branch).
    - Đặc tính kỹ thuật: Runner hoàn toàn zero-dependency (chỉ sử dụng Node.js built-ins và Docker client), xác thực backend PIDs phân biệt trên PostgreSQL, chứng minh thời gian overlap thực tế (`overlap_proven = true`), bắt giữ wait event dạng Lock (`waiting_lock_observed = true`), và tự động dọn dẹp sạch sẽ tài nguyên sau chạy (`cleanup_passed = true`).
-   - Lệnh thực thi tiêu chuẩn: `npm run test:db:concurrency` (hoặc `npm run test:db` tùy context phân giải, ủy quyền cho `node tests/concurrency/runner.mjs`).
+   - Lệnh thực thi tiêu chuẩn: `npm run test:db:concurrency` (ủy quyền cho `node tests/concurrency/runner.mjs`).
 
 3. **Legacy Fallback / Parity Evidence (`tests/sql`):**
    - Thư mục `tests/sql` là bộ test SQL truyền thống đóng vai trò bằng chứng đối chiếu và fallback.
@@ -169,12 +169,12 @@ Hạ tầng kiểm chứng cơ sở dữ liệu VECLab hiện được chuẩn h
   npm run test:db:concurrency
   ```
 - **Hạ tầng GitHub Actions CI (`.github/workflows/ci.yml`):**
-  - Được thiết kế bảo mật tuyệt đối, **không yêu cầu bất kỳ secret nào của Supabase** (`SUPABASE_ACCESS_TOKEN`, project ref, service-role key, hay db password).
+  - Được thiết kế chạy hoàn toàn trên môi trường Supabase local và **không yêu cầu bất kỳ secret nào của dự án Supabase** (`SUPABASE_ACCESS_TOKEN`, project ref, service-role key, hay db password).
   - Tách bạch 2 job độc lập chạy song song không phụ thuộc (`needs` tự do):
     - `app-quality`: Kiểm tra chất lượng mã nguồn độc lập với Docker (`npm ci`, `npm run verify`).
     - `database-contract`: Khởi tạo local Supabase qua `supabase/setup-cli`, chạy clean reset và thực thi toàn bộ hợp đồng cơ sở dữ liệu (`npm run test:db`, `npm run test:db:concurrency`).
   - **Trạng thái kiểm chứng (Verification Status):**
-    - `VERIFIED_LOCALLY`: Đã kiểm chứng đạt 100% tại môi trường local (170 pgTAP assertions, 3 concurrency scenarios, `npm run verify` PASS).
+    - `VERIFIED_LOCALLY`: Bộ kiểm chứng cục bộ đã vượt qua đầy đủ: `npm run verify` PASS, 170 pgTAP assertions PASS và 3 concurrency scenarios PASS.
     - `CI_RUNTIME_PENDING`: Trạng thái thực thi runtime trên GitHub Actions được ghi nhận là đang chờ (pending) cho tới khi có một Pull Request thực tế chạy thành công trên GitHub runner; không tuyên bố CI xanh trước khi có run thật.
 
 ---
