@@ -10,6 +10,14 @@ const ACTION_STOP = 'c0000003-a002-4000-8000-000000000002';
 const BRANCH_ORIGIN_SNAPSHOT = '{"originSequence":1,"parentStatus":"stopped"}';
 const INHERITED_TIMELINE_SNAPSHOT = '[{"sequence":1,"actionType":"add_base"}]';
 
+/**
+ * Pure helper for computing scenario final pass/fail status.
+ * Requires both core race/invariant success AND cleanup success.
+ */
+export function computeScenarioStatus({ coreSuccess, cleanupPassed, hasError }) {
+  return (coreSuccess && cleanupPassed && !hasError) ? 'PASS' : 'FAIL';
+}
+
 export async function runScenario(containerName, supervisor) {
   const result = {
     id: SCENARIO_ID,
@@ -27,12 +35,15 @@ export async function runScenario(containerName, supervisor) {
     cleanup_passed: false
   };
 
+  let coreSuccess = false;
+  let scenarioError = null;
+
   const sessionA = new PsqlSession(containerName, `${SCENARIO_ID}_SessionA`);
   const sessionB = new PsqlSession(containerName, `${SCENARIO_ID}_SessionB`);
 
   const cleanup = () => {
     supervisor.execSql(`
-      DELETE FROM public.attempt_events WHERE attempt_id IN ('${CHILD_ID}', '${PARENT_ID}');
+      DELETE FROM public.attempt_events WHERE attempt_id IN ('${CHILD_ID}', '${PARENT_ID}') OR action_id IN ('${ACTION_ORIGIN}', '${ACTION_STOP}');
       DELETE FROM public.attempts WHERE id IN ('${CHILD_ID}', '${PARENT_ID}');
       DELETE FROM auth.users WHERE id = '${USER_ID}';
     `);
@@ -267,19 +278,20 @@ export async function runScenario(containerName, supervisor) {
     const invParentUnchanged = { name: 'parent_state_unchanged', pass: parentAfter === parentBefore };
 
     result.invariants.push(invSingleChild, invChildStatus, invChildRevSeq, invChildParent, invSnapshots, invParentUnchanged);
-    const allInvariantsPass = result.invariants.every(inv => inv.pass);
+    const allInvariantsPass = result.invariants.length > 0 && result.invariants.every(inv => inv.pass);
 
-    if (
-      result.distinct_backend_pids &&
-      result.overlap_proven &&
-      result.session_a_outcome === 'committed' &&
-      result.session_b_outcome === 'SQLSTATE_23505' &&
-      allInvariantsPass
-    ) {
-      result.status = 'PASS';
-    }
+    coreSuccess = result.distinct_backend_pids &&
+                  result.overlap_proven &&
+                  result.session_a_outcome === 'committed' &&
+                  result.session_b_outcome === 'SQLSTATE_23505' &&
+                  allInvariantsPass;
 
     return result;
+  } catch (err) {
+    scenarioError = err;
+    result.error = err.message || String(err);
+    err.scenarioResult = result;
+    throw err;
   } finally {
     await sessionA.close().catch(() => sessionA.terminate());
     await sessionB.close().catch(() => sessionB.terminate());
@@ -288,10 +300,19 @@ export async function runScenario(containerName, supervisor) {
 
     try {
       cleanup();
-      const countRemaining = parseInt(supervisor.execSql(`SELECT count(*) FROM public.attempts WHERE id IN ('${CHILD_ID}', '${PARENT_ID}');`), 10);
-      result.cleanup_passed = countRemaining === 0;
+      const remainingAttempts = parseInt(supervisor.execSql(`SELECT count(*) FROM public.attempts WHERE id IN ('${CHILD_ID}', '${PARENT_ID}');`), 10);
+      const remainingEvents = parseInt(supervisor.execSql(`SELECT count(*) FROM public.attempt_events WHERE attempt_id IN ('${CHILD_ID}', '${PARENT_ID}') OR action_id IN ('${ACTION_ORIGIN}', '${ACTION_STOP}');`), 10);
+      const remainingUsers = parseInt(supervisor.execSql(`SELECT count(*) FROM auth.users WHERE id = '${USER_ID}';`), 10);
+
+      result.cleanup_passed = (remainingAttempts === 0 && remainingEvents === 0 && remainingUsers === 0);
     } catch {
       result.cleanup_passed = false;
     }
+
+    result.status = computeScenarioStatus({
+      coreSuccess,
+      cleanupPassed: result.cleanup_passed,
+      hasError: Boolean(scenarioError)
+    });
   }
 }

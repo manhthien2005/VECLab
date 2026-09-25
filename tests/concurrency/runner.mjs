@@ -6,21 +6,36 @@ import { runScenario as runConc01 } from './scenarios/conc01-create-attempt.mjs'
 import { runScenario as runConc02 } from './scenarios/conc02-revision-race.mjs';
 import { runScenario as runConc03 } from './scenarios/conc03-branch-race.mjs';
 
-function normalizePath(p) {
-  return p.replace(/\\/g, '/').toLowerCase();
+/**
+ * Normalizes a filesystem path strictly for comparison purposes.
+ * Normalizes slash direction, and applies case-folding only on case-insensitive filesystems (win32).
+ * Raw filesystem access paths must never be passed through case folding.
+ */
+export function normalizeForComparison(p, platform = process.platform) {
+  if (typeof p !== 'string') return '';
+  let normalized = p.replace(/\\/g, '/');
+  if (platform === 'win32') {
+    normalized = normalized.toLowerCase();
+  }
+  return normalized;
 }
 
-function getRepoRoot() {
-  const out = execFileSync('git', ['rev-parse', '--show-toplevel'], {
+/**
+ * Returns the raw, un-lowercased repository root path as reported by git.
+ */
+export function getRawRepoRoot() {
+  return execFileSync('git', ['rev-parse', '--show-toplevel'], {
     shell: false,
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'pipe']
   }).trim();
-  return normalizePath(out);
 }
 
-function getProjectId(repoRoot) {
-  const configPath = resolve(repoRoot, 'supabase/config.toml');
+/**
+ * Reads project_id from supabase/config.toml using the raw repository root.
+ */
+export function getProjectId(rawRepoRoot) {
+  const configPath = resolve(rawRepoRoot, 'supabase/config.toml');
   const config = readFileSync(configPath, 'utf8');
   const m = config.match(/project_id\s*=\s*"([^"]+)"/);
   if (!m) {
@@ -29,9 +44,13 @@ function getProjectId(repoRoot) {
   return m[1];
 }
 
+/**
+ * Discovers the verified local database container using Supabase labels and service/image evidence.
+ */
 export function discoverDatabaseContainer() {
-  const repoRoot = getRepoRoot();
-  const projectId = getProjectId(repoRoot);
+  const rawRepoRoot = getRawRepoRoot();
+  const normalizedRepoRoot = normalizeForComparison(rawRepoRoot);
+  const projectId = getProjectId(rawRepoRoot);
 
   const psOut = execFileSync('docker', [
     'ps',
@@ -66,17 +85,19 @@ export function discoverDatabaseContainer() {
       continue;
     }
 
-    // Verify com.supabase.cli.workdir when present
+    // Verify com.supabase.cli.workdir against repository root using comparison-normalized paths
     if (labels['com.supabase.cli.workdir']) {
-      const containerWorkdir = normalizePath(labels['com.supabase.cli.workdir']);
-      if (containerWorkdir !== repoRoot) {
+      const containerWorkdir = normalizeForComparison(labels['com.supabase.cli.workdir']);
+      if (containerWorkdir !== normalizedRepoRoot) {
         continue;
       }
     }
 
-    // Require service identification
+    // Service identification without hardcoded container names:
+    // If docker compose service label is present, require service === 'db'.
+    // If not present (e.g. Supabase CLI direct docker API containers), require verified database image evidence.
     const service = labels['com.docker.compose.service'];
-    const isDb = service ? (service === 'db') : (/\/postgres:[^/]+$/.test(image) || name === '/supabase_db_veclab');
+    const isDb = service ? (service === 'db') : (/\/postgres[:@]/i.test(image) || /^postgres[:@]/i.test(image));
 
     if (isDb) {
       matched.push({
@@ -173,7 +194,20 @@ export class Supervisor {
   }
 }
 
+/**
+ * Pure helper for computing overall runner pass/fail result.
+ * Enforces defense in depth: requires every scenario to report status === 'PASS' AND cleanup_passed === true.
+ */
+export function computeOverallResult({ scenarios, selectedCount, isInterrupted }) {
+  if (isInterrupted) return 'FAIL';
+  if (!scenarios || scenarios.length !== selectedCount || selectedCount === 0) return 'FAIL';
+  const allPass = scenarios.every(s => s && s.status === 'PASS' && s.cleanup_passed === true);
+  return allPass ? 'PASS' : 'FAIL';
+}
+
 async function main() {
+  let isInterrupted = false;
+
   const args = process.argv.slice(2);
   let scenarioArg = 'all';
 
@@ -189,12 +223,18 @@ async function main() {
   const container = discoverDatabaseContainer();
   const supervisor = new Supervisor(container.name);
 
-  // Register process termination hooks
-  const emergencyCleanup = () => {
-    supervisor.emergencyTerminate();
+  // Synchronous signal interruption handler
+  const handleSignal = (sig) => {
+    isInterrupted = true;
+    process.exitCode = (sig === 'SIGINT' ? 130 : 143);
+    try {
+      supervisor.emergencyTerminate();
+    } catch {
+      // ignore cleanup errors on signal
+    }
   };
-  process.on('SIGINT', emergencyCleanup);
-  process.on('SIGTERM', emergencyCleanup);
+  process.on('SIGINT', () => handleSignal('SIGINT'));
+  process.on('SIGTERM', () => handleSignal('SIGTERM'));
 
   const scenarioMap = {
     conc01: { id: 'CONC-01', runner: runConc01 },
@@ -207,11 +247,14 @@ async function main() {
     : (scenarioMap[scenarioArg] ? [scenarioArg] : null);
 
   if (!selectedKeys) {
-    console.error(JSON.stringify({
+    if (!process.exitCode || process.exitCode === 0) {
+      process.exitCode = 1;
+    }
+    process.stderr.write(JSON.stringify({
       result: 'FAIL',
       error: `Unknown scenario: ${scenarioArg}. Choose from: conc01, conc02, conc03, all`
-    }, null, 2));
-    process.exit(1);
+    }, null, 2) + '\n');
+    return;
   }
 
   const summary = {
@@ -223,30 +266,60 @@ async function main() {
 
   try {
     for (const key of selectedKeys) {
+      if (isInterrupted) {
+        break;
+      }
       const scenario = scenarioMap[key];
-      const scenarioResult = await scenario.runner(container.name, supervisor);
-      summary.scenarios.push(scenarioResult);
+      try {
+        const scenarioResult = await scenario.runner(container.name, supervisor);
+        summary.scenarios.push(scenarioResult);
+      } catch (err) {
+        if (err.scenarioResult && !summary.scenarios.includes(err.scenarioResult)) {
+          summary.scenarios.push(err.scenarioResult);
+        }
+        throw err;
+      }
     }
 
-    const allPassed = summary.scenarios.length > 0 && summary.scenarios.every(s => s.status === 'PASS');
-    summary.result = allPassed ? 'PASS' : 'FAIL';
+    summary.result = computeOverallResult({
+      scenarios: summary.scenarios,
+      selectedCount: selectedKeys.length,
+      isInterrupted
+    });
+
+    if (summary.result === 'PASS') {
+      if (!process.exitCode) {
+        process.exitCode = 0;
+      }
+    } else {
+      if (!process.exitCode || process.exitCode === 0) {
+        process.exitCode = 1;
+      }
+    }
 
     process.stdout.write(JSON.stringify(summary, null, 2) + '\n');
-    process.exit(allPassed ? 0 : 1);
   } catch (err) {
     summary.result = 'FAIL';
     summary.error = err.message || String(err);
+    if (!process.exitCode || process.exitCode === 0) {
+      process.exitCode = 1;
+    }
     process.stdout.write(JSON.stringify(summary, null, 2) + '\n');
-    process.exit(1);
   } finally {
-    supervisor.emergencyTerminate();
+    try {
+      supervisor.emergencyTerminate();
+    } catch {
+      // ignore termination errors on exit
+    }
   }
 }
 
 // Only execute when run directly as main script
 if (process.argv[1] && process.argv[1].endsWith('runner.mjs')) {
   main().catch((err) => {
-    console.error(JSON.stringify({ result: 'FAIL', error: err.message || String(err) }));
-    process.exit(1);
+    if (!process.exitCode || process.exitCode === 0) {
+      process.exitCode = 1;
+    }
+    process.stderr.write(JSON.stringify({ result: 'FAIL', error: err.message || String(err) }) + '\n');
   });
 }

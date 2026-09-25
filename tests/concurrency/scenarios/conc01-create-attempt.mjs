@@ -4,6 +4,14 @@ const SCENARIO_ID = 'CONC-01';
 const USER_ID = '11111111-1111-4111-8111-00000000c001';
 const ATTEMPT_ID = 'c0000001-0000-4000-8000-000000000001';
 
+/**
+ * Pure helper for computing scenario final pass/fail status.
+ * Requires both core race/invariant success AND cleanup success.
+ */
+export function computeScenarioStatus({ coreSuccess, cleanupPassed, hasError }) {
+  return (coreSuccess && cleanupPassed && !hasError) ? 'PASS' : 'FAIL';
+}
+
 export async function runScenario(containerName, supervisor) {
   const result = {
     id: SCENARIO_ID,
@@ -31,6 +39,9 @@ export async function runScenario(containerName, supervisor) {
       DELETE FROM auth.users WHERE id = '${USER_ID}';
     `);
   };
+
+  let coreSuccess = false;
+  let scenarioError = null;
 
   try {
     // Clean any stale fixture before setup
@@ -145,19 +156,20 @@ export async function runScenario(containerName, supervisor) {
     const invZeroEvents = { name: 'zero_events_exist', pass: eventCount === 0 };
 
     result.invariants.push(invSingleAttempt, invStatus, invRevSeq, invZeroEvents);
-    const allInvariantsPass = result.invariants.every(inv => inv.pass);
+    const allInvariantsPass = result.invariants.length > 0 && result.invariants.every(inv => inv.pass);
 
-    if (
-      result.distinct_backend_pids &&
-      result.overlap_proven &&
-      result.session_a_outcome === 'committed' &&
-      result.session_b_outcome === 'SQLSTATE_23505' &&
-      allInvariantsPass
-    ) {
-      result.status = 'PASS';
-    }
+    coreSuccess = result.distinct_backend_pids &&
+                  result.overlap_proven &&
+                  result.session_a_outcome === 'committed' &&
+                  result.session_b_outcome === 'SQLSTATE_23505' &&
+                  allInvariantsPass;
 
     return result;
+  } catch (err) {
+    scenarioError = err;
+    result.error = err.message || String(err);
+    err.scenarioResult = result;
+    throw err;
   } finally {
     await sessionA.close().catch(() => sessionA.terminate());
     await sessionB.close().catch(() => sessionB.terminate());
@@ -166,10 +178,19 @@ export async function runScenario(containerName, supervisor) {
 
     try {
       cleanup();
-      const countRemaining = parseInt(supervisor.execSql(`SELECT count(*) FROM public.attempts WHERE id = '${ATTEMPT_ID}';`), 10);
-      result.cleanup_passed = countRemaining === 0;
+      const remainingAttempts = parseInt(supervisor.execSql(`SELECT count(*) FROM public.attempts WHERE id = '${ATTEMPT_ID}';`), 10);
+      const remainingEvents = parseInt(supervisor.execSql(`SELECT count(*) FROM public.attempt_events WHERE attempt_id = '${ATTEMPT_ID}';`), 10);
+      const remainingUsers = parseInt(supervisor.execSql(`SELECT count(*) FROM auth.users WHERE id = '${USER_ID}';`), 10);
+
+      result.cleanup_passed = (remainingAttempts === 0 && remainingEvents === 0 && remainingUsers === 0);
     } catch {
       result.cleanup_passed = false;
     }
+
+    result.status = computeScenarioStatus({
+      coreSuccess,
+      cleanupPassed: result.cleanup_passed,
+      hasError: Boolean(scenarioError)
+    });
   }
 }
