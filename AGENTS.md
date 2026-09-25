@@ -11,7 +11,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## VECLab Git & Environment Workflow
 
 - **Branch Topology**: `main` is the production branch; `develop` is the staging and integration branch.
-- **Feature Lifecycle**: Start normal work from the latest `develop` on a short-lived `feat/`, `fix/`, or `chore/*` branch, and return to `develop` via pull request.
+- **Feature Lifecycle**: Start normal work from the latest `develop` on a short-lived `feature/*`, `fix/*`, or `chore/*` branch, and return to `develop` via pull request.
 - **Release Flow**: Production releases MUST use a reviewed pull request from `develop` to `main`.
 - **Direct Pushes**: NEVER push feature work or direct commits to `main` or `develop`.
 - **Hotfix Flow**: Urgent production hotfixes start from `main`, merge to `main` via pull request, and MUST immediately be synchronized back into `develop`.
