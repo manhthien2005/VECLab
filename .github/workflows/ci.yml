@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  app-quality:
+    name: App Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22.12.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run verification
+        run: npm run verify
+
+  database-contract:
+    name: Database Contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22.12.0'
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@45a513f8c64c0bc8e0e3dfe572b5c95be85f6359 # v3.0.1
+        with:
+          version: '2.117.0'
+
+      - name: Start Supabase stack
+        run: supabase start
+
+      - name: Reset local database
+        run: supabase db reset --local --no-seed
+
+      - name: Run pgTAP tests
+        run: npm run test:db
+
+      - name: Run concurrency tests
+        run: npm run test:db:concurrency
+
+      - name: Stop Supabase stack (cleanup)
+        if: always()
+        run: supabase stop || true
