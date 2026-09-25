@@ -2,12 +2,12 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 /**
- * Session refresh and cache-guard middleware.
+ * Session refresh and cache-guard Proxy.
  *
  * This is the canonical place the session cookie gets refreshed, for two reasons
  * documented by `@supabase/ssr`: a Server Component cannot mutate cookies, and
  * the library delivers its auth cache headers only on the first cookie write from
- * a given client. Middleware runs on every request, can write cookies, and owns
+ * a given client. Proxy runs on every request, can write cookies, and owns
  * the outgoing response, so it can apply those headers reliably.
  *
  * The headers matter: a response that sets auth cookies must never be cached by a
@@ -32,11 +32,11 @@ function requiresSession(pathname: string): boolean {
   )
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
 
   // Without configured credentials the app cannot authenticate at all. Rather
-  // than throwing inside middleware — which surfaces as an opaque 500 on every
+  // than throwing inside Proxy — which surfaces as an opaque 500 on every
   // request — fall through to the app shell, which reports the misconfiguration
   // where a developer will actually see it.
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
@@ -71,7 +71,7 @@ export async function middleware(request: NextRequest) {
   })
 
   // Reading the user forces a token refresh when the access token has expired,
-  // which is the whole reason this middleware exists. `data.user` is null for a
+  // which is the whole reason this Proxy exists. `data.user` is null for a
   // guest, which is a normal state rather than an error.
   const {
     data: { user },
@@ -91,7 +91,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   // Static assets and Next internals never need a session check; excluding them
-  // keeps middleware off the hot path for every image, font and chunk.
+  // keeps Proxy off the hot path for every image, font and chunk.
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)',
   ],
