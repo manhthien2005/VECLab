@@ -129,7 +129,8 @@ Không release nếu Gate A–E còn failure mức blocking.
 | Domain unit | Vitest | formula, solver, scoring, state transition |
 | Schema/unit | Vitest + TypeScript | parse, canonical unit, version schema |
 | Property/invariant | Vitest | conservation, range, determinism |
-| Database | pgTAP/Supabase CLI | schema, constraints, RLS, RPC |
+| Database contract | pgTAP / Supabase CLI | schema, constraints, RLS, RPC, state machine (5 files, 170 assertions) |
+| Database concurrency | Node.js concurrency runner | true multi-session PostgreSQL race conditions (3 scenarios) |
 | Application integration | Vitest/integration DB | service, idempotency, conflict, import |
 | End-to-end | Playwright | guest/auth/resume/report/compare |
 | Responsive | Playwright projects | desktop/tablet/mobile |
@@ -137,6 +138,44 @@ Không release nếu Gate A–E còn failure mức blocking.
 | Print | Playwright screenshot/PDF comparison | report print CSS |
 
 Vitest transform TypeScript nhưng type-check chạy riêng: [Vitest Writing Tests](https://vitest.dev/guide/learn/writing-tests). Playwright tests dùng isolated context và user-visible behavior: [Playwright Writing Tests](https://playwright.dev/docs/writing-tests), [Best Practices](https://playwright.dev/docs/best-practices). Supabase cung cấp pgTAP/RLS test flow: [Testing Overview](https://supabase.com/docs/guides/local-development/testing/overview).
+
+### 3.1. Phân tầng kiểm chứng Database Contracts và Concurrency
+
+Hạ tầng kiểm chứng cơ sở dữ liệu VECLab hiện được chuẩn hóa thành hai tầng canonical thực thi độc lập:
+
+1. **Canonical Deterministic Database-Contract Layer (pgTAP / Supabase CLI):**
+   - Vị trí: `supabase/tests/` (5 test files: `00000_smoke.sql`, `01_attempts_lifecycle.sql`, `02_events_and_revisions.sql`, `03_rls_and_grants.sql`, `04_immutability.sql`).
+   - Bằng chứng tại bản kiểm toán hiện tại: **170 assertions PASS**, bảo đảm tính toàn vẹn của schema, quan hệ khóa ngoại, trigger hàm, RLS chính sách phân quyền cho anonymous/authenticated, và tính bất biến của completed attempts.
+   - Lệnh thực thi tiêu chuẩn: `npm run test:db` (ủy quyền trực tiếp cho `supabase test db --local`).
+
+2. **Canonical Multi-Session PostgreSQL Race Layer (`tests/concurrency`):**
+   - Vị trí: `tests/concurrency/runner.mjs` cùng các kịch bản trong `tests/concurrency/scenarios/`.
+   - Bằng chứng tại bản kiểm toán hiện tại: **3 kịch bản concurrency PASS** (`CONC-01` tạo attempt đồng thời, `CONC-02` đua revision update, `CONC-03` đua rẽ nhánh child branch).
+   - Đặc tính kỹ thuật: Runner hoàn toàn zero-dependency (chỉ sử dụng Node.js built-ins và Docker client), xác thực backend PIDs phân biệt trên PostgreSQL, chứng minh thời gian overlap thực tế (`overlap_proven = true`), bắt giữ wait event dạng Lock (`waiting_lock_observed = true`), và tự động dọn dẹp sạch sẽ tài nguyên sau chạy (`cleanup_passed = true`).
+   - Lệnh thực thi tiêu chuẩn: `npm run test:db:concurrency` (ủy quyền cho `node tests/concurrency/runner.mjs`).
+
+3. **Legacy Fallback / Parity Evidence (`tests/sql`):**
+   - Thư mục `tests/sql` là bộ test SQL truyền thống đóng vai trò bằng chứng đối chiếu và fallback.
+   - Quy tắc bảo toàn: Bộ test này được **giữ nguyên vẹn (preserved)**, không được chỉnh sửa hoặc xóa bỏ. Việc chính thức loại bỏ (retirement) chưa được thực hiện và bị chặn cho tới khi CI parity được chứng minh hoàn toàn trên hạ tầng GitHub Actions kèm phê duyệt rõ ràng từ con người.
+
+### 3.2. Quy trình làm sạch trạng thái và tiêu chuẩn CI
+
+- **Lệnh nghiệm thu ứng dụng `npm run verify`:** Vẫn giữ nguyên vẹn và **hoàn toàn độc lập với Docker** (Docker-independent), bao gồm typecheck (`tsc --noEmit`), lint (`eslint .`), unit tests (`vitest run`), và Next.js build. Lệnh này không bao giờ đòi hỏi Docker hay Supabase container phải khởi chạy.
+- **Trình tự làm sạch trạng thái cơ sở dữ liệu (Clean-state sequence):**
+  ```bash
+  supabase start
+  supabase db reset --local --no-seed
+  npm run test:db
+  npm run test:db:concurrency
+  ```
+- **Hạ tầng GitHub Actions CI (`.github/workflows/ci.yml`):**
+  - Được thiết kế chạy hoàn toàn trên môi trường Supabase local và **không yêu cầu bất kỳ secret nào của dự án Supabase** (`SUPABASE_ACCESS_TOKEN`, project ref, service-role key, hay db password).
+  - Tách bạch 2 job độc lập chạy song song không phụ thuộc (`needs` tự do):
+    - `app-quality`: Kiểm tra chất lượng mã nguồn độc lập với Docker (`npm ci`, `npm run verify`).
+    - `database-contract`: Khởi tạo local Supabase qua `supabase/setup-cli`, chạy clean reset và thực thi toàn bộ hợp đồng cơ sở dữ liệu (`npm run test:db`, `npm run test:db:concurrency`).
+  - **Trạng thái kiểm chứng (Verification Status):**
+    - `VERIFIED_LOCALLY`: Bộ kiểm chứng cục bộ đã vượt qua đầy đủ: `npm run verify` PASS, 170 pgTAP assertions PASS và 3 concurrency scenarios PASS.
+    - `CI_RUNTIME_PENDING`: Trạng thái thực thi runtime trên GitHub Actions được ghi nhận là đang chờ (pending) cho tới khi có một Pull Request thực tế chạy thành công trên GitHub runner; không tuyên bố CI xanh trước khi có run thật.
 
 ---
 
@@ -417,6 +456,7 @@ PS-G01…PS-G08 đã được kiểm tra bằng một deterministic partition/go
 - Device A commit revision5→6.
 - Device B sends expected5 → conflict, no event.
 - Device B refreshes6 and retries new action ID → success7.
+- Được kiểm chứng thực nghiệm đa phiên thông qua tầng `tests/concurrency` (`CONC-01` unique constraint race, `CONC-02` optimistic revision conflict, `CONC-03` branch creation race) với overlap thực tế và lock observation.
 
 ### 10.4. Completed immutability
 

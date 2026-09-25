@@ -87,3 +87,6 @@ lerna-debug.log*
 *.tmp
 *.bak
 *.orig
+
+# Impeccable engine binary (downloaded per-platform, never tracked per upstream)
+**/skills/impeccable/scripts/bin/

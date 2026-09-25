@@ -30,6 +30,7 @@ const IGNORES = [
   'coverage/**',
   'supabase/.temp/**',
   'next-env.d.ts',
+  '.agent/**',
   '.agents/**',
   '.claude/**',
   'reference/**',
