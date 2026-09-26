@@ -154,8 +154,8 @@ cp .env.example .env.local
 Cấu hình các tham số Supabase của bạn (nếu chạy local hoặc kết nối Supabase Cloud):
 ```ini
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+SUPABASE_SECRET_KEY=your-secret-key
 ```
 *(Lưu ý: Chế độ Guest Mode vẫn hoạt động bình thường ngay cả khi chưa kết nối Supabase).*
 
