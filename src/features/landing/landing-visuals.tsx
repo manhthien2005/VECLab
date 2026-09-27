@@ -57,7 +57,7 @@ function buildChart(size: ChartSize) {
   return { plotWidth, plotHeight, xFor, yFor }
 }
 
-/** The hero device frame's chart: axes, target band and tick labels. */
+/** The hero device frame's chart: axes, grid, target callout and tick labels. */
 export function HeroPhChart() {
   const size = HERO_SIZE
   const { plotWidth, plotHeight, xFor, yFor } = buildChart(size)
@@ -66,6 +66,8 @@ export function HeroPhChart() {
   const points = CURVE_POINTS.map(([v, ph]) => `${xFor(v)},${yFor(ph)}`).join(' ')
   const goldenX = xFor(25)
   const goldenY = yFor(BENCHMARK.targetPH)
+  const midX = xFor(18)
+  const midY = yFor(5.2)
 
   return (
     <svg
@@ -74,6 +76,14 @@ export function HeroPhChart() {
       role="img"
       aria-label={`Đường cong pH minh họa: pH* đạt ${formatPh(BENCHMARK.targetPH)} khi thêm 25 mL NaOH`}
     >
+      <defs>
+        <linearGradient id="hero-curve-gradient" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="var(--accent)" />
+          <stop offset="100%" stopColor="var(--blue)" />
+        </linearGradient>
+      </defs>
+
+      {/* Target tolerance band */}
       <rect
         className="ph-series-band"
         x={size.padding.left}
@@ -81,6 +91,22 @@ export function HeroPhChart() {
         width={plotWidth}
         height={Math.abs(yFor(low) - yFor(high))}
       />
+
+      {/* Horizontal grid lines */}
+      {[4, 7, 10, 14].map((tick) => (
+        <line
+          key={tick}
+          x1={size.padding.left}
+          x2={size.padding.left + plotWidth}
+          y1={yFor(tick)}
+          y2={yFor(tick)}
+          stroke="var(--border)"
+          strokeDasharray="3 3"
+          strokeOpacity="0.75"
+        />
+      ))}
+
+      {/* Axes */}
       <line
         className="ph-series-axis"
         x1={size.padding.left}
@@ -95,18 +121,41 @@ export function HeroPhChart() {
         y1={size.padding.top}
         y2={size.padding.top + plotHeight}
       />
-      <polyline className="ph-series-line hero-chart-line" points={points} />
-      <circle className="ph-series-dot hero-chart-dot" cx={goldenX} cy={goldenY} r={4} />
-      {[0, 7, 14].map((tick) => (
+
+      {/* Curve and points */}
+      <polyline className="ph-series-line hero-chart-line" points={points} stroke="url(#hero-curve-gradient)" />
+
+      {/* Mid-process snapshot point (pH 5.2) */}
+      <circle cx={midX} cy={midY} r={6} fill="var(--blue)" opacity="0.25" />
+      <circle cx={midX} cy={midY} r={3.5} fill="var(--blue)" />
+
+      {/* Equivalence target point (pH 7.0) */}
+      <circle className="ph-series-dot hero-chart-dot" cx={goldenX} cy={goldenY} r={4.5} />
+
+      {/* Target callout badge at golden point */}
+      <g className="hero-chart-callout" transform={`translate(${goldenX - 32}, ${goldenY - 32})`}>
+        <rect x="0" y="0" width="64" height="22" rx="4" fill="var(--surface)" stroke="var(--border-strong)" strokeWidth="1" />
+        <text x="32" y="15" textAnchor="middle" fill="var(--ink)" fontSize="11" fontWeight="700" fontFamily="var(--font-numeric)">
+          pH = {formatPh(BENCHMARK.targetPH)}
+        </text>
+      </g>
+
+      {/* Y-axis Ticks */}
+      {[0, 4, 7, 10, 14].map((tick) => (
         <text className="ph-series-tick" key={tick} textAnchor="end" x={size.padding.left - 8} y={yFor(tick) + 4}>
           {tick}
         </text>
       ))}
-      {[0, 15, 30].map((tick) => (
-        <text className="ph-series-tick" key={tick} textAnchor="middle" x={xFor(tick)} y={size.height - 8}>
+
+      {/* X-axis Ticks */}
+      {[0, 10, 20, 30].map((tick) => (
+        <text className="ph-series-tick" key={tick} textAnchor="middle" x={xFor(tick)} y={size.height - 12}>
           {tick}
         </text>
       ))}
+      <text className="ph-series-tick" textAnchor="middle" x={size.padding.left + plotWidth / 2} y={size.height - 2} fontSize="10" fill="var(--ink-faint)">
+        Thời gian (phút)
+      </text>
     </svg>
   )
 }

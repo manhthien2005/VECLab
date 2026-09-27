@@ -1,8 +1,7 @@
 import Link from 'next/link'
-import { ACID_INPUT_DOMAIN, APP_STRINGS } from '@/content/index.js'
+import { APP_STRINGS } from '@/content/index.js'
 import { listCatalog } from '@/features/experiment-catalog/catalog.js'
 import { ScientificDisclosure } from '@/shared/ui/scientific-disclosure.js'
-import { formatPh } from '@/shared/ui/format.js'
 import { PhMeter } from '@/shared/ui/ph-meter.js'
 import {
   ArrowRightIcon,
@@ -20,6 +19,7 @@ import {
   type IconComponent,
 } from '@/features/landing/icons.js'
 import { BookStack, HeroPhChart, MiniPhCurve } from '@/features/landing/landing-visuals.js'
+import { HeroPreview } from '@/features/landing/hero-preview.js'
 import { ScrollReveal } from '@/features/landing/scroll-reveal.js'
 
 /**
@@ -50,7 +50,6 @@ import { ScrollReveal } from '@/features/landing/scroll-reveal.js'
  */
 
 const TRUST_ICONS: readonly IconComponent[] = [GuestIcon, RepeatIcon, BookIcon]
-const VALUE_ICONS: readonly IconComponent[] = [RepeatIcon, SigmaIcon, CalculatorIcon, BookIcon]
 
 type BadgeTone = 'icon-badge-blue' | 'icon-badge-green' | 'icon-badge-teal'
 
@@ -69,7 +68,6 @@ const SHOWCASE_META: Record<string, { Icon: IconComponent; tone: BadgeTone }> = 
 export default function HomePage() {
   const catalog = listCatalog()
   const strings = APP_STRINGS.home
-  const benchmark = ACID_INPUT_DOMAIN.benchmark
   const firstScenario = catalog[0]
   const liveScenarioKeys = new Set(catalog.map((entry) => entry.scenarioKey))
 
@@ -79,139 +77,83 @@ export default function HomePage() {
 
       <section className="hero">
         <div className="hero-inner">
-          <div className="stack rise">
-            <p className="eyebrow">{strings.heroEyebrow}</p>
+          <div className="hero-copy rise">
+            <p className="hero-eyebrow">{strings.heroEyebrow}</p>
             <h1 className="hero-headline">
-              {strings.heroHeadline.map((line) => (
-                <span key={line}>{line}</span>
+              {strings.heroHeadline.map((line, idx) => (
+                <span
+                  key={line}
+                  className={idx === strings.heroHeadline.length - 1 ? 'hero-headline-accent' : undefined}
+                >
+                  {line}
+                </span>
               ))}
             </h1>
             <p className="hero-lede">{strings.lede}</p>
 
-            <div className="row">
+            <div className="hero-cta-group">
               {firstScenario !== undefined && (
                 <Link
-                  className="btn btn-primary btn-lg"
+                  className="btn hero-btn-primary"
                   href={`/simulate/${firstScenario.scenarioKey}`}
                 >
-                  {strings.heroPrimaryCta}
+                  <span>{strings.heroPrimaryCta}</span>
                   <ArrowRightIcon />
                 </Link>
               )}
-              <Link className="btn btn-lg" href="#workbench-preview">
+              <a className="btn hero-btn-secondary" href="#workbench-preview">
                 <PlayIcon />
-                {strings.heroSecondaryCta}
-              </Link>
+                <span>{strings.heroSecondaryCta}</span>
+              </a>
             </div>
 
-            {/* §4.1: the positioning must be explicit — a learning tool, not an operating
-                one. Stated once, plainly, beside the call to action rather than buried in
-                a footer where a learner starting a run would never read it. */}
-            <p className="hero-warning">
+            {/* Quieter, refined scientific model limitation disclosure */}
+            <div className="hero-model-disclosure" role="note" aria-label="Giới hạn mô hình giáo dục">
               <WarningIcon />
-              {strings.modelWarning}
-            </p>
+              <p>
+                <strong>Mô hình học tập:</strong> {strings.modelWarning}
+              </p>
+            </div>
 
-            <ul className="trust-strip">
+            {/* Trust and confidence strip */}
+            <ul className="hero-trust-strip">
               {strings.trustItems.map((item, index) => {
                 const Icon = TRUST_ICONS[index] ?? CheckCircleIcon
                 return (
-                  <li className="trust-item" key={item.label}>
+                  <li className="hero-trust-item" key={item.label}>
                     <Icon />
                     <div>
                       <strong>{item.label}</strong>
-                      <span>{item.hint}</span>
+                      <span className="hero-trust-hint">{item.hint}</span>
                     </div>
                   </li>
                 )
               })}
             </ul>
-          </div>
 
-          {/* The hero's product-preview frame. It shows the product's actual output
-              shape — a modelled pH curve reaching the release's own target band — inside
-              a real "app window" rather than a screenshot, so a visitor sees what they
-              will be working with before they click anything. The pH/temperature readout
-              and the "60%" progress figure are illustrative UI chrome for this preview
-              moment (design.md §9 warns the mockup's own numbers are not canonical); only
-              the locked target below them is real, read from `ACID_INPUT_DOMAIN`. */}
-          <div className="rise rise-2">
-            <div className="device-frame">
-              <div className="device-topbar">
-                <span className="device-dots" aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
-                </span>
-                <span className="device-title">{APP_STRINGS.brand}</span>
-                <span className="device-crumb">Thí nghiệm / Trung hòa axit</span>
+            {/* Consolidated learning value content (preserving semantics without redundant .value-strip) */}
+            <div className="hero-learning-banner" aria-label={strings.learningValueHeading}>
+              <div className="hero-learning-header">
+                <SigmaIcon />
+                <span>{strings.learningValueHeading}</span>
               </div>
-
-              <div className="device-body">
-                <div className="device-apparatus-col">
-                  <div className="device-stats">
-                    <div className="device-stat device-stat-ph">
-                      <label>pH</label>
-                      <span>5,2</span>
-                    </div>
-                    <div className="device-stat">
-                      <label>Nhiệt độ</label>
-                      <span>25,0 °C</span>
-                    </div>
-                  </div>
-                  <div className="device-apparatus">
-                    <img src="/assets/hero-neutralization.svg" alt="" aria-hidden="true" />
-                  </div>
-                </div>
-                <div>
-                  <p className="device-chart-label">pH* theo thể tích NaOH thêm vào</p>
-                  <HeroPhChart />
-                </div>
-              </div>
-
-              <div className="device-footer">
-                <div className="device-footer-left">
-                  <p className="device-equation">HCl + NaOH → NaCl + H₂O</p>
-                  <div className="device-progress-row">
-                    <span className="tiny faint">Đang thêm NaOH…</span>
-                    <span className="device-progress-track">
-                      <span className="device-progress-fill" style={{ width: '60%' }} />
-                    </span>
-                    <span className="device-progress-pct">60%</span>
-                  </div>
-                </div>
-                <div className="device-status">
-                  <CheckCircleIcon />
-                  <div>
-                    <strong>Đạt mục tiêu</strong>
-                    <span>
-                      pH* {formatPh(benchmark.targetPH)} (± {formatPh(benchmark.targetTolerancePH)})
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <ul className="hero-learning-items">
+                {strings.learningValues.map((value, idx) => (
+                  <li key={idx} className="hero-learning-item">
+                    <span className="hero-learning-bullet" aria-hidden="true">•</span>
+                    <span>{value}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
+
+          {/* Hero product preview frame */}
+          <HeroPreview />
         </div>
       </section>
 
       <div className="page stack-loose">
-        <section className="value-strip reveal">
-          <div className="stack-tight">
-            <h2 className="eyebrow">{strings.learningValueHeading}</h2>
-            <ul className="value-list">
-              {strings.learningValues.map((value, index) => {
-                const Icon = VALUE_ICONS[index] ?? CheckCircleIcon
-                return (
-                  <li className="value-item" key={value}>
-                    <Icon />
-                    <p>{value}</p>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        </section>
 
         <section className="stack reveal">
           <div className="section-head">

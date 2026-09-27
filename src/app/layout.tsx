@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import Link from 'next/link'
 import { APP_STRINGS } from '@/content/index.js'
+import { FlaskIcon } from '@/features/landing/icons.js'
 import { AppNav } from './app-nav.js'
 import { ThemeToggle } from './theme-toggle.js'
 import { THEME_STORAGE_KEY } from './theme-storage.js'
@@ -80,11 +81,11 @@ export default function RootLayout({
         <div className="shell">
           <header className="app-header">
             <div className="app-header-inner">
-              <Link className="brand" href="/">
+              <Link className="brand" href="/" aria-label="Trang chủ VECLab">
                 <span className="brand-mark" aria-hidden="true">
-                  pH
+                  <FlaskIcon />
                 </span>
-                {APP_STRINGS.brand}
+                <span className="brand-name">{APP_STRINGS.brand}</span>
                 <span className="brand-tag">{APP_STRINGS.brandTag}</span>
               </Link>
               <AppNav />
@@ -125,11 +126,11 @@ function SiteFooter() {
       <div className="app-footer-inner">
         <div className="footer-main">
           <div className="footer-brand">
-            <Link className="brand" href="/">
+            <Link className="brand" href="/" aria-label="Trang chủ VECLab">
               <span className="brand-mark" aria-hidden="true">
-                pH
+                <FlaskIcon />
               </span>
-              {APP_STRINGS.brand}
+              <span className="brand-name">{APP_STRINGS.brand}</span>
             </Link>
             <p className="footer-tagline">Khoa học hôm nay. Tương lai ngày mai.</p>
           </div>
