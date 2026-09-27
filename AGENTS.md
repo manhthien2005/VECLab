@@ -15,8 +15,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - **Release Flow**: Production releases MUST use a reviewed pull request from `develop` to `main`.
 - **Direct Pushes**: NEVER push feature work or direct commits to `main` or `develop`.
 - **Hotfix Flow**: Urgent production hotfixes start from `main`, merge to `main` via pull request, and MUST immediately be synchronized back into `develop`.
-- **Environment Isolation**: `develop` uses staging/non-production services and MUST NEVER use production Supabase credentials.
-- **Production Scope**: `main` is the ONLY branch intended for production Vercel and production Supabase deployments.
+- **Environment Isolation**: `develop` and PR CI use local/ephemeral Supabase only and MUST NEVER receive production Supabase privileged credentials.
+- **Production Scope**: The single hosted Supabase project is production-only; `main` is the ONLY branch intended for production deployments, and remote schema mutation is permitted only through an explicitly authorized main-controlled production deployment task.
 - **Database Migrations**: Database schema changes MUST be version-controlled migrations verified locally and in CI before promotion.
 - **Mutation Governance**: Remote Supabase or production environment mutations require explicit task authorization.
 - **Quality Gate**: Required CI checks MUST be green before any branch promotion or merge.

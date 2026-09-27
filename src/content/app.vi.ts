@@ -461,7 +461,7 @@ export const APP_STRINGS = {
     genericTitle: 'Đã xảy ra lỗi',
     notConfiguredTitle: 'Chưa cấu hình Supabase',
     notConfiguredBody:
-      'Ứng dụng chưa có NEXT_PUBLIC_SUPABASE_URL và NEXT_PUBLIC_SUPABASE_ANON_KEY. Chế độ khách vẫn hoạt động; tài khoản và đồng bộ thì không.',
+      'Ứng dụng chưa có NEXT_PUBLIC_SUPABASE_URL và NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY. Chế độ khách vẫn hoạt động; tài khoản và đồng bộ thì không.',
     backHome: 'Về trang chủ',
   },
 } as const
