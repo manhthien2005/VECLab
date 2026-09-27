@@ -46,7 +46,7 @@ const VOLUME_MAX = 30
 
 type ChartSize = { width: number; height: number; padding: { top: number; right: number; bottom: number; left: number } }
 
-const HERO_SIZE: ChartSize = { width: 520, height: 300, padding: { top: 16, right: 14, bottom: 30, left: 36 } }
+const HERO_SIZE: ChartSize = { width: 540, height: 285, padding: { top: 24, right: 20, bottom: 38, left: 40 } }
 const MINI_SIZE: ChartSize = { width: 320, height: 190, padding: { top: 10, right: 8, bottom: 4, left: 8 } }
 
 function buildChart(size: ChartSize) {
@@ -100,11 +100,23 @@ export function HeroPhChart() {
           x2={size.padding.left + plotWidth}
           y1={yFor(tick)}
           y2={yFor(tick)}
-          stroke="var(--border)"
+          stroke="var(--border-strong)"
           strokeDasharray="3 3"
-          strokeOpacity="0.75"
+          strokeOpacity="0.55"
         />
       ))}
+
+      {/* Equivalence target guide line at pH 7.0 */}
+      <line
+        x1={size.padding.left}
+        x2={size.padding.left + plotWidth}
+        y1={goldenY}
+        y2={goldenY}
+        stroke="var(--accent)"
+        strokeDasharray="4 4"
+        strokeOpacity="0.4"
+        strokeWidth="1"
+      />
 
       {/* Axes */}
       <line
@@ -123,19 +135,19 @@ export function HeroPhChart() {
       />
 
       {/* Curve and points */}
-      <polyline className="ph-series-line hero-chart-line" points={points} stroke="url(#hero-curve-gradient)" />
+      <polyline className="ph-series-line hero-chart-line" points={points} stroke="url(#hero-curve-gradient)" strokeWidth="3.5" />
 
       {/* Mid-process snapshot point (pH 5.2) */}
-      <circle cx={midX} cy={midY} r={6} fill="var(--blue)" opacity="0.25" />
+      <circle cx={midX} cy={midY} r={7} fill="var(--blue)" opacity="0.2" />
       <circle cx={midX} cy={midY} r={3.5} fill="var(--blue)" />
 
       {/* Equivalence target point (pH 7.0) */}
-      <circle className="ph-series-dot hero-chart-dot" cx={goldenX} cy={goldenY} r={4.5} />
+      <circle className="ph-series-dot hero-chart-dot" cx={goldenX} cy={goldenY} r={5} />
 
       {/* Target callout badge at golden point */}
-      <g className="hero-chart-callout" transform={`translate(${goldenX - 32}, ${goldenY - 32})`}>
-        <rect x="0" y="0" width="64" height="22" rx="4" fill="var(--surface)" stroke="var(--border-strong)" strokeWidth="1" />
-        <text x="32" y="15" textAnchor="middle" fill="var(--ink)" fontSize="11" fontWeight="700" fontFamily="var(--font-numeric)">
+      <g className="hero-chart-callout" transform={`translate(${goldenX - 36}, ${goldenY - 32})`}>
+        <rect x="0" y="0" width="72" height="23" rx="6" className="hero-chart-callout-box" />
+        <text x="36" y="15" textAnchor="middle" className="hero-chart-callout-text">
           pH = {formatPh(BENCHMARK.targetPH)}
         </text>
       </g>
@@ -149,11 +161,11 @@ export function HeroPhChart() {
 
       {/* X-axis Ticks */}
       {[0, 10, 20, 30].map((tick) => (
-        <text className="ph-series-tick" key={tick} textAnchor="middle" x={xFor(tick)} y={size.height - 12}>
+        <text className="ph-series-tick" key={tick} textAnchor="middle" x={xFor(tick)} y={size.height - 14}>
           {tick}
         </text>
       ))}
-      <text className="ph-series-tick" textAnchor="middle" x={size.padding.left + plotWidth / 2} y={size.height - 2} fontSize="10" fill="var(--ink-faint)">
+      <text className="ph-series-tick-label" textAnchor="middle" x={size.padding.left + plotWidth / 2} y={size.height - 2}>
         Thời gian (phút)
       </text>
     </svg>

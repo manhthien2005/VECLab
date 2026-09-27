@@ -107,49 +107,49 @@ export default function HomePage() {
               </a>
             </div>
 
-            {/* Quieter, refined scientific model limitation disclosure */}
-            <div className="hero-model-disclosure" role="note" aria-label="Giới hạn mô hình giáo dục">
-              <WarningIcon />
-              <p>
-                <strong>Mô hình học tập:</strong> {strings.modelWarning}
-              </p>
-            </div>
-
-            {/* Trust and confidence strip */}
+            {/* Lightweight trust and confidence strip */}
             <ul className="hero-trust-strip">
               {strings.trustItems.map((item, index) => {
                 const Icon = TRUST_ICONS[index] ?? CheckCircleIcon
                 return (
                   <li className="hero-trust-item" key={item.label}>
-                    <Icon />
-                    <div>
-                      <strong>{item.label}</strong>
-                      <span className="hero-trust-hint">{item.hint}</span>
-                    </div>
+                    <Icon className="hero-trust-icon" />
+                    <span>{item.label}</span>
+                    <span className="sr-only"> ({item.hint})</span>
                   </li>
                 )
               })}
             </ul>
 
-            {/* Consolidated learning value content (preserving semantics without redundant .value-strip) */}
-            <div className="hero-learning-banner" aria-label={strings.learningValueHeading}>
-              <div className="hero-learning-header">
-                <SigmaIcon />
-                <span>{strings.learningValueHeading}</span>
-              </div>
-              <ul className="hero-learning-items">
-                {strings.learningValues.map((value, idx) => (
-                  <li key={idx} className="hero-learning-item">
-                    <span className="hero-learning-bullet" aria-hidden="true">•</span>
-                    <span>{value}</span>
-                  </li>
-                ))}
-              </ul>
+            {/* Compact refined scientific model limitation disclosure */}
+            <div className="hero-model-disclosure" role="note" aria-label="Giới hạn mô hình giáo dục">
+              <WarningIcon className="hero-model-icon" />
+              <p>
+                <strong>Mô hình học tập:</strong> {strings.modelWarning}
+              </p>
             </div>
           </div>
 
           {/* Hero product preview frame */}
           <HeroPreview />
+        </div>
+      </section>
+
+      {/* Relocated learning value content (quiet, supporting strip outside the primary first-fold copy) */}
+      <section className="hero-learning-strip reveal" aria-label={strings.learningValueHeading}>
+        <div className="hero-learning-inner">
+          <div className="hero-learning-header">
+            <SigmaIcon className="hero-learning-icon" />
+            <span>{strings.learningValueHeading}</span>
+          </div>
+          <ul className="hero-learning-items">
+            {strings.learningValues.map((value, idx) => (
+              <li key={idx} className="hero-learning-item">
+                <span className="hero-learning-bullet" aria-hidden="true">•</span>
+                <span>{value}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
