@@ -2475,6 +2475,8 @@ td[data-numeric],
   gap: var(--space-5);
   align-items: stretch;
   width: 100%;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 .showcase-controls {
@@ -2617,29 +2619,98 @@ td[data-numeric],
     box-shadow var(--motion-state, 240ms) var(--ease-out),
     border-color var(--motion-state, 240ms) var(--ease-out);
   overflow: hidden;
+  opacity: 1;
 }
 
-.showcase-card:hover,
-.showcase-card:focus-within,
+/* Receded (non-active) pointer cue */
+.showcase-card:not([data-active='true']) {
+  cursor: pointer;
+}
+
+/* ACTIVE State: persistent visual spotlight */
 .showcase-card[data-active='true'] {
-  border-color: var(--border-strong);
-  box-shadow: 0 16px 36px -4px rgba(11, 31, 61, 0.1),
-    0 0 0 1px rgba(2, 132, 199, 0.15);
+  border-color: rgba(2, 132, 199, 0.45);
+  box-shadow: 0 20px 48px -8px rgba(11, 31, 61, 0.14),
+    0 0 0 1.5px rgba(2, 132, 199, 0.35);
+  cursor: default;
 }
 
-@media (min-width: 66rem) {
-  .showcase-card:hover,
-  .showcase-card:focus-within {
-    transform: translateY(-5px);
+/* Subtle media stage emphasis when card is ACTIVE */
+.showcase-card[data-active='true'] .showcase-media-stage {
+  border-color: rgba(2, 132, 199, 0.25);
+}
+
+/* HOVER_PREVIEW State: temporary pointer emphasis on non-active card */
+.showcase-card:not([data-active='true']):hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 10px 28px -4px rgba(11, 31, 61, 0.09),
+    0 0 0 1px rgba(11, 31, 61, 0.06);
+  transition-duration: 180ms;
+}
+
+/* FOCUS_WITHIN State: temporary keyboard emphasis when inner CTA has focus */
+.showcase-card:focus-within {
+  border-color: var(--border-strong);
+  box-shadow: 0 10px 28px -4px rgba(11, 31, 61, 0.09),
+    0 0 0 1px rgba(2, 132, 199, 0.2);
+}
+
+.showcase-card[data-active='true']:focus-within {
+  border-color: rgba(2, 132, 199, 0.5);
+  box-shadow: 0 20px 48px -8px rgba(11, 31, 61, 0.14),
+    0 0 0 1.5px rgba(2, 132, 199, 0.45);
+}
+
+/* Desktop spatial elevation contract (>66rem) */
+@media (min-width: 66.01rem) {
+  .showcase-card[data-active='true'] {
+    transform: translateY(-6px);
+  }
+
+  .showcase-card:not([data-active='true']):hover {
+    transform: translateY(-3px);
+  }
+
+  .showcase-card:not([data-active='true']):focus-within {
+    transform: translateY(-3px);
+  }
+
+  .showcase-card[data-active='true']:focus-within {
+    transform: translateY(-6px);
   }
 }
 
-[data-theme='dark'] .showcase-card:hover,
-[data-theme='dark'] .showcase-card:focus-within,
+/* Dark mode visual hierarchy */
+[data-theme='dark'] .showcase-card {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+}
+
 [data-theme='dark'] .showcase-card[data-active='true'] {
   border-color: var(--accent);
-  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.5),
+  box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.65),
+    0 0 0 1.5px rgba(56, 189, 248, 0.35);
+}
+
+[data-theme='dark'] .showcase-card[data-active='true'] .showcase-media-stage {
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+[data-theme='dark'] .showcase-card:not([data-active='true']):hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'] .showcase-card:focus-within {
+  border-color: var(--border-strong);
+  box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.45),
     0 0 0 1px rgba(56, 189, 248, 0.25);
+}
+
+[data-theme='dark'] .showcase-card[data-active='true']:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.65),
+    0 0 0 1.5px rgba(56, 189, 248, 0.5);
 }
 
 .showcase-status-badge {
@@ -2885,6 +2956,19 @@ td[data-numeric],
   color: var(--ink-muted);
 }
 
+/* Active card CTA treatment: LIVE gets bold accent arrow offset; PREVIEW gets subtle contrast boost without looking runnable */
+.showcase-card[data-active='true'] .cta-live {
+  color: var(--accent);
+}
+
+.showcase-card[data-active='true'] .cta-live .showcase-cta-arrow {
+  transform: translateX(3px);
+}
+
+.showcase-card[data-active='true'] .cta-preview {
+  color: var(--ink);
+}
+
 .showcase-cta-arrow {
   width: 1.1rem;
   height: 1.1rem;
@@ -2895,21 +2979,8 @@ td[data-numeric],
   transform: translateX(4px);
 }
 
-/* Card Stagger Reveal Animations */
-.showcase-card {
-  animation: showcase-card-appear 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: calc(var(--card-index, 0) * 85ms);
-}
-
-@keyframes showcase-card-appear {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.showcase-card[data-active='true']:hover .cta-live .showcase-cta-arrow {
+  transform: translateX(6px);
 }
 
 /* --- Workbench Demonstration (Redesigned R14.2) ------------------------ */
@@ -3802,10 +3873,17 @@ td[data-numeric],
   .showcase-card {
     animation: none !important;
     transform: none !important;
+    transition: none !important;
   }
   .showcase-card:hover,
-  .showcase-card:focus-within {
+  .showcase-card:focus-within,
+  .showcase-card[data-active='true'] {
     transform: none !important;
+  }
+  .showcase-card[data-active='true'] .cta-live .showcase-cta-arrow,
+  .showcase-card:hover .showcase-cta-arrow {
+    transform: none !important;
+    transition: none !important;
   }
   .hero-btn-primary:active,
   .hero-btn-secondary:active,

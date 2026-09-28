@@ -81,6 +81,7 @@ export function ExperimentShowcase() {
               aria-label={`${idx + 1} / ${SHOWCASE_CARDS.length}: ${title}`}
               className={`showcase-card ${isLive ? 'showcase-card-live' : 'showcase-card-preview'}`}
               style={{ '--card-index': idx } as React.CSSProperties}
+              data-active={idx === 0 ? 'true' : undefined}
             >
               {/* Honest Capability / Status Badge */}
               {!isLive ? (
