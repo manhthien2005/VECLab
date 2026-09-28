@@ -1483,6 +1483,21 @@ td[data-numeric],
   flex-direction: column;
 }
 
+.hero-copy.rise {
+  animation: hero-copy-entrance 450ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes hero-copy-entrance {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .hero-eyebrow {
   display: inline-block;
   font-family: var(--font-display);
@@ -1671,6 +1686,21 @@ td[data-numeric],
   width: 100%;
 }
 
+.hero-preview-wrapper.rise-2 {
+  animation: hero-frame-entrance 600ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
+}
+
+@keyframes hero-frame-entrance {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .device-frame {
   position: relative;
   background: var(--surface);
@@ -1824,11 +1854,16 @@ td[data-numeric],
   min-height: 355px;
 }
 
-.telemetry-badge {
+.hero-telemetry-entrance {
   position: absolute;
   top: 0;
   left: 0;
   z-index: 10;
+  animation: hero-overlay-entrance 380ms var(--spring-tactile) 760ms both;
+}
+
+.telemetry-badge {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -1906,6 +1941,21 @@ td[data-numeric],
   margin: 0;
 }
 
+.hero-apparatus-entrance {
+  animation: hero-apparatus-entrance 500ms var(--spring-tactile) 260ms both;
+}
+
+@keyframes hero-apparatus-entrance {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .apparatus-render {
   width: 100%;
   max-width: 16.5rem;
@@ -1915,9 +1965,26 @@ td[data-numeric],
   filter: drop-shadow(0 16px 32px rgba(11, 34, 64, 0.12));
 }
 
-.device-equation-card {
+.hero-equation-entrance {
   position: relative;
   z-index: 5;
+  width: 100%;
+  animation: hero-overlay-entrance 380ms var(--spring-tactile) 760ms both;
+}
+
+@keyframes hero-overlay-entrance {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.device-equation-card {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -2025,7 +2092,7 @@ td[data-numeric],
 .hero-chart-line {
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
-  animation: draw-curve 900ms var(--ease-out) 200ms both;
+  animation: draw-curve 800ms cubic-bezier(0.16, 1, 0.3, 1) 400ms both;
   stroke-width: 3.5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -2035,12 +2102,12 @@ td[data-numeric],
 .hero-chart-dot {
   fill: var(--accent);
   opacity: 0;
-  animation: fade-in var(--motion) var(--ease-out) 1050ms both;
+  animation: fade-in 180ms ease-out 1100ms both;
 }
 
 .hero-chart-callout {
   opacity: 0;
-  animation: fade-in var(--motion) var(--ease-out) 1150ms both;
+  animation: fade-in 180ms ease-out 1180ms both;
 }
 
 .hero-chart-callout-box {
@@ -2068,6 +2135,11 @@ td[data-numeric],
   fill: var(--ink-faint);
   font-size: 10px;
   font-weight: 600;
+}
+
+.hero-status-entrance {
+  width: 100%;
+  animation: hero-overlay-entrance 380ms var(--spring-tactile) 760ms both;
 }
 
 .hero-status-card {
@@ -2181,14 +2253,50 @@ td[data-numeric],
   fill: #94a3b8;
 }
 
-/* --- Restrained idle floating motion ------------------------------------- */
+/* --- Hero Desktop Pointer-Depth Parallax (R17.2) ------------------------- */
 
-.hero-float-gentle {
-  animation: hero-card-float 5s ease-in-out infinite;
+.hero-pointer-stage {
+  position: relative;
+  width: 100%;
+  perspective: 1200px;
 }
 
+.hero-pointer-stage .device-frame {
+  transform: rotateX(calc(var(--hero-pointer-y, 0) * -1.2deg)) rotateY(calc(var(--hero-pointer-x, 0) * 1.2deg));
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-depth-telemetry {
+  transform: translate3d(calc(var(--hero-pointer-x, 0) * 4px), calc(var(--hero-pointer-y, 0) * 4px), 0);
+  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-depth-apparatus {
+  transform: translate3d(calc(var(--hero-pointer-x, 0) * -1.5px), calc(var(--hero-pointer-y, 0) * -1.5px), 0);
+  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-pointer-stage[data-pointer-active='true'] .device-frame {
+    transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .hero-pointer-stage[data-pointer-active='true'] .hero-depth-telemetry {
+    transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .hero-pointer-stage[data-pointer-active='true'] .hero-depth-apparatus {
+    transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+/* --- Restrained idle floating motion (retired perpetual bobbing) ---------- */
+
+.hero-float-gentle,
 .hero-float-gentle-alt {
-  animation: hero-card-float-alt 6s ease-in-out infinite;
+  animation: none !important;
 }
 
 @keyframes hero-card-float {
@@ -2202,10 +2310,15 @@ td[data-numeric],
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-float-gentle,
-  .hero-float-gentle-alt {
+  .hero-copy.rise,
+  .hero-preview-wrapper.rise-2,
+  .hero-apparatus-entrance,
+  .hero-telemetry-entrance,
+  .hero-status-entrance,
+  .hero-equation-entrance {
     animation: none !important;
     transform: none !important;
+    opacity: 1 !important;
   }
   .hero-chart-line {
     animation: none !important;
@@ -2215,6 +2328,17 @@ td[data-numeric],
   .hero-chart-callout {
     animation: none !important;
     opacity: 1 !important;
+  }
+  .hero-pointer-stage .device-frame,
+  .hero-depth-telemetry,
+  .hero-depth-apparatus {
+    transform: none !important;
+    transition: none !important;
+  }
+  .hero-float-gentle,
+  .hero-float-gentle-alt {
+    animation: none !important;
+    transform: none !important;
   }
 }
 
