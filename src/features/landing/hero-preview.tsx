@@ -104,7 +104,7 @@ export function HeroPreview() {
             {/* Chart Card */}
             <div className="hero-chart-card">
               <div className="hero-chart-header">
-                <h3 className="hero-chart-title">Biểu đồ pH theo thời gian</h3>
+                <p className="hero-chart-title">Biểu đồ pH theo thời gian</p>
                 <span className="hero-chart-tag">Mô phỏng cân bằng</span>
               </div>
               <div className="hero-chart-body">

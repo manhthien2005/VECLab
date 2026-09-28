@@ -47,7 +47,6 @@ const VOLUME_MAX = 30
 type ChartSize = { width: number; height: number; padding: { top: number; right: number; bottom: number; left: number } }
 
 const HERO_SIZE: ChartSize = { width: 540, height: 285, padding: { top: 24, right: 20, bottom: 38, left: 40 } }
-const MINI_SIZE: ChartSize = { width: 320, height: 190, padding: { top: 10, right: 8, bottom: 4, left: 8 } }
 
 function buildChart(size: ChartSize) {
   const plotWidth = size.width - size.padding.left - size.padding.right
@@ -169,39 +168,5 @@ export function HeroPhChart() {
         Thời gian (phút)
       </text>
     </svg>
-  )
-}
-
-/** The compact curve on the acid-neutralization showcase card: shape only, no axes. */
-export function MiniPhCurve() {
-  const size = MINI_SIZE
-  const { xFor, yFor } = buildChart(size)
-  const points = CURVE_POINTS.map(([v, ph]) => `${xFor(v)},${yFor(ph)}`).join(' ')
-  const goldenX = xFor(25)
-  const goldenY = yFor(BENCHMARK.targetPH)
-
-  return (
-    <svg className="ph-series mini-chart-svg" viewBox={`0 0 ${size.width} ${size.height}`} aria-hidden="true">
-      <polyline className="ph-series-line" points={points} />
-      <circle className="ph-series-dot" cx={goldenX} cy={goldenY} r={4.5} />
-    </svg>
-  )
-}
-
-/**
- * Decorative stack of three reference "books" for the evidence section.
- *
- * The supplied asset (`assets/evidence-books.svg`) bakes English spine titles into the
- * raster, which would read as a translation slip on an otherwise all-Vietnamese page.
- * design.md §21 allows redrawing the motif without text for exactly this reason, so this
- * is plain CSS shapes: no localization to maintain, no text to get out of sync.
- */
-export function BookStack() {
-  return (
-    <div className="book-stack" aria-hidden="true">
-      <span className="book-spine book-spine-1" />
-      <span className="book-spine book-spine-2" />
-      <span className="book-spine book-spine-3" />
-    </div>
   )
 }
