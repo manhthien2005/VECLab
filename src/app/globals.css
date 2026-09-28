@@ -3426,15 +3426,15 @@ td[data-numeric],
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   overflow: hidden;
-  height: 2.5rem;
-  min-height: 40px;
+  height: 2.75rem;
+  min-height: 44px;
 }
 
 .wp-stepper-btn {
-  width: 2.5rem;
-  min-width: 40px;
+  width: 2.75rem;
+  min-width: 44px;
   height: 100%;
-  min-height: 40px;
+  min-height: 44px;
   border: none;
   background: transparent;
   font-size: 1.1rem;
@@ -3469,7 +3469,8 @@ td[data-numeric],
 }
 
 .wp-action-btn {
-  height: 2.6rem;
+  height: 2.75rem;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3494,7 +3495,11 @@ td[data-numeric],
 .wp-reset-btn {
   align-self: center;
   color: var(--ink-faint);
-  min-height: 2.25rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.8rem;
   transition: transform var(--motion-micro, 120ms) var(--spring-tactile, cubic-bezier(0.34, 1.56, 0.64, 1)),
     color var(--motion-fast) var(--ease);
 }
@@ -3978,6 +3983,8 @@ td[data-numeric],
   align-items: center;
   justify-content: center;
   flex: none;
+  width: 100%;
+  max-width: 360px;
 }
 
 .book-stack-container {
