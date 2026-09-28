@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -17,23 +17,50 @@ export function WorkbenchPreview() {
   const [previewVolumeTotal, setPreviewVolumeTotal] = useState<number>(250)
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null)
   const [isSimulatingAddition, setIsSimulatingAddition] = useState<boolean>(false)
+  const [selectedReagent, setSelectedReagent] = useState<string>('naoh-001')
+
+  const pulseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const clearActiveTimers = () => {
+    if (pulseTimerRef.current !== null) {
+      clearTimeout(pulseTimerRef.current)
+      pulseTimerRef.current = null
+    }
+    if (toastTimerRef.current !== null) {
+      clearTimeout(toastTimerRef.current)
+      toastTimerRef.current = null
+    }
+  }
+
+  // Component unmount cleanup cancels remaining timers
+  useEffect(() => {
+    return () => {
+      clearActiveTimers()
+    }
+  }, [])
 
   // Local-only interactive preview action (zero backend calls, zero state persistence)
   const handleAddReagent = () => {
+    clearActiveTimers()
     setIsSimulatingAddition(true)
-    setFeedbackMsg(`Đã thêm ${addedVolume} mL dung dịch (mô phỏng cục bộ)`)
+    setFeedbackMsg(`Đã thêm ${addedVolume} mL (mô phỏng cục bộ). Mở không gian mô phỏng để tính toán pH cân bằng.`)
     setPreviewVolumeTotal((prev) => prev + addedVolume)
 
-    setTimeout(() => {
+    pulseTimerRef.current = setTimeout(() => {
       setIsSimulatingAddition(false)
+      pulseTimerRef.current = null
     }, 600)
 
-    setTimeout(() => {
+    toastTimerRef.current = setTimeout(() => {
       setFeedbackMsg(null)
+      toastTimerRef.current = null
     }, 3000)
   }
 
   const handleResetPreview = () => {
+    clearActiveTimers()
+    setIsSimulatingAddition(false)
     setAddedVolume(5)
     setPreviewVolumeTotal(250)
     setFeedbackMsg(null)
@@ -160,7 +187,7 @@ export function WorkbenchPreview() {
 
               <div className="wp-state-display">
                 {/* Apparatus Image Container */}
-                <div className="wp-apparatus-frame">
+                <div className={`wp-apparatus-frame ${isSimulatingAddition ? 'is-stirring' : ''}`}>
                   <Image
                     src="/assets/hero-apparatus.webp"
                     width={220}
@@ -178,7 +205,7 @@ export function WorkbenchPreview() {
                     <span className="wp-telemetry-value-lg">4,8</span>
                   </div>
 
-                  <div className="wp-telemetry-meta">
+                  <div className="wp-meta-item-group wp-telemetry-meta">
                     <div className="wp-meta-item">
                       <span className="wp-meta-label">Nhiệt độ</span>
                       <strong className="wp-meta-value">25,0 °C</strong>
@@ -190,9 +217,12 @@ export function WorkbenchPreview() {
                   </div>
 
                   {/* Pulsing Status Pill */}
-                  <div className="wp-status-pill" role="status">
+                  <div
+                    className={`wp-status-pill ${isSimulatingAddition ? 'is-active-addition' : ''}`}
+                    role="status"
+                  >
                     <span className="wp-status-dot pulse-dot" aria-hidden="true" />
-                    <span>Đang khuấy</span>
+                    <span>{isSimulatingAddition ? 'Đang khuấy & thêm' : 'Đang khuấy'}</span>
                   </div>
                 </div>
               </div>
@@ -392,12 +422,11 @@ export function WorkbenchPreview() {
                   <select
                     id="preview-reagent-select"
                     className="wp-select-input"
-                    defaultValue="naoh-01"
+                    value={selectedReagent}
+                    onChange={(e) => setSelectedReagent(e.target.value)}
                     aria-label="Chọn hóa chất trung hòa"
                   >
-                    <option value="naoh-01">NaOH 0,1 M</option>
-                    <option value="naoh-001">NaOH 0,0100 M</option>
-                    <option value="caoh2">Ca(OH)₂ 0,0050 M</option>
+                    <option value="naoh-001">NaOH 0,0100 M (Chuẩn hóa)</option>
                   </select>
                 </div>
               </div>
@@ -458,7 +487,14 @@ export function WorkbenchPreview() {
               {feedbackMsg && (
                 <div className="wp-feedback-toast" role="status" aria-live="polite">
                   <span className="wp-toast-dot" />
-                  <span>{feedbackMsg}</span>
+                  <span className="wp-toast-text">{feedbackMsg}</span>
+                  <Link
+                    href="/simulate/acid-neutralization"
+                    className="wp-toast-link"
+                    aria-label="Mở không gian mô phỏng đầy đủ cho thí nghiệm trung hòa axit"
+                  >
+                    Mở mô phỏng
+                  </Link>
                 </div>
               )}
             </div>
