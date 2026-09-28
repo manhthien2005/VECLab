@@ -3148,6 +3148,33 @@ td[data-numeric],
   justify-content: center;
 }
 
+.wp-apparatus-frame.is-stirring .wp-apparatus-img {
+  animation: wp-stirring-gentle 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes wp-stirring-gentle {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.025); }
+  70% { transform: scale(0.99); }
+  100% { transform: scale(1); }
+}
+
+.wp-apparatus-frame.is-stirring::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--accent);
+  opacity: 0.4;
+  animation: wp-apparatus-pulse 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes wp-apparatus-pulse {
+  0% { transform: scale(0.96); opacity: 0.6; }
+  100% { transform: scale(1.04); opacity: 0; }
+}
+
 .wp-apparatus-img {
   width: 100%;
   height: auto;
@@ -3230,6 +3257,20 @@ td[data-numeric],
   font-size: 0.78rem;
   font-weight: 700;
   align-self: center;
+  transition: background-color var(--motion-fast) var(--ease),
+    color var(--motion-fast) var(--ease),
+    border-color var(--motion-fast) var(--ease);
+  border: 1px solid transparent;
+}
+
+.wp-status-pill.is-active-addition {
+  background: var(--blue-soft);
+  color: var(--blue);
+  border-color: rgba(2, 132, 199, 0.3);
+}
+
+.wp-status-pill.is-active-addition .wp-status-dot {
+  background: var(--blue);
 }
 
 .wp-status-dot {
@@ -3287,11 +3328,17 @@ td[data-numeric],
   font-weight: 650;
   color: var(--ink-muted);
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: background-color var(--motion-fast) var(--ease),
+    color var(--motion-fast) var(--ease),
+    transform var(--motion-micro, 120ms) var(--spring-tactile, cubic-bezier(0.34, 1.56, 0.64, 1));
 }
 
 .wp-tab-btn:hover {
   color: var(--ink);
+}
+
+.wp-tab-btn:active {
+  transform: scale(0.96);
 }
 
 .wp-tab-btn.active {
@@ -3397,11 +3444,16 @@ td[data-numeric],
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease,
+    transform var(--motion-micro, 120ms) var(--spring-tactile, cubic-bezier(0.34, 1.56, 0.64, 1));
 }
 
 .wp-stepper-btn:hover {
   background: var(--surface-2);
+}
+
+.wp-stepper-btn:active {
+  transform: scale(0.9);
 }
 
 .wp-stepper-value {
@@ -3425,6 +3477,13 @@ td[data-numeric],
   width: 100%;
   font-size: 0.9rem;
   font-weight: 700;
+  transition: transform var(--motion-micro, 120ms) var(--spring-tactile, cubic-bezier(0.34, 1.56, 0.64, 1)),
+    box-shadow var(--motion-fast) var(--ease),
+    background-color var(--motion-fast) var(--ease);
+}
+
+.wp-action-btn:active {
+  transform: scale(0.97);
 }
 
 .wp-btn-icon {
@@ -3436,20 +3495,48 @@ td[data-numeric],
   align-self: center;
   color: var(--ink-faint);
   min-height: 2.25rem;
+  transition: transform var(--motion-micro, 120ms) var(--spring-tactile, cubic-bezier(0.34, 1.56, 0.64, 1)),
+    color var(--motion-fast) var(--ease);
+}
+
+.wp-reset-btn:active {
+  transform: scale(0.96);
 }
 
 .wp-feedback-toast {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.55rem 0.75rem;
   border-radius: var(--radius-md);
   background: var(--blue-soft);
-  border: 1px solid rgba(2, 132, 199, 0.2);
+  border: 1px solid rgba(2, 132, 199, 0.25);
   color: var(--blue);
   font-size: 0.78rem;
   font-weight: 650;
-  animation: toast-fade 0.25s ease;
+  animation: toast-fade 0.2s ease-out;
+}
+
+.wp-toast-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+  flex-shrink: 0;
+}
+
+.wp-toast-text {
+  flex: 1;
+}
+
+.wp-toast-link {
+  font-weight: 700;
+  text-decoration: underline;
+  color: var(--accent);
+  white-space: nowrap;
+  font-size: 0.75rem;
+  margin-left: 0.25rem;
 }
 
 @keyframes toast-fade {
@@ -3578,7 +3665,7 @@ td[data-numeric],
   transform: translateX(3px);
 }
 
-/* Reduced Motion Override (Landing & Showcase scoped) */
+/* Reduced Motion Override (Landing, Showcase & Workbench scoped) */
 @media (prefers-reduced-motion: reduce) {
   .showcase-track {
     scroll-behavior: auto !important;
@@ -3602,6 +3689,19 @@ td[data-numeric],
   }
   .wb-progress-fill {
     transition: none !important;
+  }
+  .wp-apparatus-frame.is-stirring .wp-apparatus-img {
+    animation: none !important;
+    transform: none !important;
+  }
+  .wp-apparatus-frame.is-stirring::after {
+    animation: none !important;
+  }
+  .wp-action-btn:active,
+  .wp-reset-btn:active,
+  .wp-stepper-btn:active,
+  .wp-tab-btn:active {
+    transform: none !important;
   }
 }
 
