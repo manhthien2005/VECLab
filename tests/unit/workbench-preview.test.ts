@@ -95,4 +95,30 @@ describe('WorkbenchPreview R16.3 Architecture, Timer Hardening and Scientific Tr
     expect(css).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.wp-apparatus-frame\.is-stirring[\s\S]*?animation:\s*none\s*!important/m)
     expect(css).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.wp-action-btn:active[\s\S]*?transform:\s*none\s*!important/m)
   })
+
+  it('enforces R17.4 coordinated instrument interaction sequence and contracts', () => {
+    const content = readFileSync(WORKBENCH_FILE, 'utf8')
+    const css = readFileSync(GLOBALS_CSS, 'utf8')
+
+    // Component coordinates Step 2 pulse and volume readout
+    expect(content).toContain('is-addition-active')
+    expect(content).toContain('is-volume-pulse')
+    expect(content).toContain('wp-volume-value')
+
+    // Scientific truth: pH remains fixed at 4,8 and protocol does not advance past Step 2
+    expect(content).toContain('>4,8<')
+    expect(content).toContain('Bước 2 / 5')
+    expect(content).toContain('style={{ width: \'40%\' }}')
+
+    // CSS coordinated animation definitions
+    expect(css).toContain('@keyframes wp-volume-flash')
+    expect(css).toContain('@keyframes wb-step-pulse')
+
+    // Damped mechanical stirring rather than simple scaling
+    expect(css).toMatch(/@keyframes\s+wp-stirring-gentle\s*\{[^}]*rotate\(/m)
+
+    // Reduced motion overrides cover volume flash and Step 2 pulse
+    expect(css).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.wb-step-active\.is-addition-active[\s\S]*?animation:\s*none\s*!important/m)
+    expect(css).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.wp-volume-value\.is-volume-pulse[\s\S]*?animation:\s*none\s*!important/m)
+  })
 })

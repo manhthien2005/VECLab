@@ -51,10 +51,16 @@ test.describe('Workbench Preview Interaction and Timer Hardening (R16.3)', () =>
 
     await addBtn.click()
 
-    // Apparatus active pulse & status pill update
+    // Apparatus active pulse, volume flash, Step 2 pulse & status pill update
     await expect(frame.locator('.wp-apparatus-frame')).toHaveClass(/is-stirring/)
     await expect(frame.locator('.wp-status-pill')).toContainText('Đang khuấy & thêm')
     await expect(frame.locator('.wp-telemetry-meta')).toContainText('255 mL')
+    await expect(frame.locator('.wp-volume-value')).toHaveClass(/is-volume-pulse/)
+    await expect(frame.locator('.wb-step-active')).toHaveClass(/is-addition-active/)
+
+    // Step progression strictly remains Step 2 (never advances to Step 3 in preview)
+    await expect(frame.locator('.wb-step-active .wb-step-index')).toHaveText('Bước 2')
+    await expect(frame.locator('.wb-timeline-item').nth(2)).toHaveClass(/wb-step-pending/)
 
     // Telemetry pH must remain completely unchanged (4,8)
     await expect(frame.locator('.wp-telemetry-value-lg')).toHaveText('4,8')
@@ -111,6 +117,8 @@ test.describe('Workbench Preview Interaction and Timer Hardening (R16.3)', () =>
     await expect(frame.locator('.wp-telemetry-meta')).toContainText('250 mL')
     await expect(frame.locator('.wp-status-pill')).toContainText('Đang khuấy')
     await expect(frame.locator('.wp-apparatus-frame')).not.toHaveClass(/is-stirring/)
+    await expect(frame.locator('.wp-volume-value')).not.toHaveClass(/is-volume-pulse/)
+    await expect(frame.locator('.wb-step-active')).not.toHaveClass(/is-addition-active/)
     await expect(frame.locator('.wp-feedback-toast')).not.toBeVisible()
 
     // Wait 1.5s: ensure no stale timer fires to alter UI after reset
