@@ -46,8 +46,7 @@ const VOLUME_MAX = 30
 
 type ChartSize = { width: number; height: number; padding: { top: number; right: number; bottom: number; left: number } }
 
-const HERO_SIZE: ChartSize = { width: 520, height: 300, padding: { top: 16, right: 14, bottom: 30, left: 36 } }
-const MINI_SIZE: ChartSize = { width: 320, height: 190, padding: { top: 10, right: 8, bottom: 4, left: 8 } }
+const HERO_SIZE: ChartSize = { width: 540, height: 285, padding: { top: 24, right: 20, bottom: 38, left: 40 } }
 
 function buildChart(size: ChartSize) {
   const plotWidth = size.width - size.padding.left - size.padding.right
@@ -57,7 +56,7 @@ function buildChart(size: ChartSize) {
   return { plotWidth, plotHeight, xFor, yFor }
 }
 
-/** The hero device frame's chart: axes, target band and tick labels. */
+/** The hero device frame's chart: axes, grid, target callout and tick labels. */
 export function HeroPhChart() {
   const size = HERO_SIZE
   const { plotWidth, plotHeight, xFor, yFor } = buildChart(size)
@@ -66,6 +65,8 @@ export function HeroPhChart() {
   const points = CURVE_POINTS.map(([v, ph]) => `${xFor(v)},${yFor(ph)}`).join(' ')
   const goldenX = xFor(25)
   const goldenY = yFor(BENCHMARK.targetPH)
+  const midX = xFor(18)
+  const midY = yFor(5.2)
 
   return (
     <svg
@@ -74,6 +75,14 @@ export function HeroPhChart() {
       role="img"
       aria-label={`Đường cong pH minh họa: pH* đạt ${formatPh(BENCHMARK.targetPH)} khi thêm 25 mL NaOH`}
     >
+      <defs>
+        <linearGradient id="hero-curve-gradient" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="var(--accent)" />
+          <stop offset="100%" stopColor="var(--blue)" />
+        </linearGradient>
+      </defs>
+
+      {/* Target tolerance band */}
       <rect
         className="ph-series-band"
         x={size.padding.left}
@@ -81,6 +90,34 @@ export function HeroPhChart() {
         width={plotWidth}
         height={Math.abs(yFor(low) - yFor(high))}
       />
+
+      {/* Horizontal grid lines */}
+      {[4, 7, 10, 14].map((tick) => (
+        <line
+          key={tick}
+          x1={size.padding.left}
+          x2={size.padding.left + plotWidth}
+          y1={yFor(tick)}
+          y2={yFor(tick)}
+          stroke="var(--border-strong)"
+          strokeDasharray="3 3"
+          strokeOpacity="0.55"
+        />
+      ))}
+
+      {/* Equivalence target guide line at pH 7.0 */}
+      <line
+        x1={size.padding.left}
+        x2={size.padding.left + plotWidth}
+        y1={goldenY}
+        y2={goldenY}
+        stroke="var(--accent)"
+        strokeDasharray="4 4"
+        strokeOpacity="0.4"
+        strokeWidth="1"
+      />
+
+      {/* Axes */}
       <line
         className="ph-series-axis"
         x1={size.padding.left}
@@ -95,52 +132,41 @@ export function HeroPhChart() {
         y1={size.padding.top}
         y2={size.padding.top + plotHeight}
       />
-      <polyline className="ph-series-line hero-chart-line" points={points} />
-      <circle className="ph-series-dot hero-chart-dot" cx={goldenX} cy={goldenY} r={4} />
-      {[0, 7, 14].map((tick) => (
+
+      {/* Curve and points */}
+      <polyline className="ph-series-line hero-chart-line" points={points} stroke="url(#hero-curve-gradient)" strokeWidth="3.5" />
+
+      {/* Mid-process snapshot point (pH 5.2) */}
+      <circle cx={midX} cy={midY} r={7} fill="var(--blue)" opacity="0.2" />
+      <circle cx={midX} cy={midY} r={3.5} fill="var(--blue)" />
+
+      {/* Equivalence target point (pH 7.0) */}
+      <circle className="ph-series-dot hero-chart-dot" cx={goldenX} cy={goldenY} r={5} />
+
+      {/* Target callout badge at golden point */}
+      <g className="hero-chart-callout" transform={`translate(${goldenX - 36}, ${goldenY - 32})`}>
+        <rect x="0" y="0" width="72" height="23" rx="6" className="hero-chart-callout-box" />
+        <text x="36" y="15" textAnchor="middle" className="hero-chart-callout-text">
+          pH = {formatPh(BENCHMARK.targetPH)}
+        </text>
+      </g>
+
+      {/* Y-axis Ticks */}
+      {[0, 4, 7, 10, 14].map((tick) => (
         <text className="ph-series-tick" key={tick} textAnchor="end" x={size.padding.left - 8} y={yFor(tick) + 4}>
           {tick}
         </text>
       ))}
-      {[0, 15, 30].map((tick) => (
-        <text className="ph-series-tick" key={tick} textAnchor="middle" x={xFor(tick)} y={size.height - 8}>
+
+      {/* X-axis Ticks */}
+      {[0, 10, 20, 30].map((tick) => (
+        <text className="ph-series-tick" key={tick} textAnchor="middle" x={xFor(tick)} y={size.height - 14}>
           {tick}
         </text>
       ))}
+      <text className="ph-series-tick-label" textAnchor="middle" x={size.padding.left + plotWidth / 2} y={size.height - 2}>
+        Thời gian (phút)
+      </text>
     </svg>
-  )
-}
-
-/** The compact curve on the acid-neutralization showcase card: shape only, no axes. */
-export function MiniPhCurve() {
-  const size = MINI_SIZE
-  const { xFor, yFor } = buildChart(size)
-  const points = CURVE_POINTS.map(([v, ph]) => `${xFor(v)},${yFor(ph)}`).join(' ')
-  const goldenX = xFor(25)
-  const goldenY = yFor(BENCHMARK.targetPH)
-
-  return (
-    <svg className="ph-series mini-chart-svg" viewBox={`0 0 ${size.width} ${size.height}`} aria-hidden="true">
-      <polyline className="ph-series-line" points={points} />
-      <circle className="ph-series-dot" cx={goldenX} cy={goldenY} r={4.5} />
-    </svg>
-  )
-}
-
-/**
- * Decorative stack of three reference "books" for the evidence section.
- *
- * The supplied asset (`assets/evidence-books.svg`) bakes English spine titles into the
- * raster, which would read as a translation slip on an otherwise all-Vietnamese page.
- * design.md §21 allows redrawing the motif without text for exactly this reason, so this
- * is plain CSS shapes: no localization to maintain, no text to get out of sync.
- */
-export function BookStack() {
-  return (
-    <div className="book-stack" aria-hidden="true">
-      <span className="book-spine book-spine-1" />
-      <span className="book-spine book-spine-2" />
-      <span className="book-spine book-spine-3" />
-    </div>
   )
 }
