@@ -92,4 +92,17 @@ describe('Experiment Showcase R16.2 Architecture and Semantics', () => {
     expect(css).toContain('.showcase-track')
     expect(css).toContain('.showcase-card')
   })
+
+  it('satisfies minimum 44x44px touch target contract for carousel controls', () => {
+    const css = readFileSync(GLOBALS_CSS, 'utf8')
+
+    // Prev / Next button min size
+    expect(css).toMatch(/\.showcase-nav-btn\s*\{[^}]*min-width:\s*44px/m)
+    expect(css).toMatch(/\.showcase-nav-btn\s*\{[^}]*min-height:\s*44px/m)
+
+    // Pagination dot button hit target min size
+    expect(css).toMatch(/\.showcase-dot\s*\{[^}]*min-width:\s*44px/m)
+    expect(css).toMatch(/\.showcase-dot\s*\{[^}]*min-height:\s*44px/m)
+  })
 })
+

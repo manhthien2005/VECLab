@@ -2401,8 +2401,10 @@ td[data-numeric],
 }
 
 .showcase-nav-btn {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: var(--radius-full);
   border: 1px solid var(--border);
   background: var(--surface);
@@ -2439,22 +2441,40 @@ td[data-numeric],
 .showcase-dots {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .showcase-dot {
+  position: relative;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+}
+
+.showcase-dot:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.showcase-dot::after {
+  content: '';
+  display: block;
   width: 0.55rem;
   height: 0.55rem;
   border-radius: var(--radius-full);
-  border: none;
   background: var(--border-strong);
-  padding: 0;
-  cursor: pointer;
   transition: width var(--motion-state, 240ms) var(--ease-out),
     background-color var(--motion-state, 240ms) var(--ease-out);
 }
 
-.showcase-dot.is-active {
+.showcase-dot.is-active::after {
   width: 1.5rem;
   background: var(--accent);
 }
