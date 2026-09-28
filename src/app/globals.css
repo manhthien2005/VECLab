@@ -3701,7 +3701,12 @@ td[data-numeric],
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-[data-theme="dark"] .final-cta-surface,
+[data-theme="dark"] .final-cta-surface {
+  background: linear-gradient(135deg, rgba(13, 78, 72, 0.42) 0%, rgba(6, 44, 40, 0.55) 100%);
+  border: 1px solid rgba(45, 212, 191, 0.25);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .final-cta-surface {
     background: linear-gradient(135deg, rgba(13, 78, 72, 0.42) 0%, rgba(6, 44, 40, 0.55) 100%);
@@ -3730,7 +3735,11 @@ td[data-numeric],
   flex: none;
 }
 
-[data-theme="dark"] .final-cta-emblem,
+[data-theme="dark"] .final-cta-emblem {
+  background: rgba(45, 212, 191, 0.22);
+  color: #5eead4;
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .final-cta-emblem {
     background: rgba(45, 212, 191, 0.22);
@@ -3757,7 +3766,10 @@ td[data-numeric],
   color: var(--ink);
 }
 
-[data-theme="dark"] .final-cta-title,
+[data-theme="dark"] .final-cta-title {
+  color: #f0fdfa;
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .final-cta-title {
     color: #f0fdfa;
@@ -3772,7 +3784,11 @@ td[data-numeric],
   max-width: 52ch;
 }
 
-[data-theme="dark"] .final-cta-desc,
+[data-theme="dark"] .final-cta-desc {
+  color: #ccfbf1;
+  opacity: 0.95;
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .final-cta-desc {
     color: #ccfbf1;
@@ -3789,7 +3805,7 @@ td[data-numeric],
   align-items: center;
   gap: var(--space-2);
   background: var(--accent);
-  color: #ffffff !important;
+  color: var(--accent-contrast);
   font-weight: 700;
   font-size: var(--text-base);
   padding: 0.85rem 1.85rem;
@@ -3806,8 +3822,10 @@ td[data-numeric],
   transition: transform 0.18s ease;
 }
 
-.final-cta-btn:hover {
+.final-cta-btn:hover,
+.final-cta-btn:hover:not(:disabled) {
   background: var(--accent-hover, #0f766e);
+  color: var(--accent-contrast);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(13, 148, 136, 0.45);
 }
