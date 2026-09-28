@@ -57,19 +57,13 @@ export function ExperimentShowcase() {
   const strings = APP_STRINGS.home
 
   return (
-    <section className="experiment-showcase-section reveal" id="showcase">
-      {/* Section Heading & View All Action */}
-      <div className="section-head">
-        <div className="stack-tight">
-          <p className="eyebrow">{strings.showcaseEyebrow}</p>
-          <h2 className="showcase-main-heading">{strings.showcaseHeading}</h2>
-        </div>
-        <Link className="btn btn-ghost btn-sm showcase-view-all" href="/experiments">
-          <span>Xem tất cả</span>
-          <ArrowRightIcon />
-        </Link>
+    <div className="experiment-showcase-section reveal">
+      {/* Centered Section Heading matching approved reference */}
+      <div className="section-head-center">
+        <p className="eyebrow">{strings.showcaseEyebrow}</p>
+        <h2 className="showcase-main-heading">{strings.showcaseHeading}</h2>
+        <p className="lede showcase-lede">{strings.showcaseLede}</p>
       </div>
-      <p className="lede showcase-lede">{strings.showcaseLede}</p>
 
       {/* 3-Card Scientific Grid */}
       <div className="showcase-grid">
@@ -125,6 +119,6 @@ export function ExperimentShowcase() {
           )
         })}
       </div>
-    </section>
+    </div>
   )
 }
