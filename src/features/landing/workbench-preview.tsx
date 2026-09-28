@@ -44,7 +44,7 @@ export function WorkbenchPreview() {
   }
 
   return (
-    <section className="workbench-section reveal" id="workbench-preview">
+    <div className="workbench-section reveal">
       {/* Section Header */}
       <div className="section-head-center">
         <p className="eyebrow">TRẢI NGHIỆM CHI TIẾT</p>
@@ -502,6 +502,6 @@ export function WorkbenchPreview() {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   )
 }

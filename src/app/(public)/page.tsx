@@ -6,9 +6,9 @@ import {
   ArrowRightIcon,
   BookIcon,
   CheckCircleIcon,
-  GuestIcon,
+  GraduationCapIcon,
   PlayIcon,
-  RepeatIcon,
+  ShieldCheckIcon,
   WarningIcon,
   type IconComponent,
 } from '@/features/landing/icons.js'
@@ -21,22 +21,21 @@ import { ScrollReveal } from '@/features/landing/scroll-reveal.js'
 
 /**
  * Home page and experiment showcase (docs/web-application-scope.md §4.1), redesigned to
- * the approved landing package (design.md, reference/approved-landing.png).
+ * the approved landing package (reference/approved-landing.png).
  *
  * Storytelling sequence:
- * 1. Hero with interactive preview (HeroPreview)
- * 2. Learning values transition strip
- * 3. 3-experiment showcase (ExperimentShowcase)
- * 4. Interactive Workbench demonstration (WorkbenchPreview)
- * 5. Scientific Evidence & Trust (EvidenceSection)
- * 6. Final conversion banner (FinalCtaBanner)
- * 7. Scientific model disclosure & locked evidence register (ScientificDisclosure)
+ * 1. Hero with interactive preview (HeroPreview) and integrated learning value trust row
+ * 2. 3-experiment showcase with centered heading (ExperimentShowcase)
+ * 3. Interactive Workbench demonstration in subtle icy-blue framing (WorkbenchPreview)
+ * 4. Scientific Evidence & Trust (EvidenceSection)
+ * 5. Final conversion banner (FinalCtaBanner)
+ * 6. Scientific model disclosure & locked evidence register (ScientificDisclosure)
  *
  * Server Component reading only the release registries, statically renderable.
  * `ScrollReveal` and `WorkbenchPreview` are client leaves where needed.
  */
 
-const TRUST_ICONS: readonly IconComponent[] = [GuestIcon, RepeatIcon, BookIcon]
+const TRUST_ICONS: readonly IconComponent[] = [ShieldCheckIcon, GraduationCapIcon, BookIcon]
 
 export default function HomePage() {
   const catalog = listCatalog()
@@ -79,8 +78,8 @@ export default function HomePage() {
               </a>
             </div>
 
-            {/* Lightweight trust and confidence strip */}
-            <ul className="hero-trust-strip">
+            {/* Lightweight learning value benefit row beneath CTA matching approved reference */}
+            <ul className="hero-trust-strip" aria-label="Giá trị học tập và cam kết giáo dục">
               {strings.trustItems.map((item, index) => {
                 const Icon = TRUST_ICONS[index] ?? CheckCircleIcon
                 return (
@@ -91,6 +90,13 @@ export default function HomePage() {
                   </li>
                 )
               })}
+            </ul>
+
+            {/* Preserved learning values educational statements for accessibility and auditing */}
+            <ul className="sr-only" aria-label={strings.learningValueHeading}>
+              {strings.learningValues.map((value, idx) => (
+                <li key={idx}>{value}</li>
+              ))}
             </ul>
 
             {/* Compact refined scientific model limitation disclosure */}
@@ -107,36 +113,37 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Relocated learning value content (quiet, supporting strip outside the primary first-fold copy) */}
-      <section className="hero-learning-strip reveal" aria-label={strings.learningValueHeading}>
-        <div className="hero-learning-inner">
-          <div className="hero-learning-header">
-            <span className="hero-learning-icon" aria-hidden="true">∑</span>
-            <span>{strings.learningValueHeading}</span>
+      {/* Landing Flow Sections with Distinct Chapter Framing */}
+      <div className="landing-flow">
+        <section className="landing-section landing-section-experiments" id="showcase">
+          <div className="landing-section-inner">
+            <ExperimentShowcase />
           </div>
-          <ul className="hero-learning-items">
-            {strings.learningValues.map((value, idx) => (
-              <li key={idx} className="hero-learning-item">
-                <span className="hero-learning-bullet" aria-hidden="true">•</span>
-                <span>{value}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+        </section>
 
-      <div className="page landing-flow">
-        <ExperimentShowcase />
+        <section className="landing-section landing-section-workbench" id="workbench-preview">
+          <div className="landing-section-inner">
+            <WorkbenchPreview />
+          </div>
+        </section>
 
-        <WorkbenchPreview />
+        <section className="landing-section landing-section-evidence" id="evidence">
+          <div className="landing-section-inner">
+            <EvidenceSection />
+          </div>
+        </section>
 
-        <EvidenceSection />
+        <section className="landing-section landing-section-cta">
+          <div className="landing-section-inner">
+            <FinalCtaBanner scenarioKey={firstScenario?.scenarioKey} />
+          </div>
+        </section>
 
-        <FinalCtaBanner scenarioKey={firstScenario?.scenarioKey} />
-
-        <section className="landing-disclosure-section reveal" aria-label="Nguồn và giới hạn mô hình">
-          <div className="landing-disclosure-card">
-            <ScientificDisclosure />
+        <section className="landing-section landing-section-disclosure reveal" aria-label="Nguồn và giới hạn mô hình">
+          <div className="landing-section-inner">
+            <div className="landing-disclosure-card">
+              <ScientificDisclosure />
+            </div>
           </div>
         </section>
       </div>

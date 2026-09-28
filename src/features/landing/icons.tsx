@@ -39,6 +39,25 @@ export function CheckCircleIcon({ className }: IconProps) {
   )
 }
 
+export function ShieldCheckIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3.5 4.5 7v5.5c0 4.5 3.2 8.7 7.5 9.5 4.3-.8 7.5-5 7.5-9.5V7L12 3.5Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="m9 12 2 2 4-4" />
+    </svg>
+  )
+}
+
+export function GraduationCapIcon({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 9.5 12 5l9.5 4.5L12 14 2.5 9.5Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 11.5v5c0 2 3 3.5 6 3.5s6-1.5 6-3.5v-5" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21.5 10v6" />
+    </svg>
+  )
+}
+
 export function GuestIcon({ className }: IconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">

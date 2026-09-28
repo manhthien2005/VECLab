@@ -5,6 +5,7 @@ import { FlaskIcon } from '@/features/landing/icons.js'
 import { AppNav } from './app-nav.js'
 import { ThemeToggle } from './theme-toggle.js'
 import { THEME_STORAGE_KEY } from './theme-storage.js'
+import { manrope } from './fonts.js'
 import './globals.css'
 
 /**
@@ -71,7 +72,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
       </head>
-      <body>
+      <body className={manrope.variable}>
         {/* First tab stop on every page: the workbench has many controls before the
             content, and a keyboard user must be able to skip the header. */}
         <a className="skip-link" href="#main">
