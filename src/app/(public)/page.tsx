@@ -5,44 +5,38 @@ import { ScientificDisclosure } from '@/shared/ui/scientific-disclosure.js'
 import {
   ArrowRightIcon,
   BookIcon,
-  CalculatorIcon,
   CheckCircleIcon,
-  FlaskIcon,
   GuestIcon,
   PlayIcon,
   RepeatIcon,
-  SigmaIcon,
   WarningIcon,
   type IconComponent,
 } from '@/features/landing/icons.js'
-import { BookStack } from '@/features/landing/landing-visuals.js'
 import { HeroPreview } from '@/features/landing/hero-preview.js'
 import { ExperimentShowcase } from '@/features/landing/experiment-showcase.js'
 import { WorkbenchPreview } from '@/features/landing/workbench-preview.js'
+import { EvidenceSection } from '@/features/landing/evidence-section.js'
+import { FinalCtaBanner } from '@/features/landing/final-cta-banner.js'
 import { ScrollReveal } from '@/features/landing/scroll-reveal.js'
 
 /**
  * Home page and experiment showcase (docs/web-application-scope.md §4.1), redesigned to
  * the approved landing package (design.md, reference/approved-landing.png).
  *
- * Core storytelling sections redesigned in R14.2:
- * - 3-experiment showcase (ExperimentShowcase)
- * - Workbench demonstration (WorkbenchPreview)
+ * Storytelling sequence:
+ * 1. Hero with interactive preview (HeroPreview)
+ * 2. Learning values transition strip
+ * 3. 3-experiment showcase (ExperimentShowcase)
+ * 4. Interactive Workbench demonstration (WorkbenchPreview)
+ * 5. Scientific Evidence & Trust (EvidenceSection)
+ * 6. Final conversion banner (FinalCtaBanner)
+ * 7. Scientific model disclosure & locked evidence register (ScientificDisclosure)
  *
- * Server Component reading only the release registries, so it is statically renderable.
- * `ScrollReveal` and `WorkbenchPreview` are client leaves where needed, so everything else
- * stays server-rendered.
+ * Server Component reading only the release registries, statically renderable.
+ * `ScrollReveal` and `WorkbenchPreview` are client leaves where needed.
  */
 
 const TRUST_ICONS: readonly IconComponent[] = [GuestIcon, RepeatIcon, BookIcon]
-
-type BadgeTone = 'icon-badge-blue' | 'icon-badge-green' | 'icon-badge-teal'
-
-const EVIDENCE_ICONS: ReadonlyArray<{ Icon: IconComponent; tone: BadgeTone }> = [
-  { Icon: CalculatorIcon, tone: 'icon-badge-blue' },
-  { Icon: SigmaIcon, tone: 'icon-badge-teal' },
-  { Icon: BookIcon, tone: 'icon-badge-green' },
-]
 
 export default function HomePage() {
   const catalog = listCatalog()
@@ -117,7 +111,7 @@ export default function HomePage() {
       <section className="hero-learning-strip reveal" aria-label={strings.learningValueHeading}>
         <div className="hero-learning-inner">
           <div className="hero-learning-header">
-            <SigmaIcon className="hero-learning-icon" />
+            <span className="hero-learning-icon" aria-hidden="true">∑</span>
             <span>{strings.learningValueHeading}</span>
           </div>
           <ul className="hero-learning-items">
@@ -131,64 +125,20 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="page stack-loose">
-
+      <div className="page landing-flow">
         <ExperimentShowcase />
 
         <WorkbenchPreview />
 
-        <section className="stack reveal" id="evidence">
-          <div className="stack-tight">
-            <p className="eyebrow">{strings.evidenceEyebrow}</p>
-            <h2>{strings.evidenceSectionHeading}</h2>
-            <p className="lede">{strings.evidenceSectionLede}</p>
-          </div>
+        <EvidenceSection />
 
-          <div className="evidence-section">
-            <div className="evidence-cards">
-              {strings.evidenceCards.map((card, index) => {
-                const meta = EVIDENCE_ICONS[index] ?? EVIDENCE_ICONS[0]!
-                const { Icon, tone } = meta
-                return (
-                  <div className="evidence-card" key={card.title}>
-                    <span className={`icon-badge icon-badge-sm ${tone}`}>
-                      <Icon />
-                    </span>
-                    <h3>{card.title}</h3>
-                    <p>{card.body}</p>
-                    <Link href="/evidence">
-                      Xem chi tiết
-                      <ArrowRightIcon />
-                    </Link>
-                  </div>
-                )
-              })}
-            </div>
-            <div className="evidence-illustration">
-              <BookStack />
-            </div>
+        <FinalCtaBanner scenarioKey={firstScenario?.scenarioKey} />
+
+        <section className="landing-disclosure-section reveal" aria-label="Nguồn và giới hạn mô hình">
+          <div className="landing-disclosure-card">
+            <ScientificDisclosure />
           </div>
         </section>
-
-        <section className="final-cta reveal">
-          <div className="final-cta-body">
-            <span className="icon-badge icon-badge-teal" aria-hidden="true">
-              <FlaskIcon />
-            </span>
-            <div className="final-cta-copy">
-              <h2>{strings.finalCtaHeading}</h2>
-              <p>{strings.finalCtaLede}</p>
-            </div>
-          </div>
-          {firstScenario !== undefined && (
-            <Link className="btn btn-primary btn-lg" href={`/simulate/${firstScenario.scenarioKey}`}>
-              {strings.finalCtaButton}
-              <ArrowRightIcon />
-            </Link>
-          )}
-        </section>
-
-        <ScientificDisclosure />
       </div>
     </>
   )
