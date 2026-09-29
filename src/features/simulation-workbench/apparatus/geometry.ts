@@ -8,47 +8,49 @@
 
 export const APPARATUS_CONSTANTS = {
   VIEWBOX: '0 0 800 600',
+  VIEWBOX_DESKTOP: '0 0 800 600',
+  VIEWBOX_MOBILE: '200 185 400 380',
   VIEWBOX_WIDTH: 800,
   VIEWBOX_HEIGHT: 600,
 
   // Burette Truth Contract: 100 mL visual capacity comfortably supports 0-60 mL delivered NaOH
   BURETTE_CAPACITY_ML: 100,
-  BURETTE_CENTER_X: 380,
-  BURETTE_TUBE_WIDTH: 24,
-  BURETTE_TUBE_TOP_Y: 50,
-  BURETTE_TUBE_BOTTOM_Y: 310,
-  BURETTE_SCALE_TOP_Y: 80, // 0.0 mL graduation
-  BURETTE_SCALE_BOTTOM_Y: 290, // 100.0 mL graduation
-  BURETTE_VALVE_Y: 330,
-  BURETTE_TIP_Y: 366,
+  BURETTE_CENTER_X: 375,
+  BURETTE_TUBE_WIDTH: 28,
+  BURETTE_TUBE_TOP_Y: 35,
+  BURETTE_TUBE_BOTTOM_Y: 255,
+  BURETTE_SCALE_TOP_Y: 55, // 0.0 mL graduation
+  BURETTE_SCALE_BOTTOM_Y: 235, // 100.0 mL graduation (180px scale: 1.8px / mL)
+  BURETTE_VALVE_Y: 275,
+  BURETTE_TIP_Y: 310,
 
   // Beaker Truth Contract: 250 mL standard laboratory beaker
   BEAKER_CAPACITY_ML: 250,
   BEAKER_CENTER_X: 400,
-  BEAKER_WIDTH: 148,
-  BEAKER_TOP_Y: 385,
-  BEAKER_BOTTOM_Y: 505,
-  BEAKER_LIQUID_BASE_Y: 502,
-  BEAKER_MAX_LIQUID_HEIGHT: 88, // 250 mL fill height
+  BEAKER_WIDTH: 196,
+  BEAKER_TOP_Y: 330,
+  BEAKER_BOTTOM_Y: 492,
+  BEAKER_LIQUID_BASE_Y: 488,
+  BEAKER_MAX_LIQUID_HEIGHT: 125, // 250 mL fill height (surface at 363, well below 330 rim)
 
   // pH Electrode Probe Geometry
-  PROBE_MOUNT_X: 446,
-  PROBE_TIP_Y: 494, // Fully submerged even at minimum 25 mL level (surfaceY ~493)
+  PROBE_MOUNT_X: 450,
+  PROBE_TIP_Y: 482, // Fully submerged across 25-150 mL (25 mL surface is 475.5)
 
   // Laboratory Stand Geometry
-  STAND_BASE_X: 180,
-  STAND_BASE_Y: 532,
-  STAND_BASE_WIDTH: 440,
+  STAND_BASE_X: 160,
+  STAND_BASE_Y: 536,
+  STAND_BASE_WIDTH: 480,
   STAND_BASE_HEIGHT: 18,
-  STAND_ROD_X: 255,
-  STAND_ROD_TOP_Y: 35,
-  STAND_ROD_BOTTOM_Y: 532,
+  STAND_ROD_X: 235,
+  STAND_ROD_TOP_Y: 22,
+  STAND_ROD_BOTTOM_Y: 536,
 
   // Magnetic Stirrer Geometry
-  STIRRER_PLATE_TOP_Y: 508,
+  STIRRER_PLATE_TOP_Y: 494,
   STIRRER_BODY_BOTTOM_Y: 546,
-  STIRRER_WIDTH: 180,
-  STIR_BAR_Y: 498,
+  STIRRER_WIDTH: 230,
+  STIR_BAR_Y: 485,
 } as const
 
 export type BuretteGeometryResult = Readonly<{

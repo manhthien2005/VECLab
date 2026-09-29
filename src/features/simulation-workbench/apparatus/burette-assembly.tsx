@@ -15,7 +15,7 @@ export function BuretteAssembly({
   addedBaseVolumeMl,
   isDispensing = false,
 }: BuretteAssemblyProps): ReactElement {
-  const { meniscusY, remainingMl, deliveredMl } = calculateBuretteLiquid(addedBaseVolumeMl)
+  const { meniscusY, remainingMl } = calculateBuretteLiquid(addedBaseVolumeMl)
 
   const centerX = APPARATUS_CONSTANTS.BURETTE_CENTER_X
   const tubeWidth = APPARATUS_CONSTANTS.BURETTE_TUBE_WIDTH
@@ -29,7 +29,7 @@ export function BuretteAssembly({
   const valveY = APPARATUS_CONSTANTS.BURETTE_VALVE_Y
   const tipY = APPARATUS_CONSTANTS.BURETTE_TIP_Y
   const rodX = APPARATUS_CONSTANTS.STAND_ROD_X
-  const clampY = 160
+  const clampY = 135
 
   // Major graduation ticks every 10 mL (0 to 100 mL)
   const scaleTopY = APPARATUS_CONSTANTS.BURETTE_SCALE_TOP_Y
@@ -55,10 +55,10 @@ export function BuretteAssembly({
     M ${innerLeft} ${meniscusY}
     L ${innerRight} ${meniscusY}
     L ${innerRight} ${bottomY}
-    L ${centerX + 3} ${valveY + 8}
-    L ${centerX + 1.5} ${tipY}
-    L ${centerX - 1.5} ${tipY}
-    L ${centerX - 3} ${valveY + 8}
+    L ${centerX + 3.5} ${valveY + 8}
+    L ${centerX + 1.8} ${tipY}
+    L ${centerX - 1.8} ${tipY}
+    L ${centerX - 3.5} ${valveY + 8}
     L ${innerLeft} ${bottomY}
     Z
   `
@@ -120,8 +120,8 @@ export function BuretteAssembly({
       {/* Flared top filling funnel */}
       <path
         d={`
-          M ${centerX - 18} 38
-          L ${centerX + 18} 38
+          M ${centerX - 20} 22
+          L ${centerX + 20} 22
           L ${rightX} ${topY}
           L ${leftX} ${topY}
           Z
@@ -129,7 +129,7 @@ export function BuretteAssembly({
         className="wb-burette-funnel"
       />
       {/* Top rim highlight */}
-      <ellipse cx={centerX} cy={38} rx={18} ry={2.5} className="wb-burette-rim" />
+      <ellipse cx={centerX} cy={22} rx={20} ry={3} className="wb-burette-rim" />
 
       {/* Main Glass Tube Background */}
       <rect
@@ -147,27 +147,50 @@ export function BuretteAssembly({
 
           {/* Concave Meniscus Line at current liquid level */}
           <path
-            d={`M ${innerLeft} ${meniscusY} Q ${centerX} ${meniscusY + 2.5} ${innerRight} ${meniscusY}`}
+            d={`M ${innerLeft} ${meniscusY} Q ${centerX} ${meniscusY + 3} ${innerRight} ${meniscusY}`}
             className="wb-burette-meniscus"
           />
           {/* Subtle meniscus specular reflection */}
           <ellipse
             cx={centerX}
-            cy={meniscusY + 1}
+            cy={meniscusY + 1.2}
             rx={halfWidth - 3}
-            ry={1.2}
+            ry={1.4}
             fill="rgba(255, 255, 255, 0.45)"
           />
         </>
       )}
 
-      {/* ================= 4. GRADUATION SCALE (0 to 100 mL) ================= */}
-      <g className="wb-burette-scale" opacity={0.8}>
+      {/* ================= 4. GRADUATION SCALE & ETCHED MARKINGS (0 to 100 mL) ================= */}
+      <g className="wb-burette-scale">
+        {/* Class A Specification Etchings on Glass */}
+        <text
+          x={centerX - 1}
+          y={scaleTopY - 10}
+          fontSize={6.5}
+          fontFamily="var(--font-mono)"
+          fill="var(--ink-muted)"
+          textAnchor="middle"
+          letterSpacing="0.04em"
+        >
+          NaOH 0,100 M
+        </text>
+        <text
+          x={centerX - 1}
+          y={scaleTopY - 3}
+          fontSize={5.5}
+          fontFamily="var(--font-mono)"
+          fill="var(--ink-faint)"
+          textAnchor="middle"
+        >
+          100 : 0.1 mL
+        </text>
+
         {/* Minor ticks (every 2 mL) */}
         {minorTicks.map(({ y }, idx) => (
           <line
             key={`minor-${idx}`}
-            x1={rightX - 4}
+            x1={rightX - 5}
             x2={rightX - 1}
             y1={y}
             y2={y}
@@ -180,7 +203,7 @@ export function BuretteAssembly({
         {majorTicks.map(({ ml, y, label }) => (
           <g key={`major-${ml}`}>
             <line
-              x1={rightX - 9}
+              x1={rightX - 10}
               x2={rightX - 1}
               y1={y}
               y2={y}
@@ -191,7 +214,7 @@ export function BuretteAssembly({
               <text
                 x={rightX + 4}
                 y={y + 3}
-                fontSize={7.5}
+                fontSize={8}
                 fontFamily="var(--font-numeric)"
                 fill="var(--ink-muted)"
                 textAnchor="start"
@@ -214,8 +237,8 @@ export function BuretteAssembly({
       />
       {/* Left specular reflection stripe */}
       <line
-        x1={leftX + 3}
-        x2={leftX + 3}
+        x1={leftX + 3.5}
+        x2={leftX + 3.5}
         y1={topY + 4}
         y2={bottomY - 4}
         className="wb-burette-reflection"
@@ -274,40 +297,6 @@ export function BuretteAssembly({
         `}
         className="wb-burette-tip"
       />
-
-      {/* ================= 7. COMPACT BURETTE TELEMETRY TAG ================= */}
-      <g transform={`translate(${leftX - 105}, 65)`}>
-        <rect
-          x={0}
-          y={0}
-          width={96}
-          height={32}
-          rx={4}
-          className="wb-burette-tag-bg"
-        />
-        <text
-          x={8}
-          y={13}
-          fontSize={8.5}
-          fontWeight={600}
-          fill="var(--ink)"
-          fontFamily="var(--font-sans)"
-        >
-          Burette NaOH
-        </text>
-        <text
-          x={8}
-          y={24}
-          fontSize={8}
-          fill="var(--ink-muted)"
-          fontFamily="var(--font-numeric)"
-        >
-          Đã thêm:{' '}
-          <tspan fill="var(--accent)" fontWeight={700}>
-            {`${deliveredMl} mL`}
-          </tspan>
-        </text>
-      </g>
     </g>
   )
 }

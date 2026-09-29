@@ -146,36 +146,36 @@ export function MagneticStirrer({
         {/* Front Control Panel Recess */}
         <rect
           x={plateLeft + 12}
-          y={plateTop + 13}
+          y={plateTop + 14}
           width={APPARATUS_CONSTANTS.STIRRER_WIDTH - 24}
-          height={21}
+          height={26}
           rx={3}
           className="wb-stirrer-front-panel"
         />
 
         {/* Status / Stirring Pilot LED */}
         <circle
-          cx={plateLeft + 26}
-          cy={plateTop + 23.5}
-          r={3}
+          cx={plateLeft + 24}
+          cy={plateTop + 27}
+          r={3.5}
           className={`wb-stirrer-led ${isStirring ? 'is-active' : ''}`}
         />
 
         {/* Digital RPM Readout */}
-        <g transform={`translate(${plateLeft + 36}, ${plateTop + 16})`}>
+        <g transform={`translate(${plateLeft + 36}, ${plateTop + 18})`}>
           <rect
             x={0}
             y={0}
-            width={62}
-            height={15}
+            width={76}
+            height={18}
             rx={2}
             className="wb-stirrer-lcd"
           />
           <text
-            x={31}
-            y={11}
+            x={38}
+            y={13}
             textAnchor="middle"
-            fontSize={9.5}
+            fontSize={10.5}
             fontFamily="var(--font-mono)"
             fontWeight={700}
             className="wb-stirrer-lcd-text"
@@ -185,17 +185,17 @@ export function MagneticStirrer({
         </g>
 
         {/* Rotary Speed Knob */}
-        <g transform={`translate(${plateRight - 36}, ${plateTop + 23.5})`}>
-          <circle cx={0} cy={0} r={7.5} className="wb-stirrer-knob-base" />
-          <circle cx={0} cy={0} r={6} className="wb-stirrer-knob" />
+        <g transform={`translate(${plateRight - 36}, ${plateTop + 27})`}>
+          <circle cx={0} cy={0} r={9} className="wb-stirrer-knob-base" />
+          <circle cx={0} cy={0} r={7} className="wb-stirrer-knob" />
           {/* Knob pointer indicator */}
           <line
             x1={0}
             y1={-1}
-            x2={isStirring ? 3 : -3}
-            y2={isStirring ? -4.5 : 4.5}
+            x2={isStirring ? 3.5 : -3.5}
+            y2={isStirring ? -5.5 : 5.5}
             stroke="var(--accent-contrast)"
-            strokeWidth={1.5}
+            strokeWidth={1.75}
             strokeLinecap="round"
           />
         </g>

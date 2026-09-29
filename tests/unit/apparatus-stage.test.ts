@@ -114,6 +114,37 @@ describe('Titration Apparatus Stage Component Architecture (WB-R4)', () => {
     expect(mixingHtml).toContain('450 RPM')
     expect(mixingHtml).toContain('Đang khuấy mẫu')
   })
+
+  it('supports explicit responsive viewMode framing (desktop full scene vs mobile focused)', () => {
+    const desktopHtml = renderToString(
+      React.createElement(TitrationApparatusStage, {
+        addedBaseVolumeMl: 0,
+        totalVolumeMl: 25,
+        viewMode: 'desktop',
+      }),
+    )
+    expect(desktopHtml).toContain('viewBox="0 0 800 600"')
+
+    const mobileHtml = renderToString(
+      React.createElement(TitrationApparatusStage, {
+        addedBaseVolumeMl: 0,
+        totalVolumeMl: 25,
+        viewMode: 'mobile',
+      }),
+    )
+    expect(mobileHtml).toContain('viewBox="200 185 400 380"')
+  })
+
+  it('ensures apparatus stage is a clean laboratory instrument without floating diagram callout pills', () => {
+    const stageContent = readFileSync(STAGE_FILE, 'utf8')
+    const buretteContent = readFileSync(BURETTE_FILE, 'utf8')
+    const beakerContent = readFileSync(BEAKER_FILE, 'utf8')
+
+    // Floating diagram tags removed
+    expect(stageContent).not.toContain('wb-stage-status-badge')
+    expect(buretteContent).not.toContain('wb-burette-tag-bg')
+    expect(beakerContent).not.toContain('wb-beaker-vol-tag')
+  })
 })
 
 describe('Titration Apparatus Scientific State Truth & Zero Chemistry Duplication', () => {

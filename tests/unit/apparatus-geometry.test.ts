@@ -122,4 +122,65 @@ describe('Apparatus Geometry Contract (WB-R4)', () => {
       expect(p600.vortexIntensity).toBe(1)
     })
   })
+
+  describe('WB-R4.1 Apparatus Spatial Alignment & Responsive Framing', () => {
+    it('verifies burette tip remains vertically aligned directly over beaker opening', () => {
+      const beakerLeft =
+        APPARATUS_CONSTANTS.BEAKER_CENTER_X - APPARATUS_CONSTANTS.BEAKER_WIDTH / 2
+      const beakerRight =
+        APPARATUS_CONSTANTS.BEAKER_CENTER_X + APPARATUS_CONSTANTS.BEAKER_WIDTH / 2
+
+      // Tip X is strictly inside the beaker rim opening
+      expect(APPARATUS_CONSTANTS.BURETTE_CENTER_X).toBeGreaterThan(beakerLeft)
+      expect(APPARATUS_CONSTANTS.BURETTE_CENTER_X).toBeLessThan(beakerRight)
+
+      // Tip Y is above beaker top or rim opening with clearance for droplets
+      expect(APPARATUS_CONSTANTS.BURETTE_TIP_Y).toBeLessThan(
+        APPARATUS_CONSTANTS.BEAKER_TOP_Y,
+      )
+    })
+
+    it('verifies probe remains submerged across all supported volume states (25 to 150 mL)', () => {
+      const volumeStates = [25, 35, 50, 65, 80, 100, 110, 150]
+      for (const vol of volumeStates) {
+        const { isProbeSubmerged, surfaceY } = calculateBeakerLiquid(vol)
+        expect(isProbeSubmerged).toBe(true)
+        expect(surfaceY).toBeLessThanOrEqual(APPARATUS_CONSTANTS.PROBE_TIP_Y)
+      }
+    })
+
+    it('verifies mobile focused framing contains beaker, probe, and burette tip without clipping', () => {
+      const parts = APPARATUS_CONSTANTS.VIEWBOX_MOBILE.split(' ').map(Number)
+      const vx = parts[0] ?? 0
+      const vy = parts[1] ?? 0
+      const vw = parts[2] ?? 0
+      const vh = parts[3] ?? 0
+      const minX = vx
+      const maxX = vx + vw
+      const minY = vy
+      const maxY = vy + vh
+
+      // Burette tip is within mobile view
+      expect(APPARATUS_CONSTANTS.BURETTE_CENTER_X).toBeGreaterThanOrEqual(minX)
+      expect(APPARATUS_CONSTANTS.BURETTE_CENTER_X).toBeLessThanOrEqual(maxX)
+      expect(APPARATUS_CONSTANTS.BURETTE_TIP_Y).toBeGreaterThanOrEqual(minY)
+      expect(APPARATUS_CONSTANTS.BURETTE_TIP_Y).toBeLessThanOrEqual(maxY)
+
+      // Beaker boundaries are within mobile view
+      const beakerLeft =
+        APPARATUS_CONSTANTS.BEAKER_CENTER_X - APPARATUS_CONSTANTS.BEAKER_WIDTH / 2
+      const beakerRight =
+        APPARATUS_CONSTANTS.BEAKER_CENTER_X + APPARATUS_CONSTANTS.BEAKER_WIDTH / 2
+      expect(beakerLeft).toBeGreaterThanOrEqual(minX)
+      expect(beakerRight).toBeLessThanOrEqual(maxX)
+      expect(APPARATUS_CONSTANTS.BEAKER_TOP_Y).toBeGreaterThanOrEqual(minY)
+      expect(APPARATUS_CONSTANTS.BEAKER_BOTTOM_Y).toBeLessThanOrEqual(maxY)
+
+      // Probe bulb is within mobile view
+      expect(APPARATUS_CONSTANTS.PROBE_MOUNT_X).toBeGreaterThanOrEqual(minX)
+      expect(APPARATUS_CONSTANTS.PROBE_MOUNT_X).toBeLessThanOrEqual(maxX)
+      expect(APPARATUS_CONSTANTS.PROBE_TIP_Y).toBeGreaterThanOrEqual(minY)
+      expect(APPARATUS_CONSTANTS.PROBE_TIP_Y).toBeLessThanOrEqual(maxY)
+    })
+  })
 })

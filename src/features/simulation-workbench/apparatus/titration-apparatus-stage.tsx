@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import { useSyncExternalStore, type ReactElement } from 'react'
 import type {
   InteractionAcknowledgement,
   OperationStage,
@@ -22,11 +22,28 @@ export type TitrationApparatusStageProps = {
   operationStage?: OperationStage
   lastSuccessfulInteraction?: InteractionAcknowledgement | null
   className?: string
+  viewMode?: 'auto' | 'desktop' | 'mobile'
+}
+
+function subscribeMobileQuery(callback: () => void): () => void {
+  if (typeof window === 'undefined') return () => {}
+  const mq = window.matchMedia('(max-width: 640px)')
+  mq.addEventListener('change', callback)
+  return () => mq.removeEventListener('change', callback)
+}
+
+function getMobileSnapshot(): boolean {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(max-width: 640px)').matches
+}
+
+function getMobileServerSnapshot(): boolean {
+  return false
 }
 
 /**
  * TitrationApparatusStage: Scalable interactive SVG laboratory apparatus for the VECLab Workbench.
- * (docs/web-application-scope.md §4.6, WB-R4).
+ * (docs/web-application-scope.md §4.6, WB-R4, WB-R4.1).
  *
  * Professional digital laboratory aesthetic:
  * - 100 mL graduated dosing burette with rotating stopcock valve.
@@ -34,6 +51,7 @@ export type TitrationApparatusStageProps = {
  * - Laboratory combination pH electrode.
  * - Magnetic stir plate and rotating stir bar with RPM visual telemetry.
  * - Droplet dispensing interaction acknowledgement.
+ * - Responsive SVG framing: desktop shows full apparatus; mobile focuses on the active reaction cluster.
  *
  * Prop-driven read model. Does not own or mutate chemistry state.
  */
@@ -45,7 +63,24 @@ export function TitrationApparatusStage({
   operationStage = 'idle',
   lastSuccessfulInteraction = null,
   className = '',
+  viewMode = 'auto',
 }: TitrationApparatusStageProps): ReactElement {
+  // Mobile responsive subscription via useSyncExternalStore (SSR-safe, React 19 clean)
+  const isMobileClient = useSyncExternalStore(
+    subscribeMobileQuery,
+    getMobileSnapshot,
+    getMobileServerSnapshot,
+  )
+
+  const currentViewBox =
+    viewMode === 'mobile'
+      ? APPARATUS_CONSTANTS.VIEWBOX_MOBILE
+      : viewMode === 'desktop'
+        ? APPARATUS_CONSTANTS.VIEWBOX_DESKTOP
+        : isMobileClient
+          ? APPARATUS_CONSTANTS.VIEWBOX_MOBILE
+          : APPARATUS_CONSTANTS.VIEWBOX_DESKTOP
+
   // Derive operational flags
   const isDispensing = operationStage === 'dispensing'
   const isMixing = operationStage === 'mixing' || stirrerActive
@@ -68,15 +103,14 @@ export function TitrationApparatusStage({
   return (
     <div className={`wb-apparatus-stage-container ${className}`}>
       <svg
-        viewBox={APPARATUS_CONSTANTS.VIEWBOX}
+        viewBox={currentViewBox}
         className="wb-apparatus-svg"
         role="img"
         aria-label="Mô phỏng bộ dụng cụ chuẩn độ axit - bazơ gồm buret định mức, cốc phản ứng, máy khuấy từ và điện cực pH"
       >
         <title>Bộ dụng cụ chuẩn độ axit - bazơ VECLab</title>
         <desc>
-          Buret chứa dung dịch NaOH đã thêm {addedBaseVolumeMl} mL. Cốc phản ứng chứa tổng thể tích{' '}
-          {totalVolumeMl} mL với điện cực pH và máy khuấy từ. Trạng thái hiện tại: {stageDescription}.
+          {`Buret chứa dung dịch NaOH đã thêm ${addedBaseVolumeMl} mL. Cốc phản ứng chứa tổng thể tích ${totalVolumeMl} mL với điện cực pH và máy khuấy từ. Trạng thái hiện tại: ${stageDescription}.`}
         </desc>
 
         {/* ================= SVG DEFS & GRADIENTS ================= */}
@@ -165,33 +199,6 @@ export function TitrationApparatusStage({
           triggerToken={additionToken}
         />
 
-        {/* ================= 7. COMPACT APPARATUS STATUS CHIP (TOP RIGHT) ================= */}
-        <g transform="translate(620, 48)" className="wb-stage-status-badge" aria-hidden="true">
-          <rect
-            x={0}
-            y={0}
-            width={130}
-            height={26}
-            rx={13}
-            className="wb-status-badge-bg"
-          />
-          <circle
-            cx={13}
-            cy={13}
-            r={4}
-            className={`wb-status-badge-dot ${operationStage !== 'idle' ? 'is-active' : ''}`}
-          />
-          <text
-            x={24}
-            y={16.5}
-            fontSize={9.5}
-            fontWeight={600}
-            fontFamily="var(--font-sans)"
-            className="wb-status-badge-text"
-          >
-            {stageDescription}
-          </text>
-        </g>
       </svg>
     </div>
   )

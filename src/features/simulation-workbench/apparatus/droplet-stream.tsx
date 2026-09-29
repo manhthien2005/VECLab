@@ -16,8 +16,8 @@ export type DropletStreamProps = {
  */
 export function DropletStream({
   isDispensing,
-  originX = 380,
-  originY = 366,
+  originX = 375,
+  originY = 310,
   targetY,
   triggerToken,
 }: DropletStreamProps): ReactElement {

@@ -19,7 +19,7 @@ export function ReactionBeaker({
   vortexIntensity = 0.5,
   stirDurationSeconds = 0.2,
 }: ReactionBeakerProps): ReactElement {
-  const { surfaceY, volumeMl } = calculateBeakerLiquid(totalVolumeMl)
+  const { surfaceY } = calculateBeakerLiquid(totalVolumeMl)
 
   const leftX = APPARATUS_CONSTANTS.BEAKER_CENTER_X - APPARATUS_CONSTANTS.BEAKER_WIDTH / 2
   const rightX = APPARATUS_CONSTANTS.BEAKER_CENTER_X + APPARATUS_CONSTANTS.BEAKER_WIDTH / 2
@@ -36,10 +36,10 @@ export function ReactionBeaker({
   const liquidPath = `
     M ${innerLeft} ${surfaceY}
     Q ${APPARATUS_CONSTANTS.BEAKER_CENTER_X} ${surfaceY + vortexDip} ${innerRight} ${surfaceY}
-    L ${innerRight} ${innerBottom - 6}
-    Q ${innerRight} ${innerBottom} ${innerRight - 6} ${innerBottom}
-    L ${innerLeft + 6} ${innerBottom}
-    Q ${innerLeft} ${innerBottom} ${innerLeft} ${innerBottom - 6}
+    L ${innerRight} ${innerBottom - 8}
+    Q ${innerRight} ${innerBottom} ${innerRight - 8} ${innerBottom}
+    L ${innerLeft + 8} ${innerBottom}
+    Q ${innerLeft} ${innerBottom} ${innerLeft} ${innerBottom - 8}
     Z
   `
 
@@ -60,50 +60,62 @@ export function ReactionBeaker({
       {/* --- 1. Beaker Rear Wall & Glass Base --- */}
       <path
         d={`
-          M ${leftX - 4} ${topY - 3}
-          Q ${leftX - 8} ${topY - 5} ${leftX - 6} ${topY + 3}
-          L ${leftX} ${topY + 6}
-          L ${leftX} ${bottomY - 8}
-          Q ${leftX} ${bottomY} ${leftX + 8} ${bottomY}
-          L ${rightX - 8} ${bottomY}
-          Q ${rightX} ${bottomY} ${rightX} ${bottomY - 8}
-          L ${rightX} ${topY + 6}
-          L ${rightX + 4} ${topY + 4}
+          M ${leftX - 6} ${topY - 4}
+          Q ${leftX - 10} ${topY - 6} ${leftX - 8} ${topY + 4}
+          L ${leftX} ${topY + 8}
+          L ${leftX} ${bottomY - 10}
+          Q ${leftX} ${bottomY} ${leftX + 10} ${bottomY}
+          L ${rightX - 10} ${bottomY}
+          Q ${rightX} ${bottomY} ${rightX} ${bottomY - 10}
+          L ${rightX} ${topY + 8}
+          L ${rightX + 5} ${topY + 5}
         `}
         className="wb-beaker-glass-back"
       />
 
       {/* --- 2. Beaker Graduation Lines on Glass --- */}
-      <g className="wb-beaker-graduations" opacity={0.65}>
+      <g className="wb-beaker-graduations">
+        {/* Specification & brand etchings */}
         <text
-          x={leftX + 16}
-          y={topY + 16}
-          fontSize={7.5}
-          fill="var(--ink-faint)"
+          x={leftX + 18}
+          y={topY + 20}
+          fontSize={8.5}
+          fontWeight={600}
+          fill="var(--ink-muted)"
           fontFamily="var(--font-mono)"
           letterSpacing="0.04em"
         >
           250 mL
+        </text>
+        <text
+          x={leftX + 18}
+          y={topY + 30}
+          fontSize={6.5}
+          fill="var(--ink-faint)"
+          fontFamily="var(--font-mono)"
+        >
+          APPROX. VOL.
         </text>
 
         {graduations.map(({ ml, y }) => (
           <g key={ml}>
             {/* Major tick mark */}
             <line
-              x1={leftX + 10}
-              x2={leftX + 22}
+              x1={leftX + 12}
+              x2={leftX + 28}
               y1={y}
               y2={y}
-              stroke="var(--ink-faint)"
-              strokeWidth={1.2}
+              stroke="var(--ink-muted)"
+              strokeWidth={1.4}
             />
             {/* Volume label */}
             <text
-              x={leftX + 26}
-              y={y + 3}
-              fontSize={8}
+              x={leftX + 33}
+              y={y + 3.5}
+              fontSize={9}
+              fontWeight={600}
               fontFamily="var(--font-numeric)"
-              fill="var(--ink-faint)"
+              fill="var(--ink)"
             >
               {ml}
             </text>
@@ -122,10 +134,10 @@ export function ReactionBeaker({
 
       {/* Secondary fluid highlight reflecting light */}
       <path
-        d={`M ${innerLeft + 6} ${surfaceY + 2} Q ${APPARATUS_CONSTANTS.BEAKER_CENTER_X} ${surfaceY + vortexDip + 2} ${innerRight - 6} ${surfaceY + 2}`}
+        d={`M ${innerLeft + 8} ${surfaceY + 2.5} Q ${APPARATUS_CONSTANTS.BEAKER_CENTER_X} ${surfaceY + vortexDip + 2.5} ${innerRight - 8} ${surfaceY + 2.5}`}
         fill="none"
-        stroke="rgba(255, 255, 255, 0.4)"
-        strokeWidth={1}
+        stroke="rgba(255, 255, 255, 0.45)"
+        strokeWidth={1.2}
       />
 
       {/* --- 4. Magnetic Stir Bar (inside liquid at beaker floor) --- */}
@@ -139,24 +151,24 @@ export function ReactionBeaker({
         }
       >
         {/* Shadow under stir bar */}
-        <ellipse cx={0} cy={3} rx={14} ry={2.5} fill="rgba(0, 0, 0, 0.18)" />
+        <ellipse cx={0} cy={4} rx={18} ry={3.5} fill="rgba(0, 0, 0, 0.22)" />
 
         {/* Stir bar body (PTFE white laboratory magnet pill) */}
         <rect
-          x={-14}
-          y={-3.5}
-          width={28}
-          height={7}
-          rx={3.5}
+          x={-18}
+          y={-4.5}
+          width={36}
+          height={9}
+          rx={4.5}
           className="wb-stir-bar"
         />
         {/* Center pivot ring on stir bar */}
         <rect
-          x={-2}
-          y={-4}
-          width={4}
-          height={8}
-          rx={1}
+          x={-2.5}
+          y={-5}
+          width={5}
+          height={10}
+          rx={1.5}
           className="wb-stir-bar-ring"
         />
       </g>
@@ -164,32 +176,32 @@ export function ReactionBeaker({
       {/* --- 5. Beaker Front Glass Profile & Highlights --- */}
       <path
         d={`
-          M ${leftX - 4} ${topY - 3}
-          Q ${leftX - 8} ${topY - 5} ${leftX - 6} ${topY + 3}
-          L ${leftX} ${topY + 6}
-          L ${leftX} ${bottomY - 8}
-          Q ${leftX} ${bottomY} ${leftX + 8} ${bottomY}
-          L ${rightX - 8} ${bottomY}
-          Q ${rightX} ${bottomY} ${rightX} ${bottomY - 8}
-          L ${rightX} ${topY + 6}
-          L ${rightX + 4} ${topY + 4}
+          M ${leftX - 6} ${topY - 4}
+          Q ${leftX - 10} ${topY - 6} ${leftX - 8} ${topY + 4}
+          L ${leftX} ${topY + 8}
+          L ${leftX} ${bottomY - 10}
+          Q ${leftX} ${bottomY} ${leftX + 10} ${bottomY}
+          L ${rightX - 10} ${bottomY}
+          Q ${rightX} ${bottomY} ${rightX} ${bottomY - 10}
+          L ${rightX} ${topY + 8}
+          L ${rightX + 5} ${topY + 5}
         `}
         className="wb-beaker-glass-front"
       />
 
       {/* Vertical Glass Reflection Streak on Right */}
       <line
-        x1={rightX - 8}
-        x2={rightX - 8}
-        y1={topY + 12}
-        y2={bottomY - 14}
+        x1={rightX - 10}
+        x2={rightX - 10}
+        y1={topY + 14}
+        y2={bottomY - 16}
         className="wb-beaker-reflection"
       />
       <line
-        x1={leftX + 6}
-        x2={leftX + 6}
-        y1={topY + 14}
-        y2={bottomY - 16}
+        x1={leftX + 8}
+        x2={leftX + 8}
+        y1={topY + 16}
+        y2={bottomY - 18}
         className="wb-beaker-reflection-soft"
       />
 
@@ -197,37 +209,11 @@ export function ReactionBeaker({
       <line
         x1={leftX}
         x2={rightX}
-        y1={topY + 4}
-        y2={topY + 4}
-        stroke="rgba(255, 255, 255, 0.6)"
-        strokeWidth={1.5}
+        y1={topY + 5}
+        y2={topY + 5}
+        stroke="rgba(255, 255, 255, 0.7)"
+        strokeWidth={1.75}
       />
-
-      {/* Volume readout tag */}
-      <g
-        className="wb-beaker-vol-tag"
-        transform={`translate(${rightX + 8}, ${Math.min(bottomY - 15, Math.max(topY + 15, surfaceY))})`}
-      >
-        <rect
-          x={0}
-          y={-10}
-          width={44}
-          height={18}
-          rx={3}
-          className="wb-vol-tag-bg"
-        />
-        <text
-          x={22}
-          y={2.5}
-          textAnchor="middle"
-          fontSize={8.5}
-          fontFamily="var(--font-numeric)"
-          fontWeight={600}
-          className="wb-vol-tag-text"
-        >
-          {`${volumeMl} mL`}
-        </text>
-      </g>
     </g>
   )
 }
