@@ -209,6 +209,8 @@ export {
   projectTitrationPoint,
   projectTitrationPoints,
   projectTitrationCurve,
+  calculateNaohEquivalenceVolumeMl,
+  resolveMaxBaseVolumeMl,
   type TitrationCurvePoint,
   type TitrationCurveProjection,
 } from './acid-titration-curve.js'

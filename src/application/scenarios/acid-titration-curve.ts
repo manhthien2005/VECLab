@@ -125,3 +125,85 @@ export function projectTitrationCurve(
     maxBaseVolumeMl,
   }
 }
+
+/**
+ * Calculate the stoichiometric equivalence volume in millilitres (mL) for NaOH titrating HCl (WB-R5).
+ *
+ * In the neutralization reaction:
+ *   HCl + NaOH -> NaCl + H2O
+ * Stoichiometric equivalence occurs when moles of NaOH added equals initial moles of HCl:
+ *   n_HCl = acidVolumeL * acidConcentrationMolL
+ *   V_eq_L = n_HCl / baseEquivalentConcentrationEqL
+ *   V_eq_mL = V_eq_L * 1000
+ *
+ * Derived strictly from configuration/setup parameters without hardcoding 25.00 mL.
+ */
+export function calculateNaohEquivalenceVolumeMl(
+  params:
+    | {
+        readonly acidVolumeL: number
+        readonly acidConcentrationMolL?: number
+        readonly baseEquivalentConcentrationEqL?: number
+      }
+    | {
+        readonly constants: {
+          readonly acidVolumeL: number
+          readonly acidConcentrationMolL: number
+          readonly baseEquivalentConcentrationEqL: number
+        }
+      },
+): number {
+  const acidVolumeL = 'constants' in params ? params.constants.acidVolumeL : params.acidVolumeL
+  const acidConc =
+    'constants' in params
+      ? params.constants.acidConcentrationMolL
+      : params.acidConcentrationMolL ?? 0.01
+  const baseConc =
+    'constants' in params
+      ? params.constants.baseEquivalentConcentrationEqL
+      : params.baseEquivalentConcentrationEqL ?? acidConc
+
+  if (!Number.isFinite(acidVolumeL) || acidVolumeL <= 0) {
+    throw new RangeError(`Invalid acid volume for equivalence calculation: ${acidVolumeL}`)
+  }
+  if (!Number.isFinite(baseConc) || baseConc <= 0) {
+    throw new RangeError(`Invalid base concentration for equivalence calculation: ${baseConc}`)
+  }
+  if (!Number.isFinite(acidConc) || acidConc <= 0) {
+    throw new RangeError(`Invalid acid concentration for equivalence calculation: ${acidConc}`)
+  }
+
+  const vEqL = (acidVolumeL * acidConc) / baseConc
+  return Math.round(vEqL * ML_PER_LITRE * 1e6) / 1e6
+}
+
+/**
+ * Resolve the maximum cumulative NaOH base volume in millilitres (mL)
+ * for the titration curve x-axis from the active attempt configuration or setup parameters (WB-R5).
+ *
+ * For NaOH, max permitted volume is 1.20x the initial sample volume (spec §3.1).
+ *   Benchmark (25.0 mL sample): 30.00 mL
+ *   50.0 mL sample: 60.00 mL
+ */
+export function resolveMaxBaseVolumeMl(
+  configOrParams?:
+    | {
+        readonly maxBaseVolumeLByRoute?: Readonly<Record<string, number>>
+        readonly acidVolumeL?: number
+        readonly constants?: { readonly acidVolumeL: number }
+      }
+    | null
+    | undefined,
+): number {
+  if (!configOrParams) {
+    return 30.0
+  }
+  if (configOrParams.maxBaseVolumeLByRoute?.naoh !== undefined) {
+    return configOrParams.maxBaseVolumeLByRoute.naoh * ML_PER_LITRE
+  }
+  const acidVolumeL = configOrParams.constants?.acidVolumeL ?? configOrParams.acidVolumeL
+  if (acidVolumeL !== undefined && Number.isFinite(acidVolumeL) && acidVolumeL > 0) {
+    return 1.2 * acidVolumeL * ML_PER_LITRE
+  }
+  return 30.0
+}

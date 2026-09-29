@@ -6141,4 +6141,452 @@ td[data-numeric],
   }
 }
 
+/* ==========================================================================
+   36. Workbench Live Titration Chart & Telemetry HUD (WB-R5)
+   Scientific plotting area, digital HUD readout and responsive layout.
+   ========================================================================== */
+
+/* --- Live Titration Chart ------------------------------------------------ */
+.live-titration-chart-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  position: relative;
+  outline: none;
+}
+
+.live-titration-chart-container:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-ring);
+}
+
+.live-titration-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.live-titration-chart-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.live-titration-chart-heading {
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.live-titration-chart-count-badge {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--ink-muted);
+  border: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+
+.live-titration-chart-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+}
+
+.live-titration-chart-legend .legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.live-titration-chart-legend .legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+
+.live-titration-chart-legend .legend-line-dashed {
+  width: 14px;
+  height: 0;
+  border-top: 2px dashed var(--warn);
+}
+
+.live-titration-chart-svg-wrapper {
+  width: 100%;
+  position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.live-titration-chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.live-chart-plot-bg {
+  fill: var(--surface-2);
+}
+
+.live-chart-neutral-guide {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0.65;
+}
+
+.live-chart-grid-line-h,
+.live-chart-grid-line-v {
+  stroke: var(--border);
+  stroke-width: 1;
+  opacity: 0.55;
+}
+
+.live-chart-axis-line {
+  stroke: var(--border-strong);
+  stroke-width: 1.25;
+}
+
+.live-chart-tick-mark {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.live-chart-tick-label {
+  fill: var(--ink-faint);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.live-chart-axis-title {
+  fill: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.live-chart-curve {
+  fill: none;
+  stroke: var(--blue);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.live-chart-point-dot {
+  fill: var(--blue);
+  transition: r var(--motion-micro) ease, fill var(--motion-micro) ease;
+}
+
+.live-chart-point-halo {
+  fill: none;
+  stroke: var(--blue);
+  stroke-width: 1.5;
+  opacity: 0.85;
+}
+
+.live-chart-point-item:hover .live-chart-point-dot,
+.live-chart-point-item:focus .live-chart-point-dot {
+  r: 5.5;
+  fill: var(--cyan);
+}
+
+.live-chart-point-item:focus {
+  outline: none;
+}
+
+.live-chart-equivalence-line {
+  stroke: var(--warn);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.live-chart-equivalence-text {
+  fill: var(--warn);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: -0.01em;
+}
+
+.live-chart-hit-target {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.live-chart-tooltip-bg {
+  fill: var(--ink);
+  opacity: 0.94;
+}
+
+.live-chart-tooltip-text {
+  fill: var(--ink-inverted);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.live-chart-empty-text {
+  fill: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.live-chart-empty-subtext {
+  fill: var(--ink-faint);
+  font-size: 11px;
+}
+
+.live-titration-chart-inspection {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  border: 1px solid var(--border);
+}
+
+.live-titration-chart-inspection .inspection-label {
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+.live-titration-chart-inspection .inspection-value {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.live-titration-chart-inspection .inspection-correction {
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+}
+
+/* --- Instrument Telemetry HUD -------------------------------------------- */
+.instrument-telemetry-hud {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.telemetry-primary-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.telemetry-primary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.telemetry-label-cluster {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.telemetry-device-name {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
+
+.telemetry-device-type {
+  font-size: var(--text-2xs);
+  color: var(--ink-faint);
+}
+
+.telemetry-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.telemetry-status-pill.status-stable {
+  background: var(--ok-soft);
+  color: var(--ok);
+  border: 1px solid rgba(22, 163, 74, 0.25);
+}
+
+.telemetry-status-pill.status-pending {
+  background: var(--warn-soft);
+  color: var(--warn);
+  border: 1px solid rgba(217, 119, 6, 0.25);
+}
+
+.telemetry-status-pill.status-uncalibrated,
+.telemetry-status-pill.status-unmeasured {
+  background: var(--surface-3);
+  color: var(--ink-muted);
+  border: 1px solid var(--border);
+}
+
+.telemetry-status-pill .status-indicator-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.telemetry-value-display {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.telemetry-ph-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.telemetry-ph-value {
+  font-size: 2.75rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.telemetry-ph-value.value-placeholder {
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+
+.telemetry-ph-value.is-stale {
+  color: var(--ink-muted);
+  opacity: 0.82;
+}
+
+.telemetry-ph-unit {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--ink-muted);
+}
+
+.telemetry-stale-notice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--text-xs);
+  color: var(--warn);
+  font-weight: 500;
+}
+
+.telemetry-secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+}
+
+@media (min-width: 640px) {
+  .telemetry-secondary-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.telemetry-cell {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.telemetry-cell-label {
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.telemetry-cell-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.telemetry-cell-number {
+  font-size: var(--text-base);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.telemetry-cell-unit {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.telemetry-cell-subtext {
+  font-size: var(--text-2xs);
+  color: var(--ink-faint);
+}
+
+.telemetry-cell-state-badge {
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.telemetry-cell-state-badge.is-mixed {
+  color: var(--ok);
+}
+
+.telemetry-cell-state-badge.not-mixed {
+  color: var(--warn);
+}
+
+/* Reduced motion for chart and telemetry */
+@media (prefers-reduced-motion: reduce) {
+  .live-chart-point-dot,
+  .live-chart-point-halo,
+  .telemetry-status-pill {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 
