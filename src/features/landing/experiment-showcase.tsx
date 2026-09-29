@@ -58,7 +58,7 @@ export function ExperimentShowcase() {
   const strings = APP_STRINGS.home
 
   return (
-    <div className="experiment-showcase-section reveal">
+    <div className="experiment-showcase-section reveal" data-reveal-variant="focus">
       {/* Centered Section Heading matching approved reference */}
       <div className="section-head-center">
         <p className="eyebrow">{strings.showcaseEyebrow}</p>

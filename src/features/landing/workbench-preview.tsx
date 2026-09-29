@@ -71,7 +71,7 @@ export function WorkbenchPreview() {
   }
 
   return (
-    <div className="workbench-section reveal">
+    <div className="workbench-section reveal" data-reveal-variant="assemble">
       {/* Section Header */}
       <div className="section-head-center">
         <p className="eyebrow">TRẢI NGHIỆM CHI TIẾT</p>

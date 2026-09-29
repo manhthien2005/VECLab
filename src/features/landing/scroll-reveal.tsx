@@ -26,9 +26,15 @@ export function ScrollReveal() {
     const sections = document.querySelectorAll<HTMLElement>('.reveal')
     if (sections.length === 0) return
 
-    const reveal = (el: Element) => el.classList.remove('is-pending')
+    const reveal = (el: Element) => {
+      el.classList.remove('is-pending')
+      el.classList.add('is-revealed')
+    }
 
-    if (typeof IntersectionObserver === 'undefined') return
+    if (typeof IntersectionObserver === 'undefined') {
+      sections.forEach(reveal)
+      return
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -38,14 +44,17 @@ export function ScrollReveal() {
           observer.unobserve(entry.target)
         }
       },
-      { rootMargin: '0px 0px -10% 0px', threshold: 0.1 },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
     )
 
     const pending: Element[] = []
     for (const section of sections) {
       const rect = section.getBoundingClientRect()
       const alreadyVisible = rect.top < window.innerHeight && rect.bottom > 0
-      if (alreadyVisible) continue
+      if (alreadyVisible) {
+        section.classList.add('is-revealed')
+        continue
+      }
 
       section.classList.add('is-pending')
       pending.push(section)

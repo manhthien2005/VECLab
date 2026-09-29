@@ -1145,10 +1145,20 @@ td[data-numeric],
   font-weight: 600;
   white-space: nowrap;
   transition: background-color var(--motion-fast) var(--ease),
-    color var(--motion-fast) var(--ease);
+    color var(--motion-fast) var(--ease),
+    transform var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease);
 }
 
-.app-nav a:hover { background: var(--surface-2); color: var(--ink); }
+.app-nav a:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+  transform: translateY(-0.5px);
+}
+
+.app-nav a:active {
+  transform: translateY(0) scale(0.98);
+}
 
 /* Current-page indicator: `aria-current` is set in the component, so the marker cannot
    drift from what assistive technology is told. */
@@ -1287,17 +1297,51 @@ td[data-numeric],
   color: var(--ink-muted);
   cursor: pointer;
   box-shadow: var(--shadow-xs);
-  transition: background-color var(--motion-fast) var(--ease),
-    color var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease);
+  transition: background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .theme-toggle:hover {
   background: var(--surface-2);
   color: var(--ink);
   border-color: var(--border-strong);
+  transform: translateY(-1px);
 }
 
-.theme-toggle svg { width: 1.25rem; height: 1.25rem; }
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+.theme-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: theme-toggle-switch 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes theme-toggle-switch {
+  from {
+    opacity: 0.3;
+    transform: rotate(-25deg) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+.theme-toggle svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-toggle:hover svg {
+  transform: rotate(12deg);
+}
 
 /* ==========================================================================
    15. Footer (Compact & Intentional, P11)
@@ -1575,6 +1619,11 @@ td[data-numeric],
 .hero-btn-primary svg {
   width: 1.125rem;
   height: 1.125rem;
+  transition: transform 0.18s ease;
+}
+
+.hero-btn-primary:hover svg {
+  transform: translateX(3px);
 }
 
 .hero-btn-secondary {
@@ -1613,6 +1662,11 @@ td[data-numeric],
   width: 1.125rem;
   height: 1.125rem;
   color: var(--accent);
+  transition: transform 0.18s ease;
+}
+
+.hero-btn-secondary:hover svg {
+  transform: scale(1.08);
 }
 
 /* --- Hero Trust & Limitation Disclosures --------------------------------- */
@@ -5401,22 +5455,201 @@ td[data-numeric],
  * permanently invisible. `scripting: none` is a second, independent guarantee of the same
  * thing for browsers that report it.
  */
+.reveal {
+  transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .reveal.is-pending {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(16px);
 }
 
-.reveal {
-  transition: opacity 620ms cubic-bezier(0.16, 1, 0.3, 1), transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
+.reveal.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
 }
 
+/* --- Variant: SIMPLE (Scientific Disclosure & Limitation note) ------------
+   Simple opacity transition only; no spatial movement, no child stagger. */
+.reveal[data-reveal-variant='simple'].is-pending {
+  opacity: 0;
+  transform: none;
+}
+
+.reveal[data-reveal-variant='simple'].is-revealed {
+  opacity: 1;
+  transform: none;
+  transition: opacity 450ms ease;
+}
+
+/* --- Variant: FOCUS (Experiment Showcase) ---------------------------------
+   Cards cascade with 70ms stagger only after section intersection, settling
+   seamlessly into the accepted R17.3 ACTIVE/RECEDED hierarchy. */
+.reveal[data-reveal-variant='focus'].is-revealed .showcase-card {
+  animation: showcase-cascade 450ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.reveal[data-reveal-variant='focus'].is-revealed .showcase-card:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.reveal[data-reveal-variant='focus'].is-revealed .showcase-card:nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.reveal[data-reveal-variant='focus'].is-revealed .showcase-card:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+@keyframes showcase-cascade {
+  from {
+    opacity: 0.65;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* --- Variant: ASSEMBLE (Workbench Demonstration) --------------------------
+   Communicates unified instrument: outer frame settles, then 3 structural columns
+   (rail, stage/telemetry, actions) stage with 80ms increments without interfering
+   with R17.4 interactive Add/Reset state classes. */
+.reveal[data-reveal-variant='assemble'].is-pending .workbench-frame {
+  opacity: 0.85;
+}
+
+.reveal[data-reveal-variant='assemble'].is-pending .wp-rail,
+.reveal[data-reveal-variant='assemble'].is-pending .wp-stage-col,
+.reveal[data-reveal-variant='assemble'].is-pending .wp-actions {
+  opacity: 0.75;
+}
+
+.reveal[data-reveal-variant='assemble'].is-revealed .workbench-frame {
+  opacity: 1;
+  transition: opacity 500ms var(--ease-out);
+}
+
+.reveal[data-reveal-variant='assemble'].is-revealed .wp-rail {
+  opacity: 1;
+  transition: opacity 400ms var(--ease-out) 80ms;
+}
+
+.reveal[data-reveal-variant='assemble'].is-revealed .wp-stage-col {
+  opacity: 1;
+  transition: opacity 400ms var(--ease-out) 160ms;
+}
+
+.reveal[data-reveal-variant='assemble'].is-revealed .wp-actions {
+  opacity: 1;
+  transition: opacity 400ms var(--ease-out) 240ms;
+}
+
+/* --- Variant: SETTLE (Scientific Evidence & Trust) ------------------------
+   Evidence cards enter calmly with 70ms stagger; BookStack settles with small depth motion. */
+.reveal[data-reveal-variant='settle'].is-pending .evidence-card {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.reveal[data-reveal-variant='settle'].is-pending .evidence-visual-pane {
+  opacity: 0;
+  transform: scale(0.97) translateY(8px);
+}
+
+.reveal[data-reveal-variant='settle'].is-revealed .evidence-card {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 450ms var(--ease-out), transform 450ms var(--ease-out);
+}
+
+.reveal[data-reveal-variant='settle'].is-revealed .evidence-card:nth-child(1) {
+  transition-delay: 40ms;
+}
+
+.reveal[data-reveal-variant='settle'].is-revealed .evidence-card:nth-child(2) {
+  transition-delay: 110ms;
+}
+
+.reveal[data-reveal-variant='settle'].is-revealed .evidence-card:nth-child(3) {
+  transition-delay: 180ms;
+}
+
+.reveal[data-reveal-variant='settle'].is-revealed .evidence-card:hover,
+.reveal[data-reveal-variant='settle'].is-revealed .evidence-card:focus-within {
+  transition-delay: 0ms;
+}
+
+.reveal[data-reveal-variant='settle'].is-revealed .evidence-visual-pane {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  transition: opacity 550ms var(--ease-out) 100ms, transform 550ms var(--ease-out) 100ms;
+}
+
+/* --- Variant: INVITE (Final CTA Banner) -----------------------------------
+   Banner surface reveals with restrained opacity/depth; CTA remains static until hover/focus/press. */
+.reveal[data-reveal-variant='invite'].is-pending .final-cta-surface {
+  opacity: 0;
+  transform: translateY(12px) scale(0.99);
+}
+
+.reveal[data-reveal-variant='invite'].is-revealed .final-cta-surface {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+}
+
+/* --- Fallback for disabled JavaScript ------------------------------------ */
 @media (scripting: none) {
-  .reveal.is-pending { opacity: 1; transform: none; }
+  .reveal.is-pending,
+  .reveal[data-reveal-variant].is-pending,
+  .reveal[data-reveal-variant].is-pending * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
+/* --- Reduced Motion Guarantee --------------------------------------------
+   Collapses all spatial translations and child stagger delays immediately. */
 @media (prefers-reduced-motion: reduce) {
-  .reveal.is-pending { opacity: 1 !important; transform: none !important; }
-  .reveal { transition: none !important; }
+  .reveal.is-pending,
+  .reveal.is-revealed,
+  .reveal[data-reveal-variant].is-pending,
+  .reveal[data-reveal-variant].is-revealed,
+  .reveal[data-reveal-variant].is-pending *,
+  .reveal[data-reveal-variant].is-revealed * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+  .app-nav a,
+  .app-nav a:hover,
+  .app-nav a:active {
+    transform: none !important;
+    transition: none !important;
+  }
+  .theme-toggle,
+  .theme-toggle:hover,
+  .theme-toggle:active {
+    transform: none !important;
+  }
+  .theme-toggle svg {
+    transform: none !important;
+    transition: none !important;
+  }
+  .theme-toggle-icon {
+    animation: none !important;
+  }
+  .hero-btn-primary svg,
+  .hero-btn-primary:hover svg,
+  .hero-btn-secondary svg,
+  .hero-btn-secondary:hover svg,
+  .final-cta-btn svg,
+  .final-cta-btn:hover svg {
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 /* ==========================================================================
