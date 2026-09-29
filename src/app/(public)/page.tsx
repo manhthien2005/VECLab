@@ -139,7 +139,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="landing-section landing-section-disclosure reveal" aria-label="Nguồn và giới hạn mô hình">
+        <section className="landing-section landing-section-disclosure reveal" data-reveal-variant="simple" aria-label="Nguồn và giới hạn mô hình">
           <div className="landing-section-inner">
             <div className="landing-disclosure-card">
               <ScientificDisclosure />

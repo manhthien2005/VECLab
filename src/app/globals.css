@@ -1145,10 +1145,20 @@ td[data-numeric],
   font-weight: 600;
   white-space: nowrap;
   transition: background-color var(--motion-fast) var(--ease),
-    color var(--motion-fast) var(--ease);
+    color var(--motion-fast) var(--ease),
+    transform var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease);
 }
 
-.app-nav a:hover { background: var(--surface-2); color: var(--ink); }
+.app-nav a:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+  transform: translateY(-0.5px);
+}
+
+.app-nav a:active {
+  transform: translateY(0) scale(0.98);
+}
 
 /* Current-page indicator: `aria-current` is set in the component, so the marker cannot
    drift from what assistive technology is told. */
@@ -1287,17 +1297,51 @@ td[data-numeric],
   color: var(--ink-muted);
   cursor: pointer;
   box-shadow: var(--shadow-xs);
-  transition: background-color var(--motion-fast) var(--ease),
-    color var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease);
+  transition: background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .theme-toggle:hover {
   background: var(--surface-2);
   color: var(--ink);
   border-color: var(--border-strong);
+  transform: translateY(-1px);
 }
 
-.theme-toggle svg { width: 1.25rem; height: 1.25rem; }
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+.theme-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: theme-toggle-switch 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes theme-toggle-switch {
+  from {
+    opacity: 0.3;
+    transform: rotate(-25deg) scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+.theme-toggle svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-toggle:hover svg {
+  transform: rotate(12deg);
+}
 
 /* ==========================================================================
    15. Footer (Compact & Intentional, P11)
@@ -1483,6 +1527,21 @@ td[data-numeric],
   flex-direction: column;
 }
 
+.hero-copy.rise {
+  animation: hero-copy-entrance 450ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes hero-copy-entrance {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .hero-eyebrow {
   display: inline-block;
   font-family: var(--font-display);
@@ -1560,6 +1619,11 @@ td[data-numeric],
 .hero-btn-primary svg {
   width: 1.125rem;
   height: 1.125rem;
+  transition: transform 0.18s ease;
+}
+
+.hero-btn-primary:hover svg {
+  transform: translateX(3px);
 }
 
 .hero-btn-secondary {
@@ -1598,6 +1662,11 @@ td[data-numeric],
   width: 1.125rem;
   height: 1.125rem;
   color: var(--accent);
+  transition: transform 0.18s ease;
+}
+
+.hero-btn-secondary:hover svg {
+  transform: scale(1.08);
 }
 
 /* --- Hero Trust & Limitation Disclosures --------------------------------- */
@@ -1669,6 +1738,21 @@ td[data-numeric],
 .hero-preview-wrapper {
   position: relative;
   width: 100%;
+}
+
+.hero-preview-wrapper.rise-2 {
+  animation: hero-frame-entrance 600ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
+}
+
+@keyframes hero-frame-entrance {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .device-frame {
@@ -1824,11 +1908,16 @@ td[data-numeric],
   min-height: 355px;
 }
 
-.telemetry-badge {
+.hero-telemetry-entrance {
   position: absolute;
   top: 0;
   left: 0;
   z-index: 10;
+  animation: hero-overlay-entrance 380ms var(--spring-tactile) 760ms both;
+}
+
+.telemetry-badge {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -1906,6 +1995,21 @@ td[data-numeric],
   margin: 0;
 }
 
+.hero-apparatus-entrance {
+  animation: hero-apparatus-entrance 500ms var(--spring-tactile) 260ms both;
+}
+
+@keyframes hero-apparatus-entrance {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .apparatus-render {
   width: 100%;
   max-width: 16.5rem;
@@ -1915,9 +2019,26 @@ td[data-numeric],
   filter: drop-shadow(0 16px 32px rgba(11, 34, 64, 0.12));
 }
 
-.device-equation-card {
+.hero-equation-entrance {
   position: relative;
   z-index: 5;
+  width: 100%;
+  animation: hero-overlay-entrance 380ms var(--spring-tactile) 760ms both;
+}
+
+@keyframes hero-overlay-entrance {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.device-equation-card {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -2025,7 +2146,7 @@ td[data-numeric],
 .hero-chart-line {
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
-  animation: draw-curve 900ms var(--ease-out) 200ms both;
+  animation: draw-curve 800ms cubic-bezier(0.16, 1, 0.3, 1) 400ms both;
   stroke-width: 3.5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -2035,12 +2156,12 @@ td[data-numeric],
 .hero-chart-dot {
   fill: var(--accent);
   opacity: 0;
-  animation: fade-in var(--motion) var(--ease-out) 1050ms both;
+  animation: fade-in 180ms ease-out 1100ms both;
 }
 
 .hero-chart-callout {
   opacity: 0;
-  animation: fade-in var(--motion) var(--ease-out) 1150ms both;
+  animation: fade-in 180ms ease-out 1180ms both;
 }
 
 .hero-chart-callout-box {
@@ -2068,6 +2189,11 @@ td[data-numeric],
   fill: var(--ink-faint);
   font-size: 10px;
   font-weight: 600;
+}
+
+.hero-status-entrance {
+  width: 100%;
+  animation: hero-overlay-entrance 380ms var(--spring-tactile) 760ms both;
 }
 
 .hero-status-card {
@@ -2181,14 +2307,50 @@ td[data-numeric],
   fill: #94a3b8;
 }
 
-/* --- Restrained idle floating motion ------------------------------------- */
+/* --- Hero Desktop Pointer-Depth Parallax (R17.2) ------------------------- */
 
-.hero-float-gentle {
-  animation: hero-card-float 5s ease-in-out infinite;
+.hero-pointer-stage {
+  position: relative;
+  width: 100%;
+  perspective: 1200px;
 }
 
+.hero-pointer-stage .device-frame {
+  transform: rotateX(calc(var(--hero-pointer-y, 0) * -1.2deg)) rotateY(calc(var(--hero-pointer-x, 0) * 1.2deg));
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-depth-telemetry {
+  transform: translate3d(calc(var(--hero-pointer-x, 0) * 4px), calc(var(--hero-pointer-y, 0) * 4px), 0);
+  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-depth-apparatus {
+  transform: translate3d(calc(var(--hero-pointer-x, 0) * -1.5px), calc(var(--hero-pointer-y, 0) * -1.5px), 0);
+  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-pointer-stage[data-pointer-active='true'] .device-frame {
+    transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .hero-pointer-stage[data-pointer-active='true'] .hero-depth-telemetry {
+    transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .hero-pointer-stage[data-pointer-active='true'] .hero-depth-apparatus {
+    transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+/* --- Restrained idle floating motion (retired perpetual bobbing) ---------- */
+
+.hero-float-gentle,
 .hero-float-gentle-alt {
-  animation: hero-card-float-alt 6s ease-in-out infinite;
+  animation: none !important;
 }
 
 @keyframes hero-card-float {
@@ -2202,10 +2364,15 @@ td[data-numeric],
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-float-gentle,
-  .hero-float-gentle-alt {
+  .hero-copy.rise,
+  .hero-preview-wrapper.rise-2,
+  .hero-apparatus-entrance,
+  .hero-telemetry-entrance,
+  .hero-status-entrance,
+  .hero-equation-entrance {
     animation: none !important;
     transform: none !important;
+    opacity: 1 !important;
   }
   .hero-chart-line {
     animation: none !important;
@@ -2215,6 +2382,17 @@ td[data-numeric],
   .hero-chart-callout {
     animation: none !important;
     opacity: 1 !important;
+  }
+  .hero-pointer-stage .device-frame,
+  .hero-depth-telemetry,
+  .hero-depth-apparatus {
+    transform: none !important;
+    transition: none !important;
+  }
+  .hero-float-gentle,
+  .hero-float-gentle-alt {
+    animation: none !important;
+    transform: none !important;
   }
 }
 
@@ -2351,6 +2529,8 @@ td[data-numeric],
   gap: var(--space-5);
   align-items: stretch;
   width: 100%;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 .showcase-controls {
@@ -2493,29 +2673,98 @@ td[data-numeric],
     box-shadow var(--motion-state, 240ms) var(--ease-out),
     border-color var(--motion-state, 240ms) var(--ease-out);
   overflow: hidden;
+  opacity: 1;
 }
 
-.showcase-card:hover,
-.showcase-card:focus-within,
+/* Receded (non-active) pointer cue */
+.showcase-card:not([data-active='true']) {
+  cursor: pointer;
+}
+
+/* ACTIVE State: persistent visual spotlight */
 .showcase-card[data-active='true'] {
-  border-color: var(--border-strong);
-  box-shadow: 0 16px 36px -4px rgba(11, 31, 61, 0.1),
-    0 0 0 1px rgba(2, 132, 199, 0.15);
+  border-color: rgba(2, 132, 199, 0.45);
+  box-shadow: 0 20px 48px -8px rgba(11, 31, 61, 0.14),
+    0 0 0 1.5px rgba(2, 132, 199, 0.35);
+  cursor: default;
 }
 
-@media (min-width: 66rem) {
-  .showcase-card:hover,
-  .showcase-card:focus-within {
-    transform: translateY(-5px);
+/* Subtle media stage emphasis when card is ACTIVE */
+.showcase-card[data-active='true'] .showcase-media-stage {
+  border-color: rgba(2, 132, 199, 0.25);
+}
+
+/* HOVER_PREVIEW State: temporary pointer emphasis on non-active card */
+.showcase-card:not([data-active='true']):hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 10px 28px -4px rgba(11, 31, 61, 0.09),
+    0 0 0 1px rgba(11, 31, 61, 0.06);
+  transition-duration: 180ms;
+}
+
+/* FOCUS_WITHIN State: temporary keyboard emphasis when inner CTA has focus */
+.showcase-card:focus-within {
+  border-color: var(--border-strong);
+  box-shadow: 0 10px 28px -4px rgba(11, 31, 61, 0.09),
+    0 0 0 1px rgba(2, 132, 199, 0.2);
+}
+
+.showcase-card[data-active='true']:focus-within {
+  border-color: rgba(2, 132, 199, 0.5);
+  box-shadow: 0 20px 48px -8px rgba(11, 31, 61, 0.14),
+    0 0 0 1.5px rgba(2, 132, 199, 0.45);
+}
+
+/* Desktop spatial elevation contract (>66rem) */
+@media (min-width: 66.01rem) {
+  .showcase-card[data-active='true'] {
+    transform: translateY(-6px);
+  }
+
+  .showcase-card:not([data-active='true']):hover {
+    transform: translateY(-3px);
+  }
+
+  .showcase-card:not([data-active='true']):focus-within {
+    transform: translateY(-3px);
+  }
+
+  .showcase-card[data-active='true']:focus-within {
+    transform: translateY(-6px);
   }
 }
 
-[data-theme='dark'] .showcase-card:hover,
-[data-theme='dark'] .showcase-card:focus-within,
+/* Dark mode visual hierarchy */
+[data-theme='dark'] .showcase-card {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+}
+
 [data-theme='dark'] .showcase-card[data-active='true'] {
   border-color: var(--accent);
-  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.5),
+  box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.65),
+    0 0 0 1.5px rgba(56, 189, 248, 0.35);
+}
+
+[data-theme='dark'] .showcase-card[data-active='true'] .showcase-media-stage {
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+[data-theme='dark'] .showcase-card:not([data-active='true']):hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'] .showcase-card:focus-within {
+  border-color: var(--border-strong);
+  box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.45),
     0 0 0 1px rgba(56, 189, 248, 0.25);
+}
+
+[data-theme='dark'] .showcase-card[data-active='true']:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.65),
+    0 0 0 1.5px rgba(56, 189, 248, 0.5);
 }
 
 .showcase-status-badge {
@@ -2761,6 +3010,19 @@ td[data-numeric],
   color: var(--ink-muted);
 }
 
+/* Active card CTA treatment: LIVE gets bold accent arrow offset; PREVIEW gets subtle contrast boost without looking runnable */
+.showcase-card[data-active='true'] .cta-live {
+  color: var(--accent);
+}
+
+.showcase-card[data-active='true'] .cta-live .showcase-cta-arrow {
+  transform: translateX(3px);
+}
+
+.showcase-card[data-active='true'] .cta-preview {
+  color: var(--ink);
+}
+
 .showcase-cta-arrow {
   width: 1.1rem;
   height: 1.1rem;
@@ -2771,21 +3033,8 @@ td[data-numeric],
   transform: translateX(4px);
 }
 
-/* Card Stagger Reveal Animations */
-.showcase-card {
-  animation: showcase-card-appear 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: calc(var(--card-index, 0) * 85ms);
-}
-
-@keyframes showcase-card-appear {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.showcase-card[data-active='true']:hover .cta-live .showcase-cta-arrow {
+  transform: translateX(6px);
 }
 
 /* --- Workbench Demonstration (Redesigned R14.2) ------------------------ */
@@ -3042,6 +3291,28 @@ td[data-numeric],
   background: var(--blue);
   color: #ffffff;
   box-shadow: 0 0 0 4px var(--blue-soft);
+  transition: transform var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease);
+}
+
+.wb-step-active.is-addition-active .wb-step-marker {
+  animation: wb-step-pulse 0.45s ease-out;
+  box-shadow: 0 0 0 6px rgba(2, 132, 199, 0.35);
+}
+
+@keyframes wb-step-pulse {
+  0% {
+    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(2, 132, 199, 0.25);
+    transform: scale(1.08);
+  }
+  100% {
+    box-shadow: 0 0 0 4px var(--blue-soft);
+    transform: scale(1);
+  }
 }
 
 .wb-step-pending .wb-step-marker {
@@ -3153,10 +3424,27 @@ td[data-numeric],
 }
 
 @keyframes wp-stirring-gentle {
-  0% { transform: scale(1); }
-  35% { transform: scale(1.025); }
-  70% { transform: scale(0.99); }
-  100% { transform: scale(1); }
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  15% {
+    transform: translate(-1.2px, -0.5px) rotate(-0.4deg);
+  }
+  30% {
+    transform: translate(1.2px, 0.5px) rotate(0.4deg);
+  }
+  50% {
+    transform: translate(-0.8px, 0.3px) rotate(-0.25deg);
+  }
+  70% {
+    transform: translate(0.6px, -0.2px) rotate(0.15deg);
+  }
+  85% {
+    transform: translate(-0.3px, 0) rotate(-0.05deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
 }
 
 .wp-apparatus-frame.is-stirring::after {
@@ -3171,8 +3459,9 @@ td[data-numeric],
 }
 
 @keyframes wp-apparatus-pulse {
-  0% { transform: scale(0.96); opacity: 0.6; }
-  100% { transform: scale(1.04); opacity: 0; }
+  0% { transform: scale(0.98); opacity: 0.5; }
+  50% { opacity: 0.25; }
+  100% { transform: scale(1.02); opacity: 0; }
 }
 
 .wp-apparatus-img {
@@ -3243,6 +3532,40 @@ td[data-numeric],
   font-family: var(--font-numeric);
   color: var(--ink);
   font-variant-numeric: tabular-nums;
+}
+
+.wp-volume-value {
+  display: inline-block;
+  transition: color var(--motion-fast) var(--ease),
+    transform var(--motion-state, 240ms) var(--ease-out);
+}
+
+.wp-volume-value.is-volume-pulse {
+  color: var(--accent);
+  animation: wp-volume-flash 0.35s ease-out;
+}
+
+@keyframes wp-volume-flash {
+  0% {
+    transform: scale(1);
+    color: var(--accent);
+    text-shadow: 0 0 8px rgba(2, 132, 199, 0.3);
+  }
+  40% {
+    transform: scale(1.06);
+    color: var(--accent);
+    text-shadow: 0 0 12px rgba(2, 132, 199, 0.4);
+  }
+  100% {
+    transform: scale(1);
+    color: var(--ink);
+    text-shadow: none;
+  }
+}
+
+[data-theme='dark'] .wp-volume-value.is-volume-pulse {
+  color: var(--accent);
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
 }
 
 .wp-status-pill {
@@ -3678,10 +4001,17 @@ td[data-numeric],
   .showcase-card {
     animation: none !important;
     transform: none !important;
+    transition: none !important;
   }
   .showcase-card:hover,
-  .showcase-card:focus-within {
+  .showcase-card:focus-within,
+  .showcase-card[data-active='true'] {
     transform: none !important;
+  }
+  .showcase-card[data-active='true'] .cta-live .showcase-cta-arrow,
+  .showcase-card:hover .showcase-cta-arrow {
+    transform: none !important;
+    transition: none !important;
   }
   .hero-btn-primary:active,
   .hero-btn-secondary:active,
@@ -3701,6 +4031,16 @@ td[data-numeric],
   }
   .wp-apparatus-frame.is-stirring::after {
     animation: none !important;
+  }
+  .wb-step-active.is-addition-active .wb-step-marker {
+    animation: none !important;
+    transform: none !important;
+    box-shadow: 0 0 0 4px var(--blue-soft) !important;
+  }
+  .wp-volume-value.is-volume-pulse {
+    animation: none !important;
+    transform: none !important;
+    text-shadow: none !important;
   }
   .wp-action-btn:active,
   .wp-reset-btn:active,
@@ -5115,22 +5455,201 @@ td[data-numeric],
  * permanently invisible. `scripting: none` is a second, independent guarantee of the same
  * thing for browsers that report it.
  */
+.reveal {
+  transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .reveal.is-pending {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(16px);
 }
 
-.reveal {
-  transition: opacity 620ms cubic-bezier(0.16, 1, 0.3, 1), transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
+.reveal.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
 }
 
+/* --- Variant: SIMPLE (Scientific Disclosure & Limitation note) ------------
+   Simple opacity transition only; no spatial movement, no child stagger. */
+.reveal[data-reveal-variant='simple'].is-pending {
+  opacity: 0;
+  transform: none;
+}
+
+.reveal[data-reveal-variant='simple'].is-revealed {
+  opacity: 1;
+  transform: none;
+  transition: opacity 450ms ease;
+}
+
+/* --- Variant: FOCUS (Experiment Showcase) ---------------------------------
+   Cards cascade with 70ms stagger only after section intersection, settling
+   seamlessly into the accepted R17.3 ACTIVE/RECEDED hierarchy. */
+.reveal[data-reveal-variant='focus'].is-revealed .showcase-card {
+  animation: showcase-cascade 450ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.reveal[data-reveal-variant='focus'].is-revealed .showcase-card:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.reveal[data-reveal-variant='focus'].is-revealed .showcase-card:nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.reveal[data-reveal-variant='focus'].is-revealed .showcase-card:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+@keyframes showcase-cascade {
+  from {
+    opacity: 0.65;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* --- Variant: ASSEMBLE (Workbench Demonstration) --------------------------
+   Communicates unified instrument: outer frame settles, then 3 structural columns
+   (rail, stage/telemetry, actions) stage with 80ms increments without interfering
+   with R17.4 interactive Add/Reset state classes. */
+.reveal[data-reveal-variant='assemble'].is-pending .workbench-frame {
+  opacity: 0.85;
+}
+
+.reveal[data-reveal-variant='assemble'].is-pending .wp-rail,
+.reveal[data-reveal-variant='assemble'].is-pending .wp-stage-col,
+.reveal[data-reveal-variant='assemble'].is-pending .wp-actions {
+  opacity: 0.75;
+}
+
+.reveal[data-reveal-variant='assemble'].is-revealed .workbench-frame {
+  opacity: 1;
+  transition: opacity 500ms var(--ease-out);
+}
+
+.reveal[data-reveal-variant='assemble'].is-revealed .wp-rail {
+  opacity: 1;
+  transition: opacity 400ms var(--ease-out) 80ms;
+}
+
+.reveal[data-reveal-variant='assemble'].is-revealed .wp-stage-col {
+  opacity: 1;
+  transition: opacity 400ms var(--ease-out) 160ms;
+}
+
+.reveal[data-reveal-variant='assemble'].is-revealed .wp-actions {
+  opacity: 1;
+  transition: opacity 400ms var(--ease-out) 240ms;
+}
+
+/* --- Variant: SETTLE (Scientific Evidence & Trust) ------------------------
+   Evidence cards enter calmly with 70ms stagger; BookStack settles with small depth motion. */
+.reveal[data-reveal-variant='settle'].is-pending .evidence-card {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.reveal[data-reveal-variant='settle'].is-pending .evidence-visual-pane {
+  opacity: 0;
+  transform: scale(0.97) translateY(8px);
+}
+
+.reveal[data-reveal-variant='settle'].is-revealed .evidence-card {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 450ms var(--ease-out), transform 450ms var(--ease-out);
+}
+
+.reveal[data-reveal-variant='settle'].is-revealed .evidence-card:nth-child(1) {
+  transition-delay: 40ms;
+}
+
+.reveal[data-reveal-variant='settle'].is-revealed .evidence-card:nth-child(2) {
+  transition-delay: 110ms;
+}
+
+.reveal[data-reveal-variant='settle'].is-revealed .evidence-card:nth-child(3) {
+  transition-delay: 180ms;
+}
+
+.reveal[data-reveal-variant='settle'].is-revealed .evidence-card:hover,
+.reveal[data-reveal-variant='settle'].is-revealed .evidence-card:focus-within {
+  transition-delay: 0ms;
+}
+
+.reveal[data-reveal-variant='settle'].is-revealed .evidence-visual-pane {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  transition: opacity 550ms var(--ease-out) 100ms, transform 550ms var(--ease-out) 100ms;
+}
+
+/* --- Variant: INVITE (Final CTA Banner) -----------------------------------
+   Banner surface reveals with restrained opacity/depth; CTA remains static until hover/focus/press. */
+.reveal[data-reveal-variant='invite'].is-pending .final-cta-surface {
+  opacity: 0;
+  transform: translateY(12px) scale(0.99);
+}
+
+.reveal[data-reveal-variant='invite'].is-revealed .final-cta-surface {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+}
+
+/* --- Fallback for disabled JavaScript ------------------------------------ */
 @media (scripting: none) {
-  .reveal.is-pending { opacity: 1; transform: none; }
+  .reveal.is-pending,
+  .reveal[data-reveal-variant].is-pending,
+  .reveal[data-reveal-variant].is-pending * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }
 
+/* --- Reduced Motion Guarantee --------------------------------------------
+   Collapses all spatial translations and child stagger delays immediately. */
 @media (prefers-reduced-motion: reduce) {
-  .reveal.is-pending { opacity: 1 !important; transform: none !important; }
-  .reveal { transition: none !important; }
+  .reveal.is-pending,
+  .reveal.is-revealed,
+  .reveal[data-reveal-variant].is-pending,
+  .reveal[data-reveal-variant].is-revealed,
+  .reveal[data-reveal-variant].is-pending *,
+  .reveal[data-reveal-variant].is-revealed * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+  .app-nav a,
+  .app-nav a:hover,
+  .app-nav a:active {
+    transform: none !important;
+    transition: none !important;
+  }
+  .theme-toggle,
+  .theme-toggle:hover,
+  .theme-toggle:active {
+    transform: none !important;
+  }
+  .theme-toggle svg {
+    transform: none !important;
+    transition: none !important;
+  }
+  .theme-toggle-icon {
+    animation: none !important;
+  }
+  .hero-btn-primary svg,
+  .hero-btn-primary:hover svg,
+  .hero-btn-secondary svg,
+  .hero-btn-secondary:hover svg,
+  .final-cta-btn svg,
+  .final-cta-btn:hover svg {
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 /* ==========================================================================

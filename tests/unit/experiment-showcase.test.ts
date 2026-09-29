@@ -104,5 +104,49 @@ describe('Experiment Showcase R16.2 Architecture and Semantics', () => {
     expect(css).toMatch(/\.showcase-dot\s*\{[^}]*min-width:\s*44px/m)
     expect(css).toMatch(/\.showcase-dot\s*\{[^}]*min-height:\s*44px/m)
   })
+
+  it('enforces R17.3 active focal hierarchy and spatial contracts in globals.css', () => {
+    const css = readFileSync(GLOBALS_CSS, 'utf8')
+
+    // Desktop spatial elevation (>66rem)
+    expect(css).toContain(".showcase-card[data-active='true']")
+    expect(css).toContain('transform: translateY(-6px);')
+    expect(css).toContain('transform: translateY(-3px);')
+
+    // Active card depth shadow (Level 3) and accent border
+    expect(css).toMatch(/\.showcase-card\[data-active='true'\]\s*\{[^}]*border-color:/m)
+    expect(css).toMatch(/\.showcase-card\[data-active='true'\]\s*\{[^}]*box-shadow:/m)
+
+    // Strictly NO whole-card opacity reduction on receded cards
+    expect(css).toMatch(/\.showcase-card\s*\{[^}]*opacity:\s*1;/m)
+    expect(css).not.toMatch(/\.showcase-card:not\(\[data-active='true'\]\)\s*\{[^}]*opacity:\s*0\./m)
+
+    // LIVE vs PREVIEW CTA distinction under active spotlight
+    expect(css).toContain(".showcase-card[data-active='true'] .cta-live")
+    expect(css).toContain(".showcase-card[data-active='true'] .cta-preview")
+    // Preview CTA must never use accent color
+    expect(css).toMatch(/\.showcase-card\[data-active='true'\]\s+\.cta-preview\s*\{[^}]*color:\s*var\(--ink\);/m)
+
+    // Reduced motion overrides neutralize translateY
+    expect(css).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.showcase-card\[data-active='true'\][\s\S]*?transform:\s*none\s*!important/m)
+  })
+
+  it('verifies SSR initial active spotlight on card 0', () => {
+    const showcaseContent = readFileSync(SHOWCASE_FILE, 'utf8')
+    expect(showcaseContent).toContain("data-active={idx === 0 ? 'true' : undefined}")
+  })
+
+  it('verifies progressive card click delegation preserves native interactive CTA elements', () => {
+    const trackContent = readFileSync(TRACK_FILE, 'utf8')
+
+    // Event delegation on track
+    expect(trackContent).toContain('onClick={handleTrackClick}')
+    // Guard preventing interference with native interactive links/buttons
+    expect(trackContent).toMatch(/target\.closest\(['"]a,\s*button/i)
+    // No keyboard or ARIA anti-patterns (no JSX element rendered with role="button" or tabIndex 0)
+    expect(trackContent).not.toMatch(/<[a-z]+[^>]*role=["']button["']/i)
+    expect(trackContent).not.toMatch(/tabIndex=\{?0\}?/i)
+  })
 })
+
 

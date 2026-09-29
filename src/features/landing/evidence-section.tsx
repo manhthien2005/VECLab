@@ -24,7 +24,7 @@ export function EvidenceSection() {
   const strings = APP_STRINGS.home
 
   return (
-    <div className="evidence-section-wrap reveal" aria-labelledby="evidence-heading">
+    <div className="evidence-section-wrap reveal" data-reveal-variant="settle" aria-labelledby="evidence-heading">
       {/* Centered Section Header */}
       <div className="evidence-head">
         <p className="eyebrow">{strings.evidenceEyebrow}</p>

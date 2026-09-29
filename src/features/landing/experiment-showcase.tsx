@@ -58,7 +58,7 @@ export function ExperimentShowcase() {
   const strings = APP_STRINGS.home
 
   return (
-    <div className="experiment-showcase-section reveal">
+    <div className="experiment-showcase-section reveal" data-reveal-variant="focus">
       {/* Centered Section Heading matching approved reference */}
       <div className="section-head-center">
         <p className="eyebrow">{strings.showcaseEyebrow}</p>
@@ -81,6 +81,7 @@ export function ExperimentShowcase() {
               aria-label={`${idx + 1} / ${SHOWCASE_CARDS.length}: ${title}`}
               className={`showcase-card ${isLive ? 'showcase-card-live' : 'showcase-card-preview'}`}
               style={{ '--card-index': idx } as React.CSSProperties}
+              data-active={idx === 0 ? 'true' : undefined}
             >
               {/* Honest Capability / Status Badge */}
               {!isLive ? (

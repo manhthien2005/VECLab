@@ -94,7 +94,9 @@ export function ThemeToggle() {
       aria-label={label}
       title={label}
     >
-      {isDark ? <SunIcon /> : <MoonIcon />}
+      <span className="theme-toggle-icon" key={theme}>
+        {isDark ? <SunIcon /> : <MoonIcon />}
+      </span>
     </button>
   )
 }

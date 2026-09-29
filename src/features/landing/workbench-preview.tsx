@@ -71,7 +71,7 @@ export function WorkbenchPreview() {
   }
 
   return (
-    <div className="workbench-section reveal">
+    <div className="workbench-section reveal" data-reveal-variant="assemble">
       {/* Section Header */}
       <div className="section-head-center">
         <p className="eyebrow">TRẢI NGHIỆM CHI TIẾT</p>
@@ -124,7 +124,7 @@ export function WorkbenchPreview() {
               </li>
 
               {/* Step 2: Active */}
-              <li className="wb-timeline-item wb-step-active">
+              <li className={`wb-timeline-item wb-step-active ${isSimulatingAddition ? 'is-addition-active' : ''}`}>
                 <span className="wb-step-marker" aria-hidden="true">2</span>
                 <div className="wb-step-content">
                   <span className="wb-step-index">Bước 2</span>
@@ -210,9 +210,11 @@ export function WorkbenchPreview() {
                       <span className="wp-meta-label">Nhiệt độ</span>
                       <strong className="wp-meta-value">25,0 °C</strong>
                     </div>
-                    <div className="wp-meta-item">
+                    <div className="wp-meta-item wp-volume-meta">
                       <span className="wp-meta-label">Thể tích</span>
-                      <strong className="wp-meta-value">{previewVolumeTotal} mL</strong>
+                      <strong className={`wp-meta-value wp-volume-value ${isSimulatingAddition ? 'is-volume-pulse' : ''}`}>
+                        {previewVolumeTotal} mL
+                      </strong>
                     </div>
                   </div>
 

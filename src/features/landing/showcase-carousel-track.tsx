@@ -87,6 +87,36 @@ export function ShowcaseCarouselTrack({
     setActiveIndex((prev) => (prev !== closestIndex ? closestIndex : prev))
   }, [])
 
+  // Progressive pointer enhancement: clicking an inactive card's surface transfers active focus
+  // Native interactive elements (links, buttons) are excluded to ensure 1-click CTA navigation
+  const handleTrackClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement | null
+    if (!target) return
+
+    // Never intercept native interactive controls - single-click navigation must be preserved
+    if (target.closest('a, button, input, select, textarea, [role="button"]')) {
+      return
+    }
+
+    const card = target.closest<HTMLElement>('.showcase-card')
+    if (!card) return
+
+    const track = trackRef.current
+    if (!track) return
+
+    const slides = Array.from(track.querySelectorAll<HTMLElement>('.showcase-card'))
+    const cardIndex = slides.indexOf(card)
+    if (cardIndex !== -1 && cardIndex !== activeIndex) {
+      // If mobile/tablet scrollable carousel, smooth-scroll to it; otherwise update active state directly
+      const isScrollable = track.scrollWidth > track.clientWidth + 4
+      if (isScrollable) {
+        scrollToIndex(cardIndex)
+      } else {
+        setActiveIndex(cardIndex)
+      }
+    }
+  }, [activeIndex, scrollToIndex])
+
   // Mark data-active attribute on slide DOM elements for styling
   useEffect(() => {
     const track = trackRef.current
@@ -114,6 +144,7 @@ export function ShowcaseCarouselTrack({
         ref={trackRef}
         className="showcase-track"
         onScroll={handleScroll}
+        onClick={handleTrackClick}
         tabIndex={-1}
       >
         {children}

@@ -136,4 +136,87 @@ test.describe('Experiment Showcase Interaction and Accessibility (R16.2.1)', () 
       await expect(cards.nth(1)).toHaveAttribute('data-active', 'true')
     })
   })
+
+  test.describe('Desktop Focal Hierarchy and Pointer Interaction (>66rem)', () => {
+    test.use({ viewport: { width: 1280, height: 800 } })
+
+    test('renders all 3 cards simultaneously with Card 1 ACTIVE by default and distinct elevation', async ({ page }) => {
+      const cards = page.locator('.showcase-card')
+      await expect(cards).toHaveCount(3)
+
+      for (let i = 0; i < 3; i++) {
+        await expect(cards.nth(i)).toBeVisible()
+      }
+
+      // Card 1 active by default
+      await expect(cards.nth(0)).toHaveAttribute('data-active', 'true')
+      await expect(cards.nth(1)).not.toHaveAttribute('data-active', 'true')
+      await expect(cards.nth(2)).not.toHaveAttribute('data-active', 'true')
+
+      // Measurably distinct elevation: active card has translateY(-6px)
+      const activeTransform = await cards.nth(0).evaluate((el) => window.getComputedStyle(el).transform)
+      const recededTransform = await cards.nth(1).evaluate((el) => window.getComputedStyle(el).transform)
+      expect(activeTransform).not.toBe(recededTransform)
+      // When translateY(-6px) is computed in 2D transform, matrix is matrix(1, 0, 0, 1, 0, -6)
+      expect(activeTransform).toContain('-6')
+    })
+
+    test('hovering a receded card provides temporary preview without persisting active state on mouse leave', async ({ page }) => {
+      const cards = page.locator('.showcase-card')
+      await expect(cards.nth(0)).toHaveAttribute('data-active', 'true')
+
+      // Hover card 1 (copper)
+      await cards.nth(1).hover()
+      // Card 0 remains active in state
+      await expect(cards.nth(0)).toHaveAttribute('data-active', 'true')
+
+      // Move mouse away to showcase heading
+      await page.locator('#showcase-heading').hover()
+      // Card 0 still active, card 1 not active
+      await expect(cards.nth(0)).toHaveAttribute('data-active', 'true')
+      await expect(cards.nth(1)).not.toHaveAttribute('data-active', 'true')
+    })
+
+    test('clicking card body surface transfers active spotlight', async ({ page }) => {
+      const cards = page.locator('.showcase-card')
+      await expect(cards.nth(0)).toHaveAttribute('data-active', 'true')
+
+      // Click card 1 (copper) on its title
+      await cards.nth(1).locator('.showcase-card-title').click()
+      await expect(cards.nth(1)).toHaveAttribute('data-active', 'true')
+      await expect(cards.nth(0)).not.toHaveAttribute('data-active', 'true')
+
+      // Click card 2 (plastic) on its media stage
+      await cards.nth(2).locator('.showcase-media-stage').click()
+      await expect(cards.nth(2)).toHaveAttribute('data-active', 'true')
+      await expect(cards.nth(1)).not.toHaveAttribute('data-active', 'true')
+    })
+
+    test('clicking card CTA navigates directly on first click without prior card selection', async ({ page }) => {
+      const cards = page.locator('.showcase-card')
+      await expect(cards.nth(0)).toHaveAttribute('data-active', 'true')
+
+      // Directly click CTA of Card 1 (copper, receded)
+      const copperCta = cards.nth(1).locator('.showcase-cta-link')
+      await copperCta.click()
+
+      // Navigates directly to /experiments on first click
+      await expect(page).toHaveURL(/\/experiments/)
+    })
+
+    test('focusing CTA link applies visible focus styling without mutating activeIndex', async ({ page }) => {
+      const cards = page.locator('.showcase-card')
+      await expect(cards.nth(0)).toHaveAttribute('data-active', 'true')
+
+      // Focus CTA of card 2
+      const plasticCta = cards.nth(2).locator('.showcase-cta-link')
+      await plasticCta.focus()
+      await expect(plasticCta).toBeFocused()
+
+      // Card 0 remains persistently active
+      await expect(cards.nth(0)).toHaveAttribute('data-active', 'true')
+      await expect(cards.nth(2)).not.toHaveAttribute('data-active', 'true')
+    })
+  })
 })
+
