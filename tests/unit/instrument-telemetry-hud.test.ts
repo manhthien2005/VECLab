@@ -108,6 +108,43 @@ describe('InstrumentTelemetryHud & State Truth Contract (WB-R5)', () => {
       expect(html).toContain('2,05')
     })
 
+    it('retains last measured pH from domain.measurements as pending/stale when engine clears lastMeasuredPH on reagent addition (WB-R5.1 regression)', () => {
+      // Upon add_base, domain engine invalidateReading sets lastMeasuredPH = null, but domain.measurements preserves history
+      const domain = createMockDomainState({
+        compositionRevision: 3,
+        lastMeasuredCompositionRevision: null,
+        lastMeasuredPH: null,
+        readingStable: false,
+        measurements: [
+          {
+            sequence: 4,
+            compositionRevision: 2,
+            simulatedPH: 2.0,
+            baseVolumeL: 0,
+            correctionAcidVolumeL: 0,
+          },
+        ],
+      })
+
+      const evaluation = evaluateMeasurementState(domain)
+      expect(evaluation.status).toBe('pending')
+      expect(evaluation.isStale).toBe(true)
+      expect(evaluation.label).toBe('Chờ đo')
+      expect(evaluation.lastMeasuredPh).toBe(2.0)
+
+      const html = renderToString(
+        React.createElement(InstrumentTelemetryHud, {
+          domain,
+        }),
+      )
+
+      expect(html).toContain('status-pending')
+      expect(html).toContain('Chờ đo')
+      expect(html).toContain('is-stale')
+      expect(html).toContain('telemetry-stale-notice')
+      expect(html).toContain('2,00')
+    })
+
     it('distinguishes uncalibrated meter state cleanly without showing fake readings', () => {
       const domain = createMockDomainState({
         meterCalibrated: false,

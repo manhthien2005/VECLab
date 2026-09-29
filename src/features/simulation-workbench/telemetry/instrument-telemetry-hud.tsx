@@ -54,12 +54,16 @@ export function evaluateMeasurementState(domain?: AcidNeutralizationState | null
     }
   }
 
-  const hasMeasurement = domain.lastMeasuredPH !== null
+  const lastRecord =
+    domain.measurements.length > 0 ? domain.measurements[domain.measurements.length - 1] : null
+  const priorPh = domain.lastMeasuredPH ?? lastRecord?.simulatedPH ?? null
+
   const isCurrent =
-    hasMeasurement && domain.lastMeasuredCompositionRevision === domain.compositionRevision
+    domain.lastMeasuredPH !== null &&
+    domain.lastMeasuredCompositionRevision === domain.compositionRevision
   const isStable = domain.readingStable
 
-  if (hasMeasurement && isCurrent && isStable) {
+  if (domain.lastMeasuredPH !== null && isCurrent && isStable) {
     return {
       status: 'stable',
       label: 'Ổn định',
@@ -68,12 +72,12 @@ export function evaluateMeasurementState(domain?: AcidNeutralizationState | null
     }
   }
 
-  if (hasMeasurement) {
+  if (priorPh !== null) {
     return {
       status: 'pending',
       label: !isCurrent ? 'Chờ đo' : 'Chưa có số đo ổn định',
       isStale: true,
-      lastMeasuredPh: domain.lastMeasuredPH,
+      lastMeasuredPh: priorPh,
     }
   }
 
