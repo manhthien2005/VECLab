@@ -305,7 +305,7 @@ export function useWorkbenchController({
     async (aliquotL?: number): Promise<OrchestrationResult> => {
       const check = requireActiveAttempt('dispensing')
       if (!check.ok) return check.result
-      const volumeL = aliquotL ?? selectedAliquotL
+      const volumeL = typeof aliquotL === 'number' ? aliquotL : selectedAliquotL
 
       return runMutatingOperation('dispensing', () =>
         executeGuidedAction(session, check.attemptId, 'add_base', { volumeL }, 'dispensing'),
@@ -345,7 +345,7 @@ export function useWorkbenchController({
     async (aliquotL?: number): Promise<OrchestrationResult> => {
       const check = requireActiveAttempt('dispensing')
       if (!check.ok) return check.result
-      const volumeL = aliquotL ?? selectedAliquotL
+      const volumeL = typeof aliquotL === 'number' ? aliquotL : selectedAliquotL
 
       return runMutatingOperation('dispensing', () =>
         executeGuidedAction(
@@ -364,7 +364,7 @@ export function useWorkbenchController({
     async (aliquotL?: number): Promise<OrchestrationResult> => {
       const check = requireActiveAttempt('dispensing')
       if (!check.ok) return check.result
-      const volumeL = aliquotL ?? selectedAliquotL
+      const volumeL = typeof aliquotL === 'number' ? aliquotL : selectedAliquotL
 
       return runMutatingOperation('dispensing', () =>
         orchestrateDispenseAndMeasure(session, check.attemptId, volumeL),

@@ -6589,4 +6589,782 @@ td[data-numeric],
   }
 }
 
+/* ==========================================================================
+   37. Workbench V1 Production Assembly (WB-R6)
+   Scientific workstation layout: desktop 3-zone cockpit, tablet reflow,
+   mobile segmented navigation, restrained laboratory theme.
+   ========================================================================== */
+
+.wb-root {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  gap: var(--space-4);
+}
+
+/* --- Top Context Bar ----------------------------------------------------- */
+.wb-context-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xs);
+}
+
+.wb-context-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.wb-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.wb-reaction-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  background: var(--surface-2);
+  color: var(--accent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
+}
+
+.wb-context-title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.wb-context-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.wb-mode-toggle-compact {
+  display: inline-flex;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.wb-mode-btn-compact {
+  border: none;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: calc(var(--radius-sm) - 2px);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.wb-mode-btn-compact.is-active {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: var(--shadow-xs);
+}
+
+.wb-save-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: var(--text-xs);
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
+.wb-save-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--ink-faint);
+  transition: background-color 0.2s ease;
+}
+
+.wb-save-dot[data-state='saving'] {
+  background: var(--warn);
+  animation: pulse-save 1s infinite alternate;
+}
+
+.wb-save-dot[data-state='saved'],
+.wb-save-dot[data-state='local'] {
+  background: var(--ok);
+}
+
+.wb-save-dot[data-state='error'] {
+  background: var(--danger);
+}
+
+@keyframes pulse-save {
+  0% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+/* --- Error / Banner ------------------------------------------------------ */
+.wb-error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+}
+
+/* --- Mobile Nav Segmented Control ---------------------------------------- */
+.wb-mobile-nav {
+  display: none;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 2px;
+}
+
+.wb-mobile-tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: 0.45rem 0.5rem;
+  border-radius: calc(var(--radius-sm) - 2px);
+  cursor: pointer;
+  text-align: center;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.wb-mobile-tab.is-active {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: var(--shadow-xs);
+  font-weight: 700;
+}
+
+/* --- 3-Zone Workspace Grid ----------------------------------------------- */
+.wb-workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 320px) minmax(360px, 1fr) minmax(300px, 340px);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.wb-zone-left,
+.wb-zone-center,
+.wb-zone-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.wb-section-heading {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+/* --- Setup Card ---------------------------------------------------------- */
+.wb-setup-card {
+  padding: var(--space-4);
+}
+
+.wb-setup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.wb-field-label {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.25rem;
+}
+
+.wb-mode-segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.wb-mode-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  min-height: 48px;
+  justify-content: center;
+}
+
+.wb-mode-pill.is-active {
+  border-color: var(--accent);
+  background: var(--accent-softer);
+}
+
+.wb-mode-pill-title {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.wb-mode-pill-desc {
+  font-size: var(--text-2xs);
+  color: var(--ink-muted);
+}
+
+.wb-fixed-conditions {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: var(--text-xs);
+}
+
+.wb-fixed-item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.wb-fixed-label {
+  color: var(--ink-muted);
+}
+
+.wb-fixed-value {
+  font-weight: 600;
+  font-family: var(--font-mono);
+  color: var(--ink);
+}
+
+.wb-param-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.wb-param-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed var(--border);
+  padding-bottom: 0.25rem;
+}
+
+.wb-param-row dt {
+  color: var(--ink-muted);
+}
+
+.wb-param-row dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* --- Protocol Rail ------------------------------------------------------- */
+.wb-protocol-rail {
+  padding: var(--space-3) var(--space-4);
+}
+
+.wb-protocol-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.wb-protocol-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.wb-protocol-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.wb-protocol-item.is-done {
+  border-left-color: var(--ok);
+  background: var(--surface-2);
+}
+
+.wb-protocol-item.is-active {
+  border-left-color: var(--accent);
+  background: var(--accent-softer);
+}
+
+.wb-protocol-item.is-upcoming {
+  opacity: 0.7;
+}
+
+.wb-protocol-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 50%;
+  font-size: var(--text-2xs);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.wb-icon-check {
+  color: var(--ok);
+  font-weight: 700;
+}
+
+.wb-icon-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background: var(--ink-faint);
+}
+
+.wb-protocol-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.wb-protocol-title {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.wb-protocol-desc {
+  font-size: var(--text-2xs);
+  color: var(--ink-muted);
+}
+
+.wb-explore-status-pills {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.wb-explore-pill {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  padding: var(--space-2);
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+
+.wb-pill-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+}
+
+.wb-pill-dot.is-done {
+  background: var(--ok);
+}
+
+.wb-pill-dot.is-pending {
+  background: var(--accent);
+}
+
+/* --- Apparatus Center Wrapper -------------------------------------------- */
+.wb-apparatus-wrapper {
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 440px;
+}
+
+.wb-apparatus-svg-container {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+  aspect-ratio: 400 / 520;
+}
+
+.wb-stage-indicator {
+  margin-top: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  background: var(--accent-softer);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.wb-stage-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse-stage 0.8s infinite alternate;
+}
+
+@keyframes pulse-stage {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  100% { transform: scale(1.2); opacity: 1; }
+}
+
+/* --- Titration Operational Controls -------------------------------------- */
+.wb-controls-card {
+  padding: var(--space-4);
+}
+
+.wb-controls-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.wb-aliquot-segmented {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.wb-aliquot-button {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  padding: 0.375rem 0.25rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: center;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.wb-aliquot-button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-softer);
+}
+
+.wb-aliquot-button.is-selected {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-xs);
+}
+
+.wb-btn-hero {
+  min-height: 52px;
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+
+.wb-measure-btn {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.wb-terminal-actions {
+  border-top: 1px solid var(--border);
+}
+
+.wb-secondary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* --- Lower Workspace: Chart & Event Log ---------------------------------- */
+.wb-lower-workspace {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+.wb-chart-container {
+  padding: var(--space-4);
+}
+
+.wb-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.wb-event-log {
+  padding: var(--space-4);
+}
+
+.wb-log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.wb-log-empty {
+  padding: var(--space-4) 0;
+  text-align: center;
+}
+
+.wb-log-scroll-area {
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.wb-log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.wb-log-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--text-xs);
+}
+
+.wb-log-item:last-child {
+  border-bottom: none;
+}
+
+.wb-log-item.is-reverted {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.wb-log-item.is-undo {
+  color: var(--warn);
+}
+
+.wb-log-meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  width: 110px;
+  flex-shrink: 0;
+}
+
+.wb-log-seq {
+  font-weight: 700;
+  color: var(--ink-faint);
+}
+
+.wb-log-time {
+  font-size: var(--text-2xs);
+  color: var(--ink-faint);
+}
+
+.wb-log-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  flex: 1;
+}
+
+.wb-log-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.wb-log-title {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.wb-log-detail {
+  margin: 0;
+  color: var(--ink-muted);
+}
+
+/* --- Completion Card ----------------------------------------------------- */
+.wb-completion-card {
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 2px solid var(--ok);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.wb-completion-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.wb-completion-badge-wrap {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.wb-completion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+}
+
+.wb-completion-metric {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.wb-metric-label {
+  font-size: var(--text-2xs);
+  color: var(--ink-muted);
+  text-transform: uppercase;
+}
+
+.wb-metric-value {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ==========================================================================
+   Responsive Breakpoints: Tablet (768px-1023px) and Mobile (<768px)
+   ========================================================================== */
+
+@media (max-width: 1023px) {
+  .wb-workspace-grid {
+    grid-template-columns: minmax(280px, 1fr) minmax(320px, 1fr);
+  }
+
+  .wb-zone-left {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 767px) {
+  .wb-mobile-nav {
+    display: flex;
+  }
+
+  .wb-workspace-grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Show active section according to mobile tab */
+  .mobile-show-operations .wb-zone-left:not(.wb-is-prestart),
+  .mobile-show-operations .wb-lower-workspace {
+    display: none;
+  }
+
+  .mobile-show-operations .wb-zone-left.wb-is-prestart {
+    display: flex;
+    width: 100%;
+  }
+
+  .mobile-show-operations .wb-zone-center,
+  .mobile-show-operations .wb-zone-right {
+    display: flex;
+    width: 100%;
+  }
+
+  .mobile-show-data .wb-zone-left,
+  .mobile-show-data .wb-zone-center,
+  .mobile-show-data .wb-zone-right {
+    display: none;
+  }
+
+  .mobile-show-data .wb-lower-workspace {
+    display: flex;
+    width: 100%;
+  }
+
+  .mobile-show-protocol .wb-zone-center,
+  .mobile-show-protocol .wb-zone-right,
+  .mobile-show-protocol .wb-lower-workspace .wb-chart-container {
+    display: none;
+  }
+
+  .mobile-show-protocol .wb-zone-left,
+  .mobile-show-protocol .wb-lower-workspace .wb-event-log {
+    display: flex;
+    width: 100%;
+  }
+
+  .wb-context-bar {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .wb-apparatus-wrapper {
+    min-height: 340px;
+    padding: var(--space-2);
+  }
+
+  .wb-aliquot-segmented {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+
 
