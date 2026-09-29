@@ -40,9 +40,9 @@ export const APP_STRINGS = {
       'Đây là công cụ học tập. Kết quả là pH* mô hình ở 25 °C và 0,1 MPa, không phải phép đo bench và không dùng để vận hành hay suy liều cho mẫu thật.',
 
     trustItems: [
-      { label: 'Không cần đăng ký', hint: 'Dùng thử đầy đủ ở chế độ khách' },
-      { label: 'Học qua thao tác', hint: 'Mô phỏng xác định, lặp lại được' },
-      { label: 'Có nguồn khoa học', hint: 'Minh bạch, kiểm tra được' },
+      { label: 'An toàn, không rủi ro', hint: 'Không cần đăng ký, dùng thử an toàn ở chế độ khách' },
+      { label: 'Học qua thực hành', hint: 'Thao tác từng bước, cân bằng hóa học xác thực' },
+      { label: 'Dựa trên nguồn khoa học', hint: 'Minh bạch, có căn cứ kiểm chứng' },
     ],
 
     learningValueHeading: 'Giá trị học tập',

@@ -21,7 +21,7 @@ export function FinalCtaBanner({ scenarioKey = 'acid-neutralization' }: FinalCta
   const strings = APP_STRINGS.home
 
   return (
-    <section className="final-cta-section reveal" aria-labelledby="final-cta-heading">
+    <div className="final-cta-section reveal" data-reveal-variant="invite" aria-labelledby="final-cta-heading">
       <div className="final-cta-surface">
         <div className="final-cta-content">
           <div className="final-cta-emblem" aria-hidden="true">
@@ -47,6 +47,6 @@ export function FinalCtaBanner({ scenarioKey = 'acid-neutralization' }: FinalCta
           </Link>
         </div>
       </div>
-    </section>
+    </div>
   )
 }

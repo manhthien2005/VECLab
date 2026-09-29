@@ -5,6 +5,7 @@ import { FlaskIcon } from '@/features/landing/icons.js'
 import { AppNav } from './app-nav.js'
 import { ThemeToggle } from './theme-toggle.js'
 import { THEME_STORAGE_KEY } from './theme-storage.js'
+import { manrope } from './fonts.js'
 import './globals.css'
 
 /**
@@ -71,7 +72,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
       </head>
-      <body>
+      <body className={manrope.variable}>
         {/* First tab stop on every page: the workbench has many controls before the
             content, and a keyboard user must be able to skip the header. */}
         <a className="skip-link" href="#main">
@@ -146,17 +147,19 @@ function SiteFooter() {
         </div>
 
         <div className="footer-legal">
-          <p>
-            Giá trị pH hiển thị là pH* — kết quả mô hình tính từ nồng độ H⁺ với hệ số hoạt
-            độ bằng 1, không phải phép đo bench. Mô hình áp dụng ở 25 °C và 0,1 MPa, hệ
-            carbon kín; không dùng để suy ra liều xử lý cho mẫu thật chưa biết thành phần.
-          </p>
-          <p>
-            Thí nghiệm thật chỉ thực hiện dưới sự giám sát của người phụ trách phòng thí
-            nghiệm, với trang bị bảo hộ phù hợp. Công cụ giáo dục — không thay thế phép đo,
-            jar test, thiết kế kỹ thuật, đánh giá an toàn, quản lý chất thải hoặc kết luận
-            tuân thủ pháp luật.
-          </p>
+          <div className="footer-disclaimers">
+            <p>
+              Giá trị pH hiển thị là pH* — kết quả mô hình tính từ nồng độ H⁺ với hệ số hoạt
+              độ bằng 1, không phải phép đo bench. Mô hình áp dụng ở 25 °C và 0,1 MPa, hệ
+              carbon kín; không dùng để suy ra liều xử lý cho mẫu thật chưa biết thành phần.
+            </p>
+            <p>
+              Thí nghiệm thật chỉ thực hiện dưới sự giám sát của người phụ trách phòng thí
+              nghiệm, với trang bị bảo hộ phù hợp. Công cụ giáo dục — không thay thế phép đo,
+              jar test, thiết kế kỹ thuật, đánh giá an toàn, quản lý chất thải hoặc kết luận
+              tuân thủ pháp luật.
+            </p>
+          </div>
           <div className="footer-legal-row">
             <span>{APP_STRINGS.brand}. Đồ án học tập.</span>
             <span>© 2026 {APP_STRINGS.brand}</span>
