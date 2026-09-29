@@ -5,6 +5,7 @@ import { newUUID } from '@/shared/ids.js'
 import type {
   AcidSession,
   AcidSessionState,
+  AcidSetupParams,
   CommitIdentity,
   FinalReportSnapshot,
   SessionActionResult,
@@ -74,15 +75,13 @@ export class RemoteAcidSession implements AcidSession {
   /**
    * Start a fresh attempt.
    *
-   * Takes no parameters because the server owns the scenario: it picks the locked
-   * release and computes the initial state and projection itself. A client-supplied
-   * initial state would let a learner begin from an arbitrary composition and still
-   * receive a report claiming it was the benchmark run.
+   * Accepts optional validated setup parameters or defaults to the benchmark scenario.
+   * The server constructs the initial state; client never submits arbitrary initial_state.
    */
-  async start(): Promise<AcidSessionState> {
+  async start(params?: AcidSetupParams): Promise<AcidSessionState> {
     const response = await this.fetch<{ state: SessionStateDto }>('/attempts', {
       method: 'POST',
-      body: {},
+      body: params ?? {},
     })
     return fromSessionStateDto(response.state)
   }

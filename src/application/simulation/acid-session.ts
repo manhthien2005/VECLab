@@ -23,6 +23,9 @@ import {
   createInitialResourceLedger,
   initialHclMmolFor,
   resolveTargetEquivalentsMmolEq,
+  createAcidScenarioConfig,
+  resolveScenarioConfigForAttempt,
+  type AcidSetupParams,
 } from '@/domain/experiments/acid-neutralization/index.js'
 import { replayEvents, undoLastAction } from '@/domain/process/lifecycle.js'
 import { stateHash } from '@/domain/process/hashing.js'
@@ -40,6 +43,7 @@ import {
   createAcidProjector,
   isAcidProjection,
   type AcidProjection,
+  type AcidProjector,
 } from '@/application/scenarios/acid-projection.js'
 
 /**
@@ -62,9 +66,23 @@ import {
  * trusting a snapshot no store actually holds.
  */
 
-const engine = createAcidNeutralizationModule()
-const projector = createAcidProjector()
-const config: AcidScenarioConfig = benchmarkScenarioConfig()
+/**
+ * Resolve attempt-specific scenario configuration, engine and projector from an attempt's
+ * immutable initial state.
+ *
+ * Ensures parameterized attempts use their own stock concentration, sample volume, and
+ * dynamic volume caps, while historical benchmark attempts resolve to exact benchmark constants.
+ */
+function toolsForAttempt(initialState: AcidNeutralizationState) {
+  const attemptConfig = resolveScenarioConfigForAttempt(initialState)
+  const attemptEngine = createAcidNeutralizationModule(attemptConfig)
+  const attemptProjector = createAcidProjector(attemptConfig)
+  return {
+    config: attemptConfig,
+    engine: attemptEngine,
+    projector: attemptProjector,
+  }
+}
 
 /**
  * Action types undo may revert, derived from the content definition.
@@ -256,8 +274,8 @@ export type AcidSession = {
   listEvents(
     attemptId: UUID,
   ): Promise<readonly StoredAttemptEventRecord<AcidNeutralizationState>[]>
-  /** Start a fresh attempt for the benchmark scenario. */
-  start(): Promise<AcidSessionState>
+  /** Start a fresh attempt for the benchmark scenario or with parameterized setup. */
+  start(params?: AcidSetupParams): Promise<AcidSessionState>
   /**
    * Resume an attempt, or null when it is not in this store.
    *
@@ -309,14 +327,6 @@ export type AcidSession = {
 export function createAcidSession(
   repository: AttemptRepository<AcidNeutralizationState>,
 ): AcidSession {
-  function project(
-    sequence: number,
-    domain: AcidNeutralizationState,
-    ledger: ResourceLedger,
-  ): AcidProjection {
-    return projector.project(ACID_RELEASE_ID, sequence, domain, ledger)
-  }
-
   async function requireAttempt(
     attemptId: UUID,
   ): Promise<
@@ -336,7 +346,9 @@ export function createAcidSession(
   function sessionState(
     attempt: Attempt<AcidNeutralizationState>,
     ledger: ResourceLedger,
+    customProjector?: AcidProjector,
   ): AcidSessionState {
+    const projector = customProjector ?? toolsForAttempt(attempt.initialState).projector
     return {
       attemptId: attempt.attemptId,
       releaseId: attempt.scenarioReleaseId,
@@ -345,7 +357,7 @@ export function createAcidSession(
       status: attempt.status,
       domain: attempt.currentState,
       ledger,
-      projection: narrowProjection(attempt, ledger),
+      projection: narrowProjection(attempt, ledger, projector),
       finalReportSnapshot: narrowReport(attempt.finalReportSnapshot),
       createdAt: attempt.createdAt,
       completedAt: attempt.completedAt,
@@ -364,10 +376,11 @@ export function createAcidSession(
   function narrowProjection(
     attempt: Attempt<AcidNeutralizationState>,
     ledger: ResourceLedger,
+    projector: AcidProjector,
   ): AcidProjection {
     return isAcidProjection(attempt.currentProjection)
       ? attempt.currentProjection
-      : project(attempt.lastSequence, attempt.currentState, ledger)
+      : projector.project(ACID_RELEASE_ID, attempt.lastSequence, attempt.currentState, ledger)
   }
 
   /**
@@ -392,6 +405,7 @@ export function createAcidSession(
     feedback: Omit<ActionFeedback, 'idempotentReplay'>,
     ledgerBefore: ResourceLedger,
     ledgerAfter: ResourceLedger,
+    projector: AcidProjector,
   ): SessionActionResult {
     if (!written.ok) return written
 
@@ -405,6 +419,7 @@ export function createAcidSession(
       state: sessionState(
         written.attempt,
         idempotentReplay ? ledgerBefore : ledgerAfter,
+        projector,
       ),
     }
   }
@@ -413,9 +428,12 @@ export function createAcidSession(
     storageMode: repository.storageMode,
     listEvents: (attemptId: UUID) => repository.getAttemptEventRecords(attemptId),
 
-    async start(): Promise<AcidSessionState> {
+    async start(params?: AcidSetupParams): Promise<AcidSessionState> {
+      const attemptConfig = createAcidScenarioConfig(params)
+      const attemptEngine = createAcidNeutralizationModule(attemptConfig)
+      const attemptProjector = createAcidProjector(attemptConfig)
       const attemptId = newUUID()
-      const domain = engine.createInitialState()
+      const domain = attemptEngine.createInitialState()
       const ledger = createInitialResourceLedger()
 
       const attempt = await repository.createAttempt({
@@ -424,11 +442,11 @@ export function createAcidSession(
         scenarioReleaseId: ACID_RELEASE_ID,
         contentLocale: 'vi',
         initialState: domain,
-        initialProjection: project(0, domain, ledger),
-        projectionVersion: projector.version,
+        initialProjection: attemptProjector.project(ACID_RELEASE_ID, 0, domain, ledger),
+        projectionVersion: attemptProjector.version,
       })
 
-      return sessionState(attempt, ledger)
+      return sessionState(attempt, ledger, attemptProjector)
     },
 
     async load(attemptId: UUID) {
@@ -436,7 +454,8 @@ export function createAcidSession(
       if (found === null) return null
       if (!found.ok) return { ok: false, error: found.error }
 
-      return { ok: true, state: sessionState(found.attempt, found.ledger) }
+      const { projector } = toolsForAttempt(found.attempt.initialState)
+      return { ok: true, state: sessionState(found.attempt, found.ledger, projector) }
     },
 
     async apply(
@@ -451,6 +470,7 @@ export function createAcidSession(
       if (!found.ok) return { ok: false, error: found.error }
 
       const { attempt, ledger } = found
+      const { engine, projector } = toolsForAttempt(attempt.initialState)
 
       const result = commitAction(engine, {
         attempt: {
@@ -472,7 +492,8 @@ export function createAcidSession(
 
       if (!result.ok) return { ok: false, error: result.error }
 
-      const nextProjection = project(
+      const nextProjection = projector.project(
+        ACID_RELEASE_ID,
         result.sequence,
         result.stateAfter,
         result.ledgerAfter,
@@ -520,6 +541,7 @@ export function createAcidSession(
         },
         ledger,
         result.ledgerAfter,
+        projector,
       )
     },
 
@@ -529,6 +551,7 @@ export function createAcidSession(
       if (!found.ok) return { ok: false, error: found.error }
 
       const { attempt, ledger } = found
+      const { projector } = toolsForAttempt(attempt.initialState)
       const events = await repository.getAttemptEvents(attemptId)
 
       // Replay starts from a FRESH initial ledger, not the current one: `undoLastAction`
@@ -554,7 +577,7 @@ export function createAcidSession(
       // would subtract twice.
       const undoActionId = commit.actionId ?? newUUID()
       const sequence = attempt.lastSequence + 1
-      const nextProjection = project(sequence, outcome.state, outcome.ledger)
+      const nextProjection = projector.project(ACID_RELEASE_ID, sequence, outcome.state, outcome.ledger)
 
       const written = await repository.appendAction({
         attemptId: attempt.attemptId,
@@ -604,6 +627,7 @@ export function createAcidSession(
         },
         ledger,
         outcome.ledger,
+        projector,
       )
     },
 
@@ -613,6 +637,7 @@ export function createAcidSession(
       if (!found.ok) return { ok: false, error: found.error }
 
       const { attempt, ledger } = found
+      const { config, engine, projector } = toolsForAttempt(attempt.initialState)
 
       // The engine decides whether the run MAY finish (valid model, current
       // measurement). That decision is a normal domain action; only after it is
@@ -697,7 +722,7 @@ export function createAcidSession(
 
       return {
         ok: true,
-        state: sessionState(written.attempt, finalLedger),
+        state: sessionState(written.attempt, finalLedger, projector),
         report,
       }
     },
@@ -749,7 +774,22 @@ export type ActionAvailability = {
 export function probeAvailableActions(
   state: AcidNeutralizationState,
   sequence: number,
+  config?: AcidScenarioConfig,
 ): readonly ActionAvailability[] {
+  const initialAcidVolumeL =
+    state.totalVolumeL > 0
+      ? Math.max(0.025, Math.min(0.05, state.totalVolumeL - state.baseVolumeL - state.correctionAcidVolumeL))
+      : 0.025
+  const resolvedConfig =
+    config ??
+    (initialAcidVolumeL !== 0.025
+      ? createAcidScenarioConfig({
+          acidVolumeL: initialAcidVolumeL,
+          acidConcentrationMolL: 0.01,
+        })
+      : benchmarkScenarioConfig())
+  const engine = createAcidNeutralizationModule(resolvedConfig)
+
   const context = {
     scenario: {
       key: 'acid-neutralization' as const,
@@ -810,5 +850,5 @@ function probeParametersFor(
 /** Smallest permitted aliquot, from the frozen scenario constants. */
 const SMALLEST_PERMITTED_ALIQUOT_L = PERMITTED_ALIQUOTS_L[0]!
 
-/** The acid route type, re-exported so workbench callers need one import. */
-export type { AcidRoute }
+/** The acid route and setup param types, re-exported so workbench callers need one import. */
+export type { AcidRoute, AcidSetupParams }

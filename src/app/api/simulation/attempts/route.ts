@@ -8,6 +8,7 @@ import {
 import { startAttempt, listAttempts } from '../server-session.js'
 import { guardedResponse, respond, reject } from '@/app/api/_lib/respond.js'
 import { parseBody, startAttemptSchema } from '../schemas.js'
+import type { AcidSetupParams } from '@/application/simulation/acid-session.js'
 
 /**
  * `POST /api/simulation/attempts` — start a fresh attempt.
@@ -33,18 +34,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const origin = assertSameOrigin(request)
     if (origin !== null) return reject(origin)
 
-    // The body must be EMPTY. `startAttemptSchema` is `.strict()` with no fields, so a
-    // body carrying a `scenarioKey` or any initial state is rejected rather than ignored:
-    // §17 is explicit that scenario config comes only from build or the internal registry,
-    // never from an arbitrary user payload. Accepting and discarding such a field would
-    // hide a client that believes it can choose the scenario.
+    // The body must be EMPTY for a benchmark attempt or contain complete, valid AcidSetupParams.
+    // Arbitrary initial_state or unvalidated scenario overrides are strictly rejected.
     const parsed = await readJson(request, MAX_ACTION_BODY_BYTES)
     if (!parsed.ok) return reject(parsed.failure)
 
     const validated = parseBody(startAttemptSchema, parsed.value)
     if (!validated.ok) return reject(validated.failure)
 
-    return respond(await startAttempt())
+    const params: AcidSetupParams | undefined =
+      'acidVolumeL' in validated.value && typeof validated.value.acidVolumeL === 'number'
+        ? {
+            acidVolumeL: validated.value.acidVolumeL,
+            acidConcentrationMolL: validated.value.acidConcentrationMolL as number,
+          }
+        : undefined
+
+    return respond(await startAttempt(params))
   })
 }
 

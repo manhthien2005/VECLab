@@ -85,13 +85,42 @@ export const undoActionSchema = z.object(commitFields).strict()
 /** `POST /attempts/[attemptId]/complete`. */
 export const completeActionSchema = z.object(commitFields).strict()
 
-/** `POST /attempts` — starts an attempt. The server owns the scenario, so there is nothing to send. */
-export const startAttemptSchema = z.object({}).strict()
+import { EXPLORATION_RANGES } from '@/domain/experiments/acid-neutralization/constants.js'
+
+/**
+ * Atomic setup parameters for a parameterized attempt (spec §3.5).
+ * Both fields are required and must be within authorized exploration ranges.
+ * Any unknown properties are rejected.
+ */
+export const parameterizedStartAttemptSchema = z
+  .object({
+    acidVolumeL: z
+      .number()
+      .finite()
+      .min(EXPLORATION_RANGES.acidVolumeL.min)
+      .max(EXPLORATION_RANGES.acidVolumeL.max),
+    acidConcentrationMolL: z
+      .number()
+      .finite()
+      .min(EXPLORATION_RANGES.acidConcentrationMolL.min)
+      .max(EXPLORATION_RANGES.acidConcentrationMolL.max),
+  })
+  .strict()
+
+/** Empty body for benchmark attempt start. */
+export const emptyStartAttemptSchema = z.object({}).strict()
+
+/** `POST /attempts` — starts an attempt. Accepts an empty body or complete authorized AcidSetupParams. */
+export const startAttemptSchema = z.union([
+  emptyStartAttemptSchema,
+  parameterizedStartAttemptSchema,
+])
 
 /** Inferred request types, so handlers consume values rather than re-declaring shapes. */
 export type ApplyActionRequest = z.infer<typeof applyActionSchema>
 export type UndoActionRequest = z.infer<typeof undoActionSchema>
 export type CompleteActionRequest = z.infer<typeof completeActionSchema>
+export type StartAttemptRequest = z.infer<typeof startAttemptSchema>
 
 /**
  * The identity a commit carries, as the session wants it.

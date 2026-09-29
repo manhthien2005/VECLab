@@ -186,6 +186,25 @@ export function AttemptShell({ attemptId, storageMode, view }: ShellProps) {
   const { session: loaded, timeline } = state
   const report: FinalReportSnapshot | null = loaded.finalReportSnapshot
 
+  const projection = report?.projection ?? loaded.projection
+  const initialAcidVolumeL =
+    projection.initialAcidVolumeMl !== undefined
+      ? projection.initialAcidVolumeMl / 1000
+      : Math.max(
+          0.025,
+          loaded.domain.totalVolumeL -
+            loaded.domain.baseVolumeL -
+            loaded.domain.correctionAcidVolumeL,
+        )
+  const initialAcidConcentrationMolL =
+    projection.initialAcidConcentrationMolL !== undefined
+      ? projection.initialAcidConcentrationMolL
+      : (loaded.domain.chlorideMoles > 0 && initialAcidVolumeL > 0
+          ? (loaded.domain.chlorideMoles -
+              loaded.domain.correctionAcidVolumeL * 0.01) /
+            initialAcidVolumeL
+          : 0.01)
+
   // A report view with no snapshot means the run never completed. §4.2 forbids completing
   // without one, so the absence is not a rendering bug to paper over — it is an unfinished
   // run, and the learner is sent back to finish it rather than shown a partial report that
@@ -271,15 +290,15 @@ export function AttemptShell({ attemptId, storageMode, view }: ShellProps) {
         </dl>
       </section>
 
-      {/* §4.7 item 2: initial conditions, from the locked release constants rather than
-          from the stored attempt, so the report says what the scenario actually specified. */}
+      {/* §4.7 item 2: initial conditions, truthfully rendered from the attempt/report
+          projection and authoritative domain state rather than benchmark literals. */}
       <section className="card stack-tight">
         <h2>{strings.headings.initialConditions}</h2>
         <dl className="meta-list">
           <dt>Mẫu axit</dt>
           <dd>
-            {formatLitresAsMl(ACID_INPUT_DOMAIN.benchmark.acidVolumeL)} HCl{' '}
-            {ACID_INPUT_DOMAIN.benchmark.acidConcentrationMolL.toExponential(4)} mol/L
+            {formatLitresAsMl(initialAcidVolumeL)} HCl{' '}
+            {initialAcidConcentrationMolL.toExponential(4)} mol/L
           </dd>
           <dt>pH* mục tiêu</dt>
           <dd>
