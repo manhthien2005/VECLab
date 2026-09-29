@@ -5801,3 +5801,357 @@ td[data-numeric],
     color: #555;
   }
 }
+
+/* ==========================================================================
+   Workbench V1 Interactive Titration Apparatus (WB-R4)
+   Scientific digital laboratory instrument aesthetic.
+   ========================================================================== */
+
+.wb-apparatus-stage-container {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  border-radius: var(--radius-lg, 12px);
+  background: var(--surface-raised, #ffffff);
+  border: 1px solid var(--border, #d8e4f0);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.wb-apparatus-svg {
+  width: 100%;
+  height: auto;
+  max-height: 560px;
+  display: block;
+  user-select: none;
+}
+
+/* Glassware & Liquid Styling */
+.wb-beaker-glass-back,
+.wb-burette-glass-back {
+  fill: var(--surface-sunken, #f1f6fb);
+  opacity: 0.35;
+}
+
+.wb-beaker-glass-front,
+.wb-burette-glass-front,
+.wb-burette-funnel {
+  fill: url(#wb-glass-sheen);
+  stroke: var(--border-strong, #b2c9e2);
+  stroke-width: 1.5;
+}
+
+.wb-burette-rim,
+.wb-valve-housing {
+  fill: var(--surface-sunken, #f1f6fb);
+  stroke: var(--border-strong, #b2c9e2);
+  stroke-width: 1.2;
+}
+
+.wb-beaker-reflection,
+.wb-burette-reflection {
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+
+.wb-beaker-reflection-soft {
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+/* Liquid solution fills (water-clear transparent aqueous) */
+.wb-beaker-liquid,
+.wb-burette-liquid {
+  fill: url(#wb-aqueous-solution);
+  stroke: var(--accent, #008388);
+  stroke-width: 0.75;
+  stroke-opacity: 0.25;
+}
+
+.wb-beaker-meniscus,
+.wb-burette-meniscus {
+  fill: none;
+  stroke: var(--accent, #008388);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+/* Magnetic Stirrer & Laboratory Stand */
+.wb-stand-plate {
+  fill: url(#wb-cast-iron);
+  stroke: var(--ink-faint, #6c7f98);
+  stroke-width: 1;
+}
+
+.wb-stand-rod-socket {
+  fill: var(--surface-3, #e5eff8);
+  stroke: var(--border-strong, #b2c9e2);
+  stroke-width: 1;
+}
+
+.wb-stand-rod-steel {
+  fill: url(#wb-steel-rod);
+  stroke: var(--border-strong, #b2c9e2);
+  stroke-width: 0.75;
+}
+
+.wb-stand-clamp-boss,
+.wb-stand-clamp-arm {
+  fill: var(--surface-3, #e5eff8);
+  stroke: var(--border-strong, #b2c9e2);
+  stroke-width: 1.2;
+}
+
+.wb-stirrer-body {
+  fill: var(--surface-2, #f1f6fb);
+  stroke: var(--border-strong, #b2c9e2);
+  stroke-width: 1.5;
+}
+
+.wb-stirrer-top-plate {
+  fill: url(#wb-ceramic-plate);
+  stroke: var(--border, #d8e4f0);
+  stroke-width: 1;
+}
+
+.wb-stirrer-front-panel {
+  fill: var(--surface-3, #e5eff8);
+  stroke: var(--border, #d8e4f0);
+  stroke-width: 1;
+}
+
+.wb-stirrer-led {
+  fill: var(--border-strong, #b2c9e2);
+  transition: fill 200ms ease;
+}
+
+.wb-stirrer-led.is-active {
+  fill: var(--ok, #16a34a);
+  filter: drop-shadow(0 0 4px var(--ok, #16a34a));
+}
+
+.wb-stirrer-lcd {
+  fill: var(--ink, #0b1f3d);
+  stroke: var(--border, #d8e4f0);
+  stroke-width: 1;
+}
+
+.wb-stirrer-lcd-text {
+  fill: var(--accent, #008388);
+}
+
+:root[data-theme='dark'] .wb-stirrer-lcd-text {
+  fill: var(--cyan, #38bdf8);
+}
+
+.wb-stirrer-knob {
+  fill: var(--surface, #ffffff);
+  stroke: var(--border-strong, #b2c9e2);
+  stroke-width: 1.2;
+}
+
+.wb-stirrer-knob-base {
+  fill: var(--surface-3, #e5eff8);
+}
+
+/* Stir bar & rotation animation */
+.wb-stir-bar {
+  fill: #ffffff;
+  stroke: var(--border-strong, #b2c9e2);
+  stroke-width: 1;
+}
+
+.wb-stir-bar-ring {
+  fill: var(--border-strong, #b2c9e2);
+}
+
+.wb-reaction-beaker.is-stirring .wb-stir-bar-group {
+  animation: wb-stir-spin var(--stir-duration, 0.2s) linear infinite;
+  transform-origin: 0 0;
+}
+
+@keyframes wb-stir-spin {
+  0% {
+    transform: translate(400px, 498px) scaleX(1);
+  }
+  25% {
+    transform: translate(400px, 498px) scaleX(0.25);
+  }
+  50% {
+    transform: translate(400px, 498px) scaleX(-1);
+  }
+  75% {
+    transform: translate(400px, 498px) scaleX(-0.25);
+  }
+  100% {
+    transform: translate(400px, 498px) scaleX(1);
+  }
+}
+
+/* pH Electrode Probe */
+.wb-probe-cap {
+  fill: var(--ink, #0b1f3d);
+  stroke: var(--border-strong, #b2c9e2);
+  stroke-width: 1;
+}
+
+.wb-probe-status-collar {
+  fill: var(--border, #d8e4f0);
+  transition: fill 200ms ease;
+}
+
+.wb-ph-probe.is-calibrating .wb-probe-status-collar,
+.wb-ph-probe.is-measuring .wb-probe-status-collar {
+  fill: var(--accent, #008388);
+  filter: drop-shadow(0 0 4px var(--accent, #008388));
+}
+
+.wb-probe-shaft {
+  fill: var(--surface-sunken, #f1f6fb);
+  stroke: var(--border-strong, #b2c9e2);
+  stroke-width: 1;
+  opacity: 0.85;
+}
+
+.wb-probe-electrolyte {
+  fill: #ffffff;
+  opacity: 0.8;
+}
+
+.wb-probe-internal-wire {
+  stroke: var(--ink-faint, #6c7f98);
+  stroke-width: 1;
+}
+
+.wb-probe-junction {
+  fill: var(--warn, #d97706);
+}
+
+.wb-probe-bulb {
+  fill: rgba(2, 132, 199, 0.18);
+  stroke: var(--accent, #008388);
+  stroke-width: 1.5;
+}
+
+/* Stopcock Valve & Dispensing */
+.wb-valve-plug-core {
+  fill: var(--surface, #ffffff);
+  stroke: var(--border-strong, #b2c9e2);
+  stroke-width: 1;
+}
+
+.wb-valve-handle {
+  fill: var(--accent, #008388);
+  stroke: var(--accent-hover, #006b70);
+  stroke-width: 1;
+}
+
+.wb-stopcock-handle-group {
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: 380px 330px;
+}
+
+.wb-burette-assembly.is-dispensing .wb-stopcock-handle-group {
+  transform: translate(380px, 330px) rotate(90deg);
+}
+
+.wb-burette-tip {
+  fill: var(--surface-sunken, #f1f6fb);
+  stroke: var(--border-strong, #b2c9e2);
+  stroke-width: 1;
+  opacity: 0.85;
+}
+
+/* Droplet Stream Animation */
+.wb-droplet-tip-meniscus {
+  fill: var(--accent, #008388);
+  opacity: 0.6;
+}
+
+.wb-droplet-hanging {
+  fill: var(--accent, #008388);
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.wb-droplet-stream.is-dispensing .wb-droplet-hanging {
+  opacity: 0.85;
+}
+
+.wb-droplet-falling {
+  fill: var(--accent, #008388);
+  opacity: 0;
+}
+
+.wb-droplet-stream.is-dispensing .wb-droplet-falling-wrapper {
+  animation: wb-droplet-fall 520ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.wb-droplet-stream.is-dispensing .wb-droplet-falling {
+  opacity: 0.85;
+}
+
+@keyframes wb-droplet-fall {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(var(--droplet-fall-distance, 110px));
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(calc(var(--droplet-fall-distance, 110px) + 8px));
+    opacity: 0;
+  }
+}
+
+/* Telemetry Badges and Chips */
+.wb-burette-tag-bg,
+.wb-vol-tag-bg,
+.wb-status-badge-bg {
+  fill: var(--surface, #ffffff);
+  stroke: var(--border, #d8e4f0);
+  stroke-width: 1;
+  filter: drop-shadow(0 2px 4px rgba(11, 31, 61, 0.05));
+}
+
+.wb-vol-tag-text {
+  fill: var(--ink, #0b1f3d);
+}
+
+.wb-status-badge-dot {
+  fill: var(--ink-faint, #6c7f98);
+  transition: fill 200ms ease;
+}
+
+.wb-status-badge-dot.is-active {
+  fill: var(--accent, #008388);
+  filter: drop-shadow(0 0 4px var(--accent, #008388));
+}
+
+.wb-status-badge-text {
+  fill: var(--ink, #0b1f3d);
+}
+
+/* Prefers Reduced Motion overrides */
+@media (prefers-reduced-motion: reduce) {
+  .wb-reaction-beaker.is-stirring .wb-stir-bar-group {
+    animation: none !important;
+  }
+
+  .wb-droplet-stream.is-dispensing .wb-droplet-falling-wrapper {
+    animation: none !important;
+  }
+
+  .wb-stopcock-handle-group {
+    transition: none !important;
+  }
+}
+
