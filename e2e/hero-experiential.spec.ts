@@ -60,6 +60,7 @@ test.describe('Hero Experiential Staging and Pointer Depth (R17.2)', () => {
 
       const stage = page.locator('.hero-pointer-stage')
       await expect(stage).toBeVisible()
+      await expect(stage).toHaveAttribute('data-hydrated', 'true')
 
       const initialBox = await stage.boundingBox()
       expect(initialBox).not.toBeNull()
@@ -67,7 +68,7 @@ test.describe('Hero Experiential Staging and Pointer Depth (R17.2)', () => {
       if (initialBox) {
         // Move pointer to lower-right area of stage
         await page.mouse.move(initialBox.x + initialBox.width * 0.75, initialBox.y + initialBox.height * 0.75)
-        await page.waitForTimeout(150)
+        await expect(stage).toHaveAttribute('data-pointer-active', 'true')
 
         // Verify pointer CSS custom properties are updated
         const pointerX = await stage.evaluate((el) => getComputedStyle(el).getPropertyValue('--hero-pointer-x').trim())
@@ -82,7 +83,7 @@ test.describe('Hero Experiential Staging and Pointer Depth (R17.2)', () => {
 
         // Pointer leave returns stage variables toward neutral (0)
         await page.mouse.move(0, 0)
-        await page.waitForTimeout(400)
+        await expect(stage).toHaveAttribute('data-pointer-active', 'false')
         const neutralX = await stage.evaluate((el) => getComputedStyle(el).getPropertyValue('--hero-pointer-x').trim())
         const neutralY = await stage.evaluate((el) => getComputedStyle(el).getPropertyValue('--hero-pointer-y').trim())
         expect(Number(neutralX)).toBe(0)
@@ -97,6 +98,7 @@ test.describe('Hero Experiential Staging and Pointer Depth (R17.2)', () => {
 
       const stage = page.locator('.hero-pointer-stage')
       await expect(stage).toBeVisible()
+      await expect(stage).toHaveAttribute('data-hydrated', 'true')
 
       const box = await stage.boundingBox()
       expect(box).not.toBeNull()
@@ -118,6 +120,7 @@ test.describe('Hero Experiential Staging and Pointer Depth (R17.2)', () => {
     test('prefers-reduced-motion disables pointer depth and spatial movement', async ({ page }) => {
       const stage = page.locator('.hero-pointer-stage')
       await expect(stage).toBeVisible()
+      await expect(stage).toHaveAttribute('data-hydrated', 'true')
 
       const box = await stage.boundingBox()
       if (box) {

@@ -41,6 +41,11 @@ export function HeroPointerStage({ children }: HeroPointerStageProps) {
   }, [])
 
   useEffect(() => {
+    // Expose client hydration readiness via direct ref DOM attribute mutation (zero extra render cycles)
+    if (containerRef.current) {
+      containerRef.current.dataset.hydrated = 'true'
+    }
+
     // Detect fine pointer capability and reduced motion preferences
     const finePointerMql = window.matchMedia('(hover: hover) and (pointer: fine)')
     const reducedMotionMql = window.matchMedia('(prefers-reduced-motion: reduce)')
