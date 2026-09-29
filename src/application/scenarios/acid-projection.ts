@@ -194,3 +194,12 @@ export function isAcidProjection(value: unknown): value is AcidProjection {
     Array.isArray(candidate.invalidReasonCodes)
   )
 }
+
+export {
+  projectTitrationPoint,
+  projectTitrationPoints,
+  projectTitrationCurve,
+  type TitrationCurvePoint,
+  type TitrationCurveProjection,
+} from './acid-titration-curve.js'
+
