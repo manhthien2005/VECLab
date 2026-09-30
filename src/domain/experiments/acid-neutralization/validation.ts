@@ -12,6 +12,7 @@ import type {
   AcidRoute,
   PermittedAliquotL,
 } from './state.js'
+import { maxBaseVolumeLForRoute } from './setup.js'
 
 /**
  * Action validation for acid neutralization.
@@ -91,7 +92,7 @@ export function validateVolumeCap(
   }
 
   const nextBaseL = state.baseVolumeL + additionalVolumeL
-  const capL = MAX_BASE_VOLUME_L_BY_ROUTE[route]
+  const capL = maxBaseVolumeLForRoute(route, acidVolumeL)
   if (nextBaseL > capL + 1e-12) {
     return invalidInput('VOLUME_OUT_OF_RANGE', 'errors.VOLUME_OUT_OF_RANGE', {
       nextBaseVolumeL: nextBaseL,

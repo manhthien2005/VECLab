@@ -133,3 +133,15 @@ export {
   INVALID_REASON_CODES,
 } from './invariants.js'
 export type { InvalidReasonCode } from './invariants.js'
+
+export {
+  benchmarkSetupParams,
+  isAcidSetupParams,
+  validateSetupParams,
+  maxBaseVolumeLForRoute,
+  buildParameterizedConstants,
+  createAcidScenarioConfig,
+  reconstructSetupParams,
+  resolveScenarioConfigForAttempt,
+} from './setup.js'
+export type { AcidSetupParams } from './setup.js'

@@ -68,6 +68,10 @@ export type AcidProjection = {
   safetyPenaltyCodes: string[]
   /** Invalid-model reasons, so the UI can explain a blocked run. */
   invalidReasonCodes: string[]
+  /** Initial acid sample volume in mL (spec §2, §3.5). */
+  initialAcidVolumeMl?: number
+  /** Initial acid sample concentration in mol/L (spec §2, §3.5). */
+  initialAcidConcentrationMolL?: number
 }
 
 export type AcidProjector = {
@@ -150,6 +154,8 @@ export function createAcidProjector(
       safetyIndex: ledger.safetyIndex,
       safetyPenaltyCodes: ledger.safetyPenalties.map((penalty) => penalty.code),
       invalidReasonCodes: [...state.invalidReasonCodes],
+      initialAcidVolumeMl: config.constants.acidVolumeL * 1000,
+      initialAcidConcentrationMolL: config.constants.acidConcentrationMolL,
     }
   }
 
@@ -191,6 +197,21 @@ export function isAcidProjection(value: unknown): value is AcidProjection {
       typeof candidate.relativeCostIndex === 'number') &&
     (candidate.safetyIndex === null || typeof candidate.safetyIndex === 'number') &&
     Array.isArray(candidate.safetyPenaltyCodes) &&
-    Array.isArray(candidate.invalidReasonCodes)
+    Array.isArray(candidate.invalidReasonCodes) &&
+    (candidate.initialAcidVolumeMl === undefined ||
+      typeof candidate.initialAcidVolumeMl === 'number') &&
+    (candidate.initialAcidConcentrationMolL === undefined ||
+      typeof candidate.initialAcidConcentrationMolL === 'number')
   )
 }
+
+export {
+  projectTitrationPoint,
+  projectTitrationPoints,
+  projectTitrationCurve,
+  calculateNaohEquivalenceVolumeMl,
+  resolveMaxBaseVolumeMl,
+  type TitrationCurvePoint,
+  type TitrationCurveProjection,
+} from './acid-titration-curve.js'
+

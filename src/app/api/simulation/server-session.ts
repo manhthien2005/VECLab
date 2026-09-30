@@ -1,4 +1,4 @@
-import { createAcidSession } from '@/application/simulation/acid-session.js'
+import { createAcidSession, type AcidSetupParams } from '@/application/simulation/acid-session.js'
 import { SupabaseAttemptRepository } from '@/application/attempts/supabase-repository.js'
 import type { AcidNeutralizationState } from '@/domain/experiments/acid-neutralization/state.js'
 import type { UUID } from '@/domain/process/contracts.js'
@@ -75,8 +75,8 @@ async function guarded<Value>(
 }
 
 /** Start a fresh attempt. The server owns the scenario and the initial state. */
-export function startAttempt() {
-  return guarded(async (session) => ({ state: toSessionStateDto(await session.start()) }))
+export function startAttempt(params?: AcidSetupParams) {
+  return guarded(async (session) => ({ state: toSessionStateDto(await session.start(params)) }))
 }
 
 /** Resume an attempt, rebuilding the ledger by replay. */
