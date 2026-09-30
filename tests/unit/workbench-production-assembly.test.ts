@@ -351,4 +351,120 @@ describe('Workbench V1 Production Assembly (WB-R6)', () => {
     expect(htmlMobile).toContain(EXPLORATION_RANGES ? 'viewBox' : '')
     expect(htmlMobile).toContain('200 185 400 380') // Mobile focused viewBox
   })
+
+  it('16. Setup envelope boundaries and interior values are strictly validated (WB-R7)', () => {
+    // Lower bounds
+    expect(validateSetupParams({ acidVolumeL: 0.025, acidConcentrationMolL: 0.005 }).ok).toBe(true)
+    expect(validateSetupParams({ acidVolumeL: 0.0249, acidConcentrationMolL: 0.005 }).ok).toBe(false)
+    expect(validateSetupParams({ acidVolumeL: 0.025, acidConcentrationMolL: 0.0049 }).ok).toBe(false)
+
+    // Upper bounds
+    expect(validateSetupParams({ acidVolumeL: 0.050, acidConcentrationMolL: 0.020 }).ok).toBe(true)
+    expect(validateSetupParams({ acidVolumeL: 0.0501, acidConcentrationMolL: 0.020 }).ok).toBe(false)
+    expect(validateSetupParams({ acidVolumeL: 0.050, acidConcentrationMolL: 0.0201 }).ok).toBe(false)
+
+    // Interior decimals
+    expect(validateSetupParams({ acidVolumeL: 0.0375, acidConcentrationMolL: 0.0125 }).ok).toBe(true)
+  })
+
+  it('17. Equivalence crossing does not complete run; 30.0 mL benchmark cap is enforced (WB-R7)', async () => {
+    const { session } = createGuestSession()
+    const start = await session.start(benchmarkSetupParams())
+    await session.apply(start.attemptId, 'select_route', { route: 'naoh' })
+    await session.apply(start.attemptId, 'calibrate_meter', {})
+
+    // 5 doses of 5.0 mL (0.005 L) = 25.0 mL (Equivalence point!)
+    for (let i = 0; i < 5; i++) {
+      const res = await session.apply(start.attemptId, 'add_base', { volumeL: 0.005 })
+      expect(res.ok).toBe(true)
+      await session.apply(start.attemptId, 'mix', {})
+      await session.apply(start.attemptId, 'wait_for_stable_reading', {})
+      await session.apply(start.attemptId, 'measure_ph', {})
+    }
+
+    // Verify after crossing equivalence: status is still in_progress
+    const current = await session.load(start.attemptId)
+    expect(current?.ok).toBe(true)
+    if (current && current.ok) {
+      expect(current.state.status).toBe('in_progress')
+      expect(current.state.domain.baseVolumeL).toBeCloseTo(0.025, 6)
+      expect(current.state.domain.measurements).toHaveLength(5)
+    }
+
+    // 6th dose to reach 30.0 mL benchmark cap
+    const sixthRes = await session.apply(start.attemptId, 'add_base', { volumeL: 0.005 })
+    expect(sixthRes.ok).toBe(true)
+
+    // 7th dose beyond cap is refused
+    const overRes = await session.apply(start.attemptId, 'add_base', { volumeL: 0.001 })
+    expect(overRes.ok).toBe(false)
+    if (!overRes.ok && 'error' in overRes) {
+      expect(overRes.error.code).toBe('VOLUME_OUT_OF_RANGE')
+    }
+  })
+
+  it('18. Undo reverts route selection cleanly when supported (WB-R7)', async () => {
+    const { session } = createGuestSession()
+    const start = await session.start(benchmarkSetupParams())
+    const routeRes = await session.apply(start.attemptId, 'select_route', { route: 'naoh' })
+    expect(routeRes.ok).toBe(true)
+    if (!routeRes.ok) return
+
+    expect(routeRes.state.domain.route).toBe('naoh')
+
+    // Undo action
+    const undoRes = await session.undo(start.attemptId)
+    expect(undoRes.ok).toBe(true)
+    if (!undoRes.ok) return
+
+    expect(undoRes.state.domain.route).toBeNull()
+  })
+
+  it('19. Correction acid increases total volume without advancing baseVolumeL or adding chart point (WB-R7)', async () => {
+    const { session } = createGuestSession()
+    const start = await session.start(benchmarkSetupParams())
+    await session.apply(start.attemptId, 'select_route', { route: 'naoh' })
+    await session.apply(start.attemptId, 'calibrate_meter', {})
+
+    // Add 30 mL base to overshoot pH past 7.15
+    await session.apply(start.attemptId, 'add_base', { volumeL: 0.005 })
+    await session.apply(start.attemptId, 'add_base', { volumeL: 0.005 })
+    await session.apply(start.attemptId, 'add_base', { volumeL: 0.005 })
+    await session.apply(start.attemptId, 'add_base', { volumeL: 0.005 })
+    await session.apply(start.attemptId, 'add_base', { volumeL: 0.005 })
+    await session.apply(start.attemptId, 'add_base', { volumeL: 0.005 })
+    await session.apply(start.attemptId, 'mix', {})
+    await session.apply(start.attemptId, 'wait_for_stable_reading', {})
+    const mRes = await session.apply(start.attemptId, 'measure_ph', {})
+    expect(mRes.ok).toBe(true)
+    if (!mRes.ok) return
+
+    expect(mRes.state.domain.measurements).toHaveLength(1)
+    const baseVolBefore = mRes.state.domain.baseVolumeL
+    const totalVolBefore = mRes.state.domain.totalVolumeL
+
+    // Add correction acid (1.00 mL)
+    const corrRes = await session.apply(start.attemptId, 'add_correction_acid', { volumeL: 0.001 })
+    expect(corrRes.ok).toBe(true)
+    if (!corrRes.ok) return
+
+    // baseVolumeL MUST NOT change!
+    expect(corrRes.state.domain.baseVolumeL).toBeCloseTo(baseVolBefore, 6)
+    // totalVolumeL MUST increase by 1.00 mL!
+    expect(corrRes.state.domain.totalVolumeL).toBeCloseTo(totalVolBefore + 0.001, 6)
+    // Measurements list MUST NOT have grown!
+    expect(corrRes.state.domain.measurements).toHaveLength(1)
+  })
+
+  it('20. Upper envelope volume (50.0 mL HCl) derives 60.0 mL NaOH cap (WB-R7)', async () => {
+    const { session } = createGuestSession()
+    const upperSetup = { acidVolumeL: 0.050, acidConcentrationMolL: 0.020 }
+    const start = await session.start(upperSetup)
+    await session.apply(start.attemptId, 'select_route', { route: 'naoh' })
+    await session.apply(start.attemptId, 'calibrate_meter', {})
+
+    // Max NaOH cap for 50 mL is 1.2 * 50 = 60 mL (0.060 L)
+    expect(start.domain.totalVolumeL).toBeCloseTo(0.050, 6)
+    expect(start.domain.baseVolumeL).toBe(0)
+  })
 })

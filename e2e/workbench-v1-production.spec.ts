@@ -41,11 +41,13 @@ test.describe('Workbench V1 Production Assembly Integration (WB-R6)', () => {
     const selectRouteBtn = page.getByRole('button', { name: 'Chọn dung dịch chuẩn NaOH' })
     await expect(selectRouteBtn).toBeVisible()
     await selectRouteBtn.click()
+    await expect(selectRouteBtn).not.toBeVisible()
 
     // Step 2: Calibrate pH meter
     const calibrateBtn = page.getByRole('button', { name: 'Hiệu chuẩn máy đo pH' })
     await expect(calibrateBtn).toBeVisible()
     await calibrateBtn.click()
+    await expect(calibrateBtn).not.toBeVisible()
 
     // Telemetry shows calibrated, ready
     await expect(page.locator('.telemetry-status-pill')).toContainText('Chưa đo')
@@ -62,16 +64,19 @@ test.describe('Workbench V1 Production Assembly Integration (WB-R6)', () => {
     const mixBtn = page.getByRole('button', { name: 'Khuấy dung dịch' })
     await expect(mixBtn).toBeEnabled()
     await mixBtn.click()
+    await expect(page.locator('.wb-stage-indicator')).not.toBeVisible()
 
     // Step 5: Wait for stable reading
     const waitBtn = page.getByRole('button', { name: 'Chờ số đọc ổn định' })
     await expect(waitBtn).toBeEnabled()
     await waitBtn.click()
+    await expect(page.locator('.wb-stage-indicator')).not.toBeVisible()
 
     // Step 6: Measure pH
     const measureBtn = page.getByRole('button', { name: 'Đo giá trị pH' })
     await expect(measureBtn).toBeEnabled()
     await measureBtn.click()
+    await expect(page.locator('.wb-stage-indicator')).not.toBeVisible()
 
     // Stable reading recorded
     await expect(page.locator('.telemetry-status-pill')).toContainText('Ổn định')
@@ -89,8 +94,12 @@ test.describe('Workbench V1 Production Assembly Integration (WB-R6)', () => {
 
     // Start Guided run
     await page.getByRole('button', { name: 'Bắt đầu thí nghiệm' }).click()
-    await page.getByRole('button', { name: 'Chọn dung dịch chuẩn NaOH' }).click()
-    await page.getByRole('button', { name: 'Hiệu chuẩn máy đo pH' }).click()
+    const selectRouteBtn = page.getByRole('button', { name: 'Chọn dung dịch chuẩn NaOH' })
+    await selectRouteBtn.click()
+    await expect(selectRouteBtn).not.toBeVisible()
+    const calibrateBtn = page.getByRole('button', { name: 'Hiệu chuẩn máy đo pH' })
+    await calibrateBtn.click()
+    await expect(calibrateBtn).not.toBeVisible()
 
     // Measure initial reading
     await page.getByRole('button', { name: 'Chờ số đọc ổn định' }).click()
@@ -135,9 +144,13 @@ test.describe('Workbench V1 Production Assembly Integration (WB-R6)', () => {
 
     // Start and perform an action
     await page.getByRole('button', { name: 'Bắt đầu thí nghiệm' }).click()
-    await page.getByRole('button', { name: 'Chọn dung dịch chuẩn NaOH' }).click()
-
+    await expect(page).toHaveURL(/attempt=/)
     const initialUrl = page.url()
+
+    const selectRouteBtn = page.getByRole('button', { name: 'Chọn dung dịch chuẩn NaOH' })
+    await selectRouteBtn.click()
+    await expect(selectRouteBtn).not.toBeVisible()
+    await expect(page.locator('.wb-stage-indicator')).not.toBeVisible()
 
     // Trigger restart
     page.on('dialog', async (dialog) => {
@@ -149,6 +162,7 @@ test.describe('Workbench V1 Production Assembly Integration (WB-R6)', () => {
 
     // Fresh attempt created
     await expect(page).not.toHaveURL(initialUrl)
+    await expect(page).toHaveURL(/attempt=/)
     await expect(page.locator('.wb-log-item')).toHaveCount(0)
   })
 
@@ -216,5 +230,265 @@ test.describe('Workbench V1 Production Assembly Integration (WB-R6)', () => {
     await expect(page.locator('.wb-context-bar')).toBeVisible()
     await page.getByRole('button', { name: 'Bắt đầu thí nghiệm' }).click()
     await expect(page.locator('.wb-apparatus-svg-container')).toBeVisible()
+  })
+
+  test('10. Theme switching preserves attemptId, chemistry state, telemetry, and chart points (WB-R7)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/simulate/acid-neutralization')
+
+    // Start Guided run and establish 1 real measurement
+    await page.getByRole('button', { name: 'Bắt đầu thí nghiệm' }).click()
+    const selectRouteBtn = page.getByRole('button', { name: 'Chọn dung dịch chuẩn NaOH' })
+    await selectRouteBtn.click()
+    await expect(selectRouteBtn).not.toBeVisible()
+    await expect(page.locator('.wb-stage-indicator')).not.toBeVisible()
+
+    const calibrateBtn = page.getByRole('button', { name: 'Hiệu chuẩn máy đo pH' })
+    await expect(calibrateBtn).toBeEnabled()
+    await calibrateBtn.click()
+    await expect(calibrateBtn).not.toBeVisible()
+    await expect(page.locator('.wb-stage-indicator')).not.toBeVisible()
+
+    const addBaseBtn = page.getByRole('button', { name: /Thêm .* NaOH/ })
+    await addBaseBtn.click()
+    await expect(page.locator('[data-testid="telemetry-naoh-volume"]')).toContainText('1,00 mL')
+
+    const mixBtn = page.getByRole('button', { name: 'Khuấy dung dịch' })
+    await expect(mixBtn).toBeEnabled()
+    await mixBtn.click()
+    await expect(page.locator('.wb-stage-indicator')).not.toBeVisible()
+
+    const waitBtn = page.getByRole('button', { name: 'Chờ số đọc ổn định' })
+    await expect(waitBtn).toBeEnabled()
+    await waitBtn.click()
+    await expect(page.locator('.wb-stage-indicator')).not.toBeVisible()
+
+    const measureBtn = page.getByRole('button', { name: 'Đo giá trị pH' })
+    await expect(measureBtn).toBeEnabled()
+    await measureBtn.click()
+    await expect(page.locator('.wb-stage-indicator')).not.toBeVisible()
+    await expect(page.locator('.telemetry-status-pill')).toContainText('Ổn định')
+    await expect(page.locator('.live-chart-point-dot')).toHaveCount(1)
+
+    // Capture baseline values
+    await expect(page).toHaveURL(/attempt=/)
+    const originalUrl = page.url()
+    const originalAttemptId = new URL(originalUrl).searchParams.get('attempt')
+    expect(originalAttemptId).toBeTruthy()
+
+    const volumeCell = page.locator('[data-testid="telemetry-naoh-volume"]')
+    const phCell = page.locator('[data-testid="telemetry-ph-value"]')
+    await expect(volumeCell).toContainText('1,00 mL')
+    const originalPhText = await phCell.innerText()
+
+    // Toggle Light -> Dark
+    const themeBtn = page.locator('.theme-toggle')
+    await themeBtn.click()
+
+    // Assert all state remains identical in Dark theme
+    expect(new URL(page.url()).searchParams.get('attempt')).toBe(originalAttemptId)
+    await expect(page.locator('.wb-context-mode')).toContainText('GUIDED')
+    await expect(volumeCell).toContainText('1,00 mL')
+    await expect(phCell).toHaveText(originalPhText)
+    await expect(page.locator('.live-chart-point-dot')).toHaveCount(1)
+    await expect(page.getByRole('button', { name: /Thêm .* NaOH/ })).toBeEnabled()
+
+    // Toggle Dark -> Light
+    await themeBtn.click()
+
+    // Assert all state remains identical in Light theme
+    expect(new URL(page.url()).searchParams.get('attempt')).toBe(originalAttemptId)
+    await expect(page.locator('.wb-context-mode')).toContainText('GUIDED')
+    await expect(volumeCell).toContainText('1,00 mL')
+    await expect(phCell).toHaveText(originalPhText)
+    await expect(page.locator('.live-chart-point-dot')).toHaveCount(1)
+    await expect(page.getByRole('button', { name: /Thêm .* NaOH/ })).toBeEnabled()
+  })
+
+  test('11. Direct browser refresh resumes active attempt state and measurements (WB-R7)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/simulate/acid-neutralization')
+
+    // Start Guided run and record 1 measurement
+    await page.getByRole('button', { name: 'Bắt đầu thí nghiệm' }).click()
+    const selectRouteBtn = page.getByRole('button', { name: 'Chọn dung dịch chuẩn NaOH' })
+    await selectRouteBtn.click()
+    await expect(selectRouteBtn).not.toBeVisible()
+    await expect(page.locator('.wb-stage-indicator')).not.toBeVisible()
+
+    const calibrateBtn = page.getByRole('button', { name: 'Hiệu chuẩn máy đo pH' })
+    await expect(calibrateBtn).toBeEnabled()
+    await calibrateBtn.click()
+    await expect(calibrateBtn).not.toBeVisible()
+    await expect(page.locator('.wb-stage-indicator')).not.toBeVisible()
+
+    const addBaseBtn = page.getByRole('button', { name: /Thêm .* NaOH/ })
+    await addBaseBtn.click()
+    await expect(page.locator('[data-testid="telemetry-naoh-volume"]')).toContainText('1,00 mL')
+
+    const mixBtn11 = page.getByRole('button', { name: 'Khuấy dung dịch' })
+    await expect(mixBtn11).toBeEnabled()
+    await mixBtn11.click()
+    await expect(page.locator('.wb-stage-indicator')).not.toBeVisible()
+
+    const waitBtn11 = page.getByRole('button', { name: 'Chờ số đọc ổn định' })
+    await expect(waitBtn11).toBeEnabled()
+    await waitBtn11.click()
+    await expect(page.locator('.wb-stage-indicator')).not.toBeVisible()
+
+    const measureBtn11 = page.getByRole('button', { name: 'Đo giá trị pH' })
+    await expect(measureBtn11).toBeEnabled()
+    await measureBtn11.click()
+    await expect(page.locator('.wb-stage-indicator')).not.toBeVisible()
+    await expect(page.locator('.telemetry-status-pill')).toContainText('Ổn định')
+    await expect(page.locator('.live-chart-point-dot')).toHaveCount(1)
+
+    await expect(page).toHaveURL(/attempt=/)
+    const attemptId = new URL(page.url()).searchParams.get('attempt')
+    expect(attemptId).toBeTruthy()
+
+    // Perform direct browser refresh
+    await page.reload()
+
+    // Verify resumption of the exact attempt
+    await expect(page).toHaveURL(new RegExp(`attempt=${attemptId}`))
+    await expect(page.locator('.wb-context-mode')).toContainText('GUIDED')
+    await expect(page.locator('[data-testid="telemetry-naoh-volume"]')).toContainText('1,00 mL')
+    await expect(page.locator('.telemetry-status-pill')).toContainText('Ổn định')
+    await expect(page.locator('.live-chart-point-dot')).toHaveCount(1)
+  })
+
+  test('12. Setup boundary verification rejects out-of-envelope parameters (WB-R7)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/simulate/acid-neutralization')
+
+    const volInput = page.locator('input[type="number"]').first()
+    const concInput = page.locator('input[type="number"]').nth(1)
+    const startBtn = page.getByRole('button', { name: 'Bắt đầu thí nghiệm' })
+
+    // Boundary: Volume immediately below 25.0 mL rejected
+    await volInput.fill('24.9')
+    await expect(startBtn).toBeDisabled()
+
+    // Boundary: Volume at 25.0 mL accepted
+    await volInput.fill('25.0')
+    await expect(startBtn).toBeEnabled()
+
+    // Boundary: Volume at 50.0 mL accepted
+    await volInput.fill('50.0')
+    await expect(startBtn).toBeEnabled()
+
+    // Boundary: Volume immediately above 50.0 mL rejected
+    await volInput.fill('50.1')
+    await expect(startBtn).toBeDisabled()
+
+    // Restore valid volume
+    await volInput.fill('25.0')
+
+    // Boundary: Concentration below 0.005 M rejected
+    await concInput.fill('0.004')
+    await expect(startBtn).toBeDisabled()
+
+    // Boundary: Concentration at 0.005 M accepted
+    await concInput.fill('0.005')
+    await expect(startBtn).toBeEnabled()
+
+    // Boundary: Concentration at 0.020 M accepted
+    await concInput.fill('0.020')
+    await expect(startBtn).toBeEnabled()
+
+    // Boundary: Concentration above 0.020 M rejected
+    await concInput.fill('0.021')
+    await expect(startBtn).toBeDisabled()
+  })
+
+  test('13. Equivalence crossing does not complete run and volume cap is enforced (WB-R7)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/simulate/acid-neutralization')
+
+    // Use EXPLORE mode for rapid automated dosing
+    await page.locator('label', { hasText: 'EXPLORE' }).click()
+    await page.getByRole('button', { name: 'Bắt đầu thí nghiệm' }).click()
+
+    // Select 5.00 mL aliquot
+    await page.getByRole('radio', { name: '5,00 mL' }).click()
+    const heroBtn = page.locator('.wb-btn-hero')
+
+    // Dose 1: 5.0 mL
+    await heroBtn.click()
+    await expect(page.locator('.live-chart-point-dot')).toHaveCount(1, { timeout: 10000 })
+
+    // Dose 2: 10.0 mL
+    await heroBtn.click()
+    await expect(page.locator('.live-chart-point-dot')).toHaveCount(2, { timeout: 10000 })
+
+    // Dose 3: 15.0 mL
+    await heroBtn.click()
+    await expect(page.locator('.live-chart-point-dot')).toHaveCount(3, { timeout: 10000 })
+
+    // Dose 4: 20.0 mL
+    await heroBtn.click()
+    await expect(page.locator('.live-chart-point-dot')).toHaveCount(4, { timeout: 10000 })
+
+    // Dose 5: 25.0 mL (Equivalence point!)
+    await heroBtn.click()
+    await expect(page.locator('.live-chart-point-dot')).toHaveCount(5, { timeout: 10000 })
+
+    // Verify crossing equivalence MUST NOT auto-complete the attempt
+    await expect(page.locator('.wb-context-mode')).toContainText('EXPLORE')
+    await expect(page.locator('.wb-completion-card')).not.toBeVisible()
+
+    // Dose 6: 30.0 mL (Authorized benchmark cap = 30.0 mL)
+    await heroBtn.click()
+    await expect(page.locator('.live-chart-point-dot')).toHaveCount(6, { timeout: 10000 })
+    await expect(page.locator('[data-testid="telemetry-naoh-volume"]')).toContainText('30,00 mL')
+
+    // At 30.0 mL cap, button is disabled with limit message
+    await expect(heroBtn).toBeDisabled()
+    await expect(page.locator('.wb-explore-actions [role="alert"]')).toContainText('Thể tích vượt giới hạn')
+  })
+
+  test('14. Undo reverts route selection when available (WB-R7)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/simulate/acid-neutralization')
+
+    await page.getByRole('button', { name: 'Bắt đầu thí nghiệm' }).click()
+    const selectRouteBtn = page.getByRole('button', { name: 'Chọn dung dịch chuẩn NaOH' })
+    await selectRouteBtn.click()
+    await expect(selectRouteBtn).not.toBeVisible()
+
+    // Undo is available before base is added
+    const undoBtn = page.getByRole('button', { name: 'Hoàn tác' })
+    await expect(undoBtn).toBeEnabled()
+    await undoBtn.click()
+
+    // Route button reappears
+    await expect(page.getByRole('button', { name: 'Chọn dung dịch chuẩn NaOH' })).toBeVisible()
+  })
+
+  test('15. Explicit completion displays summary card with report link (WB-R7)', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/simulate/acid-neutralization')
+
+    // Start Explore and perform 1 measurement
+    await page.locator('label', { hasText: 'EXPLORE' }).click()
+    await page.getByRole('button', { name: 'Bắt đầu thí nghiệm' }).click()
+
+    const heroBtn = page.locator('.wb-btn-hero')
+    await heroBtn.click()
+    await expect(page.locator('.live-chart-point-dot')).toHaveCount(1, { timeout: 10000 })
+
+    // Complete button is now enabled
+    const completeBtn = page.getByRole('button', { name: 'Hoàn thành thí nghiệm' })
+    await expect(completeBtn).toBeEnabled()
+    await completeBtn.click()
+
+    // Completion card is rendered
+    await expect(page.locator('.wb-completion-card')).toBeVisible()
+    const reportLink = page.locator('.wb-completion-actions a')
+    await expect(reportLink).toHaveAttribute('href', /\/reports\//)
+
+    // Primary action is now disabled
+    await expect(heroBtn).toBeDisabled()
   })
 })
