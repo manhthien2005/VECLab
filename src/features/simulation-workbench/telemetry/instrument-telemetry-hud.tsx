@@ -3,6 +3,7 @@
 import { useId } from 'react'
 import type { AcidNeutralizationState } from '@/domain/experiments/acid-neutralization/state.js'
 import type { AcidSetupParams } from '@/domain/experiments/acid-neutralization/setup.js'
+import { ACID_INPUT_DOMAIN, APP_STRINGS } from '@/content/index.js'
 import { formatMl, formatPh } from '@/shared/ui/format.js'
 
 export type TelemetryMeasurementStatus = 'stable' | 'pending' | 'uncalibrated' | 'unmeasured'
@@ -114,6 +115,8 @@ export function InstrumentTelemetryHud({
   const hudId = id ?? `telemetry-hud-${generatedId.replace(/:/g, '')}`
 
   const { status, label: statusLabel, isStale, lastMeasuredPh } = evaluateMeasurementState(domain)
+  const targetPh = ACID_INPUT_DOMAIN.benchmark.targetPH
+  const targetTolerancePh = ACID_INPUT_DOMAIN.benchmark.targetTolerancePH
 
   // Cumulative added NaOH volume in mL (authoritative domain baseVolumeL only)
   const baseVolumeMl = (domain?.baseVolumeL ?? 0) * 1000
@@ -153,6 +156,13 @@ export function InstrumentTelemetryHud({
             <span className="status-indicator-dot" aria-hidden="true" />
             <span className="status-text">{statusLabel}</span>
           </div>
+        </div>
+
+        <div className="telemetry-target" data-testid="telemetry-target-ph">
+          <span className="telemetry-target-label">{APP_STRINGS.workbench.target}</span>
+          <span className="telemetry-target-value">
+            {formatPh(targetPh)} ± {formatPh(targetTolerancePh)}
+          </span>
         </div>
 
         <div className="telemetry-value-display">

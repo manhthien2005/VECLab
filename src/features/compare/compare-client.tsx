@@ -33,7 +33,7 @@ import {
  * with a long attempt history.
  *
  * Client component, because a guest's attempts live in IndexedDB and only the browser can
- * read them. Middleware redirects `/compare` to sign-in for a signed-out learner, but that
+ * read them. Proxy redirects `/compare` to sign-in for a signed-out learner, but that
  * redirect is a convenience, not the boundary: this screen reads only what the session it
  * holds can see.
  */

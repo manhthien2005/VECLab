@@ -150,19 +150,26 @@ export default async function ExperimentDetailPage({ params }: DetailPageProps) 
         </dl>
       </section>
 
-      {/* 3. Process groups the learner can try — here, the three neutralizer routes */}
+      {/* 3. Process groups — live workbench is NaOH; other routes stay in the spec. */}
       <section className="card stack-tight" id="quy-trinh">
-        <h2>Các nhóm quy trình có thể thử</h2>
+        <h2>{strings.processHeading}</h2>
+        <p className="small">{strings.processLiveLead}</p>
         <ul className="stack-tight small">
-          {ACID_ROUTE_CHOICES.map((route) => (
-            <li key={route}>
-              <strong>{acidText(`routes.${route}.label`)}</strong> —{' '}
-              {acidText(`routes.${route}.description`)}
-              {clarificationFor(route) !== null && (
-                <span className="faint"> {clarificationFor(route)}</span>
-              )}
-            </li>
-          ))}
+          {ACID_ROUTE_CHOICES.map((route) => {
+            const live = route === 'naoh'
+            return (
+              <li key={route}>
+                <strong>{acidText(`routes.${route}.label`)}</strong> —{' '}
+                {acidText(`routes.${route}.description`)}{' '}
+                <span className={`badge ${live ? 'badge-ok' : 'badge-warn'}`}>
+                  {live ? strings.processLiveBadge : strings.processSpecBadge}
+                </span>
+                {clarificationFor(route) !== null && (
+                  <span className="faint"> {clarificationFor(route)}</span>
+                )}
+              </li>
+            )
+          })}
         </ul>
       </section>
 
@@ -221,9 +228,11 @@ export default async function ExperimentDetailPage({ params }: DetailPageProps) 
           </dd>
           <dt>Đơn vị hiển thị thể tích</dt>
           <dd>mL</dd>
-          <dt>Giới hạn base theo route</dt>
+          <dt>{strings.naohLimitLabel}</dt>
+          <dd>{formatLitresAsMl(ACID_INPUT_DOMAIN.maxVolumeLByRoute.naoh)}</dd>
+          <dt>{strings.specLimitLabel}</dt>
           <dd>
-            NaOH / Ca(OH)₂ {formatLitresAsMl(ACID_INPUT_DOMAIN.maxVolumeLByRoute.naoh)} ·{' '}
+            Ca(OH)₂ {formatLitresAsMl(ACID_INPUT_DOMAIN.maxVolumeLByRoute['calcium-hydroxide'])} ·{' '}
             Na₂CO₃ {formatLitresAsMl(ACID_INPUT_DOMAIN.maxVolumeLByRoute['sodium-carbonate'])}
           </dd>
           <dt>Giới hạn HCl hiệu chỉnh</dt>
@@ -337,7 +346,7 @@ export default async function ExperimentDetailPage({ params }: DetailPageProps) 
 const PAGE_SECTIONS: ReadonlyArray<{ id: string; label: string }> = [
   { id: 'boi-canh', label: APP_STRINGS.experimentDetail.contextHeading },
   { id: 'mau-ban-dau', label: APP_STRINGS.experimentDetail.initialStateHeading },
-  { id: 'quy-trinh', label: 'Các nhóm quy trình' },
+  { id: 'quy-trinh', label: APP_STRINGS.experimentDetail.processHeading },
   { id: 'thao-tac', label: APP_STRINGS.experimentDetail.permittedHeading },
   { id: 'tham-so', label: APP_STRINGS.experimentDetail.parametersHeading },
   { id: 'danh-gia', label: APP_STRINGS.experimentDetail.evaluatedHeading },

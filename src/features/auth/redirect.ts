@@ -1,8 +1,8 @@
 /**
  * The post-sign-in destination (docs/web-application-scope.md §4.4).
  *
- * Middleware appends `?next=<pathname>` when it bounces a signed-out learner away from
- * `/lab`, `/compare` or `/account`, so signing in can put them back where they were heading
+ * Proxy appends `?next=<pathname>` when it bounces a signed-out learner away from
+ * `/compare` or `/account`, so signing in can put them back where they were heading
  * rather than dumping everyone on the lab.
  *
  * That parameter is attacker-controlled, because it is in a URL a learner can be handed:

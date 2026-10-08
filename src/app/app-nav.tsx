@@ -3,62 +3,32 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { APP_STRINGS } from '@/content/index.js'
+import { useSignedIn } from '@/features/auth/use-signed-in.js'
+import { footerNavItems, headerNavItems } from './nav-items.js'
 
 /**
  * Primary navigation.
  *
- * A client component for two reasons: marking the current page with
- * `aria-current="page"` needs the live pathname (`usePathname` is a client hook, and a
- * root layout is a Server Component that receives no pathname), and the narrow-viewport
- * panel is a disclosure with open state.
+ * A client component for three reasons: `aria-current="page"` needs the live
+ * pathname, the narrow-viewport panel is a disclosure with open state, and
+ * compare/account appear only after the browser knows there is a session —
+ * so the root layout can stay static for guests.
  *
- * Route groups never appear here or in hrefs — docs/system-architecture.md forbids using
- * a group name as an auth guard, and group folders are not part of the URL anyway.
+ * Route groups never appear here or in hrefs — docs/system-architecture.md
+ * forbids using a group name as an auth guard.
  *
- * WHY A DISCLOSURE BELOW 60rem. The five destinations plus the brand do not fit on one
- * row on a phone; they used to wrap, which doubled the sticky header's height and ate a
- * quarter of a 320px-tall viewport on every scroll. Collapsing them keeps the header one
- * row tall without removing a destination, which §10.2 requires.
+ * WHY A DISCLOSURE BELOW 60rem. Guest destinations plus the brand already
+ * strain a phone row; signed-in extras would wrap. Collapsing them keeps the
+ * header one row tall without removing a destination, which §10.2 requires.
  */
-
-type NavItem = {
-  href: string
-  label: string
-}
-
-/**
- * The five route areas a learner can navigate to directly.
- *
- * `/simulate/[scenarioKey]`, `/attempts/[attemptId]` and `/reports/[attemptId]` are
- * deliberately absent: they are reached FROM the catalog or the lab, not by guessing an
- * id, and an attempt id is not something to hand-type.
- *
- * Labels come from the content bundle rather than being typed here, so navigation wording
- * lives with the rest of the copy (§9).
- */
-const NAV_ITEMS: readonly NavItem[] = [
-  { href: '/experiments', label: APP_STRINGS.nav.experiments },
-  { href: '/evidence', label: APP_STRINGS.nav.evidence },
-  { href: '/lab', label: APP_STRINGS.nav.lab },
-  { href: '/compare', label: APP_STRINGS.nav.compare },
-  { href: '/account', label: APP_STRINGS.nav.account },
-]
 
 export function AppNav() {
   const pathname = usePathname()
   const panelId = useId()
   const navRef = useRef<HTMLElement>(null)
+  const signedIn = useSignedIn()
+  const items = headerNavItems(signedIn)
 
-  /**
-   * Open state, keyed by the route it was opened on.
-   *
-   * The panel must close when the learner picks a destination, and Next's client
-   * navigation does not unmount this component — so something has to react to the
-   * pathname changing. Storing WHICH route the panel was opened on makes "still open"
-   * a derived value rather than an effect that pushes `false` after every navigation:
-   * the moment `pathname` differs, `open` is false with no extra render.
-   */
   const [openedOn, setOpenedOn] = useState<string | null>(null)
   const open = openedOn === pathname
 
@@ -67,17 +37,6 @@ export function AppNav() {
     [pathname],
   )
 
-  /**
-   * Close on Escape and on a click outside.
-   *
-   * A panel that overlays the page must be dismissible without hitting the exact toggle
-   * again — otherwise a mis-tap beside it leaves the content covered. Listeners are only
-   * attached while open, so a closed nav costs nothing.
-   *
-   * Closes through `setOpenedOn(null)` rather than the `setOpen` wrapper: the wrapper is
-   * rebuilt whenever `pathname` changes, which would re-subscribe both listeners on every
-   * navigation, while React guarantees the raw setter is stable.
-   */
   useEffect(() => {
     if (!open) return
 
@@ -86,7 +45,9 @@ export function AppNav() {
     }
     const onPointerDown = (event: PointerEvent): void => {
       if (!(event.target instanceof Node)) return
-      if (navRef.current !== null && !navRef.current.contains(event.target)) setOpenedOn(null)
+      if (navRef.current !== null && !navRef.current.contains(event.target)) {
+        setOpenedOn(null)
+      }
     }
 
     document.addEventListener('keydown', onKeyDown)
@@ -110,14 +71,8 @@ export function AppNav() {
         <span className="nav-toggle-bars" aria-hidden="true" />
       </button>
 
-      {/*
-        Always rendered, never conditionally mounted: above 60rem this IS the navigation
-        and must be present regardless of `open`. `data-open` is what the narrow-viewport
-        media query reads to collapse it, so one list serves both layouts and the links
-        stay in the document for crawlers and for the keyboard.
-      */}
       <ul className="app-nav" id={panelId} data-open={open ? 'true' : 'false'}>
-        {NAV_ITEMS.map((item) => {
+        {items.map((item) => {
           const isCurrent =
             pathname === item.href || pathname.startsWith(`${item.href}/`)
 
@@ -133,6 +88,21 @@ export function AppNav() {
           )
         })}
       </ul>
+    </nav>
+  )
+}
+
+export function AppFooterNav() {
+  const signedIn = useSignedIn()
+  const items = footerNavItems(signedIn)
+
+  return (
+    <nav aria-label="Liên kết chân trang" className="footer-nav">
+      {items.map((item) => (
+        <Link href={item.href} key={item.href}>
+          {item.label}
+        </Link>
+      ))}
     </nav>
   )
 }

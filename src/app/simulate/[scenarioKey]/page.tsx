@@ -13,7 +13,7 @@ import { WorkbenchClient } from '@/features/simulation-workbench/workbench-clien
  *
  * NOT inside a route group. §4.6's guest flow requires that a learner can complete an
  * experiment without an account, so this route is public and the storage mode is derived
- * rather than gated. Middleware guards `/lab`, `/compare` and `/account`; it does not guard
+ * rather than gated. Proxy guards `/compare` and `/account`; it does not guard
  * this, and must not — gating it would make the guest path unreachable.
  *
  * Reads cookies (through `currentStorageMode`), so it renders per request. It cannot be

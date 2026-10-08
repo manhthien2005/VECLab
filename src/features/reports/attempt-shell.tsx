@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { APP_STRINGS, resolveMessage, storageModeLabel } from '@/content/index.js'
 import { ACID_INPUT_DOMAIN } from '@/content/scenarios/acid-neutralization.js'
 import type { AcidNeutralizationState } from '@/domain/experiments/acid-neutralization/state.js'
@@ -29,6 +30,7 @@ import {
   routeLabel,
 } from '@/features/simulation-workbench/copy.js'
 import { buildTimeline, type TimelineEntry } from '@/features/simulation-workbench/timeline.js'
+import { workbenchPathForAttempt } from '@/features/simulation-workbench/scenario.js'
 
 /**
  * The attempt and report shell (docs/system-architecture.md §14, web scope §4.7).
@@ -78,6 +80,7 @@ const TIMELINE_INLINE_LIMIT = 12
 
 export function AttemptShell({ attemptId, storageMode, view }: ShellProps) {
   const strings = APP_STRINGS.report
+  const router = useRouter()
 
   const session = useMemo<AcidSession>(
     () => createSessionForStorageMode(storageMode),
@@ -145,6 +148,18 @@ export function AttemptShell({ attemptId, storageMode, view }: ShellProps) {
     }
   }, [parsedAttemptId, session])
 
+  /**
+   * An in-progress attempt belongs on the workbench, not on this read-only
+   * document. Direct `/attempts/[id]` URLs (bookmarks, shared links) resume
+   * there instead of looking like a finished report.
+   */
+  useEffect(() => {
+    if (state.kind !== 'ready') return
+    if (view !== 'attempt') return
+    if (state.session.status !== 'in_progress') return
+    router.replace(workbenchPathForAttempt(state.session.attemptId))
+  }, [router, state, view])
+
   /** Trigger the browser's own print dialog. §4.7: no server-side PDF service. */
   const print = useCallback(() => {
     globalThis.print()
@@ -184,6 +199,17 @@ export function AttemptShell({ attemptId, storageMode, view }: ShellProps) {
   }
 
   const { session: loaded, timeline } = state
+
+  if (view === 'attempt' && loaded.status === 'in_progress') {
+    return (
+      <div className="page stack">
+        <p className="muted" role="status">
+          {APP_STRINGS.workbench.loading}
+        </p>
+      </div>
+    )
+  }
+
   const report: FinalReportSnapshot | null = loaded.finalReportSnapshot
 
   const projection = report?.projection ?? loaded.projection

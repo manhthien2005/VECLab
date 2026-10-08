@@ -136,8 +136,8 @@ describe('Workbench V1 Production Assembly (WB-R6)', () => {
         isPreStart: false,
       }),
     )
-    expect(htmlBar).toContain('Chế độ:')
-    expect(htmlBar).toContain('GUIDED')
+    expect(htmlBar).toContain('Từng bước')
+    expect(htmlBar).not.toContain('GUIDED')
     expect(htmlBar).not.toContain('wb-mode-toggle-compact')
   })
 
@@ -188,7 +188,7 @@ describe('Workbench V1 Production Assembly (WB-R6)', () => {
       }),
     )
 
-    expect(html).toContain('Chỉ dẫn quy trình (GUIDED)')
+    expect(html).toContain('Quy trình chuẩn độ')
     expect(html).toContain('Chọn dung dịch chuẩn (NaOH)')
   })
 

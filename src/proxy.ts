@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { requiresSession } from '@/features/auth/session-routes.js'
 
 /**
  * Session refresh and cache-guard Proxy.
@@ -17,20 +18,6 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-
-/**
- * Route groups that require a session. Everything else — the public catalog, the
- * evidence register, the auth screens themselves and the guest workbench — stays
- * reachable without signing in, because a guest must be able to complete all
- * three experiments before creating an account (web scope §14).
- */
-const LEARNER_PREFIXES = ['/lab', '/compare', '/account']
-
-function requiresSession(pathname: string): boolean {
-  return LEARNER_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  )
-}
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
@@ -77,6 +64,9 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Compare and account need a session. Catalog, evidence, workbench, and My
+  // Lab stay public so a guest can finish a run without creating an account
+  // (web scope §14).
   if (user === null && requiresSession(request.nextUrl.pathname)) {
     const signInUrl = request.nextUrl.clone()
     signInUrl.pathname = '/sign-in'

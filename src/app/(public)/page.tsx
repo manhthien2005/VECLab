@@ -26,7 +26,7 @@ import { ScrollReveal } from '@/features/landing/scroll-reveal.js'
  * Storytelling sequence:
  * 1. Hero with interactive preview (HeroPreview) and integrated learning value trust row
  * 2. 3-experiment showcase with centered heading (ExperimentShowcase)
- * 3. Interactive Workbench demonstration in subtle icy-blue framing (WorkbenchPreview)
+ * 3. Workbench preview of the real 4-beat lab cycle (WorkbenchPreview)
  * 4. Scientific Evidence & Trust (EvidenceSection)
  * 5. Final conversion banner (FinalCtaBanner)
  * 6. Scientific model disclosure & locked evidence register (ScientificDisclosure)

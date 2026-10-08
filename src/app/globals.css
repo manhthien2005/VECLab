@@ -3742,6 +3742,24 @@ td[data-numeric],
   cursor: pointer;
 }
 
+.wp-reagent-fixed {
+  display: flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.wp-aliquot-note {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
 .wp-stepper-box {
   display: flex;
   align-items: center;
@@ -6511,6 +6529,30 @@ td[data-numeric],
   font-weight: 500;
 }
 
+.telemetry-target {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0.25rem 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.telemetry-target-label {
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.telemetry-target-value {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--ink);
+}
+
 .telemetry-secondary-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -6800,6 +6842,26 @@ td[data-numeric],
   margin-bottom: var(--space-2);
 }
 
+.wb-setup-goal,
+.wb-setup-sample {
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.wb-setup-goal-value,
+.wb-setup-sample-line {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.wb-setup-customize {
+  margin: 0;
+}
+
 .wb-field-label {
   display: block;
   font-size: var(--text-xs);
@@ -6923,7 +6985,7 @@ td[data-numeric],
   padding: var(--space-2);
   border-radius: var(--radius-sm);
   border-left: 2px solid transparent;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
 }
 
 .wb-protocol-item.is-done {
@@ -6974,6 +7036,11 @@ td[data-numeric],
   font-size: var(--text-xs);
   font-weight: 600;
   color: var(--ink);
+}
+
+.wb-protocol-now {
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .wb-protocol-desc {
@@ -7090,7 +7157,7 @@ td[data-numeric],
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .wb-aliquot-button:hover:not(:disabled) {
@@ -7103,6 +7170,19 @@ td[data-numeric],
   color: var(--accent-contrast);
   border-color: var(--accent);
   box-shadow: var(--shadow-xs);
+}
+
+.wb-action-feedback {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--ink);
+  padding: var(--space-2) var(--space-3);
+  background: var(--accent-softer);
+  border-radius: var(--radius-sm);
+}
+
+.wb-other-actions {
+  margin-top: var(--space-2);
 }
 
 .wb-btn-hero {

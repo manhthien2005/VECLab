@@ -29,11 +29,8 @@ import { WORKBENCH_SCENARIO_KEY } from '@/features/simulation-workbench/scenario
  * them. The storage mode decides which session lists them, so this one component serves both
  * modes.
  *
- * The route is `/lab`, which middleware redirects to `/sign-in` for a signed-out learner. That
- * redirect is NOT an auth boundary in the architectural sense — it is a convenience so a
- * signed-out visitor is not shown an empty list with no explanation. The screen itself reads
- * only what the session it is given can see, so a guest who reaches it directly sees their own
- * local attempts and nothing else. Route group names are never the guard.
+ * `/lab` is public. A guest sees IndexedDB attempts on this browser; a signed-in
+ * learner sees account attempts. Route group names are never the guard.
  *
  * The rows render through the shared `AttemptTable`, which the account screen (§4.9) also
  * lists and deletes from: one table means the two cannot disagree about what a null pH* looks
@@ -143,6 +140,9 @@ export function LabClient({ storageMode }: { storageMode: 'local' | 'cloud' }) {
           <p className="eyebrow">{APP_STRINGS.brandTag}</p>
           <h1>{strings.title}</h1>
           <p className="lede">{strings.lede}</p>
+          {storageMode === 'local' ? (
+            <p className="hint">{APP_STRINGS.storage.localHint}</p>
+          ) : null}
         </div>
         <Link className="btn btn-primary btn-lg" href={`/simulate/${WORKBENCH_SCENARIO_KEY}`}>
           {strings.startNew}
@@ -195,15 +195,16 @@ export function LabClient({ storageMode }: { storageMode: 'local' | 'cloud' }) {
             />
           </div>
 
-          {/* §4.5 requires access to comparison from here, not only from the navigation. */}
-          <p className="row">
-            <Link className="btn" href="/compare">
-              {APP_STRINGS.nav.compare}
-            </Link>
-            <span className="hint">
-              Cần hai lượt đã hoàn thành cùng một phiên bản kịch bản.
-            </span>
-          </p>
+          {storageMode === 'cloud' ? (
+            <p className="row">
+              <Link className="btn" href="/compare">
+                {APP_STRINGS.nav.compare}
+              </Link>
+              <span className="hint">
+                Cần hai lượt đã hoàn thành cùng một phiên bản kịch bản.
+              </span>
+            </p>
+          ) : null}
         </div>
       )}
     </div>

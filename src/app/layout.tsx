@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import Link from 'next/link'
 import { APP_STRINGS } from '@/content/index.js'
 import { FlaskIcon } from '@/features/landing/icons.js'
-import { AppNav } from './app-nav.js'
+import { AppFooterNav, AppNav } from './app-nav.js'
 import { ThemeToggle } from './theme-toggle.js'
 import { THEME_STORAGE_KEY } from './theme-storage.js'
 import { manrope } from './fonts.js'
@@ -136,14 +136,7 @@ function SiteFooter() {
             <p className="footer-tagline">Khoa học hôm nay. Tương lai ngày mai.</p>
           </div>
 
-          <nav aria-label="Liên kết chân trang" className="footer-nav">
-            <Link href="/experiments">{APP_STRINGS.nav.experiments}</Link>
-            <Link href="/evidence">{APP_STRINGS.nav.evidence}</Link>
-            <Link href="/lab">{APP_STRINGS.nav.lab}</Link>
-            <Link href="/compare">{APP_STRINGS.nav.compare}</Link>
-            <Link href="/sign-in">{APP_STRINGS.nav.signIn}</Link>
-            <Link href="/account">{APP_STRINGS.nav.account}</Link>
-          </nav>
+          <AppFooterNav />
         </div>
 
         <div className="footer-legal">

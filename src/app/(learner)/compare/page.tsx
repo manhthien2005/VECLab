@@ -6,8 +6,8 @@ import { CompareClient } from '@/features/compare/compare-client.js'
 /**
  * `/compare` — comparison of two attempts (docs/web-application-scope.md §4.8).
  *
- * This route was referenced by the primary navigation and guarded by middleware
- * (`LEARNER_PREFIXES` in `src/middleware.ts`) while no page existed for it, so every
+ * This route was referenced by the primary navigation and guarded by Proxy
+ * (`SESSION_REQUIRED_PREFIXES`) while no page existed for it, so every
  * learner who followed the "So sánh" link reached a 404. The comparability rules in
  * `src/features/compare/comparison.ts` were already written and unit-tested; only the
  * screen was missing.

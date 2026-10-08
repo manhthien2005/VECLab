@@ -6,11 +6,9 @@ import { LabClient } from '@/features/learner-lab/lab-client.js'
 /**
  * `/lab` — My Lab (docs/web-application-scope.md §4.5).
  *
- * Middleware redirects a signed-out visitor here to `/sign-in`. That redirect is a
- * convenience, not the access control: this screen is reachable directly, and it shows only
- * what the session it is handed can read — a guest's own IndexedDB attempts, or a signed-in
- * learner's account attempts. Nothing here trusts the route group name, which is not part of
- * the URL and cannot be an auth boundary (docs/system-architecture.md).
+ * Public. A guest's IndexedDB attempts and a signed-in learner's account
+ * attempts share this URL; `currentStorageMode` picks which store to read.
+ * Nothing here trusts the route group name (docs/system-architecture.md).
  *
  * Reads cookies to pick the storage mode, so it renders per request: the same URL lists
  * different attempts for a guest and for a signed-in learner, and a cached render would show

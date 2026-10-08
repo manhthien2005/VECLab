@@ -6,8 +6,8 @@ import { SignInForm } from '@/features/auth/sign-in-form.js'
 /**
  * `/sign-in` (§4.4).
  *
- * Reached two ways: directly, and by middleware redirecting a signed-out learner away from
- * `/lab`, `/compare` or `/account` with `?next=<pathname>` appended. The form validates that
+ * Reached two ways: directly, and by Proxy redirecting a signed-out learner away from
+ * `/compare` or `/account` with `?next=<pathname>` appended. The form validates that
  * parameter before using it, so the redirect is a convenience and not a way to send a learner
  * off-site (see src/features/auth/redirect.ts).
  *

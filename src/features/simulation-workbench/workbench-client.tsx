@@ -145,7 +145,6 @@ export function WorkbenchClient({ attemptId, storageMode }: WorkbenchClientProps
         saveStatus={controller.saveStatus}
         storageMode={storageMode}
         isPreStart={controller.isPreStart}
-        onModeChange={controller.setMode}
       />
 
       {/* Error / Conflict Banner */}
@@ -291,6 +290,7 @@ export function WorkbenchClient({ attemptId, storageMode }: WorkbenchClientProps
             isExploreDispenseAvailable={controller.isExploreDispenseAvailable}
             isUndoAvailable={controller.isUndoAvailable}
             isCompleteAvailable={controller.isCompleteAvailable}
+            lastActionType={controller.lastSuccessfulInteraction?.actionType ?? null}
             onAliquotChange={controller.setSelectedAliquot}
             onSelectRoute={controller.selectNaohRoute}
             onCalibrate={controller.calibrateMeter}

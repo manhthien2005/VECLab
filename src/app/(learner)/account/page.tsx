@@ -7,7 +7,7 @@ import { AccountClient } from '@/features/account/account-client.js'
 /**
  * `/account` — account and data (docs/web-application-scope.md §4.9).
  *
- * Middleware redirects a signed-out learner to `/sign-in?next=/account`, so this page
+ * Proxy redirects a signed-out learner to `/sign-in?next=/account`, so this page
  * normally renders for someone with a session. It still handles the guest case rather than
  * assuming, for two reasons: middleware falls through when Supabase is not configured at all
  * (a guest-only deployment is a supported state, §5.1), and a session can end while the page is
