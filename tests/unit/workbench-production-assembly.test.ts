@@ -165,6 +165,7 @@ describe('Workbench V1 Production Assembly (WB-R6)', () => {
         onDispenseAndMeasure: () => {},
         onUndo: () => {},
         onComplete: () => {},
+        onFinishDosing: () => {},
       }),
     )
 
@@ -216,6 +217,7 @@ describe('Workbench V1 Production Assembly (WB-R6)', () => {
         onDispenseAndMeasure: () => {},
         onUndo: () => {},
         onComplete: () => {},
+        onFinishDosing: () => {},
       }),
     )
 

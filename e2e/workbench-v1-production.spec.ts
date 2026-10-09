@@ -32,6 +32,10 @@ async function addMixWaitMeasure(page: Page): Promise<void> {
   await addBaseBtn.click()
   await expect(page.locator('[data-testid="telemetry-naoh-volume"]')).toContainText('1,00 mL')
 
+  const finishBtn = page.getByRole('button', { name: 'Thêm xong' })
+  await expect(finishBtn).toBeVisible()
+  await finishBtn.click()
+
   const mixBtn = page.getByRole('button', { name: 'Khuấy dung dịch' })
   await expect(mixBtn).toBeEnabled()
   await mixBtn.click()
@@ -93,6 +97,8 @@ test.describe('Workbench V1 Production Assembly Integration (WB-R6)', () => {
     // Now add base -> reading MUST immediately transition to pending/stale
     await page.getByRole('button', { name: /Thêm .* NaOH/ }).click()
     await expect(page.locator('.telemetry-status-pill')).toContainText('Chờ đo')
+    await expect(page.getByRole('button', { name: /Thêm .* NaOH/ })).toBeEnabled()
+    await expect(page.getByRole('button', { name: 'Thêm xong' })).toBeVisible()
   })
 
   test('4. Explore flow: One-click Thêm & Đo sequence', async ({ page }) => {

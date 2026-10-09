@@ -41,7 +41,9 @@ function isAvail(
   return availableActions.some((entry) => entry.actionType === type && entry.available)
 }
 
-function isCurrentMeasurement(domain: AcidNeutralizationState | null | undefined): boolean {
+export function isCurrentMeasurement(
+  domain: AcidNeutralizationState | null | undefined,
+): boolean {
   return (
     domain != null &&
     domain.lastMeasuredPH !== null &&
@@ -49,19 +51,25 @@ function isCurrentMeasurement(domain: AcidNeutralizationState | null | undefined
   )
 }
 
+export type GuidedActionOptions = {
+  readonly dosingFinished?: boolean
+}
+
 /**
  * Recommended next guided action.
  *
  * Order: choose reagent (only while none is set) → calibrate (only while the
- * meter is uncalibrated) → (if this composition is unread) mix if needed,
- * wait, measure → otherwise add a dose.
+ * meter is uncalibrated) → keep adding after a dose until the learner finishes
+ * this batch → then mix, wait, measure → otherwise add a dose.
  */
 export function resolveNextGuidedAction(
   domain: AcidNeutralizationState | null | undefined,
   availableActions: readonly ActionAvailability[],
+  options: GuidedActionOptions = {},
 ): GuidedActionType | null {
   const routeChosen = domain?.route != null
   const meterCalibrated = domain?.meterCalibrated === true
+  const dosingFinished = options.dosingFinished === true
   // Engine still allows changing reagent until the first dose, and allows
   // calibrating again. The one CTA must not stay on those steps after they
   // are already done.
@@ -77,6 +85,9 @@ export function resolveNextGuidedAction(
   const stable = domain?.readingStable === true
 
   if (!measured) {
+    if (isAvail(availableActions, 'add_base') && !dosingFinished && !stirred) {
+      return 'add_base'
+    }
     if (isAvail(availableActions, 'mix') && !stirred) return 'mix'
     if (isAvail(availableActions, 'wait_for_stable_reading') && !stable) {
       return 'wait_for_stable_reading'
@@ -101,8 +112,9 @@ function stepStatus(
 export function buildProtocolSteps(
   domain: AcidNeutralizationState | null | undefined,
   availableActions: readonly ActionAvailability[],
+  options: GuidedActionOptions = {},
 ): readonly ProtocolStep[] {
-  const next = resolveNextGuidedAction(domain, availableActions)
+  const next = resolveNextGuidedAction(domain, availableActions, options)
   const routeSelected = domain?.route !== null && domain?.route !== undefined
   const calibrated = domain?.meterCalibrated === true
   const hasAdded = (domain?.baseVolumeL ?? 0) > 0
@@ -193,6 +205,10 @@ export function guidedFeedbackLine(
   next: GuidedActionType | null,
 ): string | null {
   if (lastActionType === null && next === null) return null
+
+  if (lastActionType === 'add_base' && next === 'add_base') {
+    return 'Đã thêm dung dịch NaOH. Bạn có thể thêm tiếp, hoặc bấm Thêm xong.'
+  }
 
   const done = lastActionType === null ? null : (DONE_FEEDBACK[lastActionType] ?? null)
   const following = next === null ? null : NEXT_FEEDBACK[next]

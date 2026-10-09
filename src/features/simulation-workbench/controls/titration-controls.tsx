@@ -26,6 +26,7 @@ export type TitrationControlsProps = {
   readonly isUndoAvailable: boolean
   readonly isCompleteAvailable: boolean
   readonly lastActionType?: string | null
+  readonly dosingFinished?: boolean
   readonly onAliquotChange: (aliquotL: number) => void
   readonly onSelectRoute: () => void
   readonly onCalibrate: () => void
@@ -37,6 +38,7 @@ export type TitrationControlsProps = {
   readonly onDispenseAndMeasure: () => void
   readonly onUndo: () => void
   readonly onComplete: () => void
+  readonly onFinishDosing: () => void
   readonly className?: string
 }
 
@@ -61,6 +63,7 @@ export function TitrationControls({
   isUndoAvailable,
   isCompleteAvailable,
   lastActionType = null,
+  dosingFinished = false,
   onAliquotChange,
   onSelectRoute,
   onCalibrate,
@@ -72,10 +75,11 @@ export function TitrationControls({
   onDispenseAndMeasure,
   onUndo,
   onComplete,
+  onFinishDosing,
   className = '',
 }: TitrationControlsProps) {
   const aliquotFieldsetId = useId()
-  const nextGuided = resolveNextGuidedAction(domain, availableActions)
+  const nextGuided = resolveNextGuidedAction(domain, availableActions, { dosingFinished })
 
   const findAction = (type: string): ActionAvailability | undefined =>
     availableActions.find((entry) => entry.actionType === type)
@@ -197,6 +201,10 @@ export function TitrationControls({
           onMix={onMix}
           onWait={onWait}
           onMeasurePh={onMeasurePh}
+          showFinishDosing={
+            nextGuided === 'add_base' && domain?.mixedSinceLastAddition === false
+          }
+          onFinishDosing={onFinishDosing}
         />
       )}
 
@@ -269,6 +277,8 @@ function GuidedPrimaryAction({
   onMix,
   onWait,
   onMeasurePh,
+  showFinishDosing,
+  onFinishDosing,
 }: {
   readonly next: GuidedActionType | null
   readonly selectedAliquotL: number
@@ -282,6 +292,8 @@ function GuidedPrimaryAction({
   readonly onMix: () => void
   readonly onWait: () => void
   readonly onMeasurePh: () => void
+  readonly showFinishDosing: boolean
+  readonly onFinishDosing: () => void
 }) {
   const run = (): void => {
     switch (next) {
@@ -325,6 +337,16 @@ function GuidedPrimaryAction({
           {busy ? (BUSY_LABEL[operationStage] ?? 'Đang xử lý…') : label}
         </button>
       )}
+      {showFinishDosing ? (
+        <button
+          type="button"
+          className="btn btn-outline btn-block"
+          disabled={busy}
+          onClick={onFinishDosing}
+        >
+          {APP_STRINGS.workbench.finishDosing}
+        </button>
+      ) : null}
       {reason !== null && (
         <p className="hint tiny text-warn" role="alert">
           {reason}

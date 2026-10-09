@@ -108,7 +108,7 @@ describe('resolveNextGuidedAction', () => {
     ).toBe('add_base')
   })
 
-  it('mixes after a dose before waiting again', () => {
+  it('keeps adding after a dose until the learner finishes the batch', () => {
     expect(
       resolveNextGuidedAction(
         domain({
@@ -120,6 +120,22 @@ describe('resolveNextGuidedAction', () => {
         }),
         avail(['mix', 'wait_for_stable_reading', 'add_base']),
       ),
+    ).toBe('add_base')
+  })
+
+  it('mixes after the learner finishes dosing', () => {
+    expect(
+      resolveNextGuidedAction(
+        domain({
+          baseVolumeL: 0.001,
+          mixedSinceLastAddition: false,
+          readingStable: false,
+          lastMeasuredPH: null,
+          compositionRevision: 2,
+        }),
+        avail(['mix', 'wait_for_stable_reading', 'add_base']),
+        { dosingFinished: true },
+      ),
     ).toBe('mix')
   })
 })
@@ -128,6 +144,12 @@ describe('guidedFeedbackLine', () => {
   it('pairs the last action with the next step', () => {
     expect(guidedFeedbackLine('calibrate_meter', 'wait_for_stable_reading')).toBe(
       'Đã hiệu chuẩn máy đo pH. Tiếp theo: chờ số đọc ổn định.',
+    )
+  })
+
+  it('tells the learner they can add again after a dose', () => {
+    expect(guidedFeedbackLine('add_base', 'add_base')).toBe(
+      'Đã thêm dung dịch NaOH. Bạn có thể thêm tiếp, hoặc bấm Thêm xong.',
     )
   })
 })

@@ -11,6 +11,7 @@ export type GuidedProtocolRailProps = {
   readonly domain?: AcidNeutralizationState | null
   readonly availableActions: readonly ActionAvailability[]
   readonly isPreStart: boolean
+  readonly dosingFinished?: boolean
   readonly className?: string
 }
 
@@ -19,6 +20,7 @@ export function GuidedProtocolRail({
   domain,
   availableActions,
   isPreStart,
+  dosingFinished = false,
   className = '',
 }: GuidedProtocolRailProps) {
   if (isPreStart) {
@@ -62,7 +64,7 @@ export function GuidedProtocolRail({
     )
   }
 
-  const steps = buildProtocolSteps(domain, availableActions)
+  const steps = buildProtocolSteps(domain, availableActions, { dosingFinished })
 
   return (
     <nav className={`wb-protocol-rail card stack-tight ${className}`} aria-label="Quy trình chuẩn độ">

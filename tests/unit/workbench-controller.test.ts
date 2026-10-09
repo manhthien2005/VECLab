@@ -627,6 +627,7 @@ describe('Workbench Controller R3 - React Hook useWorkbenchController', () => {
       expect(c.operationStage).toBe('idle')
       expect(c.lastError).toBeNull()
       expect(c.lastSuccessfulInteraction).toBeNull()
+      expect(c.dosingFinished).toBe(false)
 
       // Actions are callable functions
       expect(typeof c.startRun).toBe('function')
@@ -648,6 +649,7 @@ describe('Workbench Controller R3 - React Hook useWorkbenchController', () => {
       expect(typeof c.setSelectedAliquot).toBe('function')
       expect(typeof c.setStirrerRpm).toBe('function')
       expect(typeof c.clearError).toBe('function')
+      expect(typeof c.finishDosing).toBe('function')
     }
   })
 })
