@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { APP_STRINGS } from '@/content/index.js'
 import { listCatalog } from '@/features/experiment-catalog/catalog.js'
 import { ScenarioCard } from '@/features/experiment-catalog/scenario-card.js'
+import { PlasticSeparationCatalogCard } from '@/features/experiment-catalog/plastic-separation-catalog-card.js'
 
 /**
  * Experiment catalog (docs/web-application-scope.md §4.1).
@@ -34,15 +35,12 @@ export default function ExperimentsPage() {
         </p>
       </section>
 
-      {catalog.length === 0 ? (
-        <p className="alert alert-info">{APP_STRINGS.home.catalogEmpty}</p>
-      ) : (
-        <div className="catalog-grid">
-          {catalog.map((entry) => (
-            <ScenarioCard key={entry.releaseId} entry={entry} />
-          ))}
-        </div>
-      )}
+      <div className="catalog-grid">
+        {catalog.map((entry) => (
+          <ScenarioCard key={entry.releaseId} entry={entry} />
+        ))}
+        <PlasticSeparationCatalogCard />
+      </div>
     </div>
   )
 }

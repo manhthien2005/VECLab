@@ -70,7 +70,11 @@ export function ExperimentShowcase() {
       <ShowcaseCarouselTrack totalSlides={SHOWCASE_CARDS.length} headingId="showcase-heading">
         {SHOWCASE_CARDS.map((card, idx) => {
           const { scenarioKey, title, summary, isLive, Icon, tone, VisualComponent } = card
-          const href = isLive ? `/simulate/${scenarioKey}` : '/experiments'
+          const href = scenarioKey === 'plastic-density-separation'
+            ? '/simulate/plastic-density-separation'
+            : isLive
+              ? `/simulate/${scenarioKey}`
+              : '/experiments'
 
           return (
             <div
