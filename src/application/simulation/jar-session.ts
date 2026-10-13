@@ -16,7 +16,7 @@ import {
   type JarProjection, type JarReportSnapshot,
 } from '@/application/scenarios/jar-projection.js'
 import type {
-  Attempt, AttemptRepository, AttemptSummary, StoredAttemptEventRecord, WriteResult,
+  Attempt, AttemptRepository, StoredAttemptEventRecord, WriteResult,
 } from '@/application/attempts/repository.js'
 import { commitAction } from './commit-action.js'
 
@@ -67,7 +67,6 @@ export type JarSession = {
     commit?: JarCommitIdentity,
   ): Promise<JarActionResult>
   complete(attemptId: UUID, commit?: JarCommitIdentity): Promise<JarCompletionResult>
-  list(limit?: number): Promise<AttemptSummary[]>
 }
 
 function invalidChain(data: DomainError['data']): DomainError {
@@ -157,7 +156,11 @@ export function createJarSession(repository: AttemptRepository<JarState>): JarSe
       createdAt: attempt.createdAt,
       completedAt: attempt.completedAt,
       projection: projectJar(attempt.currentState),
-      report: isJarReport(attempt.finalReportSnapshot) ? attempt.finalReportSnapshot : null,
+      report: attempt.status === 'completed' &&
+        attempt.currentState.phase === 'completed' &&
+        isJarReport(attempt.finalReportSnapshot)
+          ? attempt.finalReportSnapshot
+          : null,
     }
   }
 
@@ -384,13 +387,6 @@ export function createJarSession(repository: AttemptRepository<JarState>): JarSe
         ok: true, state: fresh.state, report: storedReport,
         idempotentReplay: written.outcome === 'idempotent_replay',
       }
-    },
-
-    list(limit?: number) {
-      return repository.listAttempts({
-        scenarioKey: 'jar-test',
-        ...(limit === undefined ? {} : { limit }),
-      })
     },
 
   }
