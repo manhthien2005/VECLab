@@ -4,7 +4,9 @@ import type {
 import { createInitialResourceLedger } from '@/domain/process/ledger.js'
 import { replayEvents, normalizeParameters } from '@/domain/process/lifecycle.js'
 import { requestFingerprint, stateHash } from '@/domain/process/hashing.js'
-import { modelInvalid, preconditionFailed, unsupportedRelease } from '@/shared/errors/domain-errors.js'
+import {
+  modelInvalid, preconditionFailed, revisionConflict, unsupportedRelease,
+} from '@/shared/errors/domain-errors.js'
 import { newUUID } from '@/shared/ids.js'
 import {
   createJarModule, JAR_PROFILE,
@@ -145,6 +147,23 @@ export function createJarSession(repository: AttemptRepository<JarState>): JarSe
         return { ok: true, loaded: { attempt, ledger: replay.ledger } }
       }
       if (read === MAX_COHERENT_READS - 1) {
+        // The read budget ended. Distinguish ongoing legitimate writes
+        // from a stable yet inconsistent persisted chain. Never label a
+        // changing revision as tampering.
+        const latest = await repository.getAttempt(attemptId)
+        if (latest === null) return null
+        if (latest.scenarioKey !== 'jar-test' ||
+            latest.scenarioReleaseId !== JAR_PROFILE.releaseId) {
+          return { ok: false, error: unsupportedRelease(latest.scenarioReleaseId) }
+        }
+        if (latest.revision !== attempt.revision ||
+            latest.lastSequence !== attempt.lastSequence) {
+          return {
+            ok: false, error: revisionConflict({
+              attemptId, expectedRevision: attempt.revision, currentRevision: latest.revision,
+            }),
+          }
+        }
         return {
           ok: false, error: invalidChain({
             expectedSequence: attempt.lastSequence, actualSequence: events.length,
