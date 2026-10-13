@@ -355,6 +355,29 @@ describe('Jar Task 2 guest session through IndexedDB', () => {
     expect(events.filter((event) => event.actionType === 'completed')).toHaveLength(1)
   })
 
+  it('exhausted reads during continuous valid writes return conflict, not a tampering error', async () => {
+    const other = session()
+    const started = await other.start()
+    await step(other, started.attemptId, 'prepare_cup', { cupId: 'A', initialPh: 7 })
+    await step(other, started.attemptId, 'measure_initial')
+    let reads = 0
+    const racing = createJarSession(interleavedRepository({
+      async afterGetAttempt(id) {
+        reads += 1
+        if (reads <= 4) {
+          await step(other, id, 'add_coagulant', { cupId: 'A', incrementMgL: 50 })
+        }
+      },
+    }))
+    const reply = await racing.load(started.attemptId)
+    expect(reply).toMatchObject({
+      ok: false, error: { category: 'conflict', code: 'REVISION_CONFLICT' },
+    })
+    expect(reads).toBe(5)
+    expect((await repository().getAttempt(started.attemptId))?.currentState.cups.A?.totalDoseMgL)
+      .toBe(200)
+  })
+
   it('bounds incoherent reads and still rejects genuinely tampered hashes', async () => {
     const valid = session()
     const started = await valid.start()
@@ -368,7 +391,7 @@ describe('Jar Task 2 guest session through IndexedDB', () => {
     expect(inconsistent).toMatchObject({
       ok: false, error: { code: 'STATE_HASH_MISMATCH' },
     })
-    expect(reads).toBe(4)
+    expect(reads).toBe(5) // Four pairs plus one final stability read.
 
     let hashReads = 0
     const corrupted = createJarSession(interleavedRepository({
