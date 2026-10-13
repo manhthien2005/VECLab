@@ -2,6 +2,8 @@
 
 Ngày: 13/10/2026. Trạng thái: thiết kế mục tiêu; numerical release chưa được khóa. Đọc cùng [thiết kế v1](../superpowers/specs/2026-10-13-simulation-v1-design.md).
 
+**Phạm vi khởi đầu sau audit:** theo yêu cầu giữ giải pháp vừa đủ, dùng pH ban đầu và liều làm hai biến; khuấy/lắng theo chương trình cố định. Đã tái hiện số học của một mô hình cuối pha; chưa có prototype/engine sản phẩm. Chi tiết và quyết định nội dung ở [audit](../research/simulation-refactor-audit.md) và [plan thực hiện](../superpowers/plans/2026-10-13-jar-test-first-slice.md). Các khả năng thay đổi thời gian/lấy mẫu giữa pha bên dưới là hướng mở rộng có điều kiện, không phải tính năng phải làm ngay.
+
 ## 1. Nhiệm vụ học tập
 
 Bối cảnh: một mẫu nước đục tổng hợp cần được khảo sát bằng keo tụ – tạo bông – lắng. Người học tìm một phương án giảm độ đục đạt mục tiêu đề bài với lượng hóa chất hợp lý, rồi giải thích dựa trên phép đo. Không suy mẫu đạt tiêu chuẩn uống/xả, không suy COD hay vi sinh từ NTU.
@@ -15,7 +17,7 @@ Sau lượt, người học phải phân biệt được:
 
 ## 2. Dàn dụng cụ và vòng trải nghiệm
 
-Lựa chọn thiết kế của Tech Lead cho release đầu: mỗi attempt là một mẻ với tối đa sáu cốc có ID A–F, cùng nguồn mẫu và một máy/chương trình khuấy chung. Cup ID gắn với mẫu trong attempt đó, không phải dụng cụ được tái sử dụng qua nhiều mẻ. Muốn thử thêm một mẻ thì tạo attempt mới, giữ liên kết lượt trước để so sánh khi profile/release tương thích. Không có nhiều mẻ hoặc nhiều chương trình máy trong một attempt ở release đầu. Không cho tốc độ từng cốc khác nhau trên một trục máy chung. Một cốc đối chứng không hóa chất được khuyến khích; không bắt buộc để có thể nộp báo cáo.
+Lựa chọn thiết kế của Tech Lead cho release đầu: mỗi attempt là một mẻ với tối đa sáu cốc có ID A–F, cùng nền mẫu (pH ban đầu là profile chuẩn bị sẵn) và một máy/chương trình khuấy chung. Cup ID gắn với mẫu trong attempt đó, không phải dụng cụ được tái sử dụng qua nhiều mẻ. Muốn thử thêm một mẻ thì tạo attempt mới; mở báo cáo lượt trước để so sánh khi profile/release tương thích. Không có nhiều mẻ hoặc nhiều chương trình máy trong một attempt ở release đầu. Không cho tốc độ từng cốc khác nhau trên một trục máy chung. Đối chứng liều 0 hữu ích khi dataset hỗ trợ; mô hình ứng viên bản đầu chưa bao phủ liều 0, dùng phép đo mẫu đầu làm baseline, không tự ngoại suy kết quả cốc đối chứng sau lắng.
 
 | Chặng | Thao tác của người học | Hiện tượng/phản hồi 2D | Dữ liệu lưu |
 | --- | --- | --- | --- |
@@ -58,11 +60,15 @@ Nếu dataset chỉ cung cấp initial pH: dùng profile mẫu đã chuẩn bị
 
 Ngày 13/10/2026 đã đọc được phần text của PDF từ công cụ tra cứu; chưa trích xuất/đối chiếu các điểm đồ thị và bảng tốc độ khuấy bằng ảnh (lượt lấy ảnh PDF trả 403). Chưa chấp nhận hệ số, đường nội suy hoặc con số đầu ra của nguồn này làm golden fixture. Cần kiểm tra độ phân giải hình, đơn vị liều, mốc thời gian, lặp/sai số và khả năng tái lập trước khi chọn.
 
+Cập nhật cùng ngày: tải được PDF gốc qua host `www`, đã render và đọc hình trang 2. Các đường cuối quá gần trục để lấy số chính xác, mốc tổng thời gian cần kiểm tra trước số hóa; không chọn nguồn này cho bản khởi đầu. Lưu hash và kết luận ở audit; không cần tiếp tục số hóa để triển khai mô hình cuối pha đã chọn.
+
 Nguồn này mở hướng cho quyết định lấy mẫu sớm/muộn có dữ liệu. Không mặc định mọi tổ hợp pH × liều × thời gian đều được nội suy, không suy số liệu ở vùng lấy mẫu khác.
 
 ### Ứng viên response surface
 
 [Nghiên cứu RSM năm 2024](https://www.gigvvy.com/journals/ijase/articles/ijase-202403-21-1-010) được lưu trong [rà soát trước](../research/scenario-selection-review.md). Truy cập lại trang ngày 13/10/2026 trả 403; không lấy đoạn tóm tắt làm mô hình đã thẩm định. Nếu chọn nguồn này phải lấy và kiểm tra đầy đủ phương trình, điều kiện thử và dữ liệu xác minh.
+
+Cập nhật cùng ngày: đọc được toàn văn do tác giả đăng, đối chiếu công thức với bảng số và chạy [kiểm tra số học tái lập](../../tools/research/check-jar-candidate.mjs). Chọn làm ứng viên mô hình dạy học cuối pha có giới hạn; việc tính lại trên dữ liệu xây mô hình không phải validation ngoài mẫu. Chưa đăng ký release sản phẩm.
 
 Đánh giá hiện tại: đủ cơ sở phát triển hướng mô phỏng có giới hạn, chưa đủ để cam kết bộ số liệu định lượng cuối cùng. Việc chọn/hiệu chỉnh dataset là phần việc bắt buộc trước engine; không đẩy quyết định khoa học này cho người viết UI tự đoán.
 
@@ -104,8 +110,8 @@ Phân tích cuối lượt chia rõ: kết quả xử lý → chất lượng th
 
 | Gate | Bằng chứng phải có | Tình trạng 13/10/2026 |
 | --- | --- | --- |
-| J1 — Khoa học | Profile khóa, dữ liệu truy được tới nguồn, đơn vị/basis xác minh, miền input/output, sai số/tolerance | Chưa đạt; nguồn ứng viên đã xác định |
-| J2 — Chiều sâu | Ít nhất liều và thời điểm lấy mẫu có đáp ứng kiểm chứng; một lượt đạt, một lượt hợp lệ kém, một lỗi đo/tính có lịch sử giải thích | Thiết kế đã nêu; chưa chạy mô hình |
+| J1 — Khoa học | Profile khóa, dữ liệu truy được tới nguồn, đơn vị/basis xác minh, miền input/output, sai số/tolerance | Số học ứng viên đã đối chiếu; Task 1 khóa profile dạy học/giới hạn, chưa validation ngoài mẫu |
+| J2 — Chiều sâu | Bản đầu: liều và pH ban đầu có đáp ứng; một lượt đạt, một lượt hợp lệ kém, một lỗi đo/tính có lịch sử giải thích. Thời gian chỉ thành biến khi có dữ liệu | Đã kiểm tra đáp ứng số học; chưa có lượt sản phẩm hoặc pilot |
 | J3 — Tính toán | Fixtures độc lập với implementation, bounds, không ngoại suy; kiểm tra các mốc và bất biến hóa chất/thể tích | Chưa có engine/fixtures |
 | J4 — Tương tác | Chuỗi thao tác 2D thực hiện được bằng chuột/chạm/bàn phím, hiện tượng khớp state, không lộ đáp án, reduced motion | Chưa có prototype Jar Test |
 | J5 — Đầu cuối | Lưu/khôi phục, replay, báo cáo/submission, lỗi concurrency/idempotency, đọc lượt cũ | Cần audit và kế hoạch tích hợp |

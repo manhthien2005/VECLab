@@ -2,6 +2,8 @@
 
 Ngày: 13/10/2026. Trạng thái: thiết kế để lập kế hoạch; chưa triển khai, chưa thẩm định engine mới hoặc thử với sinh viên.
 
+Cập nhật sau yêu cầu tránh over engineering: [audit và mô hình ứng viên](../../research/simulation-refactor-audit.md), [plan lượt Jar Test đầu](../plans/2026-10-13-jar-test-first-slice.md). Phần khởi đầu dùng pH ban đầu/liều, chương trình khuấy/lắng cố định; không cần mô phỏng kinetics tự do để kiểm chứng vòng học. Các khả năng mở rộng dưới đây triển khai theo nhu cầu và dữ liệu, không phải checklist để xây hết trước bản thử đầu.
+
 ## 1. Quyết định và nguồn yêu cầu
 
 Người dùng đã chốt: tối đa ba thí nghiệm có giá trị môi trường/thực tế; phục vụ sinh viên không chuyên Hóa có kiến thức cơ bản và biết dụng cụ; cho tự khám phá và mắc lỗi; quan sát diễn biến ngay, giải thích đúng/sai chủ yếu ở cuối; có hỗ trợ theo yêu cầu; có biểu diễn và tương tác 2D. Chủ đề được đồng ý tiếp tục ngày 13/10/2026:
@@ -88,14 +90,14 @@ Luồng đích: ý định thao tác → kiểm tra → engine tính → commit 
 
 Sự thật chưa đo và phương án tham chiếu không được gửi trong learner projection mặc định. Guest chạy engine local nên không chống được người cố xem đáp án qua devtools; đây là lab học tập, không cam kết chống gian lận cho thi cử. Cloud xác nhận lại kết quả bằng cùng release; không tin giá trị client gửi lên.
 
-Jar Test: một attempt là một mẻ gồm tối đa sáu cup và một chương trình máy khuấy chung; cup có ledger/phép đo riêng, tổng attempt được cộng có kiểm soát. ID cup là định danh mẫu ổn định trong attempt, không phải vị trí trên màn hình. Muốn thử mẻ mới thì tạo attempt mới có liên kết lượt trước để so sánh khi profile/release tương thích; không tái sử dụng A–F cho mẫu mới bên trong cùng attempt. Không giả thiết mỗi cup là một attempt rời.
+Jar Test: một attempt là một mẻ gồm tối đa sáu cup và một chương trình máy khuấy chung; cup có ledger/phép đo riêng, tổng attempt được cộng có kiểm soát. ID cup là định danh mẫu ổn định trong attempt, không phải vị trí trên màn hình. Muốn thử mẻ mới thì tạo attempt mới, giữ báo cáo lượt trước mở được để đối chiếu khi profile/release tương thích; không cần quan hệ branch/parent mới ở bản khởi đầu. Không tái sử dụng A–F cho mẫu mới bên trong cùng attempt. Không giả thiết mỗi cup là một attempt rời.
 
 Hợp đồng trên là mục tiêu logic, chưa phải đổi schema/API. Các kiểu hiện tại giới hạn `ScenarioKey` vào ba bài cũ; payload action chưa biểu diễn sẵn mọi cấu trúc mới. Audit phải xác định thay đổi wire/schema, fixtures và khả năng đọc release cũ trước khi triển khai. Không đổi tên một release cũ thành bài mới.
 
 ## 8. Thời gian và lưu tiến trình
 
 - Domain dùng simulated time hữu hạn, không dùng FPS, thời gian tải mạng hoặc đồng hồ máy người học để tính hiệu suất.
-- Lựa chọn mặc định: người học bắt đầu một giai đoạn/chọn mốc thời gian; `advance_time` được commit rõ ràng. Hoạt ảnh biểu diễn khoảng thời gian đó, có thể tua nhanh/bỏ qua; không tự thêm thời gian hóa học khi chuyển tab hoặc reload.
+- Lựa chọn mặc định: người học bắt đầu một giai đoạn/chọn mốc thời gian; tiến thời gian được commit rõ ràng. Jar Test đầu dùng `run_phase` với duration preset, chưa cần action `advance_time` tổng quát. Hoạt ảnh biểu diễn khoảng thời gian đó, có thể tua nhanh/bỏ qua; không tự thêm thời gian hóa học khi chuyển tab hoặc reload.
 - Bộ điều khiển có thể tuần tự gửi bước thời gian khi người học bật chạy; mỗi bước phải là action có ID, được xác nhận trước bước tiếp theo. Dừng ở mốc đã commit, không dựa vào thời điểm một khung hình vẽ xong.
 - Trong animation, thao tác lấy mẫu dùng mốc đã commit; nếu chưa tới mốc mong muốn thì đưa yêu cầu tiến tới mốc đó trước. Không gửi phép đo từ trạng thái hình ảnh đang nội suy.
 - Replay cùng release/event chain trả cùng kết quả; chuyển tốc độ animation, reduced motion, đóng/mở tab không thay đổi mẫu.
