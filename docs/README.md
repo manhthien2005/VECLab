@@ -11,6 +11,7 @@ Bộ tài liệu được giữ lại để hỗ trợ kiểm tra và refactor. 
 - [Plan Jar Test đầu cuối](superpowers/plans/2026-10-13-jar-test-first-slice.md): sáu phần để giao thực hiện, có điểm nghiệm thu; chưa phải tính năng đã triển khai.
 - [Contract giao việc web/local và cách kiểm chứng](workflow/web-handoff-contract.md): JSON v1 cho prompt/handback, ba skill dự án và nghiệm thu đúng phạm vi; mẫu [task](workflow/templates/task.json) và [result](workflow/templates/result.json).
 - [Nguồn chọn lọc và cách duy trì skill](workflow/skill-sources.md): sáu repo tham khảo, commit/giấy phép, phần áp dụng và phần chưa đưa vào.
+- [Bộ skill UI và cách dùng](workflow/ui-skills.md): Impeccable và Taste đã cài trong source; phân biệt giao diện ứng dụng, website giới thiệu và ảnh mẫu, kèm nguồn/giấy phép được ghim.
 - [Brief giao web — Jar Task 1](workflow/tasks/jar-test-01.md): nguồn được ghim, sáu file được sửa, checks và cách trả patch; phiên web vẫn phải xác nhận truy cập/công cụ trước khi làm.
 - [Local review Jar Task 1 — commit 69f8b30](workflow/reviews/jar-test-01.md): bằng chứng đã chạy, hai finding cần sửa và gói sửa giới hạn hai file.
 - [Kết quả local Round 1 — commit 5a920ee](workflow/reviews/jar-test-01-r1.json): hai finding đóng; 95 tests, typecheck và lint qua; nghiệm thu phạm vi Task 1.

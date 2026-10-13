@@ -2,7 +2,7 @@
 
 Rà soát ngày 13/10/2026. Đã đọc những file ghi dưới đây và giấy phép tại commit được ghim; đây là chọn lọc cho workflow VECLab, không phải audit toàn bộ sáu dự án hay xác nhận các claim benchmark của họ.
 
-Các skill VECLab được viết riêng cho kiến trúc, yêu cầu và cách phân công của dự án. Chúng tham khảo phương pháp; không vendor mã nguồn, installer, hook hoặc nguyên văn bộ skill upstream. Giấy phép trong bảng là giấy phép của nguồn tham khảo, không thay đổi giấy phép toàn repo VECLab.
+Ba skill VECLab được viết riêng cho kiến trúc, yêu cầu và cách phân công của dự án. Với sáu nguồn trong bảng bên dưới, chúng chỉ tham khảo phương pháp; không vendor mã nguồn, installer, hook hoặc nguyên văn bộ skill upstream. Bộ UI Impeccable/Taste được cài riêng theo yêu cầu ngày 14/10/2026, như mục cuối tài liệu này. Giấy phép từng nguồn không thay đổi giấy phép toàn repo VECLab.
 
 ## Phần chọn dùng
 
@@ -43,3 +43,20 @@ Giữ chính sách sản phẩm và contract kỹ thuật ở spec/code; skill c
 - Verification: cả baseline và lần dùng skill đều từ chối handback thiếu diff/log và claim khoa học/UI/cloud vượt evidence. Lần dùng skill phát hiện hai câu có thể gây hiểu nhầm: patch chưa có head SHA và full suite không phải gate mọi task nhỏ; đã sửa đúng hai điểm trong contract/skill.
 
 Frontmatter ba skill được kiểm tra bằng `skill-creator/scripts/quick_validate.py`; links nội bộ và whitespace được kiểm tra riêng. Những bước này kiểm chứng bộ hướng dẫn; không phải test UI, cloud hoặc validation thực nghiệm của Jar.
+
+## Bộ UI được cài — 14/10/2026
+
+Theo yêu cầu trực tiếp của người dùng, cài các folder bằng `skill-installer/scripts/install-skill-from-github.py`, ghim SHA thay vì theo `main`. Các file hướng dẫn, reference, scripts và data của folder đã chọn được giữ cùng nhau để dùng trên local lẫn web; không cài toàn repo hoặc mọi biến thể.
+
+| Nguồn được ghim | Folder upstream → folder trong `.agents/skills` | Giấy phép giữ tại bản cài |
+| --- | --- | --- |
+| [Impeccable](https://github.com/pbakaus/impeccable/tree/2f98774f86bc05563876643db37e6c37c322850f) | `.agents/skills/impeccable` → `impeccable` | `impeccable/LICENSE` (Apache-2.0), `impeccable/NOTICE.md` |
+| [Taste](https://github.com/Leonxlnx/taste-skill/tree/c924fad1a79c7d70a04bcc8c415b593e9928ad8a) | `skills/taste-skill` → `taste-skill`; `skills/redesign-skill` → `redesign-skill`; `skills/imagegen-frontend-web` → `imagegen-frontend-web` | Bản MIT `LICENSE` nguyên văn ở cả ba folder |
+
+Impeccable ghi skill version `4.5.2`; launcher ghim engine `0.1.14` qua `scripts/VERSION`. Launcher chính thức tải engine vào cache người dùng, kiểm SHA-256 và trả `impeccable-engine 0.1.14` trong smoke check local. Không commit binary hoặc cấu hình hook. Taste bản chính là v2; các biến thể v1/experimental, GPT/GSAP, mobile, brandkit và các style chuyên biệt chưa cài. Không có thay đổi dependency ứng dụng.
+
+Điều chỉnh duy nhất trong bản vendor: bỏ năm chỗ trailing spaces và một dòng trống cuối file ở ba reference Impeccable `harden.md`, `optimize.md`, `extract.md` để qua `git diff --check`; không đổi nội dung hướng dẫn hoặc scripts. Các file còn lại được đối chiếu đúng Git blob upstream, gồm các bản license/NOTICE.
+
+Kiểm tra local: bốn frontmatter hợp lệ; 95 file khớp blob upstream, ba reference chỉ khác whitespace; JSON/TOML/YAML parse được; 96 links nội bộ resolve và 13 scripts qua `node --check`. `draw.mjs --list sectors` chạy được; cấu hình ESLint hiện có đã bỏ qua `.agents`, không cần đổi pipeline. Đây là kiểm tra bản cài, chưa chạy browser detector hoặc nghiệm thu giao diện.
+
+[UI skill routing](ui-skills.md) giữ phạm vi và cách giải quyết quy tắc khác nhau giữa hai bộ. Không sửa luật upstream thành quyết định sản phẩm của anh; dùng AGENTS/brief và các yêu cầu đã chốt làm nguồn ưu tiên. Khi cập nhật phải đọc diff, ghi SHA mới và kiểm lại bản cài. Không tự update hay tải toàn bộ library vào mỗi prompt.
