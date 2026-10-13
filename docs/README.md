@@ -16,6 +16,7 @@ Bộ tài liệu được giữ lại để hỗ trợ kiểm tra và refactor. 
 - [Kết quả local Round 1 — commit 5a920ee](workflow/reviews/jar-test-01-r1.json): hai finding đóng; 95 tests, typecheck và lint qua; nghiệm thu phạm vi Task 1.
 - [Quy trình hai coder song song](workflow/parallel-work.md): nhánh riêng theo task, owner file, JSON ghi rõ coder và gate tích hợp/test người dùng.
 - [Review local Jar Task 2 — commit 7421c0c](workflow/reviews/jar-test-02.json): 65 tests/typecheck/lint qua; còn ba finding runtime/visibility cần coder 1 sửa.
+- Gói giao riêng: [Coder 1 — sửa Jar Task 2](workflow/tasks/coder-1-jar-02-r1.json), [Coder 2 — audit và đề xuất UI ngoài](workflow/tasks/coder-2-ui-01.json).
 
 Phạm vi mới là pH, Jar Test và hấp phụ xanh methylene. Các scope/architecture cũ bên dưới được giữ để audit implementation và tương thích release cũ; danh sách bài, rubric và chính sách hướng dẫn cũ không tự động là yêu cầu refactor mới. Khi lập kế hoạch phải đối chiếu mục tiêu mới với hợp đồng đang chạy, không coi tài liệu thiết kế là tính năng đã triển khai.
 
