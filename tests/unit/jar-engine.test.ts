@@ -94,11 +94,53 @@ describe('Jar Test Task 1 numerical profile', () => {
     for (const [ph, dose] of [
       [Number.NaN, 150], [Infinity, 150], [7, Number.NaN],
       [4.99, 150], [9.01, 150], [7, 0], [7, 250.01],
-    ]) expect(() => predictJarRemoval(ph, dose)).toThrow(RangeError)
+    ] as const) expect(() => predictJarRemoval(ph, dose)).toThrow(RangeError)
   })
 })
 
 describe('Jar Test Task 1 actions, units and ledger', () => {
+  it('rejects inherited Object action names without exceptions, events or mutations', () => {
+    for (const actionType of ['toString', 'constructor', '__proto__']) {
+      for (const parameters of [{}, { bad: 1 }]) {
+        const h = harness()
+        accepted(h.step('prepare_cup', { cupId: 'A', initialPh: 7 }))
+        const beforeStateHash = stateHash(h.state)
+        const beforeLedger = structuredClone(h.ledger)
+        const beforeEvents = h.events.length
+
+        // A thrown TypeError is a regression too: unknown actions must return a DomainError.
+        const result = h.step(actionType, parameters)
+        expect(result.ok).toBe(false)
+        if (!result.ok) {
+          expect(result.error.category).toBe('precondition_failed')
+          expect(result.error.code).toBe('UNKNOWN_ACTION_TYPE')
+        }
+        expect(stateHash(h.state)).toBe(beforeStateHash)
+        expect(h.ledger).toEqual(beforeLedger)
+        expect(h.events).toHaveLength(beforeEvents)
+
+        // Direct domain calls must also refuse (not just runCommand's pipeline).
+        const context = {
+          scenario: { key: 'jar-test' as const, releaseId: JAR_PROFILE.releaseId },
+          state: h.state, sequence: beforeEvents + 1,
+        }
+        const action: SimulationAction = {
+          actionId: 'f0000000-0000-4000-8000-000000000001' as UUID,
+          actionType, parameters, unitSelections: {},
+        }
+        expect(module.validateAction(context, action)).toMatchObject({
+          category: 'precondition_failed', code: 'UNKNOWN_ACTION_TYPE',
+        })
+        expect(module.run(context, action)).toMatchObject({
+          category: 'precondition_failed', code: 'UNKNOWN_ACTION_TYPE',
+        })
+        expect(stateHash(h.state)).toBe(beforeStateHash)
+        expect(h.ledger).toEqual(beforeLedger)
+        expect(h.events).toHaveLength(beforeEvents)
+      }
+    }
+  })
+
   it('dose_is_additive_and_irreversible', () => {
     const h = harness()
     accepted(h.step('prepare_cup', { cupId: 'A', initialPh: 7 }))

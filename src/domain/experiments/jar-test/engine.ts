@@ -52,8 +52,12 @@ function canDose(value: unknown): value is number {
 
 /** Validate exactly the flat action contract. Never ignore rpm/time overrides. */
 function validateJarAction(state: JarState, action: SimulationAction): DomainError | null {
-  const allowed = KEYS[action.actionType]
-  if (allowed === undefined) return rejected('UNKNOWN_ACTION_TYPE', { actionType: action.actionType })
+  // KEYs is an ordinary object; inherited names must never count as Jar actions.
+  // Check ownership before reading the parameter list or calling .includes().
+  if (!Object.hasOwn(KEYS, action.actionType)) {
+    return rejected('UNKNOWN_ACTION_TYPE', { actionType: action.actionType })
+  }
+  const allowed = KEYS[action.actionType] as readonly string[]
   if (state.phase === 'completed') return rejected('ATTEMPT_COMPLETED')
   const p = action.parameters
   for (const key of Object.keys(p)) {
