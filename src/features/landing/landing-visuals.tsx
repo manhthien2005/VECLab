@@ -16,7 +16,7 @@ import { formatPh } from '@/shared/ui/format.js'
  * Reuses the report's `.ph-series*` classes (src/features/reports/attempt-shell.tsx) so a
  * chart looks like the same instrument whether it is showing a real run or this preview.
  * No `'use client'`: it takes no props that change and holds no state, so it renders on
- * the server like `PhMeter`.
+ * the server without a client component boundary.
  */
 
 const BENCHMARK = ACID_INPUT_DOMAIN.benchmark
