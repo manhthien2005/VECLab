@@ -1,5 +1,7 @@
 # BÁO CÁO CHỐT PHẠM VI ỨNG DỤNG WEB
 
+> Baseline lịch sử: trải nghiệm mô phỏng mới theo [thiết kế ngày 13/10/2026](superpowers/specs/2026-10-13-simulation-v1-design.md), gồm tương tác 2D và phân tích đúng/sai chủ yếu cuối lượt. Các quy tắc cũ cần được đối chiếu khi audit, không mặc định áp dụng nguyên trạng cho refactor.
+
 ## Nền tảng mô phỏng quy trình hóa học có căn cứ khoa học
 
 **Trạng thái:** Đã được duyệt làm phạm vi web chính thức<br>

@@ -2,6 +2,14 @@
 
 Bộ tài liệu được giữ lại để hỗ trợ kiểm tra và refactor. Phân biệt rõ **yêu cầu mục tiêu** trong đặc tả với **khả năng đã triển khai** trong source; xem [nền source hiện tại](refactor-baseline.md).
 
+## Thiết kế refactor hiện hành — 13/10/2026
+
+- [Thiết kế sản phẩm và hợp đồng mô phỏng 2D](superpowers/specs/2026-10-13-simulation-v1-design.md): yêu cầu đã chốt, các lựa chọn đề xuất, ba bài mục tiêu, phản hồi cuối lượt và ranh giới engine/phép đo/hình ảnh.
+- [Jar Test — thiết kế chi tiết và điều kiện kiểm chứng](experiments/jar-test-design.md): bài ưu tiên; chưa có numerical release hoặc prototype.
+- [Rà soát lựa chọn ba bài](research/scenario-selection-review.md): căn cứ khoa học/giáo dục và giới hạn.
+
+Phạm vi mới là pH, Jar Test và hấp phụ xanh methylene. Các scope/architecture cũ bên dưới được giữ để audit implementation và tương thích release cũ; danh sách bài, rubric và chính sách hướng dẫn cũ không tự động là yêu cầu refactor mới. Khi lập kế hoạch phải đối chiếu mục tiêu mới với hợp đồng đang chạy, không coi tài liệu thiết kế là tính năng đã triển khai.
+
 ## Tài liệu nguồn
 
 | Tài liệu | Dùng khi |
@@ -22,7 +30,7 @@ Bộ tài liệu được giữ lại để hỗ trợ kiểm tra và refactor. 
 
 ## Quy tắc ưu tiên
 
-- Phạm vi: Core Scope → Web Scope → Architecture → Data Model.
+- Phạm vi refactor mới: thiết kế ngày 13/10/2026 → đặc tả từng bài mới khi được khóa. Scope cũ mô tả baseline/legacy; Core Scope → Web Scope → Architecture → Data Model vẫn là thứ tự đọc của bộ cũ.
 - Khoa học: experiment spec → Evidence Register → generic contracts.
 - Kiểm thử: golden cases/tolerance trong spec → Acceptance → fixtures trong source.
 - Quy trình Git và môi trường: [AGENTS.md](../AGENTS.md).

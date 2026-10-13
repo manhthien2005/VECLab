@@ -1,5 +1,7 @@
 # BÁO CÁO CHỐT PHẠM VI LÕI DỰ ÁN
 
+> Baseline lịch sử: danh sách ba bài và chính sách trải nghiệm trong tài liệu này đã được điều chỉnh cho đợt refactor ngày 13/10/2026. Đọc [thiết kế hiện hành](superpowers/specs/2026-10-13-simulation-v1-design.md) trước khi lập kế hoạch mới; giữ tài liệu này để đối chiếu release cũ.
+
 ## Nền tảng mô phỏng quy trình hóa học có căn cứ khoa học
 
 **Trạng thái:** Đã chốt làm phạm vi lõi của dự án<br>
