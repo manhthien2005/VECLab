@@ -27,6 +27,8 @@ Local dùng các skill dự án trong `.agents/skills`. Web phải được yêu
 
 Facts về source/tool đọc từ repo và môi trường; quyết định về mục tiêu, trải nghiệm hoặc đổi miền mô hình mới cần hỏi người dùng nếu chưa được chốt. Hỏi gọn, kèm đề xuất và ảnh hưởng; tiếp tục phần độc lập khi có thể. Không mở lại yêu cầu đã chấp nhận để làm đầy một checklist. Khi audit, ghi file/caller chứng minh nhận định; phần suy luận hoặc đề xuất phải được gọi đúng tên.
 
+Task UI hoặc ảnh mẫu phải đưa [UI skill routing](ui-skills.md) và đúng skill Impeccable/Taste vào `read` tại base SHA đã chứa chúng. Web đọc `SKILL.md` rồi chỉ các reference cần cho task; không giả định có CLI/browser hoặc tự tải cả thư viện vào context. Giữ phạm vi đề xuất/triển khai đã giao và JSON v1; các lệnh hoặc format mặc định của skill không mở rộng quyền hay thay đổi contract này.
+
 ## 3. Gói giao việc JSON v1
 
 Quyết định của người dùng ngày 13/10/2026: mọi prompt giao việc, handback và review giữa agent dùng **đúng một JSON object**, không Markdown fence, bảng, lời dẫn/kết hoặc comment. Quy ước này thay mẫu Markdown cũ; các brief/review Markdown đã có vẫn dùng làm tài liệu tham chiếu. Trao đổi với người dùng vẫn ngắn gọn bằng tiếng Việt.
