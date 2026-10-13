@@ -35,8 +35,8 @@ Hai mẫu chuẩn: [task.json](templates/task.json) và [result.json](templates/
 
 Task có các trường bắt buộc:
 
-- `v: 1`, `kind: "task"`, `id`: ID có vòng sửa nếu cần, chẳng hạn `JAR-01-R1`.
-- `repo`: `owner/name`; `branch`: nhánh thật; `base`: full 40-hex SHA bất biến, không chỉ HEAD/tên nhánh.
+- `v: 1`, `kind: "task"`, `id`: ID có vòng sửa nếu cần, chẳng hạn `JAR-01-R1`; `coder`: số `1` hoặc `2`, luôn ghi để người dùng copy đúng chat web.
+- `repo`: `owner/name`; `branch`: nhánh task riêng được phép ghi; `target`: nhánh local tích hợp; `base`: full 40-hex SHA bất biến, không chỉ HEAD/tên nhánh. Theo [quy trình song song](parallel-work.md); coder không push/merge target.
 - `goal`: một mục tiêu; `read`: file spec/plan/review, AGENTS, skill và contract tại base; `files`: allowlist các file được tạo/sửa.
 - `accept`: hành vi cần chứng minh. Tham chiếu contract/interface trong `read`, không chép lại toàn spec; chỉ ghi ngoại lệ/đổi interface khi có.
 - `checks`: object ánh xạ ID ngắn tới lệnh cụ thể, ví dụ `unit`, `types`, `lint`, `diff`. Chọn đúng checks của task; không bắt mọi task có cùng bốn checks trong scaffold.
@@ -51,13 +51,13 @@ Kiểm tra quyền bằng việc tối thiểu: web đọc AGENTS và một file
 
 Web làm task đã giao, dùng kiến trúc/fixtures sẵn có. Nếu cần đổi interface hoặc file ngoài phạm vi, trả ảnh hưởng và phương án nhỏ nhất trước khi mở rộng. Routine implementation trong phạm vi không cần xin lại phép. Hoàn thành một task không tự mở Task kế tiếp.
 
-Result có các trường bắt buộc: `v: 1`, `kind: "result"`, `id`, `repo`, `base` như task; `head` là full SHA đã commit hoặc `null` nếu chỉ có patch/chưa triển khai; `status`; `checks`; `next`.
+Result mới có các trường bắt buộc: `v: 1`, `kind: "result"`, `id`, `coder`, `repo`, `branch`, `base` như task; `head` là full SHA đã commit hoặc `null` nếu chỉ có patch/chưa triển khai; `status`; `checks`; `next`. Gói v1 lịch sử chưa có coder/branch vẫn đọc được; lấy owner từ gói giao đã xác nhận, không giả metadata cũ. Các gói mới luôn điền hai trường này.
 
 - `status`: web chỉ dùng `pending_review` hoặc `blocked`; local review dùng `accepted`, `needs_changes` hoặc `missing_evidence`. `accepted` chỉ cho phạm vi task đã kiểm chứng, không tự cấp quyền merge/deploy.
 - `checks`: giữ đúng IDs trong task; giá trị chỉ là `pass`, `fail`, `not_run`. Mọi check yêu cầu đều phải xuất hiện, kể cả chưa chạy. Không lặp lệnh đã có trong task; với gói legacy chưa có IDs, dùng tên ngắn rõ nghĩa và ghi lệnh thực trong `evidence`.
 - `next`: một hành động ngắn, như `local_review`, `fix_findings`, `prepare_task_2`, `provide_source`. Đây là thông tin bàn giao, không phải lệnh tự thực thi.
 
-Chỉ thêm trường tùy chọn khi có thông tin: `changes` (tóm tắt thay đổi đáng kể), `env` (runtime/OS đã chạy), `evidence` (ID check → kết quả/log/artifact thật), `issues` (finding cụ thể, file:line và cách tái hiện), `limits` (phần chưa kiểm chứng/lý do chung), `artifact` (URL PR/patch hoặc path patch thực), `branch` nếu khác nhánh giao. Bỏ trường rỗng, không thêm key tùy hứng hoặc diễn giải lại cả spec. Không có terminal thì các checks là `not_run`, lý do ghi **một lần** trong `limits`; thiếu môi trường không đồng nghĩa code lỗi.
+Chỉ thêm trường tùy chọn khi có thông tin: `changes` (tóm tắt thay đổi đáng kể), `env` (runtime/OS đã chạy), `evidence` (ID check → kết quả/log/artifact thật), `issues` (finding cụ thể, file:line và cách tái hiện), `limits` (phần chưa kiểm chứng/lý do chung), `artifact` (URL PR/patch hoặc path patch thực). Bỏ trường rỗng, không thêm key tùy hứng hoặc diễn giải lại cả spec. Không có terminal thì các checks là `not_run`, lý do ghi **một lần** trong `limits`; thiếu môi trường không đồng nghĩa code lỗi.
 
 `issues`, `changes`, `limits` là mảng chuỗi ngắn; `env`, `artifact`, `branch` là chuỗi; `evidence` là object ID → chuỗi. `needs_changes` phải có finding trong `issues`; `blocked`/`missing_evidence` phải có lý do trong `limits`. Dùng `null` đúng nghĩa chưa có head, không dùng chuỗi `"null"`. JSON không có trailing comma, comment hoặc key trùng. Khoảng trắng có thể rút gọn; giữ tên key rõ nghĩa và không đặt trần token khiến mất finding/evidence quan trọng.
 

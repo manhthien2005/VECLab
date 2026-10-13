@@ -2,8 +2,10 @@
   "v": 1,
   "kind": "task",
   "id": "<task-id>",
+  "coder": 1,
   "repo": "manhthien2005/VECLab",
-  "branch": "<working-branch>",
+  "branch": "feature/coder-1-<task>",
+  "target": "chore/pre-refactor-cleanup",
   "base": "<full-base-sha>",
   "goal": "<one bounded goal>",
   "read": [
@@ -18,6 +20,6 @@
     "unit": "<focused test command>",
     "types": "npm run typecheck",
     "lint": "<lint command for affected files>",
-    "diff": "git diff --check"
+    "diff": "git diff <full-base-sha> --check"
   }
 }
