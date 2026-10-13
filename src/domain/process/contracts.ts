@@ -17,6 +17,7 @@ export const SCENARIO_KEYS = [
   'acid-neutralization',
   'copper-precipitation',
   'plastic-separation',
+  'jar-test',
 ] as const
 
 export type ScenarioKey = (typeof SCENARIO_KEYS)[number]
