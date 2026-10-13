@@ -9,10 +9,11 @@ Bộ tài liệu được giữ lại để hỗ trợ kiểm tra và refactor. 
 - [Rà soát lựa chọn ba bài](research/scenario-selection-review.md): căn cứ khoa học/giáo dục và giới hạn.
 - [Audit luồng mô phỏng và kiểm tra mô hình ứng viên](research/simulation-refactor-audit.md): phần giữ/thay, kết quả kiểm tra số học và lựa chọn triển khai gọn.
 - [Plan Jar Test đầu cuối](superpowers/plans/2026-10-13-jar-test-first-slice.md): sáu phần để giao thực hiện, có điểm nghiệm thu; chưa phải tính năng đã triển khai.
-- [Contract giao việc web/local và cách kiểm chứng](workflow/web-handoff-contract.md): ba skill dự án, gói giao việc có base SHA, handback và nghiệm thu đúng phạm vi.
+- [Contract giao việc web/local và cách kiểm chứng](workflow/web-handoff-contract.md): JSON v1 cho prompt/handback, ba skill dự án và nghiệm thu đúng phạm vi; mẫu [task](workflow/templates/task.json) và [result](workflow/templates/result.json).
 - [Nguồn chọn lọc và cách duy trì skill](workflow/skill-sources.md): sáu repo tham khảo, commit/giấy phép, phần áp dụng và phần chưa đưa vào.
 - [Brief giao web — Jar Task 1](workflow/tasks/jar-test-01.md): nguồn được ghim, sáu file được sửa, checks và cách trả patch; phiên web vẫn phải xác nhận truy cập/công cụ trước khi làm.
 - [Local review Jar Task 1 — commit 69f8b30](workflow/reviews/jar-test-01.md): bằng chứng đã chạy, hai finding cần sửa và gói sửa giới hạn hai file.
+- [Kết quả local Round 1 — commit 5a920ee](workflow/reviews/jar-test-01-r1.json): hai finding đóng; 95 tests, typecheck và lint qua; nghiệm thu phạm vi Task 1.
 
 Phạm vi mới là pH, Jar Test và hấp phụ xanh methylene. Các scope/architecture cũ bên dưới được giữ để audit implementation và tương thích release cũ; danh sách bài, rubric và chính sách hướng dẫn cũ không tự động là yêu cầu refactor mới. Khi lập kế hoạch phải đối chiếu mục tiêu mới với hợp đồng đang chạy, không coi tài liệu thiết kế là tính năng đã triển khai.
 

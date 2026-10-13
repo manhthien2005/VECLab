@@ -1,0 +1,18 @@
+{
+  "v": 1,
+  "kind": "result",
+  "id": "<same task-id>",
+  "repo": "manhthien2005/VECLab",
+  "base": "<same full-base-sha>",
+  "head": null,
+  "status": "pending_review",
+  "changes": ["<material behavior or interface change>"],
+  "checks": {
+    "unit": "not_run",
+    "types": "not_run",
+    "lint": "not_run",
+    "diff": "not_run"
+  },
+  "limits": ["<common reason checks were not run>"],
+  "next": "local_review"
+}

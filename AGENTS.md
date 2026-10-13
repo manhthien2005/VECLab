@@ -23,6 +23,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## VECLab Shared Agent Workflow
 
+- **Persistent user decision — 2026-10-13:** All agent-to-agent task prompts, handbacks and review results use exactly one valid JSON object, protocol `v: 1`, with no Markdown fence or surrounding prose. Use [task template](docs/workflow/templates/task.json) and [result template](docs/workflow/templates/result.json); fill actual values, never send template placeholders. This supersedes the older Markdown handback format. Human-facing progress remains concise Vietnamese.
 - Read [the web/local contract](docs/workflow/web-handoff-contract.md) when preparing, implementing or reviewing a delegated refactor task. It defines the task brief, capability checks, handback and verification recipe.
 - Prepare a task with [veclab-handoff](.agents/skills/veclab-handoff/SKILL.md); implement an assigned task with [veclab-implement](.agents/skills/veclab-implement/SKILL.md); review/verify with [veclab-verify](.agents/skills/veclab-verify/SKILL.md). Load the relevant role, not every skill. Existing React/design/database skills remain available for their own scope.
 - ChatGPT web must read these repo files explicitly at the brief's pinned commit; do not assume local skill auto-loading, terminal access or repository write permission. Read-only web work returns a patch; local verifies it before acceptance.

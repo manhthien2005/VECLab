@@ -2,6 +2,8 @@
 
 Ngày 13/10/2026. **Verdict: cần sửa**, chưa giao Task 2.
 
+Cập nhật: vòng sửa `5a920ee` đã được local kiểm chứng, hai finding đóng; xem [kết quả JSON Round 1](jar-test-01-r1.json). Nội dung bên dưới lưu review của commit `69f8b30`, không phải verdict hiện tại cho commit đã sửa.
+
 ## Source đã review
 
 - Repo/branch: `manhthien2005/VECLab`, `chore/pre-refactor-cleanup`.
@@ -58,6 +60,6 @@ Không chạy full build/Playwright/DB trong vòng review engine này. Kết qu�
 
 Tiếp tục **Task 1**, sửa hai finding trên. Allowed files cho vòng sửa: `src/domain/experiments/jar-test/engine.ts` và `tests/unit/jar-engine.test.ts`. Không mở thêm kiến trúc hoặc đổi profile để chữa lỗi validation/typecheck.
 
-Đọc [contract handback hiện hành](../web-handoff-contract.md), dùng mẫu năm mục Markdown thuần, không bảng. Khi có terminal, chạy lại focused tests, typecheck và lint phần thay đổi. Nếu web không có terminal, ghi NOT RUN và giao code/tests thực cho local chạy. Trả full base/head SHA, diff/commit URL, commands/results và giới hạn; không gọi là đã nghiệm thu.
+Đọc [contract handback hiện hành](../web-handoff-contract.md), dùng result JSON v1. Khi có terminal, chạy lại focused tests, typecheck và lint phần thay đổi. Nếu web không có terminal, ghi `not_run` và giao code/tests thực cho local chạy; không gọi là đã nghiệm thu.
 
 Local sẽ kiểm chứng lại sau commit sửa; chỉ giao Task 2 khi đạt Task 1. Không sửa code implementation trong commit tài liệu review này.

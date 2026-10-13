@@ -27,58 +27,43 @@ Local dùng các skill dự án trong `.agents/skills`. Web phải được yêu
 
 Facts về source/tool đọc từ repo và môi trường; quyết định về mục tiêu, trải nghiệm hoặc đổi miền mô hình mới cần hỏi người dùng nếu chưa được chốt. Hỏi gọn, kèm đề xuất và ảnh hưởng; tiếp tục phần độc lập khi có thể. Không mở lại yêu cầu đã chấp nhận để làm đầy một checklist. Khi audit, ghi file/caller chứng minh nhận định; phần suy luận hoặc đề xuất phải được gọi đúng tên.
 
-## 3. Gói giao việc tối thiểu
+## 3. Gói giao việc JSON v1
 
-Mỗi gói ghi các trường dưới đây bằng giá trị thật lúc chuẩn bị; không dùng HEAD hoặc tên nhánh di động làm định danh duy nhất.
+Quyết định của người dùng ngày 13/10/2026: mọi prompt giao việc, handback và review giữa agent dùng **đúng một JSON object**, không Markdown fence, bảng, lời dẫn/kết hoặc comment. Quy ước này thay mẫu Markdown cũ; các brief/review Markdown đã có vẫn dùng làm tài liệu tham chiếu. Trao đổi với người dùng vẫn ngắn gọn bằng tiếng Việt.
 
-| Trường | Nội dung |
-| --- | --- |
-| Task | ID trong plan, một mục tiêu và ranh giới kết thúc |
-| Source | Repo URL, nhánh làm việc và full base SHA; bằng chứng web đọc được đúng commit |
-| Inputs | Paths của AGENTS, contract, spec/plan và nguồn/fixtures cần đọc tại base SHA |
-| Allowed files | Danh sách file được tạo/sửa cho task; phạm vi hỗ trợ trực tiếp như index/export liên quan phải ghi rõ |
-| Keep | Release/hành vi cũ và phần nằm ngoài task cần giữ |
-| Interface | Kiểu/hàm/action, input/output, đơn vị, null/error/validity và version có liên quan |
-| Acceptance | Các hành vi cần chứng minh cùng lệnh kiểm tra; phân biệt số học mô hình, kết quả thực nghiệm và UI |
-| Capability | Web hiện đọc/sửa repo, chạy terminal/test, trả patch hoặc tạo PR được hay không; chỉ ghi năng lực đã xác nhận |
-| Handback | Patch hoặc PR/commit thực, files changed, bằng chứng test, assumptions và phần chưa kiểm chứng |
+Hai mẫu chuẩn: [task.json](templates/task.json) và [result.json](templates/result.json). Đây là scaffold; điền giá trị thật, bỏ placeholder trước khi gửi. Kiểm tra bằng JSON parser trước khi bàn giao nếu có công cụ; không tự nói đã parse khi chưa chạy. Không thêm runtime/dependency để dùng hai mẫu này.
+
+Task có các trường bắt buộc:
+
+- `v: 1`, `kind: "task"`, `id`: ID có vòng sửa nếu cần, chẳng hạn `JAR-01-R1`.
+- `repo`: `owner/name`; `branch`: nhánh thật; `base`: full 40-hex SHA bất biến, không chỉ HEAD/tên nhánh.
+- `goal`: một mục tiêu; `read`: file spec/plan/review, AGENTS, skill và contract tại base; `files`: allowlist các file được tạo/sửa.
+- `accept`: hành vi cần chứng minh. Tham chiếu contract/interface trong `read`, không chép lại toàn spec; chỉ ghi ngoại lệ/đổi interface khi có.
+- `checks`: object ánh xạ ID ngắn tới lệnh cụ thể, ví dụ `unit`, `types`, `lint`, `diff`. Chọn đúng checks của task; không bắt mọi task có cùng bốn checks trong scaffold.
+
+AGENTS/spec giữ các ràng buộc chung, release cũ và scope kết thúc. Không lặp chúng vào mọi prompt. Một task không tự mở task kế tiếp. Thiếu nguồn/quyền là vấn đề cần báo, không phải lý do tự mở rộng nhiệm vụ.
 
 Nguồn repo hiện tại: `https://github.com/manhthien2005/VECLab`. Giữ nền Hoang đã được yêu cầu; Git lifecycle theo AGENTS. Tạo brief phải đọc Git hiện tại để pin SHA/nhánh, không sao chép một SHA cũ từ ví dụ. Chưa có bằng chứng commit đã đến GitHub thì ghi “chuẩn bị local, chưa xác nhận web truy cập”; không gắn nhãn ready-to-dispatch.
 
 Kiểm tra quyền bằng việc tối thiểu: web đọc AGENTS và một file task tại đúng commit, xác nhận đường dẫn/định danh. Nếu chỉ đọc được repo, web trả unified diff hoặc nội dung file đầy đủ để local áp dụng. Nếu không có terminal, ghi test “chưa chạy trên web”; local chạy trước nghiệm thu. Không đổi phương thức làm việc của người dùng chỉ vì runtime thiếu tool.
 
-## 4. Cách thực hiện và trả kết quả
+## 4. Kết quả JSON v1
 
 Web làm task đã giao, dùng kiến trúc/fixtures sẵn có. Nếu cần đổi interface hoặc file ngoài phạm vi, trả ảnh hưởng và phương án nhỏ nhất trước khi mở rộng. Routine implementation trong phạm vi không cần xin lại phép. Hoàn thành một task không tự mở Task kế tiếp.
 
-Handback dùng Markdown thuần với năm mục dưới đây, không dùng bảng, HTML hoặc nút/callout để giữ nguyên cấu trúc khi sao chép giữa ChatGPT web và local. Link commit/diff/PR phải chứa URL đầy đủ, không chỉ ghi “Xem commit”. Không cần lặp toàn bộ interface/spec đã có; chỉ nêu phần thay đổi hoặc giả định có ảnh hưởng.
+Result có các trường bắt buộc: `v: 1`, `kind: "result"`, `id`, `repo`, `base` như task; `head` là full SHA đã commit hoặc `null` nếu chỉ có patch/chưa triển khai; `status`; `checks`; `next`.
 
-~~~text
-Task: <ID và tên>
-Trạng thái: <đã commit — chờ local kiểm chứng / patch chưa áp dụng>
+- `status`: web chỉ dùng `pending_review` hoặc `blocked`; local review dùng `accepted`, `needs_changes` hoặc `missing_evidence`. `accepted` chỉ cho phạm vi task đã kiểm chứng, không tự cấp quyền merge/deploy.
+- `checks`: giữ đúng IDs trong task; giá trị chỉ là `pass`, `fail`, `not_run`. Mọi check yêu cầu đều phải xuất hiện, kể cả chưa chạy. Không lặp lệnh đã có trong task; với gói legacy chưa có IDs, dùng tên ngắn rõ nghĩa và ghi lệnh thực trong `evidence`.
+- `next`: một hành động ngắn, như `local_review`, `fix_findings`, `prepare_task_2`, `provide_source`. Đây là thông tin bàn giao, không phải lệnh tự thực thi.
 
-1. Source
-- Repo/branch: <repo và nhánh>
-- Base SHA: <full SHA>
-- Head SHA: <full SHA, hoặc chưa có nếu chỉ trả patch>
-- Commit/diff/PR: <URL đầy đủ hoặc artifact patch thực>
+Chỉ thêm trường tùy chọn khi có thông tin: `changes` (tóm tắt thay đổi đáng kể), `env` (runtime/OS đã chạy), `evidence` (ID check → kết quả/log/artifact thật), `issues` (finding cụ thể, file:line và cách tái hiện), `limits` (phần chưa kiểm chứng/lý do chung), `artifact` (URL PR/patch hoặc path patch thực), `branch` nếu khác nhánh giao. Bỏ trường rỗng, không thêm key tùy hứng hoặc diễn giải lại cả spec. Không có terminal thì các checks là `not_run`, lý do ghi **một lần** trong `limits`; thiếu môi trường không đồng nghĩa code lỗi.
 
-2. Thay đổi
-- <tóm tắt hành vi mới, files changed và interface thay đổi nếu có>
+`issues`, `changes`, `limits` là mảng chuỗi ngắn; `env`, `artifact`, `branch` là chuỗi; `evidence` là object ID → chuỗi. `needs_changes` phải có finding trong `issues`; `blocked`/`missing_evidence` phải có lý do trong `limits`. Dùng `null` đúng nghĩa chưa có head, không dùng chuỗi `"null"`. JSON không có trailing comma, comment hoặc key trùng. Khoảng trắng có thể rút gọn; giữ tên key rõ nghĩa và không đặt trần token khiến mất finding/evidence quan trọng.
 
-3. Kiểm chứng
-- Môi trường: <runtime/OS thật; hoặc không có terminal>
-- PASS / FAIL / NOT RUN — <lệnh> — <kết quả hoặc lý do chưa chạy>
-- Evidence: <log/artifact thực nếu có; không bịa đường dẫn>
+Nếu đã commit, `repo`/`base`/`head` đủ để dựng commit/diff URL; không cần chép thêm URL, parent SHA, file manifest hoặc số dòng thay đổi vốn đọc được từ Git. PR/patch thì ghi `artifact` thật; patch chưa áp dụng giữ `head: null`. Thiếu cả head lẫn patch thì chưa phải bàn giao implementation hoàn chỉnh. Patch lớn/log đầy đủ để ở artifact, không nhét vào JSON bằng escape hoặc base64; nếu không tạo được artifact thì báo giới hạn công cụ để local nhận file bằng cách khác.
 
-4. Giới hạn / vấn đề còn lại
-- <chỉ các giới hạn hoặc lỗi ảnh hưởng nghiệm thu>
-
-5. Bước tiếp theo
-- <việc local cần kiểm tra/sửa; dừng ở task nào>
-~~~
-
-Web không tự ghi “đã nghiệm thu” khi local chưa review. Parent SHA chỉ thêm khi khác base để giải thích lịch sử; không lặp metadata không cần thiết. Phân biệt check ứng dụng với CI/deployment: không có workflow run là chưa có bằng chứng; lỗi cài dependency chưa chứng minh nguyên nhân nằm trong code task. Nếu không có log chi tiết thì ghi chưa xác định nguyên nhân, không đoán.
+Phân biệt checks ứng dụng với CI/deployment: không có workflow run là chưa có bằng chứng; lỗi cài dependency chưa chứng minh nguyên nhân nằm trong code task. Không tự đoán nguyên nhân từ deployment status. Chỉ đưa CI/deployment vào output khi task yêu cầu hoặc ảnh hưởng nghiệm thu.
 
 “12 dự đoán khớp bảng” hoặc “grid hữu hạn” chỉ chứng minh phần số học đã kiểm tra. Không gọi đó là validation ngoài mẫu hoặc chứng nhận mô phỏng đúng thí nghiệm thực. Giữ riêng tolerance phép tính, sai số mô hình và mức đạt mục tiêu trong bài học.
 
@@ -96,7 +81,7 @@ Local lấy diff/patch thật và so với base, đọc code/tests liên quan r�
 
 Verdict dùng một trong ba: **cần sửa**, **còn thiếu bằng chứng**, **đạt phạm vi task**. “Đạt Task 1” không có nghĩa Jar UI/cloud hoặc cả v1 đã xong. Gói engine chưa cần kiểm thử UI chưa tồn tại; gói UI phải có lượt đầu cuối rồi người dùng mới thử giao diện.
 
-Local báo ngắn: verdict → vấn đề cần sửa theo mức ảnh hưởng → kiểm tra đã chạy/chưa chạy → bước tiếp theo. Merge/promotion vẫn theo required CI của AGENTS; production không nằm trong contract này.
+Local trả agent bằng result JSON với status/checks/findings theo mục 4; báo người dùng ngắn bằng tiếng Việt. Merge/promotion vẫn theo required CI của AGENTS; production không nằm trong contract này.
 
 ## 6. Chọn kiểm chứng theo thay đổi
 

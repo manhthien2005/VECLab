@@ -1,0 +1,23 @@
+{
+  "v": 1,
+  "kind": "task",
+  "id": "<task-id>",
+  "repo": "manhthien2005/VECLab",
+  "branch": "<working-branch>",
+  "base": "<full-base-sha>",
+  "goal": "<one bounded goal>",
+  "read": [
+    "AGENTS.md",
+    ".agents/skills/veclab-implement/SKILL.md",
+    "docs/workflow/web-handoff-contract.md",
+    "<task-spec-or-review-path>"
+  ],
+  "files": ["<allowed-file>"],
+  "accept": ["<observable acceptance criterion>"],
+  "checks": {
+    "unit": "<focused test command>",
+    "types": "npm run typecheck",
+    "lint": "<lint command for affected files>",
+    "diff": "git diff --check"
+  }
+}
