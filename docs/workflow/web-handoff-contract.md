@@ -51,12 +51,34 @@ Kiểm tra quyền bằng việc tối thiểu: web đọc AGENTS và một file
 
 Web làm task đã giao, dùng kiến trúc/fixtures sẵn có. Nếu cần đổi interface hoặc file ngoài phạm vi, trả ảnh hưởng và phương án nhỏ nhất trước khi mở rộng. Routine implementation trong phạm vi không cần xin lại phép. Hoàn thành một task không tự mở Task kế tiếp.
 
-Mẫu handback ngắn:
+Handback dùng Markdown thuần với năm mục dưới đây, không dùng bảng, HTML hoặc nút/callout để giữ nguyên cấu trúc khi sao chép giữa ChatGPT web và local. Link commit/diff/PR phải chứa URL đầy đủ, không chỉ ghi “Xem commit”. Không cần lặp toàn bộ interface/spec đã có; chỉ nêu phần thay đổi hoặc giả định có ảnh hưởng.
 
-1. Task ID, base SHA và commit/PR SHA thực; nếu chỉ có patch thì ghi rõ patch chưa áp dụng.
-2. Thay đổi và files changed; không gộp cleanup không liên quan.
-3. Test: lệnh, môi trường, kết quả/log có thật, hoặc “chưa chạy” và lý do.
-4. Giả định/giới hạn, interface thay đổi và việc còn lại.
+~~~text
+Task: <ID và tên>
+Trạng thái: <đã commit — chờ local kiểm chứng / patch chưa áp dụng>
+
+1. Source
+- Repo/branch: <repo và nhánh>
+- Base SHA: <full SHA>
+- Head SHA: <full SHA, hoặc chưa có nếu chỉ trả patch>
+- Commit/diff/PR: <URL đầy đủ hoặc artifact patch thực>
+
+2. Thay đổi
+- <tóm tắt hành vi mới, files changed và interface thay đổi nếu có>
+
+3. Kiểm chứng
+- Môi trường: <runtime/OS thật; hoặc không có terminal>
+- PASS / FAIL / NOT RUN — <lệnh> — <kết quả hoặc lý do chưa chạy>
+- Evidence: <log/artifact thực nếu có; không bịa đường dẫn>
+
+4. Giới hạn / vấn đề còn lại
+- <chỉ các giới hạn hoặc lỗi ảnh hưởng nghiệm thu>
+
+5. Bước tiếp theo
+- <việc local cần kiểm tra/sửa; dừng ở task nào>
+~~~
+
+Web không tự ghi “đã nghiệm thu” khi local chưa review. Parent SHA chỉ thêm khi khác base để giải thích lịch sử; không lặp metadata không cần thiết. Phân biệt check ứng dụng với CI/deployment: không có workflow run là chưa có bằng chứng; lỗi cài dependency chưa chứng minh nguyên nhân nằm trong code task. Nếu không có log chi tiết thì ghi chưa xác định nguyên nhân, không đoán.
 
 “12 dự đoán khớp bảng” hoặc “grid hữu hạn” chỉ chứng minh phần số học đã kiểm tra. Không gọi đó là validation ngoài mẫu hoặc chứng nhận mô phỏng đúng thí nghiệm thực. Giữ riêng tolerance phép tính, sai số mô hình và mức đạt mục tiêu trong bài học.
 
