@@ -1,6 +1,6 @@
 # Jar Test First Slice Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Cách thực hiện đã chọn:** ChatGPT web làm từng task; Codex local review/kiểm chứng; người dùng thử UI. Đọc [contract giao việc](../../workflow/web-handoff-contract.md) và `veclab-implement` trong repo. Nếu dùng runtime khác thì vẫn giữ cùng phạm vi và handback; plan không yêu cầu cài thêm plugin hoặc tự dispatch nhiều agent. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Một lượt Jar Test chạy đầu cuối: thao tác 2D → đo → tự tính/chọn phương án → báo cáo → lưu/tiếp tục, giữ acid cũ hoạt động.
 
@@ -9,6 +9,10 @@
 **Tech Stack:** Next.js/React/TypeScript hiện cài, SVG/HTML/CSS, Vitest, Playwright, IndexedDB và Supabase local cho kiểm chứng cloud. Không thêm dependency.
 
 **Spec:** [Thiết kế sản phẩm](../specs/2026-10-13-simulation-v1-design.md), [Jar Test](../../experiments/jar-test-design.md), [audit và kiểm tra số học](../../research/simulation-refactor-audit.md). Phạm vi plan là bài đầu tiên; pH refactor, hấp phụ và tutor có plan sau.
+
+## Chuẩn bị trước Task 1
+
+Skill dự án và contract giao việc phải có trong source được giao. Dùng `veclab-handoff` để chuẩn bị brief Task 1 với repo/branch/full base SHA, inputs, allowed files, interface, acceptance và handback; xác nhận web đọc được đúng commit và công cụ thực có. Chỉ có plan local chưa đủ để dispatch. Nếu web chỉ đọc GitHub thì trả patch; local chạy tests và review bằng `veclab-verify`. Contract FE ↔ BE chi tiết được khóa lần lượt ở Tasks 1–3; không coi interface đề xuất là code đã có.
 
 ## Global Constraints
 

@@ -60,6 +60,7 @@ Các thư mục .agent, .agents, .claude và skills-lock.json là công cụ h�
 - [Nền source trước refactor](docs/refactor-baseline.md)
 - [Ownership đội ngũ](docs/team/README.md)
 - [Quy tắc repository](AGENTS.md)
+- [Workflow và skill dùng chung cho local/ChatGPT web](docs/workflow/web-handoff-contract.md)
 
 Công việc thông thường tách nhánh từ develop và trở về develop qua PR. Production chỉ phát hành từ main qua PR develop → main; CI bắt buộc phải xanh. Đợt dọn source này được tách từ Hoang theo yêu cầu riêng.
 
