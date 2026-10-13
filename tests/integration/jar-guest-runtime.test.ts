@@ -172,6 +172,34 @@ describe('Jar Task 2 guest session through IndexedDB', () => {
     expect((await repository().getAttempt(id))?.currentState.cups.A?.totalDoseMgL).toBe(150)
   })
 
+  it('same action id from two tabs commits once and reports the stored sequence', async () => {
+    const first = session()
+    const second = session()
+    const attempt = await first.start()
+    const actionId = newUUID()
+    const results = await Promise.all([
+      first.apply(attempt.attemptId, 'prepare_cup', { cupId: 'A', initialPh: 7 }, {},
+        { actionId, expectedRevision: 0 }),
+      second.apply(attempt.attemptId, 'prepare_cup', { cupId: 'A', initialPh: 7 }, {},
+        { actionId, expectedRevision: 0 }),
+    ])
+    const sequences: number[] = []
+    const replays: boolean[] = []
+    for (const result of results) {
+      expect(result.ok).toBe(true)
+      if (!result.ok) throw new Error('Concurrent identical action was refused')
+      sequences.push(result.feedback.sequence)
+      replays.push(result.feedback.idempotentReplay)
+    }
+    expect(sequences).toEqual([1, 1])
+    expect(replays.filter(Boolean)).toHaveLength(1)
+    const events = await repository().getAttemptEventRecords(attempt.attemptId)
+    expect(events).toHaveLength(1)
+    expect(events[0]?.actionId).toBe(actionId)
+    expect(events[0]?.sequence).toBe(1)
+    expect((await repository().getAttempt(attempt.attemptId))?.revision).toBe(1)
+  })
+
   it('wrong_release_is_not_cast_to_jar before projection, replay or writing', async () => {
     const acid = createAcidSession(new GuestAttemptRepository<AcidNeutralizationState>())
     const foreign = await acid.start()

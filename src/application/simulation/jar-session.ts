@@ -297,12 +297,21 @@ export function createJarSession(repository: AttemptRepository<JarState>): JarSe
       if (!written.ok) return written
       const fresh = await readAfterWrite(attemptId)
       if (!fresh.ok) return fresh
+      const idempotentReplay = written.outcome === 'idempotent_replay'
+      let feedbackSequence = result.sequence
+      if (idempotentReplay) {
+        // Another tab won the race between our duplicate lookup and the write.
+        // The stored event's original sequence, not the speculative one, is authoritative.
+        const events = await repository.getAttemptEventRecords(attemptId)
+        const existing = events.find((event) => event.actionId === result.actionId)
+        if (!existing) {
+          return { ok: false, error: invalidChain({ sequence: result.sequence }) }
+        }
+        feedbackSequence = existing.sequence
+      }
       return {
         ok: true, state: fresh.state,
-        feedback: {
-          actionType, sequence: result.sequence,
-          idempotentReplay: written.outcome === 'idempotent_replay',
-        },
+        feedback: { actionType, sequence: feedbackSequence, idempotentReplay },
       }
     },
 
