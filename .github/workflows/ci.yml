@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - develop
+      - chore/pre-refactor-cleanup
   push:
     branches:
       - main
