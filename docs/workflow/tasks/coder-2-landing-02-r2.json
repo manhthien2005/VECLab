@@ -1,0 +1,41 @@
+{
+  "v": 1,
+  "kind": "task",
+  "id": "UI-02-R2",
+  "coder": 2,
+  "repo": "manhthien2005/VECLab",
+  "branch": "fix/coder-2-ui02-r2",
+  "target": "chore/pre-refactor-cleanup",
+  "base": "0d860e159a2071f2c97dff1162e5a9a2f7acce1f",
+  "goal": "Sửa cắt tên bài khi tăng chữ200% và race trong regression test chuyển theme. R1:56/66 E2E pass; unit/type/lint/build/diff pass. Bản hiện tại: http://127.0.0.1:3002/.",
+  "read": [
+    "AGENTS.md",
+    ".agents/skills/veclab-implement/SKILL.md",
+    "docs/workflow/web-handoff-contract.md",
+    "docs/workflow/ui-skills.md",
+    ".agents/skills/impeccable/SKILL.md",
+    "docs/ui/landing-page-audit.md",
+    "docs/workflow/reviews/landing-ui-02-r1.json"
+  ],
+  "files": [
+    "src/app/globals.css",
+    "e2e/hero-experiential.spec.ts",
+    "e2e/showcase-interaction.spec.ts"
+  ],
+  "accept": [
+    "R1-F1: ở390px và200% root font, tên methylene đang tràn51px và bị card cắt. Sửa wrapping và leading cho tiêu đề tiếng Việt trong showcase; giữ đủ toàn bộ tên ở390/768/1279/1440px, cả100% và200%, không thu nhỏ chữ hoặc bỏ kiểm tra clipping.",
+    "Phân biệt scrollHeight tràn2px do glyph ink với clipping thực tế ở các viewport lớn: giữ kiểm tra overlap, horizontal overflow và vùng cắt của ancestor. Không tăng tolerance tùy ý để làm tests xanh; ưu tiên CSS cho chữ có đủ chỗ.",
+    "R1-F2: helper contrast đọc màu giữa body transition200ms. Dùng bounded auto-retrying assertion như expect.poll để chờ computed colors/contrast của theme đích, vẫn yêu cầu>=4.5:1. Không dùng fixed sleep, bỏ assertion hoặc tắt motion trong official test để né lỗi.",
+    "Giữ fixes automatic dark, tương phản nút và badge normal flow của R1; giữ copy, ba bài, demo và route. CSS chỉ chạm typography showcase cần sửa; không đổi global theme/body transition, dependency hoặc scope khác.",
+    "Chạy checks nếu có môi trường; thiếu công cụ ghi not_run. Trả result JSON v1 với coder/branch/base/head và đủ check IDs. Dừng để local review; không merge/deploy hoặc mở task khác."
+  ],
+  "checks": {
+    "unit": "npm run test -- tests/unit/experiment-showcase.test.ts",
+    "types": "npm run typecheck",
+    "lint": "npx --no-install eslint 'src/app/(public)/page.tsx' src/app/layout.tsx src/content/app.vi.ts src/features/landing e2e tests/unit/experiment-showcase.test.ts",
+    "diff": "git diff 0d860e159a2071f2c97dff1162e5a9a2f7acce1f --check",
+    "ui_desktop": "npm run test:e2e -- e2e/landing-page.spec.ts e2e/hero-experiential.spec.ts e2e/showcase-interaction.spec.ts e2e/workbench-preview.spec.ts e2e/choreography-integrated.spec.ts e2e/guest-ia.spec.ts --project=chromium",
+    "ui_mobile": "npm run test:e2e -- e2e/landing-page.spec.ts e2e/hero-experiential.spec.ts e2e/showcase-interaction.spec.ts e2e/workbench-preview.spec.ts e2e/choreography-integrated.spec.ts e2e/guest-ia.spec.ts --project=mobile",
+    "build": "npm run build"
+  }
+}
