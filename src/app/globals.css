@@ -1048,33 +1048,114 @@ td[data-numeric],
    14. App header
    ========================================================================== */
 
+.shell {
+  padding-top: calc(var(--header-h) + 2rem);
+}
+
 .app-header {
-  position: sticky;
-  top: 0;
+  position: fixed;
+  top: 1rem;
+  left: clamp(12px, 2.8vw, 40px);
+  right: clamp(12px, 2.8vw, 40px);
+  max-width: 80rem;
+  margin-inline: auto;
   z-index: 40;
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  box-shadow: 0 1px 3px rgba(11, 31, 61, 0.03);
+  border-radius: 18px;
+  box-shadow: 0 8px 32px -16px rgba(11, 31, 61, 0.25);
 }
 
 /* A translucent header reads as glass over scrolling content, but only where the
    browser can actually blur — otherwise it would just be a washed-out bar. */
 @supports (backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px)) {
   .app-header {
-    background: color-mix(in srgb, var(--surface) 88%, transparent);
-    -webkit-backdrop-filter: saturate(180%) blur(16px);
-    backdrop-filter: saturate(180%) blur(16px);
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    -webkit-backdrop-filter: saturate(140%) blur(18px);
+    backdrop-filter: saturate(140%) blur(18px);
   }
 }
 
 .app-header-inner {
-  max-width: var(--landing-max, 88rem);
-  margin: 0 auto;
+  position: relative;
   min-height: var(--header-h);
-  padding: 0 clamp(1.25rem, 3.5vw, 2.5rem);
-  display: flex;
+  padding: 0 clamp(12px, 1.6vw, 24px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: var(--space-4);
+  gap: 1rem;
+}
+
+.app-header .brand {
+  justify-self: start;
+}
+
+.header-tools {
+  display: contents;
+}
+
+.header-navigation {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.header-actions {
+  grid-column: 3;
+  display: flex;
+  justify-self: end;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.account-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.account-link:hover {
+  background: var(--surface-2);
+  color: var(--accent-hover);
+}
+
+.account-icon {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+.account-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.account-status-dot {
+  position: absolute;
+  top: -1px;
+  right: -2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+  outline: 2px solid var(--surface);
+}
+
+.header-actions .theme-toggle {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
 }
 
 .brand {
@@ -1137,12 +1218,15 @@ td[data-numeric],
 
 .app-nav a {
   position: relative;
-  padding: 0.5rem 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 12px;
   border-radius: var(--radius-pill);
-  color: var(--ink-muted);
+  color: var(--ink);
   text-decoration: none;
-  font-size: 0.9375rem;
-  font-weight: 600;
+  font-size: 0.875rem;
+  font-weight: 550;
   white-space: nowrap;
   transition: background-color var(--motion-fast) var(--ease),
     color var(--motion-fast) var(--ease),
@@ -1175,20 +1259,13 @@ td[data-numeric],
 
 .nav-toggle { display: none; }
 
-.header-tools {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-left: auto;
-}
-
-@media (max-width: 60rem) {
+@media (max-width: 70rem) {
   /* The panel spans the header's full width and sits directly under it, so a tap lands
      on a whole row rather than on a word. Closed it is removed from the layout AND from
      the accessibility tree — `display: none` does both, which a class-only hide does not. */
   .app-nav {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 0.625rem);
     left: 0;
     right: 0;
     flex-direction: column;
@@ -1196,8 +1273,10 @@ td[data-numeric],
     gap: 0;
     padding: var(--space-2);
     background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    border-radius: 1rem;
     box-shadow: var(--shadow-lg);
+    max-height: calc(100dvh - 8rem);
+    overflow-y: auto;
     animation: slide-in var(--motion) var(--ease-out) both;
   }
 
@@ -1209,6 +1288,8 @@ td[data-numeric],
     display: block;
     padding: var(--space-3);
     font-size: var(--text-base);
+    white-space: normal;
+    overflow-wrap: anywhere;
     min-height: 44px;
     display: flex;
     align-items: center;
@@ -1217,8 +1298,8 @@ td[data-numeric],
   .nav-toggle {
     display: inline-flex;
     order: 2;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 44px;
+    height: 44px;
     min-width: 44px;
     min-height: 44px;
     padding: 0;
@@ -1227,13 +1308,31 @@ td[data-numeric],
   }
 
   .app-header-inner {
-    position: relative;
     min-height: 4rem;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 8px;
   }
 
-  .brand-mark {
-    width: 2.25rem;
-    height: 2.25rem;
+  .header-actions {
+    gap: 4px;
+  }
+
+  .account-link {
+    width: 44px;
+    padding: 0;
+  }
+
+  .account-label {
+    display: none;
+  }
+
+  .app-header .brand {
+    gap: 8px;
+  }
+
+  .app-header .brand-mark {
+    width: 36px;
+    height: 36px;
   }
 
   .brand-mark svg {
@@ -1241,8 +1340,14 @@ td[data-numeric],
     height: 1.25rem;
   }
 
-  .brand-name {
-    font-size: 1.35rem;
+  .app-header .brand-name {
+    font-size: 1.2rem;
+  }
+
+  .app-header .brand-mark svg,
+  .header-actions .theme-toggle svg {
+    width: 20px;
+    height: 20px;
   }
 
   .theme-toggle {
@@ -1259,6 +1364,10 @@ td[data-numeric],
   background: currentColor;
   border-radius: 2px;
   transition: background-color var(--motion-fast) var(--ease);
+}
+
+@media (max-width: 24rem) {
+  .app-header .brand-name { display: none; }
 }
 
 .nav-toggle-bars::before,
@@ -1349,9 +1458,8 @@ td[data-numeric],
 
 .app-footer {
   flex: none;
-  border-top: 1px solid var(--border);
-  background: var(--surface);
-  padding: clamp(1.75rem, 2.5vw, 2.25rem) 0 clamp(1.25rem, 2vw, 1.75rem);
+  background: var(--surface-2);
+  padding: clamp(3rem, 5vw, 4.5rem) 0 1.5rem;
   position: relative;
   z-index: 2;
 }
@@ -1363,18 +1471,17 @@ td[data-numeric],
 }
 
 .footer-main {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding-bottom: var(--space-4);
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: clamp(2.5rem, 6vw, 6rem);
+  padding-bottom: 2.5rem;
 }
 
 .footer-brand {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  align-items: flex-start;
+  gap: 1rem;
 }
 
 .footer-brand .brand {
@@ -1386,31 +1493,53 @@ td[data-numeric],
   text-decoration: none;
 }
 
-.footer-tagline {
+.footer-description {
   margin: 0;
-  font-size: var(--text-xs);
-  color: var(--ink-faint);
-  line-height: var(--leading-normal);
+  max-width: 31ch;
+  font-size: 1rem;
+  color: var(--ink-muted);
+  line-height: 1.65;
 }
 
 .footer-nav {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) clamp(1rem, 2vw, 1.75rem);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 1.5rem;
+}
+
+.footer-nav-group h2 {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 650;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.footer-nav-group ul {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
 .footer-nav a {
-  color: var(--ink-muted);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink);
   text-decoration: none;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: color 0.18s ease, transform 0.18s ease;
+  font-size: 0.9375rem;
+  font-weight: 450;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  transition: color 0.18s ease;
   padding: var(--space-1) 0;
 }
 
 .footer-nav a:hover {
-  color: var(--accent);
+  color: var(--accent-hover);
 }
 
 .footer-nav a:focus-visible {
@@ -1420,31 +1549,58 @@ td[data-numeric],
 }
 
 .footer-legal {
-  padding-top: var(--space-4);
+  padding-top: 1.5rem;
   border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  font-size: 0.735rem;
-  color: var(--ink-faint);
-  line-height: 1.55;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+  line-height: 1.6;
 }
 
-.footer-disclaimers {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4) var(--space-6);
-  width: 100%;
+.footer-note {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem 3rem;
 }
 
-.footer-disclaimers p {
-  margin: 0;
+.footer-note p {
+  max-width: 68ch;
+}
+
+.footer-note a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: none;
+  min-height: 44px;
+  max-width: 100%;
+  color: var(--ink);
+  text-underline-offset: 0.25em;
+}
+
+.footer-note a svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
 }
 
 @media (max-width: 48rem) {
-  .footer-disclaimers {
+  .footer-main {
     grid-template-columns: 1fr;
-    gap: var(--space-2);
+    gap: 2rem;
+  }
+
+  .footer-note {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-note a {
+    flex: auto;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -1458,11 +1614,8 @@ td[data-numeric],
   gap: var(--space-2) var(--space-4);
   justify-content: space-between;
   align-items: center;
-  margin-top: var(--space-1);
-  padding-top: var(--space-3);
-  border-top: 1px dashed var(--border);
-  font-size: var(--text-2xs);
-  color: var(--ink-faint);
+  font-size: 0.8125rem;
+  color: var(--ink-muted);
 }
 
 /* ==========================================================================
@@ -5774,6 +5927,8 @@ td[data-numeric],
   .nav-toggle,
   .workbench-actions,
   .no-print { display: none !important; }
+
+  .shell { padding-top: 0; }
 
   /* The chart is a required report element, not decoration, so it keeps its ink on
      paper: browsers default to not printing backgrounds, which would drop the target

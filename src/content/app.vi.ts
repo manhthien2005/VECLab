@@ -15,6 +15,12 @@ export const APP_STRINGS = {
   brand: 'VECLab',
   brandTag: 'Mô phỏng quy trình',
 
+  footer: {
+    description: 'Thực hành hóa học và xử lý nước qua mô phỏng tương tác.',
+    note: 'Dành cho học tập. Kết quả mô phỏng không thay thế phép đo hoặc hướng dẫn xử lý mẫu thực tế.',
+    project: 'Dự án giáo dục',
+  },
+
   nav: {
     experiments: 'Thí nghiệm',
     evidence: 'Nguồn khoa học',
