@@ -1,0 +1,43 @@
+{
+  "v": 1,
+  "kind": "task",
+  "id": "UI-02-R1",
+  "coder": 2,
+  "repo": "manhthien2005/VECLab",
+  "branch": "fix/coder-2-ui02-review",
+  "target": "chore/pre-refactor-cleanup",
+  "base": "9b642ecd0ea97edab6e025bf974088a267b1d8c1",
+  "goal": "Sửa ba lỗi hiển thị UI02-F1/F2/F3 đã được local xác nhận. UI-02 chưa nghiệm thu dù 6 unit tests, 52 E2E, typecheck, lint và build đã qua. Bản hiện tại để người dùng xem: http://127.0.0.1:3002/.",
+  "read": [
+    "AGENTS.md",
+    ".agents/skills/veclab-implement/SKILL.md",
+    "docs/workflow/web-handoff-contract.md",
+    "docs/workflow/ui-skills.md",
+    ".agents/skills/impeccable/SKILL.md",
+    "docs/ui/landing-page-audit.md",
+    "docs/workflow/reviews/landing-ui-02.json"
+  ],
+  "files": [
+    "src/app/globals.css",
+    "src/features/landing/experiment-showcase.tsx",
+    "e2e/hero-experiential.spec.ts",
+    "e2e/showcase-interaction.spec.ts",
+    "e2e/workbench-preview.spec.ts"
+  ],
+  "accept": [
+    "F1: hero phải dễ đọc khi hệ thống dùng dark và chưa có theme lưu, cũng như khi chọn light/dark trực tiếp. Kiểm tra trường hợp không có data-theme; fix chỉ trong CSS landing, không thay global theme logic.",
+    "F2: nút Xem thao tác thêm 1 mL giữ nền/chữ tương phản tối thiểu 4.5:1 ở trạng thái normal, hover, focus và sau click; không còn trắng trên nền #f1f6fb. Giữ hành vi thêm/reset và pH Chưa đo.",
+    "F3: badge không che tên Hấp phụ xanh methylene tại 1279px; bố trí badge/title theo normal flow hoặc chừa đủ chỗ. Nội dung đầy đủ ở 390/768/1279/1440px và khi phóng chữ.",
+    "Thêm regression tests tái hiện đúng ba lỗi: automatic dark với storage rỗng, màu nút sau hover/click, geometry badge/title. Các assertion visible/text/không tràn ngang đơn thuần chưa bắt được các lỗi này.",
+    "Giữ copy, ba bài và hành vi hiện có. Không sửa dependency/lockfile để chữa lỗi npm ci của baseline; không mở rộng redesign, domain/API hoặc file ngoài allowlist. Bàn giao result JSON v1 đủ check IDs, head thực; dừng để local review, không merge/deploy."
+  ],
+  "checks": {
+    "unit": "npm run test -- tests/unit/experiment-showcase.test.ts",
+    "types": "npm run typecheck",
+    "lint": "npx --no-install eslint 'src/app/(public)/page.tsx' src/app/layout.tsx src/content/app.vi.ts src/features/landing e2e tests/unit/experiment-showcase.test.ts",
+    "diff": "git diff 9b642ecd0ea97edab6e025bf974088a267b1d8c1 --check",
+    "ui_desktop": "npm run test:e2e -- e2e/landing-page.spec.ts e2e/hero-experiential.spec.ts e2e/showcase-interaction.spec.ts e2e/workbench-preview.spec.ts e2e/choreography-integrated.spec.ts e2e/guest-ia.spec.ts --project=chromium",
+    "ui_mobile": "npm run test:e2e -- e2e/landing-page.spec.ts e2e/hero-experiential.spec.ts e2e/showcase-interaction.spec.ts e2e/workbench-preview.spec.ts e2e/choreography-integrated.spec.ts e2e/guest-ia.spec.ts --project=mobile",
+    "build": "npm run build"
+  }
+}
