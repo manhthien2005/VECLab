@@ -16,9 +16,8 @@ export const APP_STRINGS = {
   brandTag: 'Mô phỏng quy trình',
 
   footer: {
-    description: 'Thực hành hóa học và xử lý nước qua mô phỏng tương tác.',
-    note: 'Dành cho học tập. Kết quả mô phỏng không thay thế phép đo hoặc hướng dẫn xử lý mẫu thực tế.',
-    project: 'Dự án giáo dục',
+    description: 'Mô phỏng thí nghiệm hóa học và xử lý nước.',
+    note: 'Mô phỏng phục vụ học tập, không thay thế phép đo hoặc quy trình xử lý thực tế.',
   },
 
   nav: {

@@ -126,12 +126,12 @@ function SiteFooter() {
 
         <div className="footer-legal">
           <div className="footer-note">
-            <p>{APP_STRINGS.footer.note}</p>
-            <Link href="/evidence">Nguồn và giới hạn mô hình <ArrowRightIcon aria-hidden="true" /></Link>
+            <p><strong>Lưu ý sử dụng</strong>{APP_STRINGS.footer.note}</p>
+            <Link href="/evidence">Nguồn và giới hạn <ArrowRightIcon aria-hidden="true" /></Link>
           </div>
           <div className="footer-legal-row">
             <span>© 2026 {APP_STRINGS.brand}</span>
-            <span>{APP_STRINGS.footer.project}</span>
+            <a className="footer-back-top" href="#main">Về đầu trang <ArrowRightIcon /></a>
           </div>
         </div>
       </div>

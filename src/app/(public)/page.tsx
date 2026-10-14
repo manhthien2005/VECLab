@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { APP_STRINGS } from '@/content/index.js'
 import { listCatalog } from '@/features/experiment-catalog/catalog.js'
-import { ScientificDisclosure } from '@/shared/ui/scientific-disclosure.js'
 import {
   ArrowRightIcon,
   BookIcon,
@@ -28,7 +27,6 @@ import { ScrollReveal } from '@/features/landing/scroll-reveal.js'
  * 3. Static concept preview of the planned workbench (WorkbenchPreview)
  * 4. Scientific Evidence & Trust (EvidenceSection)
  * 5. Final conversion banner (FinalCtaBanner)
- * 6. Scientific model disclosure & locked evidence register (ScientificDisclosure)
  *
  * Server Component reading only the release registries, statically renderable.
  * `ScrollReveal` handles page reveals; the workbench concept is static server markup.
@@ -174,13 +172,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="landing-section landing-section-disclosure reveal" data-reveal-variant="simple" aria-label="Nguồn và giới hạn mô hình">
-          <div className="landing-section-inner">
-            <div className="landing-disclosure-card">
-              <ScientificDisclosure />
-            </div>
-          </div>
-        </section>
       </div>
     </>
   )
