@@ -7213,9 +7213,10 @@ td[data-numeric],
 .experiment-detail-header p { margin: 0; font-size: 1.0625rem; line-height: 1.75; color: var(--ink-muted); text-wrap: pretty; }
 .experiment-detail-header > .btn { flex-shrink: 0; }
 .experiment-detail-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 1.25rem; align-items: start; }
-.experiment-detail-panel { min-width: 0; align-self: stretch; padding: 1.75rem; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+.experiment-detail-panel { --detail-hue: #0f766e; --detail-tone: color-mix(in srgb, var(--detail-hue) 65%, var(--ink)); min-width: 0; align-self: stretch; padding: 1.75rem; border: 1px solid color-mix(in srgb, var(--detail-tone) 22%, var(--border)); border-radius: 16px; background: color-mix(in srgb, var(--detail-tone) 4%, var(--surface)); }
 .experiment-detail h2 { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 0.85rem; font-size: 1.25rem; font-weight: 750; line-height: 1.4; letter-spacing: -0.02em; text-wrap: balance; }
-.experiment-detail h2 svg { width: 1.4rem; height: 1.4rem; flex-shrink: 0; color: var(--accent); }
+.experiment-detail-panel h2 { color: var(--detail-tone); }
+.experiment-detail-panel h2 > svg { width: 2.25rem; height: 2.25rem; padding: 0.45rem; border-radius: 9px; flex-shrink: 0; color: var(--detail-tone); background: color-mix(in srgb, var(--detail-tone) 12%, var(--surface)); }
 .experiment-detail h3 { font-size: 0.9375rem; line-height: 1.5; font-weight: 700; margin: 0 0 0.3rem; }
 .experiment-detail p { font-size: 0.9375rem; line-height: 1.75; max-width: 72ch; }
 .experiment-detail-panel > p { margin: 0 0 1.25rem; color: var(--ink-muted); }
@@ -7230,7 +7231,7 @@ td[data-numeric],
 .experiment-detail-learning { display: flex; gap: 0.65rem; align-items: flex-start; margin-top: auto; padding-top: 1.5rem; }
 .experiment-detail-learning svg { width: 1.25rem; height: 1.25rem; flex-shrink: 0; color: var(--accent); margin-top: 0.25rem; }
 .experiment-detail-learning p { margin: 0; font-size: 0.875rem; color: var(--ink); }
-.experiment-detail-sample { grid-column: span 4; padding: 0; overflow: hidden; }
+.experiment-detail-sample { --detail-hue: #0369a1; grid-column: span 4; padding: 0; overflow: hidden; }
 .experiment-detail-sample-image { position: relative; height: 13rem; background: #edf4f8; border-bottom: 1px solid var(--border); }
 .experiment-detail-sample-image img { object-fit: contain; }
 .experiment-detail-sample-body { padding: 1.4rem 1.5rem; }
@@ -7239,8 +7240,8 @@ td[data-numeric],
 .experiment-detail-values > div:last-child { border-bottom: 0; }
 .experiment-detail-values dt { color: var(--ink-muted); }
 .experiment-detail-values dd { margin: 0; text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; }
-.experiment-detail-process { grid-column: span 7; }
-.experiment-detail-outcome { grid-column: span 5; background: var(--surface-2); }
+.experiment-detail-process { --detail-hue: #6d4caa; grid-column: span 7; }
+.experiment-detail-outcome { --detail-hue: #187646; grid-column: span 5; }
 .experiment-detail-steps { counter-reset: detail-step; padding: 0; margin: 1.5rem 0; list-style: none; }
 .experiment-detail-steps li { position: relative; display: flex; gap: 0.9rem; padding-bottom: 1.3rem; counter-increment: detail-step; }
 .experiment-detail-steps li::before { content: counter(detail-step); display: grid; place-items: center; width: 1.8rem; height: 1.8rem; flex-shrink: 0; border: 1px solid var(--border-strong); border-radius: 50%; background: var(--surface-2); color: var(--ink); font-size: 0.8125rem; font-weight: 700; }
@@ -7252,9 +7253,8 @@ td[data-numeric],
 .experiment-detail-results li:first-child { padding-top: 0.25rem; }
 .experiment-detail-results li:last-child { border-bottom: 0; }
 .experiment-detail-results span { display: block; font-size: 0.9375rem; font-weight: 700; margin-bottom: 0.4rem; }
-.experiment-detail-parameters { grid-column: span 5; }
-.experiment-detail-safety { grid-column: span 7; }
-.experiment-detail-safety h2 svg { color: var(--ink); }
+.experiment-detail-parameters { --detail-hue: #2454a6; grid-column: span 5; }
+.experiment-detail-safety { --detail-hue: #a65b08; grid-column: span 7; }
 .experiment-detail-safety-list { padding-left: 1.1rem; margin: 0; font-size: 0.875rem; line-height: 1.8; color: var(--ink-muted); }
 .experiment-detail-safety-list li + li { margin-top: 0.75rem; }
 .experiment-detail-safety-list strong { color: var(--ink); font-weight: 650; }
@@ -7273,11 +7273,10 @@ td[data-numeric],
 .experiment-detail-action-list strong { font-size: 0.875rem; font-weight: 650; }
 .experiment-detail-action-list p { margin: 0.2rem 0 0; }
 .experiment-detail-score-list { padding-left: 1.1rem; font-size: 0.875rem; line-height: 1.8; }
-.experiment-detail-limits { grid-column: 1 / -1; padding: 1.25rem 0.5rem 0.5rem; }
-.experiment-detail-limits h2 { font-size: 1.125rem; }
+.experiment-detail-limits { --detail-hue: #52667f; grid-column: 1 / -1; }
 .experiment-detail-limits > p { color: var(--ink-muted); font-size: 0.875rem; margin: 0 0 1rem; }
 .experiment-detail-limits ul { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem 2.5rem; padding-left: 1.1rem; margin: 0; color: var(--ink-muted); font-size: 0.8125rem; line-height: 1.8; }
-.experiment-detail-sources { grid-column: 1 / -1; margin-top: 0.5rem; }
+.experiment-detail-sources { --detail-hue: #5353a2; grid-column: 1 / -1; }
 .experiment-detail-sources-heading { display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: 1.25rem; }
 .experiment-detail-sources-heading h2 { margin-bottom: 0.35rem; }
 .experiment-detail-sources-heading p { margin: 0; font-size: 0.875rem; color: var(--ink-muted); }

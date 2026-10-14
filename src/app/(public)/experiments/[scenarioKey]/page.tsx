@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { APP_STRINGS, ACID_STRINGS, ACID_INPUT_DOMAIN, ACID_ROUTE_CHOICES, ACID_DISPLAY_FORMAT, ACID_SOURCES } from '@/content/index.js'
 import { findCatalogEntry, listActions, manifestFor } from '@/features/experiment-catalog/catalog.js'
-import { ArrowRightIcon, FlaskIcon, CheckCircleIcon, ShieldCheckIcon } from '@/features/landing/icons.js'
+import { ArrowRightIcon, FlaskIcon, CheckCircleIcon, ShieldCheckIcon, RepeatIcon, LayersIcon, CalculatorIcon, WarningIcon, BookIcon } from '@/features/landing/icons.js'
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
 import { SourceList, ClaimList } from '@/shared/ui/scientific-disclosure.js'
 import { formatLitresAsMl, formatPh } from '@/shared/ui/format.js'
@@ -52,7 +52,7 @@ export default async function ExperimentDetailPage({ params }: DetailPageProps) 
 
       <div className="experiment-detail-grid">
         <section className="experiment-detail-panel experiment-detail-goal" aria-labelledby="goal-title">
-          <h2 id="goal-title">Đưa mẫu axit về pH mục tiêu</h2>
+          <h2 id="goal-title"><CheckCircleIcon />Đưa mẫu axit về pH mục tiêu</h2>
           <p>Điều chỉnh pH là một công đoạn trong xử lý nước. Ở bài này, bạn thực hành với mẫu HCl có thành phần đã biết để hiểu cách chọn liều, đo và điều chỉnh.</p>
           <div className="experiment-detail-target">
             <div><span>Mục tiêu mẫu chuẩn</span><strong>pH* {formatPh(benchmark.targetPH)}</strong><small>Dung sai ± {formatPh(benchmark.targetTolerancePH)}</small></div>
@@ -76,7 +76,7 @@ export default async function ExperimentDetailPage({ params }: DetailPageProps) 
         </section>
 
         <section className="experiment-detail-panel experiment-detail-process" aria-labelledby="process-title">
-          <h2 id="process-title">Bạn sẽ làm gì?</h2>
+          <h2 id="process-title"><RepeatIcon />Bạn sẽ làm gì?</h2>
           <p>Chuẩn bị, thêm hóa chất, đo rồi quyết định bước tiếp theo. Mỗi lần thêm sẽ làm thay đổi mẫu.</p>
           <ol className="experiment-detail-steps">
             <li><div><h3>Chuẩn bị lượt thực hành</h3><p>Chọn mẫu chuẩn hoặc tùy chỉnh mẫu, dùng NaOH làm chất trung hòa và hiệu chuẩn máy đo pH.</p></div></li>
@@ -94,7 +94,7 @@ export default async function ExperimentDetailPage({ params }: DetailPageProps) 
         </section>
 
         <section className="experiment-detail-panel experiment-detail-outcome" aria-labelledby="outcome-title">
-          <h2 id="outcome-title">Kết quả bạn nhận được</h2>
+          <h2 id="outcome-title"><LayersIcon />Kết quả bạn nhận được</h2>
           <ul className="experiment-detail-results">
             <li><span>pH cuối và mức đạt mục tiêu</span><p>Đối chiếu số đo cuối với dải mục tiêu; phân biệt đạt mục tiêu với điểm tổng.</p></li>
             <li><span>Lượng hóa chất đã dùng</span><p>Theo dõi lượng NaOH, HCl hiệu chỉnh và chỉ số chi phí tương đối.</p></li>
@@ -111,7 +111,7 @@ export default async function ExperimentDetailPage({ params }: DetailPageProps) 
         </section>
 
         <section className="experiment-detail-panel experiment-detail-parameters" aria-labelledby="parameters-title">
-          <h2 id="parameters-title">Hóa chất và thông số</h2>
+          <h2 id="parameters-title"><CalculatorIcon />Hóa chất và thông số</h2>
           <p>{acidText('routes.naoh.description')}</p>
           <dl className="experiment-detail-values">
             <div><dt>Thể tích mỗi lần thêm</dt><dd>{ACID_INPUT_DOMAIN.permittedAliquotsL.map(litres => (litres * 1000).toLocaleString('vi-VN')).join(' · ')} mL</dd></div>
@@ -146,8 +146,8 @@ export default async function ExperimentDetailPage({ params }: DetailPageProps) 
           <p className="experiment-detail-note">Chỉ số an toàn trong báo cáo là quy ước sư phạm, không phải đánh giá rủi ro thực tế.</p>
         </section>
 
-        <section className="experiment-detail-limits" aria-labelledby="limits-title">
-          <h2 id="limits-title">Hiểu đúng phạm vi mô phỏng</h2>
+        <section className="experiment-detail-panel experiment-detail-limits" aria-labelledby="limits-title">
+          <h2 id="limits-title"><WarningIcon />Hiểu đúng phạm vi mô phỏng</h2>
           <p>pH* được tính từ nồng độ H⁺ với hệ số hoạt độ bằng 1. Theo IUPAC, pH được định nghĩa theo hoạt độ H⁺; vì vậy pH* ở đây là kết quả mô phỏng, không phải số đo trong phòng thí nghiệm.</p>
           <ul>
             <li>Hệ carbonate được xem là kín, không trao đổi CO₂ với không khí. Trao đổi CO₂ ngoài thực tế có thể làm pH thay đổi đáng kể.</li>
@@ -159,7 +159,7 @@ export default async function ExperimentDetailPage({ params }: DetailPageProps) 
         </section>
 
         <section className="experiment-detail-panel experiment-detail-sources" aria-labelledby="sources-title">
-          <div className="experiment-detail-sources-heading"><div><h2 id="sources-title">Nguồn khoa học</h2><p>Định nghĩa, hằng số và hướng dẫn dùng trong mô hình.</p></div><Link href="/evidence">Xem sổ bằng chứng <ArrowRightIcon /></Link></div>
+          <div className="experiment-detail-sources-heading"><div><h2 id="sources-title"><BookIcon />Nguồn khoa học</h2><p>Định nghĩa, hằng số và hướng dẫn dùng trong mô hình.</p></div><Link href="/evidence">Xem sổ bằng chứng <ArrowRightIcon /></Link></div>
           <ul className="experiment-detail-source-links">{[
             { key: 'IUPAC-PH', label: 'Định nghĩa pH' },
             { key: 'IAPWS-KW-2024', label: 'Hằng số ion hóa nước' },
