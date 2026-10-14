@@ -455,18 +455,19 @@ export const APP_STRINGS = {
     nextHint: 'Bạn sẽ được đưa trở lại trang vừa truy cập.',
     signedUpTitle: 'Đã gửi email xác minh',
     signedUpBody:
-      'Kiểm tra hộp thư và bấm liên kết xác minh để hoàn tất tạo tài khoản. Liên kết có hiệu lực trong 24 giờ.',
+      'Kiểm tra hộp thư và bấm liên kết xác minh để hoàn tất tạo tài khoản. Nếu liên kết hết hạn, hãy yêu cầu gửi lại.',
     resetSentTitle: 'Đã gửi liên kết đặt lại',
     resetSentBody:
       'Nếu email này có tài khoản, một liên kết đặt lại mật khẩu đã được gửi. Kiểm tra cả thư rác.',
     verifying: 'Đang xác minh liên kết…',
     verifyOkTitle: 'Đã xác minh email',
-    verifyOkBody: 'Bạn có thể đăng nhập bằng email và mật khẩu vừa tạo.',
+    verifyOkBody: 'Email đã được xác minh. Bạn có thể tiếp tục vào phòng lab.',
     verifyFailedTitle: 'Liên kết không hợp lệ',
     verifyFailedBody:
-      'Liên kết xác minh đã hết hạn hoặc đã được sử dụng. Yêu cầu gửi lại liên kết mới.',
+      'Liên kết không hợp lệ, đã hết hạn hoặc đã được sử dụng. Vui lòng yêu cầu một liên kết mới.',
     resendVerification: 'Gửi lại email xác minh',
     errors: {
+      emailUnconfirmed: 'Email chưa được xác minh. Mở email xác minh hoặc yêu cầu gửi lại để tiếp tục.',
       invalidCredentials: 'Email hoặc mật khẩu không đúng.',
       emailTaken: 'Email này đã có tài khoản. Hãy đăng nhập.',
       weakPassword: 'Mật khẩu quá yếu. Dùng tối thiểu 8 ký tự.',
@@ -474,7 +475,7 @@ export const APP_STRINGS = {
       invalidEmail: 'Email không hợp lệ.',
       tooManyRequests: 'Quá nhiều yêu cầu. Vui lòng chờ vài phút rồi thử lại.',
       notConfigured:
-        'Ứng dụng chưa cấu hình Supabase nên không thể đăng nhập hay tạo tài khoản. Chế độ khách vẫn hoạt động.',
+        'Chức năng tài khoản hiện chưa sẵn sàng. Bạn vẫn có thể thực hành ở chế độ khách và lưu tiến độ trên trình duyệt này.',
       generic: 'Không thực hiện được. Vui lòng thử lại.',
       signOutFailed: 'Không đăng xuất được. Thử lại hoặc đóng tab.',
     },

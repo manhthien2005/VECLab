@@ -36,20 +36,23 @@ export async function proxy(request: NextRequest) {
         return request.cookies.getAll()
       },
       setAll(cookiesToSet, headers) {
-        // Apply the cache-control headers BEFORE the cookies, so a response that
-        // ends up setting an auth cookie is never left cacheable.
-        if (headers) {
-          for (const [key, value] of Object.entries(headers)) {
-            response.headers.set(key, value)
-          }
-        }
-
         for (const { name, value } of cookiesToSet) {
           request.cookies.set(name, value)
         }
         // Rebuild the response from the mutated request so the refreshed cookies
         // travel onward to the route handler.
+        const previousResponse = response
         response = NextResponse.next({ request })
+        for (const cookie of previousResponse.cookies.getAll()) response.cookies.set(cookie)
+        for (const header of ['cache-control', 'expires', 'pragma']) {
+          const value = previousResponse.headers.get(header)
+          if (value !== null) response.headers.set(header, value)
+        }
+        // Rebuilding the response discards its old headers. Apply them to the
+        // outgoing response, together with the refreshed session cookies.
+        if (headers) {
+          for (const [key, value] of Object.entries(headers)) response.headers.set(key, value)
+        }
         for (const { name, value, options } of cookiesToSet) {
           response.cookies.set(name, value, options)
         }
@@ -73,7 +76,13 @@ export async function proxy(request: NextRequest) {
     // Carry the destination so sign-in can return the learner to where they were
     // heading instead of dropping them on the catalog (web scope §11.4).
     signInUrl.searchParams.set('next', request.nextUrl.pathname)
-    return NextResponse.redirect(signInUrl)
+    const redirectResponse = NextResponse.redirect(signInUrl)
+    for (const cookie of response.cookies.getAll()) redirectResponse.cookies.set(cookie)
+    for (const header of ['cache-control', 'expires', 'pragma']) {
+      const value = response.headers.get(header)
+      if (value !== null) redirectResponse.headers.set(header, value)
+    }
+    return redirectResponse
   }
 
   return response

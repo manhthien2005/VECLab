@@ -58,3 +58,10 @@ export function safeNextPath(value: string | null | undefined): string | null {
 export function destinationAfterSignIn(next: string | null | undefined): string {
   return safeNextPath(next) ?? '/lab'
 }
+
+/** Used for both confirmation and recovery; the destination stays on this origin. */
+export function authCallbackUrl(origin: string, next: string | null | undefined): string {
+  const url = new URL('/auth/callback', origin)
+  url.searchParams.set('next', destinationAfterSignIn(next))
+  return url.toString()
+}

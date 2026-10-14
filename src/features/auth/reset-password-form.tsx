@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { APP_STRINGS } from '@/content/index.js'
@@ -9,143 +9,68 @@ import { AuthCard, AuthField, type AuthNotice } from '@/features/auth/auth-card.
 import { describeAuthError } from '@/features/auth/errors.js'
 import { isSupabaseConfigured } from '@/features/auth/is-configured.js'
 
-/**
- * Set a new password (§4.4: reset password).
- *
- * Reached from `/auth/callback`, which has ALREADY exchanged the emailed one-time code for a
- * session. So by the time this form renders there is a signed-in user, and the only thing left
- * to do is `updateUser({ password })`. That ordering is why the reset link works without the
- * learner typing their old password: possession of the working email link was the proof.
- *
- * If there is no session — the learner navigated here directly, or the link expired before the
- * callback ran — this screen cannot reset anything and says so, sending them to request a new
- * link. Attempting `updateUser` without a session would fail with an opaque auth error; checking
- * first turns that into a clear next step.
- */
-
-/** Minimum length, matching sign-up so the two screens cannot disagree on the policy. */
 const MIN_PASSWORD_LENGTH = 8
 
 export function ResetPasswordForm() {
   const router = useRouter()
   const strings = APP_STRINGS.auth
-
+  const configured = isSupabaseConfigured()
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<AuthNotice>(null)
+  const [sessionState, setSessionState] = useState<'checking' | 'valid' | 'invalid'>(configured ? 'checking' : 'invalid')
   const [done, setDone] = useState(false)
 
-  const submit = async () => {
-    if (password !== confirm) {
-      setNotice({ tone: 'danger', text: strings.errors.passwordMismatch })
-      return
-    }
-    if (password.length < MIN_PASSWORD_LENGTH) {
-      setNotice({ tone: 'danger', text: strings.errors.weakPassword })
-      return
-    }
+  useEffect(() => {
+    if (!configured) return
+    let cancelled = false
+    void (async () => {
+      try {
+        const { data, error } = await createSupabaseBrowserClient().auth.getUser()
+        if (cancelled) return
+        const valid = error === null && data.user !== null
+        setSessionState(valid ? 'valid' : 'invalid')
+        if (!valid) setNotice({ tone: 'danger', text: strings.verifyFailedBody })
+      } catch {
+        if (!cancelled) {
+          setSessionState('invalid')
+          setNotice({ tone: 'danger', text: 'Chưa kiểm tra được liên kết. Vui lòng mở lại hoặc yêu cầu một liên kết mới.' })
+        }
+      }
+    })()
+    return () => { cancelled = true }
+  }, [configured, strings.verifyFailedBody])
 
+  const submit = async () => {
+    if (password !== confirm) { setNotice({ tone: 'danger', text: strings.errors.passwordMismatch }); return }
+    if (password.length < MIN_PASSWORD_LENGTH) { setNotice({ tone: 'danger', text: strings.errors.weakPassword }); return }
     setBusy(true)
     setNotice(null)
-
     try {
       const supabase = createSupabaseBrowserClient()
-
-      // The session the callback established. Absent means the link did not complete, which is
-      // the common failure and deserves its own message rather than a generic auth error.
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (session === null) {
+      const { data, error: sessionError } = await supabase.auth.getUser()
+      if (sessionError !== null || data.user === null) {
+        setSessionState('invalid')
         setNotice({ tone: 'danger', text: strings.verifyFailedBody })
-        setBusy(false)
         return
       }
-
       const { error } = await supabase.auth.updateUser({ password })
-
-      if (error !== null) {
-        setNotice({ tone: 'danger', text: describeAuthError(error) })
-        setBusy(false)
-        return
+      if (error !== null) setNotice({ tone: 'danger', text: describeAuthError(error) })
+      else {
+        setDone(true)
+        router.replace('/lab')
+        router.refresh()
       }
-
-      setDone(true)
-      setBusy(false)
-      // The password changed under an active session, so the learner is already signed in and
-      // can go straight to their lab. `refresh()` re-runs server components so any cached
-      // signed-out state is discarded.
-      router.replace('/lab')
-      router.refresh()
-    } catch (cause) {
-      setNotice({ tone: 'danger', text: describeAuthError(cause) })
-      setBusy(false)
-    }
+    } catch (cause) { setNotice({ tone: 'danger', text: describeAuthError(cause) }) }
+    finally { setBusy(false) }
   }
 
-  if (!isSupabaseConfigured()) {
-    return (
-      <AuthCard
-        notice={{ tone: 'danger', text: strings.errors.notConfigured }}
-        title={strings.resetTitle}
-      >
-        <p className="muted small">{APP_STRINGS.errors.notConfiguredBody}</p>
-      </AuthCard>
-    )
-  }
+  if (done) return <AuthCard mode="reset-password" title="Mật khẩu đã được cập nhật" notice={{ tone: 'ok', text: APP_STRINGS.account.messages.passwordChanged }}><Link href="/lab">Về phòng lab</Link></AuthCard>
 
-  if (done) {
-    // Brief success card; the router.replace above is already navigating away. Rendered so a
-    // slow navigation still shows the learner their password was saved rather than a stale form.
-    return (
-      <AuthCard
-        notice={{ tone: 'ok', text: APP_STRINGS.account.messages.passwordChanged }}
-        title={strings.resetTitle}
-      >
-        <p className="muted small">
-          <Link href="/lab">{APP_STRINGS.report.backToLab}</Link>
-        </p>
-      </AuthCard>
-    )
-  }
-
-  return (
-    <AuthCard
-      busy={busy}
-      footer={
-        <p>
-          <Link href="/forgot-password">{strings.forgotLink}</Link>
-        </p>
-      }
-      lede={strings.lede}
-      notice={notice}
-      onSubmit={() => void submit()}
-      submitLabel={strings.savePassword}
-      title={strings.resetTitle}
-    >
-      <AuthField
-        autoComplete="new-password"
-        hint={strings.passwordHint}
-        id="password"
-        label={strings.newPassword}
-        minLength={MIN_PASSWORD_LENGTH}
-        onChange={(event) => setPassword(event.target.value)}
-        required
-        type="password"
-        value={password}
-      />
-      <AuthField
-        autoComplete="new-password"
-        id="confirm"
-        label={strings.confirmNewPassword}
-        minLength={MIN_PASSWORD_LENGTH}
-        onChange={(event) => setConfirm(event.target.value)}
-        required
-        type="password"
-        value={confirm}
-      />
-    </AuthCard>
-  )
+  return <AuthCard mode="reset-password" title={strings.resetTitle} lede="Đặt mật khẩu mới để tiếp tục sử dụng tài khoản." notice={notice} busy={busy} busyLabel="Đang lưu mật khẩu…" unavailable={!configured} disabled={sessionState !== 'valid'} onSubmit={() => void submit()} submitLabel={strings.savePassword} footer={<Link href="/forgot-password">Yêu cầu liên kết đặt lại mới</Link>}>
+    {configured && sessionState === 'checking' && <p className="auth-checking" role="status">Đang kiểm tra liên kết…</p>}
+    <AuthField id="password" label={strings.newPassword} type="password" autoComplete="new-password" placeholder="Mật khẩu mới" minLength={MIN_PASSWORD_LENGTH} hint={strings.passwordHint} value={password} onChange={event => setPassword(event.target.value)} required />
+    <AuthField id="confirm" label={strings.confirmNewPassword} type="password" autoComplete="new-password" placeholder="Nhập lại mật khẩu mới" minLength={MIN_PASSWORD_LENGTH} value={confirm} onChange={event => setConfirm(event.target.value)} required />
+  </AuthCard>
 }
