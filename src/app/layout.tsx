@@ -133,7 +133,6 @@ function SiteFooter() {
               </span>
               <span className="brand-name">{APP_STRINGS.brand}</span>
             </Link>
-            
           </div>
 
           <AppFooterNav />
