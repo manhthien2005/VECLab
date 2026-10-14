@@ -1627,29 +1627,31 @@ td[data-numeric],
 }
 
 .hero {
-  --hero-ground: #f3f9fc;
-  --hero-water: rgba(42, 169, 175, 0.12);
-  --hero-sky: rgba(79, 163, 224, 0.16);
+  --hero-ground: #edf4f6;
+  --hero-image-opacity: 1;
   position: relative;
   overflow: hidden;
   border-bottom: 1px solid var(--border);
-  background:
-    radial-gradient(ellipse at 84% 24%, var(--hero-sky), transparent 66%),
-    radial-gradient(ellipse at 8% 88%, var(--hero-water), transparent 58%),
-    var(--hero-ground);
+  background: var(--hero-ground);
+}
+
+.hero-background-image {
+  object-fit: cover;
+  object-position: center;
+  opacity: var(--hero-image-opacity);
+  pointer-events: none;
+  user-select: none;
 }
 
 [data-theme='dark'] .hero {
   --hero-ground: #0b1528;
-  --hero-water: rgba(20, 127, 141, 0.12);
-  --hero-sky: rgba(39, 94, 153, 0.18);
+  --hero-image-opacity: 0.18;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) .hero {
     --hero-ground: #0b1528;
-    --hero-water: rgba(20, 127, 141, 0.12);
-    --hero-sky: rgba(39, 94, 153, 0.18);
+    --hero-image-opacity: 0.18;
   }
 }
 
@@ -1665,6 +1667,10 @@ td[data-numeric],
 }
 
 @media (max-width: 64rem) {
+  .hero-background-image {
+    object-position: left center;
+  }
+
   .hero-inner {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
@@ -1840,6 +1846,7 @@ td[data-numeric],
   margin: 0 auto;
   padding: 1.5rem clamp(1.25rem, 3.5vw, 2.5rem);
   border-top: 1px solid color-mix(in srgb, var(--ink) 9%, transparent);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
 }
 
 .hero-trust-item {

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { APP_STRINGS } from '@/content/index.js'
 import { listCatalog } from '@/features/experiment-catalog/catalog.js'
 import { ScientificDisclosure } from '@/shared/ui/scientific-disclosure.js'
@@ -46,6 +47,15 @@ export default function HomePage() {
       <ScrollReveal />
 
       <section className="hero">
+        <Image
+          className="hero-background-image"
+          src="/assets/hero-water-technology.png"
+          alt=""
+          fill
+          sizes="100vw"
+          loading="eager"
+          fetchPriority="high"
+        />
         <div className="hero-inner">
           <div className="hero-copy rise">
             <p className="hero-eyebrow">{strings.heroEyebrow}</p>
