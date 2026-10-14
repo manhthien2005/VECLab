@@ -1,0 +1,47 @@
+{
+  "v": 1,
+  "kind": "result",
+  "id": "UI-02",
+  "coder": 2,
+  "repo": "manhthien2005/VECLab",
+  "branch": "feature/coder-2-landing-polish",
+  "base": "a7c8e86349ccd54ac04dbb714e7bb836fd02fdef",
+  "head": "36a95d0e44319070f5a130f397b970b3ca477e02",
+  "status": "needs_changes",
+  "checks": {
+    "unit": "pass",
+    "types": "pass",
+    "lint": "pass",
+    "diff": "pass",
+    "ui_desktop": "pass",
+    "ui_mobile": "pass",
+    "build": "pass"
+  },
+  "changes": [
+    "15 changed files match the allowlist; shared copy changes are home-only. New lesson metadata, honest preview states and shorter evidence/footer match the assigned content scope.",
+    "No application edits by local reviewer. Branch is running on http://127.0.0.1:3002/ for human preview."
+  ],
+  "issues": [
+    "P1 UI02-F1 — src/app/globals.css:1470,1479: fresh origin/profile with system dark and no stored theme leaves hero on a light #f0f7ff→#fff gradient while h1 is #f1f5f9 (about 1.0–1.1:1 contrast). Explicit data-theme=dark is handled, automatic dark is not. Inherited gap remains inside the assigned light/dark acceptance scope. Fix landing background/foreground consistently for system/light/dark without changing global theme behavior; regression must test automatic dark without setting data-theme.",
+    "P1 UI02-F2 — src/app/globals.css:734,769,3800: after hovering/clicking the demo action, generic .btn:hover changes its background to #f1f6fb while .btn-primary:hover keeps white text (1.09:1 contrast). Reproduced on 390px light preview; the enabled button looks disabled. Inherited hover conflict remains in this edited preview. Fix normal/hover/focus/active presentation within landing scope; test actual color contrast after hover and click.",
+    "P2 UI02-F3 — src/features/landing/experiment-showcase.tsx:56 and src/app/globals.css:2765,2789: at 1279px desktop the absolute Đang phát triển badge overlaps the text Hấp phụ xanh methylene. Header reserves 4.5rem although the badge is about125px wide. Put badge/title in a responsive normal-flow layout or reserve real space; preserve full visible title at 390/768/1279/1440px and under text scaling."
+  ],
+  "env": "Windows; Node v24.16.0; npm11.13.0; Next16.3.4; isolated worktree at C:/Users/MrThien/.codex/worktrees/coder-2-landing-polish/Chemistry.",
+  "evidence": {
+    "unit": "npm run test -- tests/unit/experiment-showcase.test.ts:6/6 pass; logs/ui02-review/unit.log.",
+    "types": "npm run typecheck:exit0; logs/ui02-review/types.log.",
+    "lint": "Assigned scoped ESLint command:exit0; logs/ui02-review/lint.log.",
+    "diff": "git diff a7c8e86349ccd54ac04dbb714e7bb836fd02fdef 36a95d0e44319070f5a130f397b970b3ca477e02 --check:exit0.",
+    "ui_desktop": "Assigned six E2E specs, chromium:26/26 pass.",
+    "ui_mobile": "Assigned six E2E specs, mobile:26/26 pass. Both projects run together with E2E_BASE_URL=http://127.0.0.1:3002, --workers=2 --trace=retain-on-failure; logs/ui02-review/e2e.log. Green tests do not cover the three visual failures.",
+    "build": "npm run build:exit0, static/dynamic routes generated; logs/ui02-review/build.log.",
+    "browser": "Observed light/system-dark and 390/1279/1440px layouts; mobile hero835.83px vs previous1452.69px. Verified add/reset and pH setup screen navigation. Evidence screenshots: logs/ui02-review/system-dark-hero.png, mobile-button.png, desktop-cards.png; local ignored artifacts, not public repo assets.",
+    "preview": "http://127.0.0.1:3002/; production-mode local server from reviewed source; exec session25076. Root checkout and port3000 left untouched."
+  },
+  "limits": [
+    "npm ci fails on the unchanged baseline: package.json pins vite6.4.4 while package-lock.json locks vite8.2.2 and misses required entries. Ran checks after npm install --package-lock=false --no-audit --no-fund; tracked files remained unchanged. This proves local behavior, not clean-install/CI reproducibility. Dependency/lockfile repair belongs to the integration owner, outside coder2 scope.",
+    "No production/cloud/DB testing or deployment performed. No claim about Vercel failure cause; its logs were not available in the handback.",
+    "Full manual 200% browser zoom, physical devices/Safari and whole-page contrast/performance audit are not completed. UI acceptance is withheld for the three reproduced issues."
+  ],
+  "next": "fix_findings"
+}
