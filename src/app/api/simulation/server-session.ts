@@ -203,12 +203,23 @@ export function listEvents(attemptId: UUID) {
   })
 }
 
-/** Delete only after ownership was verified, for either supported release. */
+/**
+ * Deletion remains idempotent for acid and Jar. Ownership is still checked
+ * before selecting a release, while absent and foreign IDs share the previous
+ * acid contract: {deleted:true} without revealing existence.
+ */
 export function removeAttempt(attemptId: UUID) {
-  return guardedAttempt(attemptId, async (scenario, context) => {
-    if (scenario === 'jar-test') await new SupabaseAttemptRepository<JarState>(context.userId)
-      .deleteAttempt(attemptId)
-    else await context.session.remove(attemptId)
+  return guarded(async (_session, userId) => {
+    const repository = new SupabaseAttemptRepository<unknown>(userId)
+    const attempt = await repository.getAttempt(attemptId)
+    if (attempt === null) return { deleted: true }
+    const supported =
+      (attempt.scenarioKey === 'acid-neutralization' &&
+        attempt.scenarioReleaseId === ACID_RELEASE_ID) ||
+      (attempt.scenarioKey === 'jar-test' &&
+        attempt.scenarioReleaseId === JAR_PROFILE.releaseId)
+    if (!supported) return { ok: false as const, error: unsupportedRelease(attempt.scenarioReleaseId) }
+    await repository.deleteAttempt(attemptId)
     return { deleted: true }
   })
 }

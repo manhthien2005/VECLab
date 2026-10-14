@@ -14,7 +14,9 @@ import { createJarSession } from '@/application/simulation/jar-session.js'
 import { fromSessionStateDto } from '@/application/simulation/wire.js'
 import { parseBody, startAttemptSchema } from '@/app/api/simulation/schemas.js'
 import { POST as createRoute, GET as listRoute } from '@/app/api/simulation/attempts/route.js'
-import { GET as loadRoute } from '@/app/api/simulation/attempts/[attemptId]/route.js'
+import {
+  GET as loadRoute, DELETE as deleteRoute,
+} from '@/app/api/simulation/attempts/[attemptId]/route.js'
 import { POST as actionRoute } from '@/app/api/simulation/attempts/[attemptId]/actions/route.js'
 import { POST as completeRoute } from '@/app/api/simulation/attempts/[attemptId]/complete/route.js'
 import { GET as eventsRoute } from '@/app/api/simulation/attempts/[attemptId]/events/route.js'
@@ -193,11 +195,17 @@ describe('Jar BFF scenario dispatch and learner boundaries (storage mocked via I
     for (const item of foreign) expect(item).toEqual({
       status: 200, body: { ok: false, outcome: 'not_found' },
     })
+    const foreignDelete = await deleteRoute(req('DELETE', `${root}/${id}`, {}), route(id))
+    const absentDelete = await deleteRoute(req('DELETE', `${root}/${absent}`, {}), route(absent))
+    expect(foreignDelete.status).toBe(200)
+    expect(await foreignDelete.json()).toEqual(await absentDelete.json())
     actors.current = null
     const unauthorized = await loadRoute(req('GET', `${root}/${id}`), route(id))
     expect(unauthorized.status).toBe(401)
     actors.current = ALICE
-    expect((await loadRoute(req('GET', `${root}/${id}`), route(id))).status).toBe(200)
+    const owned = await loadRoute(req('GET', `${root}/${id}`), route(id))
+    expect(owned.status).toBe(200)
+    expect((await owned.json()).state.attemptId).toBe(id)
   })
 
   it('commits Jar intent once and returns only learner-safe events, report and retries', async () => {
@@ -226,7 +234,7 @@ describe('Jar BFF scenario dispatch and learner boundaries (storage mocked via I
     const events = await eventsRoute(req('GET', `${root}/${id}/events`), route(id))
     const eventDto = await events.json()
     expect(eventDto.events.some((event: { measurement: { valueNtu: number } | null }) =>
-      event.measurement?.valueNtu === 16.5125)).toBe(true)
+      Math.abs((event.measurement?.valueNtu ?? Number.NaN) - 16.5125) < 1e-8)).toBe(true)
     for (const event of eventDto.events) {
       expect(Object.keys(event).sort()).toEqual([
         'actionId', 'actionType', 'measurement', 'occurredAt',

@@ -1,8 +1,12 @@
+import 'fake-indexeddb/auto'
 import { describe, expect, it } from 'vitest'
 import { newUUID } from '@/shared/ids.js'
 import { JAR_PROFILE } from '@/domain/experiments/jar-test/model.js'
 import type { JarSessionDto, JarReportDto, JarEventDto } from '@/application/simulation/jar-wire.js'
 import type { JarActionFeedback } from '@/application/simulation/jar-session.js'
+import { createJarSession } from '@/application/simulation/jar-session.js'
+import { GuestAttemptRepository } from '@/application/attempts/guest-repository.js'
+import type { JarState } from '@/domain/experiments/jar-test/model.js'
 
 /**
  * Opt-in end-to-end HTTP+BFF+local Supabase test.
@@ -38,6 +42,12 @@ if (enabled) {
   loopback(supabaseUrl)
   if (!cookieA || !cookieB || cookieA === cookieB) {
     throw new Error('Jar cloud tests require two distinct local learner cookie values')
+  }
+  for (const name of ['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_URL'] as const) {
+    const configured = process.env[name]
+    if (configured && loopback(configured).origin !== loopback(supabaseUrl).origin) {
+      throw new Error('Jar cloud test Supabase target differs from configured local target')
+    }
   }
 }
 
@@ -141,6 +151,33 @@ describe.runIf(enabled)('Jar cloud local HTTP + real Supabase (two learners)', (
       expect(reopened.data.state.report).toEqual(finished.data.report)
       expect(reopened.data.state.projection.cups[0].doseMgL).toBe(150)
       expect(reopened.data.state.report?.resources.reagents.alum?.amount).toBeCloseTo(0.075, 12)
+
+      // The guest path executes the same locked release, independently of the BFF.
+      const guestSession = createJarSession(new GuestAttemptRepository<JarState>())
+      const guest = await guestSession.start()
+      const guestAction = async (
+        actionType: string, parameters: Record<string, string | number | boolean> = {},
+      ) => {
+        const result = await guestSession.apply(guest.attemptId, actionType, parameters)
+        if (!result.ok) throw new Error('guest parity action refused: ' + actionType)
+      }
+      await guestAction('prepare_cup', { cupId: 'A', initialPh: 9 })
+      await guestAction('measure_initial')
+      await guestAction('add_coagulant', { cupId: 'A', incrementMgL: 150 })
+      for (const phase of ['rapid', 'slow', 'settling']) {
+        await guestAction('run_phase', { phase })
+      }
+      await guestAction('measure_final', { cupId: 'A' })
+      await guestAction('record_result', { cupId: 'A', removalPercent: 86.79 })
+      await guestAction('select_result', { cupId: 'A' })
+      const guestDone = await guestSession.complete(guest.attemptId)
+      if (!guestDone.ok) throw new Error('guest parity completion refused')
+      expect(finished.data.report.cups[0]?.measuredRemovalPercent)
+        .toBe(guestDone.report.cups[0]?.measuredRemovalPercent)
+      expect(finished.data.report.resources.reagents.alum?.amount)
+        .toBe(guestDone.report.resources.reagents.alum?.amount)
+      expect(finished.data.report.goalStatus)
+        .toEqual(guestDone.report.goalStatus)
     } finally {
       if (id) await call(cookieA, 'DELETE', `/${id}`, {})
     }
