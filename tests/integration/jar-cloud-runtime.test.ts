@@ -102,7 +102,12 @@ describe.runIf(enabled)('Jar cloud local HTTP + real Supabase (two learners)', (
         const foreign = await call(cookieB, 'GET', suffix)
         const absent = await call(cookieB, 'GET', suffix.replace(id, unknown))
         expect(foreign).toEqual(absent)
-        expect(foreign.data).toEqual({ ok: false, outcome: 'not_found' })
+        expect(foreign.status).toBe(200)
+        expect(foreign.data).toEqual(
+          suffix.endsWith('/events')
+            ? { events: [] }
+            : { ok: false, outcome: 'not_found' },
+        )
       }
 
       expect((await action(cookieA, id, 'prepare_cup', { cupId: 'A', initialPh: 9 })).data.ok).toBe(true)
