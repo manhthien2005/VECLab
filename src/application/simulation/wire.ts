@@ -1,4 +1,5 @@
 import type { DomainError, UUID } from '@/domain/process/contracts.js'
+import { ACID_RELEASE_ID } from '@/domain/experiments/acid-neutralization/index.js'
 import type { AttemptSummary, StoredAttemptEventRecord } from '@/application/attempts/repository.js'
 import type {
   AcidSessionState,
@@ -188,18 +189,38 @@ export function toSummaryDto(summary: AttemptSummary): SummaryDto {
  * that passes `instanceof Date` would instead survive narrowing and render as
  * "Invalid Date" in the report.
  */
+function dateFromIso(value: unknown): Date | null {
+  if (typeof value !== 'string' ||
+      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)) {
+    return null
+  }
+  const date = new Date(value)
+  return Number.isFinite(date.getTime()) && date.toISOString() === value ? date : null
+}
+
+function requiredIsoDate(value: unknown): Date {
+  const date = dateFromIso(value)
+  if (date === null) throw new Error('Acid BFF DTO contains an invalid timestamp')
+  return date
+}
+
 export function fromReportDto(dto: ReportDto): FinalReportSnapshot | null {
-  const generatedAt = new Date(dto.generatedAt)
-  return Number.isNaN(generatedAt.getTime())
-    ? null
-    : { ...dto, generatedAt }
+  const generatedAt = dateFromIso(dto.generatedAt)
+  return generatedAt === null ? null : { ...dto, generatedAt }
 }
 
 export function fromSessionStateDto(dto: SessionStateDto): AcidSessionState {
+  // Check identity before interpreting acid-specific domain and projection.
+  if (dto.releaseId !== ACID_RELEASE_ID ||
+      dto.projection?.scenarioReleaseId !== ACID_RELEASE_ID) {
+    throw new Error('Acid DTO contains an unsupported scenario or release')
+  }
+  const createdAt = requiredIsoDate(dto.createdAt)
+  const completedAt = dto.completedAt === null ? null : requiredIsoDate(dto.completedAt)
   return {
     ...dto,
-    createdAt: new Date(dto.createdAt),
-    completedAt: dto.completedAt === null ? null : new Date(dto.completedAt),
+    createdAt,
+    completedAt,
     finalReportSnapshot:
       dto.finalReportSnapshot === null ? null : fromReportDto(dto.finalReportSnapshot),
   }
@@ -208,15 +229,15 @@ export function fromSessionStateDto(dto: SessionStateDto): AcidSessionState {
 export function fromEventRecordDto<State>(dto: EventRecordDto): StoredAttemptEventRecord<State> {
   return {
     ...(dto as unknown as Omit<StoredAttemptEventRecord<State>, 'occurredAt'>),
-    occurredAt: new Date(dto.occurredAt),
+    occurredAt: requiredIsoDate(dto.occurredAt),
   }
 }
 
 export function fromSummaryDto(dto: SummaryDto): AttemptSummary {
   return {
     ...dto,
-    createdAt: new Date(dto.createdAt),
-    updatedAt: new Date(dto.updatedAt),
-    completedAt: dto.completedAt === null ? null : new Date(dto.completedAt),
+    createdAt: requiredIsoDate(dto.createdAt),
+    updatedAt: requiredIsoDate(dto.updatedAt),
+    completedAt: dto.completedAt === null ? null : requiredIsoDate(dto.completedAt),
   }
 }

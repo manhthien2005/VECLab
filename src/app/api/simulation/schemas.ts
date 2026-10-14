@@ -110,10 +110,14 @@ export const parameterizedStartAttemptSchema = z
 /** Empty body for benchmark attempt start. */
 export const emptyStartAttemptSchema = z.object({}).strict()
 
-/** `POST /attempts` — starts an attempt. Accepts an empty body or complete authorized AcidSetupParams. */
+/** Explicit server allowlist: a client may select Jar, never its release/version. */
+export const jarStartAttemptSchema = z.object({ scenarioKey: z.literal('jar-test') }).strict()
+
+/** Existing acid bodies are unchanged. No Jar/acid hybrid request is valid. */
 export const startAttemptSchema = z.union([
   emptyStartAttemptSchema,
   parameterizedStartAttemptSchema,
+  jarStartAttemptSchema,
 ])
 
 /** Inferred request types, so handlers consume values rather than re-declaring shapes. */

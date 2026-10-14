@@ -1,97 +1,152 @@
 import { createAcidSession, type AcidSetupParams } from '@/application/simulation/acid-session.js'
+import { createJarSession } from '@/application/simulation/jar-session.js'
 import { SupabaseAttemptRepository } from '@/application/attempts/supabase-repository.js'
 import type { AcidNeutralizationState } from '@/domain/experiments/acid-neutralization/state.js'
-import type { UUID } from '@/domain/process/contracts.js'
+import type { JarState } from '@/domain/experiments/jar-test/model.js'
+import { JAR_PROFILE } from '@/domain/experiments/jar-test/model.js'
+import { ACID_RELEASE_ID } from '@/domain/experiments/acid-neutralization/index.js'
+import type { DomainError, UUID } from '@/domain/process/contracts.js'
+import { preconditionFailed, unsupportedRelease } from '@/shared/errors/domain-errors.js'
+import { toEventRecordDto, toReportDto, toSessionStateDto, toSummaryDto } from '@/application/simulation/wire.js'
 import {
-  toEventRecordDto,
-  toReportDto,
-  toSessionStateDto,
-  toSummaryDto,
-} from '@/application/simulation/wire.js'
+  toJarEventDto, toJarReportDto, toJarSessionDto,
+} from '@/application/simulation/jar-wire.js'
 import type { CommitIdentity } from '@/application/simulation/acid-session.js'
 import { requireLearner, type GuardFailure } from '@/app/api/_lib/guard.js'
 
-/**
- * The server half of the session seam (docs/system-architecture.md §9).
- *
- * This is where the engine actually runs for an account. The browser sent intent — an
- * action type, parameters and units — and this module builds a `SupabaseAttemptRepository`
- * bound to the VERIFIED learner, hands it to the same `createAcidSession` the guest uses,
- * and lets that session run the locked release engine. No result, state or hash ever
- * crosses this boundary inbound, which is what makes the trusted columns trustworthy.
- *
- * Sharing `createAcidSession` between here and the browser is not incidental. It is the
- * reason a guest run and an imported cloud run produce the same events and the same
- * scores: there is one implementation of compute-project-persist, and §18.5's rejection
- * of client-only computation for accounts changes WHERE it executes, not WHAT executes.
- *
- * Every function returns either a `GuardFailure` (401 for no session) or the value to
- * encode. Handlers turn that into a response; this module never touches `Request` or
- * `Response`, so it stays testable without an HTTP stack.
- */
-
-/** Outcome of a guarded server call. */
 export type ServerResult<Value> =
   | { ok: true; value: Value; authHeaders: Headers }
   | { ok: false; failure: GuardFailure; authHeaders: Headers }
 
-/** The session for one verified learner, plus the headers its auth refresh produced. */
 export type LearnerSession = {
   session: ReturnType<typeof createAcidSession>
   userId: UUID
   authHeaders: Headers
 }
 
-/**
- * Authenticate and build the session.
- *
- * One call rather than per-handler boilerplate, because the ordering is load-bearing:
- * the repository must be constructed from the VERIFIED id, and nothing may read an
- * attempt before that exists. A handler that built its own repository from a body field
- * would bypass ownership entirely, since the service role does not apply RLS.
- */
+/** Authentication is the only source of actor identity; never take it from JSON. */
 export async function learnerSession(): Promise<
-  { ok: true; value: LearnerSession } | { ok: false; failure: GuardFailure; authHeaders: Headers }
+  { ok: true; value: LearnerSession } |
+  { ok: false; failure: GuardFailure; authHeaders: Headers }
 > {
   const auth = await requireLearner()
   if (!auth.ok) return { ok: false, failure: auth.failure, authHeaders: auth.authHeaders }
-
   const repository = new SupabaseAttemptRepository<AcidNeutralizationState>(auth.userId)
   return {
     ok: true,
-    value: { session: createAcidSession(repository), userId: auth.userId, authHeaders: auth.authHeaders },
+    value: {
+      session: createAcidSession(repository),
+      userId: auth.userId,
+      authHeaders: auth.authHeaders,
+    },
   }
 }
 
-/** Wrap a session call so a 401 and a success share one return shape. */
 async function guarded<Value>(
-  run: (session: LearnerSession['session']) => Promise<Value>,
+  run: (session: LearnerSession['session'], userId: UUID) => Promise<Value>,
 ): Promise<ServerResult<Value>> {
   const opened = await learnerSession()
   if (!opened.ok) {
     return { ok: false, failure: opened.failure, authHeaders: opened.authHeaders }
   }
-  return { ok: true, value: await run(opened.value.session), authHeaders: opened.value.authHeaders }
+  const { session, userId, authHeaders } = opened.value
+  return { ok: true, value: await run(session, userId), authHeaders }
 }
 
-/** Start a fresh attempt. The server owns the scenario and the initial state. */
+type Scenario = 'acid-neutralization' | 'jar-test'
+type Absent = { ok: false; outcome: 'not_found' }
+type Unsupported = { ok: false; error: ReturnType<typeof unsupportedRelease> }
+
+/** Public teaching-context fields only. Never expose stored/computed hashes or replay internals. */
+const PUBLIC_JAR_ERROR_DATA_KEYS = [
+  'actionType', 'cupId', 'parameter', 'unit', 'phase', 'status',
+  'expectedRevision', 'currentRevision',
+] as const
+
+function publicJarError(error: DomainError): DomainError {
+  const data: DomainError['data'] = {}
+  for (const key of PUBLIC_JAR_ERROR_DATA_KEYS) {
+    const value = error.data[key]
+    if (value === null || typeof value === 'string' || typeof value === 'boolean' ||
+        (typeof value === 'number' && Number.isFinite(value))) {
+      data[key] = value
+    }
+  }
+  return {
+    category: error.category,
+    code: error.code,
+    messageKey: error.messageKey,
+    data,
+  }
+}
+
+/**
+ * Ownership-before-dispatch gate: the service-role repository has an immutable
+ * verified actor. Never inspect a foreign attempt's scenario, release or events.
+ * Absent and foreign IDs return precisely the same not_found body.
+ */
+async function guardedAttempt<Value>(
+  attemptId: UUID,
+  run: (scenario: Scenario, session: LearnerSession) => Promise<Value>,
+): Promise<ServerResult<Value | Absent | Unsupported>> {
+  const opened = await learnerSession()
+  if (!opened.ok) {
+    return { ok: false, failure: opened.failure, authHeaders: opened.authHeaders }
+  }
+  const session = opened.value
+  const lookup = new SupabaseAttemptRepository<unknown>(session.userId)
+  const attempt = await lookup.getAttempt(attemptId)
+  if (attempt === null) {
+    return { ok: true, value: { ok: false, outcome: 'not_found' }, authHeaders: session.authHeaders }
+  }
+  let scenario: Scenario
+  if (attempt.scenarioKey === 'acid-neutralization' &&
+      attempt.scenarioReleaseId === ACID_RELEASE_ID) {
+    scenario = 'acid-neutralization'
+  } else if (attempt.scenarioKey === 'jar-test' &&
+             attempt.scenarioReleaseId === JAR_PROFILE.releaseId) {
+    scenario = 'jar-test'
+  } else {
+    return {
+      ok: true,
+      value: { ok: false, error: unsupportedRelease(attempt.scenarioReleaseId) },
+      authHeaders: session.authHeaders,
+    }
+  }
+  return { ok: true, value: await run(scenario, session), authHeaders: session.authHeaders }
+}
+
+function jarSession(userId: UUID) {
+  return createJarSession(new SupabaseAttemptRepository<JarState>(userId))
+}
+
+/** Old {} / parameterized acid endpoint contract remains byte-for-byte equivalent. */
 export function startAttempt(params?: AcidSetupParams) {
   return guarded(async (session) => ({ state: toSessionStateDto(await session.start(params)) }))
 }
 
-/** Resume an attempt, rebuilding the ledger by replay. */
+/** The only new accepted start request is exactly {scenarioKey:'jar-test'}. */
+export function startJarAttempt() {
+  return guarded(async (_session, userId) => ({
+    state: toJarSessionDto(await jarSession(userId).start()),
+  }))
+}
+
 export function loadAttempt(attemptId: UUID) {
-  return guarded(async (session) => {
-    const loaded = await session.load(attemptId)
-    // null is the store saying "not yours or not there". §13.2 requires that those two
-    // stay indistinguishable, so both become the same 404-shaped body.
+  return guardedAttempt(attemptId, async (scenario, context) => {
+    if (scenario === 'jar-test') {
+      const loaded = await jarSession(context.userId).load(attemptId)
+      if (loaded === null) return { ok: false as const, outcome: 'not_found' as const }
+      if (!loaded.ok) return { ok: false as const, error: publicJarError(loaded.error) }
+      return { ok: true as const, state: toJarSessionDto(loaded.state) }
+    }
+    const loaded = await context.session.load(attemptId)
     if (loaded === null) return { ok: false as const, outcome: 'not_found' as const }
     if (!loaded.ok) return { ok: false as const, error: loaded.error }
     return { ok: true as const, state: toSessionStateDto(loaded.state) }
   })
 }
 
-/** Run one action through the engine and commit it. */
 export function applyAction(
   attemptId: UUID,
   actionType: string,
@@ -99,77 +154,106 @@ export function applyAction(
   unitSelections: Record<string, string>,
   commit: CommitIdentity,
 ) {
-  return guarded(async (session) => {
-    const result = await session.apply(attemptId, actionType, parameters, unitSelections, commit)
-    if (result.ok) {
-      return {
-        ok: true as const,
-        state: toSessionStateDto(result.state),
-        feedback: result.feedback,
+  return guardedAttempt(attemptId, async (scenario, context) => {
+    if (scenario === 'jar-test') {
+      const result = await jarSession(context.userId).apply(
+        attemptId, actionType, parameters, unitSelections, commit,
+      )
+      if (!result.ok) {
+        return 'error' in result ? { ...result, error: publicJarError(result.error) } : result
       }
+      return { ok: true as const, state: toJarSessionDto(result.state), feedback: result.feedback }
     }
-    // Refusals and domain errors are already JSON-safe and already named after the RPC's
-    // outcomes, so they pass through: that shared vocabulary is what lets the workbench
-    // branch once for guest and cloud.
-    return result as Exclude<typeof result, { ok: true }>
+    const result = await context.session.apply(attemptId, actionType, parameters, unitSelections, commit)
+    return result.ok
+      ? { ok: true as const, state: toSessionStateDto(result.state), feedback: result.feedback }
+      : result
   })
 }
 
-/** Revert the last action, if the scenario allows it. */
+/** Jar has no undo semantics. A typed refusal must never enter acid undo. */
 export function undoAction(attemptId: UUID, commit: CommitIdentity) {
-  return guarded(async (session) => {
-    const result = await session.undo(attemptId, commit)
-    if (result.ok) {
+  return guardedAttempt(attemptId, async (scenario, context) => {
+    if (scenario === 'jar-test') {
       return {
-        ok: true as const,
-        state: toSessionStateDto(result.state),
-        feedback: result.feedback,
+        ok: false as const,
+        error: preconditionFailed('JAR_UNDO_UNSUPPORTED', 'errors.jar.JAR_UNDO_UNSUPPORTED'),
       }
     }
-    return result as Exclude<typeof result, { ok: true }>
+    const result = await context.session.undo(attemptId, commit)
+    return result.ok
+      ? { ok: true as const, state: toSessionStateDto(result.state), feedback: result.feedback }
+      : result
   })
 }
 
-/** Complete: build the report snapshot and finish in one write. */
 export function completeAttempt(attemptId: UUID, commit: CommitIdentity) {
-  return guarded(async (session) => {
-    const result = await session.complete(attemptId, commit)
-    if (result.ok) {
+  return guardedAttempt(attemptId, async (scenario, context) => {
+    if (scenario === 'jar-test') {
+      const result = await jarSession(context.userId).complete(attemptId, commit)
+      if (!result.ok) {
+        return 'error' in result ? { ...result, error: publicJarError(result.error) } : result
+      }
       return {
         ok: true as const,
-        state: toSessionStateDto(result.state),
-        report: toReportDto(result.report),
+        state: toJarSessionDto(result.state),
+        report: toJarReportDto(result.report),
+        idempotentReplay: result.idempotentReplay,
       }
     }
-    return result as Exclude<typeof result, { ok: true }>
+    const result = await context.session.complete(attemptId, commit)
+    return result.ok
+      ? { ok: true as const, state: toSessionStateDto(result.state), report: toReportDto(result.report) }
+      : result
   })
 }
 
-/** Lab-list summaries, newest first, with no state payloads (§18). */
+/** This is the existing acid lab list, not a new cross-scenario Jar catalog. */
 export function listAttempts(limit?: number) {
-  return guarded(async (session) => ({
-    attempts: (await session.list(limit)).map(toSummaryDto),
+  return guarded(async (_session, userId) => ({
+    attempts: (await new SupabaseAttemptRepository<AcidNeutralizationState>(userId).listAttempts({
+      scenarioKey: 'acid-neutralization',
+      ...(limit === undefined ? {} : { limit }),
+    })).map(toSummaryDto),
   }))
 }
 
-/** Full event records for the timeline and the report. */
-export function listEvents(attemptId: UUID) {
-  return guarded(async (session) => ({
-    events: (await session.listEvents(attemptId)).map(toEventRecordDto),
-  }))
+/** Jar events are explicit learner-safe DTOs; never spread persisted records. */
+export async function listEvents(attemptId: UUID) {
+  const found = await guardedAttempt(attemptId, async (scenario, context) => {
+    if (scenario === 'jar-test') {
+      const records = await new SupabaseAttemptRepository<JarState>(context.userId)
+        .getAttemptEventRecords(attemptId)
+      return { events: records.map(toJarEventDto) }
+    }
+    return { events: (await context.session.listEvents(attemptId)).map(toEventRecordDto) }
+  })
+  // Acid's established GET-events contract is {events:[]} for unknown IDs.
+  // Ownership was checked before dispatch, so neither a foreign ID nor an
+  // absent one exposes its scenario or returns a distinguishable response.
+  if (found.ok && 'outcome' in found.value && found.value.outcome === 'not_found') {
+    return { ...found, value: { events: [] } }
+  }
+  return found
 }
 
 /**
- * Delete one attempt and its chain (§4.5).
- *
- * Ownership is enforced by the repository's bound actor id, which came from the verified
- * session: `delete_attempt` refuses an attempt belonging to anyone else, and a refusal is
- * indistinguishable from a successful delete of an already-absent row, so this cannot be
- * used to probe which attempt ids exist (§13.2).
+ * Deletion remains idempotent for acid and Jar. Ownership is still checked
+ * before selecting a release, while absent and foreign IDs share the previous
+ * acid contract: {deleted:true} without revealing existence.
  */
 export function removeAttempt(attemptId: UUID) {
-  return guarded(async (session) => {
-    await session.remove(attemptId)
+  return guarded(async (_session, userId) => {
+    const repository = new SupabaseAttemptRepository<unknown>(userId)
+    const attempt = await repository.getAttempt(attemptId)
+    if (attempt === null) return { deleted: true }
+    const supported =
+      (attempt.scenarioKey === 'acid-neutralization' &&
+        attempt.scenarioReleaseId === ACID_RELEASE_ID) ||
+      (attempt.scenarioKey === 'jar-test' &&
+        attempt.scenarioReleaseId === JAR_PROFILE.releaseId)
+    if (!supported) return { ok: false as const, error: unsupportedRelease(attempt.scenarioReleaseId) }
+    await repository.deleteAttempt(attemptId)
     return { deleted: true }
   })
 }

@@ -5,7 +5,7 @@ import {
   readJson,
   MAX_ACTION_BODY_BYTES,
 } from '@/app/api/_lib/guard.js'
-import { startAttempt, listAttempts } from '../server-session.js'
+import { startAttempt, startJarAttempt, listAttempts } from '../server-session.js'
 import { guardedResponse, respond, reject } from '@/app/api/_lib/respond.js'
 import { parseBody, startAttemptSchema } from '../schemas.js'
 import type { AcidSetupParams } from '@/application/simulation/acid-session.js'
@@ -41,6 +41,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const validated = parseBody(startAttemptSchema, parsed.value)
     if (!validated.ok) return reject(validated.failure)
+
+    if ('scenarioKey' in validated.value) {
+      return respond(await startJarAttempt())
+    }
 
     const params: AcidSetupParams | undefined =
       'acidVolumeL' in validated.value && typeof validated.value.acidVolumeL === 'number'

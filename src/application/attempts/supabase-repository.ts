@@ -14,6 +14,7 @@ import type {
 } from '@/application/attempts/repository.js'
 import type { StoredEvent } from '@/domain/process/lifecycle.js'
 import { servedReleases } from '@/application/scenarios/registry.js'
+import { createJarModule, JAR_PROFILE } from '@/domain/experiments/jar-test/engine.js'
 
 /**
  * Server-side attempt store over the security-definer RPCs.
@@ -383,7 +384,9 @@ function client() {
  * the manifest never declared onto a chain. It throws, which surfaces as a 500 rather
  * than as corrupt data.
  */
-function projectionVersionFor(releaseId: string): number {
+export function projectionVersionFor(releaseId: string): number {
+  // Jar is deliberately not registered in the public catalog/servedReleases yet.
+  if (releaseId === JAR_PROFILE.releaseId) return createJarModule().manifest.projectionVersion
   const manifest = servedReleases().find((entry) => entry.releaseId === releaseId)
   if (manifest === undefined) {
     throw new Error(`no served release manifest for ${releaseId}`)
@@ -402,6 +405,7 @@ function projectionVersionFor(releaseId: string): number {
  */
 function releaseIdForScenarioKey(scenarioKey: ScenarioKey | undefined): string | null {
   if (scenarioKey === undefined) return null
+  if (scenarioKey === 'jar-test') return JAR_PROFILE.releaseId
   const manifest = servedReleases().find((entry) => entry.scenarioKey === scenarioKey)
   return manifest?.releaseId ?? `\u0000unserved:${scenarioKey}`
 }
@@ -531,9 +535,30 @@ function toAttempt<State>(row: AttemptRow): Attempt<State> {
     currentState: row.current_state as State,
     currentProjection: row.current_projection,
     projectionVersion: row.projection_version,
-    finalReportSnapshot: row.final_report_snapshot,
+    finalReportSnapshot: restoreJarReportDate(row.scenario_release_id, row.final_report_snapshot),
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
     completedAt: row.completed_at === null ? null : new Date(row.completed_at),
   }
+}
+
+/**
+ * Supabase JSONB stringifies Date. Only the locked Jar report is rehydrated here;
+ * invalid persisted timestamps must never turn into invented epoch dates or a
+ * report that silently passes Jar's Date-based schema guard.
+ */
+export function restoreJarReportDate(releaseId: string, value: unknown): unknown {
+  if (releaseId !== JAR_PROFILE.releaseId || value === null) return value
+  if (typeof value !== 'object' || Array.isArray(value)) return value
+  const report = value as Record<string, unknown>
+  if (report.scenarioKey !== 'jar-test') return value
+  if (typeof report.generatedAt !== 'string' ||
+      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(report.generatedAt)) {
+    throw new Error('Invalid persisted Jar report timestamp')
+  }
+  const date = new Date(report.generatedAt)
+  if (!Number.isFinite(date.getTime()) || date.toISOString() !== report.generatedAt) {
+    throw new Error('Invalid persisted Jar report timestamp')
+  }
+  return { ...report, generatedAt: date }
 }
