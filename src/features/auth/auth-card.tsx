@@ -38,11 +38,15 @@ export function AuthCard({ title, lede, notice, children, submitLabel, busyLabel
           <Link className="auth-story-brand" href="/"><FlaskIcon />VECLab</Link>
           <h2>Tiếp tục bài đang làm.<br />Xem lại kết quả đã lưu.</h2>
           <p>Tài khoản giúp lưu các lượt thực hành và mở lại trên thiết bị khác.</p>
-          <div className="auth-story-visual"><Image src="/assets/lab-invitation.webp" alt="" fill sizes="(max-width: 48rem) 0px, 40vw" /></div>
+          <div className="auth-story-visual">
+            <AuthIllustrationFrame />
+            <Image src="/assets/auth-laboratory-v2.webp" alt="" fill sizes="(max-width: 48rem) 0px, (max-width: 66rem) 42vw, 450px" />
+          </div>
           <div className="auth-story-note"><ShieldCheckIcon /><p>Chưa cần tài khoản? Bạn vẫn có thể thực hành và lưu tiến độ trên trình duyệt này.</p></div>
           <Link className="auth-story-guest" href="/experiments">Khám phá thí nghiệm <ArrowRightIcon /></Link>
         </aside>
         <div className="auth-card">
+          <AuthCardPattern />
           <nav className="auth-mode-nav" aria-label="Đăng nhập và đăng ký">
             <Link href={`/sign-in${query}`} aria-current={mode === 'sign-in' ? 'page' : undefined}>Đăng nhập</Link>
             <Link href={`/sign-up${query}`} aria-current={mode === 'sign-up' ? 'page' : undefined}>Đăng ký</Link>
@@ -85,4 +89,27 @@ export function AuthField({ id, label, hint, action, type, ...input }: {
 
 function AuthBackground() {
   return <svg className="auth-background" aria-hidden="true" focusable="false" width="1400" height="900" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice" fill="none"><g stroke="currentColor" opacity="0.17"><path d="m1150 60 36-21 36 21v42l-36 21-36-21Zm72 0 36-21 36 21v42l-36 21-36-21Zm-36 63 36-21 36 21v42l-36 21-36-21ZM1300 180v140l-44 44h-70M60 460v170l52 52v80H28m1154-67 30-17 30 17v34l-30 17-30-17Z" /><circle cx="1186" cy="364" r="4" /><circle cx="28" cy="762" r="4" /><path d="M280 90h130m-80-10v20m520 680h100" /></g></svg>
+}
+
+function AuthIllustrationFrame() {
+  return (
+    <svg className="auth-illustration-frame" viewBox="0 0 480 320" preserveAspectRatio="none" fill="none" aria-hidden="true" focusable="false">
+      <g stroke="currentColor" strokeWidth="1" opacity="0.5"><path d="M16 44V24a8 8 0 0 1 8-8h26m380 0h26a8 8 0 0 1 8 8v20M16 276v20a8 8 0 0 0 8 8h26m380 0h26a8 8 0 0 0 8-8v-20M204 304h72" /></g>
+      <g fill="currentColor" opacity="0.55"><circle cx="194" cy="304" r="1.5" /><circle cx="286" cy="304" r="1.5" /></g>
+    </svg>
+  )
+}
+
+function AuthCardPattern() {
+  return (
+    <svg className="auth-card-pattern" viewBox="0 0 520 780" preserveAspectRatio="xMidYMid slice" fill="none" aria-hidden="true" focusable="false">
+      <g stroke="currentColor" strokeWidth="0.9" opacity="0.18">
+        <path d="m402 18 25-14 25 14v29l-25 14-25-14Zm50 0 25-14 25 14v29l-25 14-25-14Zm-25 43 25-14 25 14v29l-25 14-25-14Zm50 0 25-14 25 14v29l-25 14-25-14Z" />
+        <path d="M520 140h-45l-25 25v82h-28m98-77h-28l-22 22v83M0 590h24l26 26v92l24 24h42M0 622h14l18 18v83l29 29h79M50 670H25m-25 0h7" />
+        <circle cx="422" cy="247" r="3.5" /><circle cx="470" cy="275" r="3" /><circle cx="116" cy="732" r="3.5" /><circle cx="140" cy="752" r="3" />
+        <path d="m12 468 19-11 19 11v22l-19 11-19-11Zm38 0 19-11 19 11v22l-19 11-19-11Z" opacity="0.5" />
+      </g>
+      <g fill="currentColor" opacity="0.13"><circle cx="484" cy="124" r="1.5" /><circle cx="506" cy="124" r="1.5" /><circle cx="506" cy="102" r="1.5" /><circle cx="16" cy="558" r="1.5" /><circle cx="38" cy="558" r="1.5" /><circle cx="16" cy="536" r="1.5" /></g>
+    </svg>
+  )
 }
