@@ -6,6 +6,9 @@ test('lists the agreed experiments, keeps planned lessons honest, and provides c
   await page.goto('/experiments')
   const cards = page.locator('.experiment-library-card')
   await expect(cards.locator('h2')).toHaveText(['Điều chỉnh pH', 'Jar Test', 'Hấp phụ xanh methylene'])
+  await expect(cards.locator('.experiment-library-learning')).toHaveCount(3)
+  await cards.first().locator('summary').click()
+  await expect(cards.first().locator('.experiment-library-preparation')).toContainText('Buret, máy khuấy và máy đo pH.')
   await expect(cards.getByText('Có thể thực hành', { exact: true })).toHaveCount(1)
   await expect(cards.getByText('Đang xây dựng', { exact: true })).toHaveCount(2)
   await expect(cards.locator('a[href^="/simulate/"]')).toHaveCount(1)
@@ -31,6 +34,12 @@ test('lists the agreed experiments, keeps planned lessons honest, and provides c
 
 test('library typography, tags and cards fit in both themes and enlarged text', async ({ page }) => {
   await page.goto('/experiments')
+  const arrangement = await page.locator('.experiment-library-card').first().evaluate(card => {
+    const image = card.querySelector('.experiment-library-image')!.getBoundingClientRect()
+    const body = card.querySelector('.experiment-library-body')!.getBoundingClientRect()
+    return matchMedia('(max-width: 58rem)').matches ? image.bottom <= body.top + 1 : image.right <= body.left + 1
+  })
+  expect(arrangement).toBe(true)
   for (const mode of ['light', 'dark']) {
     if (mode === 'dark') await page.getByRole('button', { name: 'Chuyển sang giao diện tối', exact: true }).click()
     await page.evaluate(() => { document.documentElement.style.fontSize = '150%' })

@@ -9,7 +9,7 @@ export function ScenarioCard({ overview, entry }: { overview: ExperimentOverview
   return (
     <article className="experiment-library-card" aria-labelledby={`experiment-${overview.scenarioKey}`}>
       <div className="experiment-library-image">
-        <Image src={overview.image} alt={overview.imageAlt} fill sizes="(max-width: 45rem) 92vw, (max-width: 70rem) 45vw, 420px" />
+        <Image src={overview.image} alt={overview.imageAlt} fill sizes="(max-width: 58rem) 92vw, 420px" />
       </div>
       <div className="experiment-library-body">
         <div className="experiment-library-tags">
@@ -17,22 +17,30 @@ export function ScenarioCard({ overview, entry }: { overview: ExperimentOverview
           <span className={`experiment-availability${available ? ' is-available' : ''}`}><span aria-hidden="true" />{available ? 'Có thể thực hành' : 'Đang xây dựng'}</span>
         </div>
         <h2 id={`experiment-${overview.scenarioKey}`}>{overview.title}</h2>
-        <p className="experiment-library-description">{overview.description}</p>
+        <p className="experiment-library-question">{overview.question}</p>
+        <p className="experiment-library-learning"><span>Bạn sẽ học</span>{overview.learning}</p>
         <dl className="experiment-library-facts">
-          <div><dt>Đầu vào</dt><dd>{overview.input}</dd></div>
-          <div><dt>Điều chỉnh</dt><dd>{overview.parameters}</dd></div>
-          <div><dt>Đánh giá</dt><dd>{overview.outcome}</dd></div>
+          <div><dt>Mẫu và hóa chất</dt><dd>{overview.input}</dd></div>
+          <div><dt>Thông số khảo sát</dt><dd>{overview.parameters}</dd></div>
+          <div><dt>Kết quả theo dõi</dt><dd>{overview.outcome}</dd></div>
         </dl>
+        <details className="experiment-library-plan">
+          <summary>{available ? 'Dụng cụ và kiến thức cần có' : 'Chuẩn bị và quy trình dự kiến'}<ArrowRightIcon /></summary>
+          <dl className="experiment-library-preparation">
+            <div><dt>{available ? 'Dụng cụ' : 'Dụng cụ dự kiến'}</dt><dd>{overview.tools}</dd></div>
+            <div><dt>Kiến thức cơ bản</dt><dd>{overview.prerequisites}</dd></div>
+          </dl>
+          {!available && <>
+            <p className="experiment-library-procedure-label">Quy trình dự kiến</p>
+            <ol>{overview.procedure.map(step => <li key={step}>{step}</li>)}</ol>
+          </>}
+        </details>
         <div className="experiment-library-actions">
           {available ? <>
             <Link className="btn experiment-library-start" href={`/simulate/${entry.scenarioKey}`}>Bắt đầu thực hành<ArrowRightIcon /></Link>
             <Link className="experiment-library-detail" href={`/experiments/${entry.scenarioKey}`}>Xem chi tiết<span className="sr-only"> — {overview.title}</span></Link>
           </> : (
-            <details className="experiment-library-plan">
-              <summary>Nội dung dự kiến<ArrowRightIcon /></summary>
-              <ol>{overview.procedure.map(step => <li key={step}>{step}</li>)}</ol>
-              <p>Bài này chưa mở thực hành.</p>
-            </details>
+            <p className="experiment-library-unavailable">Bài này chưa mở thực hành.</p>
           )}
         </div>
       </div>
