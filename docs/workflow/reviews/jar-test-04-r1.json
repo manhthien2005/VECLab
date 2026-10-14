@@ -1,0 +1,51 @@
+{
+  "v": 1,
+  "kind": "result",
+  "id": "JAR-04-R1",
+  "coder": 1,
+  "repo": "manhthien2005/VECLab",
+  "branch": "fix/coder-1-jar04-review",
+  "target": "chore/pre-refactor-cleanup",
+  "base": "f38133767b6c377e75e37e5af3b6a487e5687bcd",
+  "head": "726fdc179511dbf02cd0204d97f732aa3bfa8d00",
+  "status": "accepted",
+  "changes": [
+    "Đóng finding locator: alert conflict được scope vào region workbench; official two-tab test chạy hết và pass trên desktop/mobile.",
+    "Đóng finding mục tiêu học tập: giá trị 80% lấy từ profile, hiện trước start và khi resume; nhãn mô hình tách rõ khỏi ngưỡng chất lượng nước, không tiết lộ phương án tối ưu.",
+    "Đạt phạm vi chức năng guest workbench và R1 local review; giữ nguyên numerical expectations, N/A, incomplete completion và session/API đã nghiệm thu."
+  ],
+  "checks": {
+    "unit": "pass",
+    "types": "pass",
+    "lint": "pass",
+    "build": "pass",
+    "e2e_desktop": "pass",
+    "e2e_mobile": "pass",
+    "acid_smoke": "pass",
+    "ui_detector": "pass",
+    "diff": "pass"
+  },
+  "evidence": {
+    "identity": "Remote fix/coder-1-jar04-review khớp final SHA; base là cha trực tiếp. R1 đúng một commit và hai files allowlist; tổng JAR-04 so với target base vẫn đúng năm files. Target vẫn 96b226f7c5d53104b70fd77fb51cf946efcb675a.",
+    "unit": "Fresh tại 726fdc1: 51/51 PASS (jar-engine 12, jar-guest-runtime 12, guest-runtime 19, jar-remote-api 8).",
+    "types": "npm run typecheck: exit 0.",
+    "lint": "Scoped ESLint theo task: exit 0.",
+    "build": "npm run build: exit 0; route /simulate/jar-test được build đúng dynamic route.",
+    "e2e_desktop": "Official e2e/jar-test-workbench.spec.ts --project=chromium: 7/7 PASS, 11.6s. Dùng E2E_BASE_URL=http://localhost:3174 và --output=test-results/tl1-jar04-r1-review/e2e-desktop; không đổi assertion hoặc timeout.",
+    "e2e_mobile": "Official spec --project=mobile (Pixel 7 emulation): 7/7 PASS, 12.5s. Output riêng e2e-mobile; không đổi assertion hoặc timeout.",
+    "acid_smoke": "Existing 'Desktop basic layout' smoke --project=chromium: 1/1 PASS, 7.8s.",
+    "ui_detector": "Launcher Windows đã chạy với bốn targets theo brief: exit 0, JSON []. Không coi detector là chứng nhận UX/accessibility đầy đủ.",
+    "diff": "git diff f38133767b6c377e75e37e5af3b6a487e5687bcd HEAD --check: PASS.",
+    "probes": "Fresh 4/4 behavior probes PASS tại R1: toàn lượt bằng bàn phím và retry sau one-shot post-commit IndexedDB read failure, trên desktop/mobile. Đúng một lần liều 50 mg/L và cùng event actionId sau retry. Đây là fault injection cho guest UI, không phải cloud test.",
+    "visual": "Đã mở/xem sáu official screenshots setup, measured, completed trên desktop/mobile và ảnh viewport mobile đọc rõ mục tiêu. Header ở đầu trang; goal trước start/sau start/sau reload được official assertions kiểm tra. Probe 1280/412 CSS px: không tràn ngang, một main landmark, không console/page errors.",
+    "ci": "GitHub connector chưa trả PR-triggered workflow run tại final SHA. Required CI chưa được xác nhận; local acceptance không cấp quyền merge.",
+    "artifacts": "Fresh logs, screenshots, probes và cleanup: C:/Users/MrThien/.codex/worktrees/tl1-jar02-review/Chemistry/test-results/tl1-jar04-r1-review."
+  },
+  "env": "Windows; Node v24.16.0; npm 11.13.0; Next 16.3.4 production server, Playwright Chromium/Pixel 7 emulation. Checkout C:/Users/MrThien/.codex/worktrees/tl1-jar02-review/Chemistry; branch chore/tl1-jar04-r1-review tại 726fdc179511dbf02cd0204d97f732aa3bfa8d00; tracked tree sạch. Đã dừng đúng server TL1 PID 55252; port 3174 không còn listener. Không sửa app source, checkout hoặc env TL2.",
+  "limits": [
+    "Accepted cho phạm vi chức năng/local review JAR-04-R1; chưa có PR/required CI hoặc quyền merge/deploy cho gói này.",
+    "Authenticated cloud UI, mobile thật, full accessibility và review presentation/UX của TL2 chưa được nghiệm thu. Không dùng hosted Supabase hoặc kiểm chứng hóa học thực nghiệm.",
+    "Full report/catalog thuộc Task 5, chưa bắt đầu. Coder 1 giữ nguyên nhánh/SHA và chờ tích hợp."
+  ],
+  "next": "wait_for_local_integration"
+}
