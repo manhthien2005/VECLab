@@ -1,0 +1,52 @@
+{
+  "v": 1,
+  "kind": "result",
+  "id": "JAR-04",
+  "coder": 1,
+  "repo": "manhthien2005/VECLab",
+  "branch": "feature/coder-1-jar04-workbench",
+  "target": "chore/pre-refactor-cleanup",
+  "base": "96b226f7c5d53104b70fd77fb51cf946efcb675a",
+  "head": "f38133767b6c377e75e37e5af3b6a487e5687bcd",
+  "status": "needs_changes",
+  "checks": {
+    "unit": "pass",
+    "types": "pass",
+    "lint": "pass",
+    "build": "pass",
+    "e2e_desktop": "fail",
+    "e2e_mobile": "fail",
+    "acid_smoke": "pass",
+    "ui_detector": "pass",
+    "diff": "pass"
+  },
+  "issues": [
+    "[P2] e2e/jar-test-workbench.spec.ts:190 — other.getByRole('alert') khớp cả thông báo conflict của workbench và #__next-route-announcer__ của Next. Official desktop/mobile đều fail strict mode ở đây, nên không chạy đến assertions reload và cấp liều tiếp. Scope alert vào region 'Bàn thí nghiệm Jar Test' hoặc filter nội dung cụ thể; không dùng first(), bỏ assertion hoặc sửa Next announcer.",
+    "[P2] src/features/jar-test/workbench.tsx:302 — màn bắt đầu và lượt đang học không công bố mục tiêu giảm đục ít nhất 80% trong mô hình. Người học được yêu cầu chọn phương án nhưng thiếu tiêu chí chọn. Spec mục 3 yêu cầu nhận mục tiêu trước lượt; plan dòng 44 đã khóa mục tiêu này và phân biệt với ngưỡng chất lượng nước. Hiện mục tiêu công khai trước start và khi resume, giữ ẩn phương án tối ưu/đánh giá cho tới complete."
+  ],
+  "evidence": {
+    "identity": "Remote branch HEAD khớp handback; base là ancestor; đúng 3 commits, 5 files allowlist. Target vẫn 96b226f7c5d53104b70fd77fb51cf946efcb675a.",
+    "unit": "51/51 tests PASS trên đúng f381337: jar-engine 12, jar-guest-runtime 12, guest-runtime 19, jar-remote-api 8.",
+    "types": "npm run typecheck: exit 0.",
+    "lint": "Scoped ESLint theo task: exit 0.",
+    "build": "npm run build: exit 0; /simulate/jar-test là dynamic route.",
+    "e2e_desktop": "Official Chromium: 6/7 PASS, 1 FAIL tại line 190 do locator ambiguous; output riêng test-results/tl1-jar04-review/e2e-desktop và e2e-desktop.log.",
+    "e2e_mobile": "Official mobile (Pixel 7 emulation): 6/7 PASS, cùng lỗi line 190; output riêng e2e-mobile và e2e-mobile.log.",
+    "acid_smoke": "Existing acid 'Desktop basic layout' smoke: 1/1 PASS.",
+    "ui_detector": "Đã chạy launcher Windows với đúng bốn targets theo brief: exit 0, JSON []. Đây không phải chứng nhận toàn bộ UX/accessibility.",
+    "diff": "git diff base HEAD --check: PASS; tracked tree của reviewed HEAD sạch, không sửa application source.",
+    "scoped_alert_probe": "Bản sao ignored chỉ đổi locator line 190 thành region-scoped alert: two-tab test 2/2 PASS trên Chromium/mobile, giữ mọi expected/assertion. Probe không thay thế official test tại coder HEAD.",
+    "behavior_probes": "4/4 PASS: toàn lượt bằng bàn phím (pha→đo→đáp số→chọn→complete→reload) và injected one-shot post-commit IndexedDB read failure trên desktop/mobile. Retry giữ nguyên event actionId, liều đúng một lần 50 mg/L. Injection chỉ để kiểm chứng UI retry; không phải bằng chứng cloud runtime.",
+    "visual": "Đã xem screenshots setup, measured và completed desktop/mobile. Đã chụp và xem lại top-of-page viewport captures để tránh fixed header nằm giữa full-page capture do scroll. Viewport 1280/412 CSS px không tràn chiều ngang; một main landmark; full keyboard probe không có console/page errors.",
+    "goal": "DOM introHasPublic80PercentGoal=false trên cả desktop/mobile; source workbench không render JAR_PROFILE.goalRemovalPercent. Căn cứ: docs/superpowers/specs/2026-10-13-simulation-v1-design.md:29; docs/superpowers/plans/2026-10-13-jar-test-first-slice.md:44.",
+    "ci": "GitHub connector không trả PR-triggered workflow run tại f381337; required CI chưa được xác nhận.",
+    "cleanup": "Đã dừng đúng Next process TL1 PID 57988, localhost:3174 không còn listener; không dùng server, env files hoặc checkout TL2. Logs/probes/screenshots nằm trong ignored test-results/tl1-jar04-review."
+  },
+  "env": "Windows; Node v24.16.0; npm 11.13.0; Next 16.3.4 production server và Playwright Chromium/Pixel 7 emulation. Checkout thực sau bàn giao: C:/Users/MrThien/.codex/worktrees/tl1-jar02-review/Chemistry; branch chore/tl1-jar04-review tại f38133767b6c377e75e37e5af3b6a487e5687bcd, tracked tree sạch. Review/task artifacts được publish riêng trên nhánh điều phối.",
+  "limits": [
+    "JAR-04 chưa được nghiệm thu vì hai findings còn mở; các probes pass không thay thế official E2E đang fail.",
+    "Authenticated cloud UI, thiết bị mobile thật, toàn bộ accessibility và đánh giá presentation/UX của TL2 chưa được nghiệm thu. Không dùng hosted Supabase; không kiểm chứng hóa học thực nghiệm.",
+    "Chưa mở PR, merge, deploy hoặc bắt đầu Task 5. Kết quả này chỉ bàn giao review; bản sửa R1 cần handback và kiểm chứng lại tại SHA mới."
+  ],
+  "next": "fix_findings"
+}
