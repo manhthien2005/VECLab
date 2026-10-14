@@ -60,7 +60,8 @@ test('selects a side card before opening it and supports a horizontal swipe', as
   const side = cards.nth(1)
   const box = await side.boundingBox()
   if (!box) throw new Error('Side card must be visible')
-  await page.mouse.click(box.x + box.width - 12, box.y + box.height / 2)
+  const visibleRight = Math.min(box.x + box.width, page.viewportSize()!.width)
+  await page.mouse.click(visibleRight - 12, box.y + box.height / 2)
   await expect(side).toHaveAttribute('data-active', 'true')
   await expect(side.locator('details')).not.toHaveAttribute('open', '')
   await expect.poll(() => side.evaluate((el) => {
