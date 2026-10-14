@@ -4,12 +4,23 @@ const ROUTE = '/simulate/jar-test'
 
 async function begin(page: Page): Promise<string> {
   await page.goto(ROUTE)
+  await expect(page.getByTestId('jar-public-goal'))
+    .toContainText('giảm độ đục ít nhất 80%')
+  await expect(page.getByTestId('jar-public-goal'))
+    .toContainText('không phải ngưỡng chất lượng nước')
   await page.getByRole('button', { name: 'Bắt đầu thí nghiệm Jar Test' }).click()
   await expect(page).toHaveURL(/\/simulate\/jar-test\?attempt=[0-9a-f-]{36}$/)
   const id = new URL(page.url()).searchParams.get('attempt')
   if (!id) throw new Error('Start did not persist an attempt ID')
   await expect(page.getByText('Revision 0')).toBeVisible()
+  await expect(page.getByTestId('jar-public-goal'))
+    .toContainText('giảm độ đục ít nhất 80%')
   return id
+}
+
+async function captureFromTop(page: Page, path: string): Promise<void> {
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await page.screenshot({ path, fullPage: true })
 }
 
 async function prepare(page: Page, cup: 'A' | 'B', ph: '7' | '9'): Promise<void> {
@@ -49,7 +60,7 @@ test.describe('Jar Test 2D — persisted guest workbench', () => {
     await prepare(page, 'B', '9')
     await dose(page, 'B', '150')
 
-    await page.screenshot({ path: testInfo.outputPath('jar-desktop-setup.png'), fullPage: true })
+    await captureFromTop(page, testInfo.outputPath('jar-desktop-setup.png'))
     await runPhases(page)
 
     await page.getByRole('button', { name: /^Cốc A,/ }).click()
@@ -72,12 +83,16 @@ test.describe('Jar Test 2D — persisted guest workbench', () => {
 
     await page.reload()
     await expect(page).toHaveURL(new RegExp('attempt=' + id))
+    await expect(page.getByTestId('jar-public-goal'))
+      .toContainText('giảm độ đục ít nhất 80%')
+    await expect(page.getByTestId('jar-public-goal'))
+      .toContainText('không phải ngưỡng chất lượng nước')
     await expect(page.getByText('Thời gian mô phỏng: 3060 giây')).toBeVisible()
     await expect(page.getByRole('row', { name: /Cốc A/ })).toContainText('150')
     await expect(page.getByRole('row', { name: /Cốc B/ })).toContainText('16,5125')
     await expect(page.getByTestId('jar-submitted-cup')).toHaveText('Cốc B')
 
-    await page.screenshot({ path: testInfo.outputPath('jar-measured-before-completion.png'), fullPage: true })
+    await captureFromTop(page, testInfo.outputPath('jar-measured-before-completion.png'))
     await page.getByRole('button', { name: 'Hoàn thành và lưu lượt Jar Test' }).click()
     await expect(page.getByRole('heading', { name: 'Đã hoàn thành và lưu lượt' })).toBeVisible()
     const revision = await page.getByText(/^Revision \d+$/).textContent()
@@ -85,7 +100,7 @@ test.describe('Jar Test 2D — persisted guest workbench', () => {
     await expect(page.getByText(revision ?? 'missing revision')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Đã hoàn thành và lưu lượt' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Hoàn thành và lưu lượt Jar Test' })).toHaveCount(0)
-    await page.screenshot({ path: testInfo.outputPath('jar-completed.png'), fullPage: true })
+    await captureFromTop(page, testInfo.outputPath('jar-completed.png'))
   })
 
   test('early invalid reading and incomplete submission retain N/A', async ({ page }) => {
@@ -187,7 +202,8 @@ test.describe('Jar Test 2D — persisted guest workbench', () => {
       await expect(page.getByTestId('jar-dose')).toHaveText('50 mg/L')
       await other.getByLabel('Liều tăng (mg/L)').selectOption('100')
       await other.getByRole('button', { name: 'Thêm 100 mg/L vào cốc A' }).click()
-      await expect(other.getByRole('alert')).toContainText('Lượt đã thay đổi ở tab khác')
+      await expect(other.getByRole('region', { name: 'Bàn thí nghiệm Jar Test' })
+        .getByRole('alert')).toContainText('Lượt đã thay đổi ở tab khác')
       await expect(other.getByTestId('jar-dose')).toHaveText('0 mg/L')
       await other.getByRole('button', { name: 'Tải lại dữ liệu mới nhất' }).click()
       await expect(other.getByTestId('jar-dose')).toHaveText('50 mg/L')

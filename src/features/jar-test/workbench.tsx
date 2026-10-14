@@ -98,6 +98,16 @@ function refusalMessage(outcome: JarActionResult | JarCompletionResult): Issue {
   }
 }
 
+function JarLearningGoal() {
+  return (
+    <p className={styles.lead} data-testid="jar-public-goal">
+      <strong>Mục tiêu học tập:</strong> tìm phương án giảm độ đục ít nhất{' '}
+      {JAR_PROFILE.goalRemovalPercent}% theo mô hình Jar Test.
+      Đây không phải ngưỡng chất lượng nước hoặc chứng nhận nước an toàn để uống hay xả thải.
+    </p>
+  )
+}
+
 /**
  * Local and cloud share the accepted JarSession contract. Only drafts and
  * qualitative motion live in UI state; all chemistry comes from a committed view.
@@ -302,6 +312,7 @@ export function JarWorkbench({ attemptId, invalidAttempt = false, storageMode }:
           <p className={styles.lead}>Một mẻ gồm tối đa sáu cốc A–F, sử dụng mẫu kaolin
             tổng hợp và phèn nhôm. Tự chọn pH ban đầu, liều xử lý, đo độ đục,
             tính hiệu suất và chọn cốc nộp.</p>
+          <JarLearningGoal />
           <p>Mỗi cốc dùng 0,5 L mẫu trong cốc 1 L. Chương trình khuấy/lắng cố định
             và chạy theo thời gian mô phỏng, không cần chờ ngoài đời thực.</p>
           <div className={styles.actionRow}>
@@ -339,6 +350,7 @@ export function JarWorkbench({ attemptId, invalidAttempt = false, storageMode }:
             </div>
             <span className={styles.idText}>Mã lượt: {view.attemptId}</span>
           </div>
+          <JarLearningGoal />
           {issue && (
             <div className={styles.status + ' ' + styles.error} role="alert">
               <p>{issue.message}</p>
