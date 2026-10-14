@@ -5,7 +5,7 @@ import type { AcidNeutralizationState } from '@/domain/experiments/acid-neutrali
 import type { JarState } from '@/domain/experiments/jar-test/model.js'
 import { JAR_PROFILE } from '@/domain/experiments/jar-test/model.js'
 import { ACID_RELEASE_ID } from '@/domain/experiments/acid-neutralization/index.js'
-import type { UUID } from '@/domain/process/contracts.js'
+import type { DomainError, UUID } from '@/domain/process/contracts.js'
 import { preconditionFailed, unsupportedRelease } from '@/shared/errors/domain-errors.js'
 import { toEventRecordDto, toReportDto, toSessionStateDto, toSummaryDto } from '@/application/simulation/wire.js'
 import {
@@ -56,6 +56,29 @@ async function guarded<Value>(
 type Scenario = 'acid-neutralization' | 'jar-test'
 type Absent = { ok: false; outcome: 'not_found' }
 type Unsupported = { ok: false; error: ReturnType<typeof unsupportedRelease> }
+
+/** Public teaching-context fields only. Never expose stored/computed hashes or replay internals. */
+const PUBLIC_JAR_ERROR_DATA_KEYS = [
+  'actionType', 'cupId', 'parameter', 'unit', 'phase', 'status',
+  'expectedRevision', 'currentRevision',
+] as const
+
+function publicJarError(error: DomainError): DomainError {
+  const data: DomainError['data'] = {}
+  for (const key of PUBLIC_JAR_ERROR_DATA_KEYS) {
+    const value = error.data[key]
+    if (value === null || typeof value === 'string' || typeof value === 'boolean' ||
+        (typeof value === 'number' && Number.isFinite(value))) {
+      data[key] = value
+    }
+  }
+  return {
+    category: error.category,
+    code: error.code,
+    messageKey: error.messageKey,
+    data,
+  }
+}
 
 /**
  * Ownership-before-dispatch gate: the service-role repository has an immutable
@@ -114,7 +137,7 @@ export function loadAttempt(attemptId: UUID) {
     if (scenario === 'jar-test') {
       const loaded = await jarSession(context.userId).load(attemptId)
       if (loaded === null) return { ok: false as const, outcome: 'not_found' as const }
-      if (!loaded.ok) return { ok: false as const, error: loaded.error }
+      if (!loaded.ok) return { ok: false as const, error: publicJarError(loaded.error) }
       return { ok: true as const, state: toJarSessionDto(loaded.state) }
     }
     const loaded = await context.session.load(attemptId)
@@ -136,9 +159,10 @@ export function applyAction(
       const result = await jarSession(context.userId).apply(
         attemptId, actionType, parameters, unitSelections, commit,
       )
-      return result.ok
-        ? { ok: true as const, state: toJarSessionDto(result.state), feedback: result.feedback }
-        : result
+      if (!result.ok) {
+        return 'error' in result ? { ...result, error: publicJarError(result.error) } : result
+      }
+      return { ok: true as const, state: toJarSessionDto(result.state), feedback: result.feedback }
     }
     const result = await context.session.apply(attemptId, actionType, parameters, unitSelections, commit)
     return result.ok
@@ -167,12 +191,15 @@ export function completeAttempt(attemptId: UUID, commit: CommitIdentity) {
   return guardedAttempt(attemptId, async (scenario, context) => {
     if (scenario === 'jar-test') {
       const result = await jarSession(context.userId).complete(attemptId, commit)
-      return result.ok ? {
+      if (!result.ok) {
+        return 'error' in result ? { ...result, error: publicJarError(result.error) } : result
+      }
+      return {
         ok: true as const,
         state: toJarSessionDto(result.state),
         report: toJarReportDto(result.report),
         idempotentReplay: result.idempotentReplay,
-      } : result
+      }
     }
     const result = await context.session.complete(attemptId, commit)
     return result.ok
@@ -192,8 +219,8 @@ export function listAttempts(limit?: number) {
 }
 
 /** Jar events are explicit learner-safe DTOs; never spread persisted records. */
-export function listEvents(attemptId: UUID) {
-  return guardedAttempt(attemptId, async (scenario, context) => {
+export async function listEvents(attemptId: UUID) {
+  const found = await guardedAttempt(attemptId, async (scenario, context) => {
     if (scenario === 'jar-test') {
       const records = await new SupabaseAttemptRepository<JarState>(context.userId)
         .getAttemptEventRecords(attemptId)
@@ -201,6 +228,13 @@ export function listEvents(attemptId: UUID) {
     }
     return { events: (await context.session.listEvents(attemptId)).map(toEventRecordDto) }
   })
+  // Acid's established GET-events contract is {events:[]} for unknown IDs.
+  // Ownership was checked before dispatch, so neither a foreign ID nor an
+  // absent one exposes its scenario or returns a distinguishable response.
+  if (found.ok && 'outcome' in found.value && found.value.outcome === 'not_found') {
+    return { ...found, value: { events: [] } }
+  }
+  return found
 }
 
 /**

@@ -10,6 +10,7 @@ import {
   fromJarReportDto, fromJarSessionDto, toJarEventDto, toJarReportDto, toJarSessionDto,
 } from '@/application/simulation/jar-wire.js'
 import { RemoteJarSession } from '@/application/simulation/remote-jar-session.js'
+import { RemoteAcidSession } from '@/application/simulation/remote-session.js'
 import { createJarSession } from '@/application/simulation/jar-session.js'
 import { fromSessionStateDto } from '@/application/simulation/wire.js'
 import { parseBody, startAttemptSchema } from '@/app/api/simulation/schemas.js'
@@ -25,6 +26,7 @@ import { POST as undoRoute } from '@/app/api/simulation/attempts/[attemptId]/und
 const actors = vi.hoisted(() => ({
   current: '11111111-1111-4111-8111-111111111111' as string | null,
   owners: new Map<string, string>(),
+  corruptFor: null as string | null,
 }))
 const ALICE = '11111111-1111-4111-8111-111111111111'
 const BOB = '22222222-2222-4222-8222-222222222222'
@@ -78,7 +80,14 @@ vi.mock('@/application/attempts/supabase-repository.js', async () => {
         return this.store.completeAttempt(input)
       }
       async getAttemptEvents(id: UUID) {
-        return actors.owners.get(id) === this.user ? this.store.getAttemptEvents(id) : []
+        if (actors.owners.get(id) !== this.user) return []
+        const events = await this.store.getAttemptEvents(id)
+        // Simulate a persisted chain whose private stored hash was corrupted.
+        return id === actors.corruptFor
+          ? events.map((event, index) => index === 0
+            ? { ...event, stateAfterHash: 'private-corrupted-stored-hash' }
+            : event)
+          : events
       }
       async getAttemptEventRecords(id: UUID) {
         return actors.owners.get(id) === this.user ? this.store.getAttemptEventRecords(id) : []
@@ -124,6 +133,7 @@ describe('Jar BFF scenario dispatch and learner boundaries (storage mocked via I
       await new GuestAttemptRepository<unknown>().deleteAttempt(row.attemptId)
     }
     actors.owners.clear()
+    actors.corruptFor = null
   })
   afterEach(() => { actors.current = ALICE })
 
@@ -192,8 +202,9 @@ describe('Jar BFF scenario dispatch and learner boundaries (storage mocked via I
     const foreign = await outcomes(id)
     const missing = await outcomes(absent)
     expect(foreign).toEqual(missing)
-    for (const item of foreign) expect(item).toEqual({
-      status: 200, body: { ok: false, outcome: 'not_found' },
+    for (const [index, item] of foreign.entries()) expect(item).toEqual({
+      status: 200,
+      body: index === 1 ? { events: [] } : { ok: false, outcome: 'not_found' },
     })
     const foreignDelete = await deleteRoute(req('DELETE', `${root}/${id}`, {}), route(id))
     const absentDelete = await deleteRoute(req('DELETE', `${root}/${absent}`, {}), route(absent))
@@ -206,6 +217,70 @@ describe('Jar BFF scenario dispatch and learner boundaries (storage mocked via I
     const owned = await loadRoute(req('GET', `${root}/${id}`), route(id))
     expect(owned.status).toBe(200)
     expect((await owned.json()).state.attemptId).toBe(id)
+  })
+
+  it('keeps missing/foreign/deleted acid GET-events compatible with RemoteAcidSession', async () => {
+    const acid = await (await createRoute(req('POST', root, {}))).json()
+    const id = acid.state.attemptId as UUID
+    const missing = newUUID()
+    const originalFetch = globalThis.fetch
+    // Exercise the actual remote decoder against the real route handler, not a
+    // hardcoded JSON fixture. The mock repository still enforces actor ownership.
+    globalThis.fetch = (async (input: string | URL | Request) => {
+      const url = new URL(String(input), 'http://localhost:3000')
+      const attemptId = url.pathname.split('/').at(-2)
+      if (!attemptId) throw new Error('missing attempt segment')
+      return eventsRoute(req('GET', url.pathname), route(attemptId))
+    }) as typeof fetch
+    try {
+      const remote = new RemoteAcidSession()
+      actors.current = BOB
+      expect(await remote.listEvents(id)).toEqual([])
+      expect(await remote.listEvents(missing)).toEqual([])
+      actors.current = ALICE
+      const deleted = await deleteRoute(req('DELETE', `${root}/${id}`, {}), route(id))
+      expect(deleted.status).toBe(200)
+      expect(await remote.listEvents(id)).toEqual([])
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+
+  it('redacts private replay hashes from Jar load, apply and complete errors', async () => {
+    const started = await (await createRoute(req('POST', root, { scenarioKey: 'jar-test' }))).json()
+    const id = started.state.attemptId as UUID
+    expect((await act(id, 'prepare_cup', { cupId: 'A', initialPh: 9 })).ok).toBe(true)
+    actors.corruptFor = id
+
+    const responses = await Promise.all([
+      loadRoute(req('GET', `${root}/${id}`), route(id)),
+      actionRoute(req('POST', `${root}/${id}/actions`, {
+        attemptId: id, actionId: newUUID(), expectedRevision: null,
+        actionType: 'measure_initial', parameters: {}, unitSelections: {},
+      }), route(id)),
+      completeRoute(req('POST', `${root}/${id}/complete`, {
+        attemptId: id, actionId: newUUID(), expectedRevision: null,
+      }), route(id)),
+    ])
+    for (const response of responses) {
+      expect(response.status).toBe(200)
+      const outcome = await response.json()
+      expect(outcome).toMatchObject({
+        ok: false,
+        error: { code: 'STATE_HASH_MISMATCH', data: {} },
+      })
+      expect(outcome.error.data).toEqual({})
+      const body = JSON.stringify(outcome)
+      expect(body).not.toContain('storedHash')
+      expect(body).not.toContain('computedHash')
+      expect(body).not.toContain('private-corrupted-stored-hash')
+    }
+    // No operation must repair or commit the corrupted chain silently.
+    const stored = await new GuestAttemptRepository<JarState>().getAttempt(id)
+    expect(stored?.lastSequence).toBe(1)
+    actors.corruptFor = null
+    const healthy = await loadRoute(req('GET', `${root}/${id}`), route(id))
+    expect((await healthy.json()).ok).toBe(true)
   })
 
   it('commits Jar intent once and returns only learner-safe events, report and retries', async () => {

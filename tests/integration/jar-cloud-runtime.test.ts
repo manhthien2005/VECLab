@@ -116,7 +116,7 @@ describe.runIf(enabled)('Jar cloud local HTTP + real Supabase (two learners)', (
         cupId: 'A', incrementMgL: 150,
       }, doseId, 2)
       expect(retry.data.feedback.idempotentReplay).toBe(true)
-      expect(retry.data.state.projection.cups[0].doseMgL).toBe(150)
+      expect(retry.data.state.projection.cups[0]?.doseMgL).toBe(150)
       expect((await action(cookieA, id, 'add_coagulant', {
         cupId: 'A', incrementMgL: 50,
       }, doseId, 2)).data.outcome).toBe('idempotency_conflict')
@@ -127,10 +127,10 @@ describe.runIf(enabled)('Jar cloud local HTTP + real Supabase (two learners)', (
         expect((await action(cookieA, id, 'run_phase', { phase })).data.ok).toBe(true)
       }
       const measured = await action(cookieA, id, 'measure_final', { cupId: 'A' })
-      expect(round(measured.data.state.projection.cups[0].measurements[0].valueNtu)).toBe(16.5125)
-      expect(measured.data.state.projection.cups[0].measuredRemovalPercent).toBeNull()
+      expect(round(measured.data.state.projection.cups[0]?.measurements[0]?.valueNtu ?? null)).toBe(16.5125)
+      expect(measured.data.state.projection.cups[0]?.measuredRemovalPercent).toBeNull()
       expect((await action(cookieA, id, 'record_result', { cupId: 'A', removalPercent: 86.79 }))
-        .data.state.projection.cups[0].measuredRemovalPercent).toBeNull()
+        .data.state.projection.cups[0]?.measuredRemovalPercent).toBeNull()
       expect((await action(cookieA, id, 'select_result', { cupId: 'A' })).data.ok).toBe(true)
       const history = await call(cookieA, 'GET', `/${id}/events`)
       expect(history.status).toBe(200)
@@ -149,7 +149,7 @@ describe.runIf(enabled)('Jar cloud local HTTP + real Supabase (two learners)', (
       const reopened = await call(cookieA, 'GET', `/${id}`)
       expect(reopened.data.state.status).toBe('completed')
       expect(reopened.data.state.report).toEqual(finished.data.report)
-      expect(reopened.data.state.projection.cups[0].doseMgL).toBe(150)
+      expect(reopened.data.state.projection.cups[0]?.doseMgL).toBe(150)
       expect(reopened.data.state.report?.resources.reagents.alum?.amount).toBeCloseTo(0.075, 12)
 
       // The guest path executes the same locked release, independently of the BFF.
