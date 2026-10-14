@@ -1,0 +1,46 @@
+{
+  "v": 1,
+  "kind": "result",
+  "id": "UI-02-R1",
+  "coder": 2,
+  "repo": "manhthien2005/VECLab",
+  "branch": "fix/coder-2-ui02-review",
+  "base": "9b642ecd0ea97edab6e025bf974088a267b1d8c1",
+  "head": "1a670bd3b69b63698b38f30a2dec93571647bb27",
+  "status": "needs_changes",
+  "checks": {
+    "unit": "pass",
+    "types": "pass",
+    "lint": "pass",
+    "diff": "pass",
+    "ui_desktop": "fail",
+    "ui_mobile": "fail",
+    "build": "pass"
+  },
+  "changes": [
+    "Four changed files match the assigned allowlist. Automatic dark hero, demo button contrast and regular-size badge overlap are fixed; no app edits by local reviewer.",
+    "UI remains available at http://127.0.0.1:3002/ from the reviewed production build."
+  ],
+  "issues": [
+    "P2 R1-F1 — src/app/globals.css:2820 (showcase title),2672 (card), e2e/showcase-interaction.spec.ts:65-66: at390px and200% root text, methylene overflows the heading by51px and is visibly cropped by the card. Other scaled-width tests report2px vertical overflow; the1440px screenshot shows readable title ink, so distinguish actual ancestor clipping from natural glyph paint beyond the line box. Fix long-word wrapping/adequate Vietnamese leading; do not reduce the requested text scale or raise overflow tolerances arbitrarily.",
+    "P2 R1-F2 — e2e/hero-experiential.spec.ts:54-63,75: explicit dark assertion reads foreground during the existing200ms body color transition (globals.css:333), yielding1.1212:1. The same unmodified test passes with reducedMotion=reduce in a diagnostic config; automatic-dark cases and manually settled explicit modes pass. Wait for the intended computed contrast using a bounded auto-retrying assertion, not fixed sleeps or removal of the contrast checks. Keep coverage for persistent bad colors."
+  ],
+  "env": "Windows; Node24.16.0; npm11.13.0; Next16.3.4; isolated coder2 worktree.",
+  "evidence": {
+    "unit": "6/6 pass; logs/ui02-r1-review/unit.log.",
+    "types": "npm run typecheck exit0; logs/ui02-r1-review/types.log.",
+    "lint": "Assigned scoped ESLint exit0; logs/ui02-r1-review/lint.log.",
+    "diff": "git diff 9b642ecd0ea97edab6e025bf974088a267b1d8c1 1a670bd3b69b63698b38f30a2dec93571647bb27 --check exit0.",
+    "ui_desktop": "28/33 pass,5 fail: explicit-theme contrast and four200% text cases.",
+    "ui_mobile": "28/33 pass,5 fail; combined56/66 in50.5s, baseURL127.0.0.1:3002, workers2. Official failures retained in logs/ui02-r1-review/e2e.log and logs/ui02-r1-review/failures/ with PNG/context/trace.",
+    "build": "npm run build exit0; logs/ui02-r1-review/build.log.",
+    "probe": "Unmodified explicit light/dark test with isolated logs/ui02-r1-review/contrast-probe.config.cjs (reducedMotion=reduce):1/1 pass. Diagnostic only; official checks remain fail. logs/ui02-r1-review/contrast-probe.log.",
+    "browser": "System dark without data-theme: ink#f1f5f9 on#0b1528→#090e17; settled explicit light/dark correct. Light mobile demo after click: white on#006b70 (~6.29:1),26.00mL and pHChưa đo. Badge/title gap12px at1279px. Screenshots in logs/ui02-r1-review/.",
+    "preview": "http://127.0.0.1:3002/; detached hidden Node server PID44628, pidfile logs/ui02-r1-review/server.pid. Verify listener and command before stopping it. Main checkout/port3000 and TL1 worktree untouched."
+  },
+  "limits": [
+    "Dependency lock mismatch is inherited and unchanged; used the existing manifest-resolved local installation from prior review. No clean-install/CI/Vercel success claim.",
+    "200% coverage here changes root font size, not native browser zoom. No physical-device/Safari, cloud/database testing, merge or deployment."
+  ],
+  "next": "fix_findings"
+}
