@@ -1,5 +1,7 @@
 # Landing page — audit và gói sửa UI-02
 
+> **Cập nhật quyết định 14/10/2026:** Người dùng đã từ chối giao diện UI-02/R2 vì giản lược quá mạnh. [Contract giữ thiết kế gốc](landing-preservation-contract.md) thay thế các chỉ dẫn bỏ biểu đồ, bỏ panel, thay minh họa hoặc rút cấu trúc ở tài liệu này. Giữ audit làm bằng chứng lịch sử; copy deck và các chỉ dẫn xóa không còn là yêu cầu tự động triển khai.
+
 Ngày 14/10/2026. Owner: TL2 / coder 2. Người dùng yêu cầu giữ cấu trúc landing hiện tại, sửa lời văn, cập nhật ba bài, giảm giải thích thừa và cải thiện thiết kế/chuyển động. Đây là quyền triển khai landing; các ảnh gen chưa phải thiết kế được duyệt.
 
 ## Nền và bằng chứng
