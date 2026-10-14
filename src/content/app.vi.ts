@@ -25,106 +25,46 @@ export const APP_STRINGS = {
   },
 
   home: {
-    /**
-     * Hero, per the approved landing design package
-     * (design.md §9 — the wording that shipped in `reference/approved-landing.png`).
-     * Three short lines rather than one sentence, so the headline reads in one glance.
-     */
-    heroEyebrow: 'Nền tảng mô phỏng hóa học cho giáo dục',
-    heroHeadline: ['Thử quy trình.', 'Thấy kết quả.', 'Hiểu vì sao.'],
-    lede: 'Mô phỏng hóa học và môi trường theo từng thao tác. Thay đổi thông số, quan sát trạng thái và hiểu cơ sở khoa học phía sau kết quả.',
-    heroPrimaryCta: 'Bắt đầu trải nghiệm',
-    heroSecondaryCta: 'Xem cách hoạt động',
-    /** §4.1 "Cảnh báo giới hạn mô hình" — must stay beside the hero CTA, not in a footer. */
-    modelWarning:
-      'Đây là công cụ học tập. Kết quả là pH* mô hình ở 25 °C và 0,1 MPa, không phải phép đo bench và không dùng để vận hành hay suy liều cho mẫu thật.',
-
-    trustItems: [
-      { label: 'An toàn, không rủi ro', hint: 'Không cần đăng ký, dùng thử an toàn ở chế độ khách' },
-      { label: 'Học qua thực hành', hint: 'Thao tác từng bước, cân bằng hóa học xác thực' },
-      { label: 'Dựa trên nguồn khoa học', hint: 'Minh bạch, có căn cứ kiểm chứng' },
-    ],
-
-    learningValueHeading: 'Giá trị học tập',
-    learningValues: [
-      'Thao tác từng bước như quy trình thật: chọn chất, hiệu chuẩn, thêm liều, khuấy, chờ ổn định rồi mới đo.',
-      'pH* được giải từ cân bằng hóa học, không phải tra bảng — đổi mục tiêu sẽ đổi liều tương đương.',
-      'Điểm tách thành pH, tài nguyên và quy trình, luôn hiển thị từng thành phần.',
-      'Nguồn và giới hạn mô hình xuất hiện ngay trong lúc làm, không phải phụ lục.',
-    ],
-
-    /** §4.1 "Ba thẻ thí nghiệm" — MVP scope names all three (docs/core-project-scope.md §1),
-     * but only acid neutralization has a registered engine today
-     * (src/application/scenarios/registry.ts). The other two are shown honestly as
-     * upcoming rather than linked to an attempt that cannot start (system-architecture §2.4). */
-    showcaseEyebrow: 'Khám phá ngay',
-    showcaseHeading: '3 thí nghiệm mô phỏng',
-    showcaseLede: 'Những chủ đề tiêu biểu, sát thực tế, giúp bạn vừa học vừa khám phá.',
-    showcaseCtaLabel: 'Thử ngay',
-    comingSoonBadge: 'Sắp ra mắt',
-    comingSoonCta: 'Xem trước',
+    heroHeadline: ['Thực hành', 'xử lý nước.'],
+    lede: 'Chọn điều kiện, thao tác trên dụng cụ và dùng số đo để giải thích kết quả.',
+    heroPrimaryCta: 'Chọn bài thực hành',
+    heroSecondaryCta: 'Xem bàn mô phỏng',
+    modelWarning: 'Mô phỏng phục vụ học tập; không dùng kết quả để xử lý mẫu nước thật.',
+    showcaseHeading: 'Ba bài thực hành',
+    showcaseLede: 'Hiện có bản thực hành pH; Jar Test và hấp phụ đang phát triển.',
     showcaseCards: [
-      {
-        scenarioKey: 'acid-neutralization',
-        title: 'Trung hòa axit',
-        summary: 'Khám phá quá trình trung hòa, theo dõi sự thay đổi pH theo thời gian.',
-        available: true,
-      },
-      {
-        scenarioKey: 'copper-precipitation',
-        title: 'Kết tủa Cu²⁺',
-        summary: 'Quan sát quá trình tạo kết tủa, theo dõi nồng độ ion trong dung dịch.',
-        available: false,
-      },
-      {
-        scenarioKey: 'plastic-density-separation',
-        title: 'Phân loại nhựa',
-        summary: 'Tìm hiểu tính chất, tách và nhận diện các loại nhựa phổ biến.',
-        available: false,
-      },
+      { scenarioKey: 'acid-neutralization', title: 'Điều chỉnh pH',
+        summary: 'Khảo sát lượng NaOH cần thêm cho mẫu HCl tổng hợp.',
+        status: 'Bản hiện có', available: true, actionLabel: 'Thử bài pH',
+        href: '/simulate/acid-neutralization' },
+      { scenarioKey: 'jar-test', title: 'Jar Test',
+        summary: 'So sánh độ đục theo pH và liều alum sau khuấy, lắng.',
+        status: 'Đang phát triển', available: false, actionLabel: '', href: '' },
+      { scenarioKey: 'methylene-blue-adsorption', title: 'Hấp phụ xanh methylene',
+        summary: 'Khảo sát khả năng loại màu bằng than hoạt tính theo mẻ.',
+        status: 'Đang phát triển', available: false, actionLabel: '', href: '' },
     ],
-
-    workbenchEyebrow: 'Trải nghiệm chi tiết',
-    workbenchHeading: 'Chu kỳ trên workbench',
-    workbenchLede:
-      'Bốn nhịp như lab: chuẩn bị mẫu, thêm từng giọt NaOH, đọc pH*, xem đường cong. Minh họa dưới đây không tính cân bằng — mở không gian mô phỏng để đo thật.',
-    workbenchSteps: ['Chuẩn bị mẫu', 'Thêm từng giọt', 'Đọc pH', 'Xem đường cong'],
-    workbenchDemoCta: 'Thêm và đo 1,00 mL',
-    workbenchDemoReset: 'Đặt lại',
-    workbenchDemoFeedback:
-      'Đã thêm 1,00 mL (mô phỏng cục bộ). pH* không đổi trên minh họa. Mở không gian mô phỏng để tính cân bằng.',
+    workbenchHeading: 'Làm việc trên bàn mô phỏng',
+    workbenchLede: 'Chọn dụng cụ, thực hiện thao tác và ghi lại số đo.',
+    workbenchDemoCta: 'Xem thao tác thêm 1 mL',
+    workbenchDemoReset: 'Đặt lại minh họa',
+    workbenchDemoFeedback: 'Đã minh họa thêm 1 mL. Mở bài pH để thực hành.',
     workbenchReagent: 'NaOH 0,0100 M',
-    workbenchChartTitle: 'Đường cong pH',
-    workbenchIdleStatus: 'Minh họa',
-
-    evidenceEyebrow: 'Nền tảng vững chắc',
-    evidenceSectionHeading: 'Mỗi kết quả đều có căn cứ',
-    evidenceSectionLede:
-      'Các mô phỏng trong VECLab được xây dựng từ mô hình khoa học và tài liệu đáng tin cậy.',
+    workbenchIdleStatus: 'Minh họa thao tác',
+    evidenceSectionHeading: 'Mô hình, điều kiện và tài liệu',
+    evidenceSectionLede: 'Kiểm tra phạm vi và nguồn của từng mô hình trước khi dùng kết quả.',
     evidenceCards: [
-      {
-        title: 'Mô hình tính toán',
-        body: 'Dựa trên cân bằng hóa học và các hằng số đã được kiểm chứng.',
-      },
-      {
-        title: 'Công thức minh họa',
-        body: 'Cơ sở tính toán của quá trình, hiển thị ngay trong lúc làm.',
-      },
-      {
-        title: 'Nguồn tham khảo',
-        body: 'Tài liệu kỹ thuật và nghiên cứu khoa học có thể kiểm tra lại.',
-      },
+      { title: 'Phạm vi áp dụng', body: 'Mỗi bài có mẫu, điều kiện và giới hạn riêng.' },
+      { title: 'Cách tính', body: 'Giá trị được tính theo mô hình của bài, không phải phép đo mẫu thật.' },
+      { title: 'Tài liệu tham khảo', body: 'Nguồn khoa học và giả định có thể tra cứu theo phiên bản.' },
     ],
-
-    finalCtaHeading: 'Sẵn sàng vào lab?',
-    finalCtaLede: 'Khám phá thế giới hóa học và môi trường qua mô phỏng tương tác cùng VECLab.',
-    finalCtaButton: 'Bắt đầu ngay',
-
+    evidenceAction: 'Xem cơ sở mô phỏng',
+    finalCtaHeading: 'Chọn bài để bắt đầu.',
+    finalCtaButton: 'Chọn bài thực hành',
     catalogHeading: 'Thí nghiệm',
     catalogEmpty: 'Hiện chưa có thí nghiệm nào được khóa trong phiên bản triển khai này.',
     startGuest: 'Bắt đầu không cần tài khoản',
-    guestNote:
-      'Chế độ khách thực hiện đầy đủ thí nghiệm và lưu trên trình duyệt này. Tạo tài khoản để tiếp tục trên thiết bị khác và mở lại báo cáo.',
+    guestNote: 'Chế độ khách thực hiện đầy đủ thí nghiệm và lưu trên trình duyệt này. Tạo tài khoản để tiếp tục trên thiết bị khác và mở lại báo cáo.',
   },
 
   experimentDetail: {

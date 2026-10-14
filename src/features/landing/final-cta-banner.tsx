@@ -1,50 +1,20 @@
-import Link from 'next/link'
 import { APP_STRINGS } from '@/content/index.js'
-import { ArrowRightIcon, FlaskIcon } from './icons.js'
+import { ArrowRightIcon } from './icons.js'
 
-interface FinalCtaBannerProps {
-  scenarioKey?: string | undefined
-}
-
-/**
- * Final CTA Section (docs/web-application-scope.md §4.1).
- *
- * Implements the approved mint/cyan surface standard from reference/approved-landing.png:
- * - Spacious rounded surface with subtle clinical mint/cyan wash.
- * - Circular emblem with laboratory icon.
- * - Bold concise heading and supporting lede.
- * - Dominant, highly accessible CTA button pointing to live Acid Neutralization simulation.
- * - Desktop horizontal composition and mobile stacked composition.
- * - Server Component.
- */
-export function FinalCtaBanner({ scenarioKey = 'acid-neutralization' }: FinalCtaBannerProps) {
+export function FinalCtaBanner() {
   const strings = APP_STRINGS.home
-
   return (
     <div className="final-cta-section reveal" data-reveal-variant="invite" aria-labelledby="final-cta-heading">
       <div className="final-cta-surface">
         <div className="final-cta-content">
-          <div className="final-cta-emblem" aria-hidden="true">
-            <FlaskIcon />
-          </div>
           <div className="final-cta-text">
-            <h2 id="final-cta-heading" className="final-cta-title">
-              {strings.finalCtaHeading}
-            </h2>
-            <p className="final-cta-desc">
-              {strings.finalCtaLede}
-            </p>
+            <h2 id="final-cta-heading" className="final-cta-title">{strings.finalCtaHeading}</h2>
           </div>
         </div>
-
         <div className="final-cta-action">
-          <Link
-            className="btn final-cta-btn"
-            href={`/simulate/${scenarioKey}`}
-          >
-            <span>{strings.finalCtaButton}</span>
-            <ArrowRightIcon />
-          </Link>
+          <a className="btn final-cta-btn" href="#showcase">
+            <span>{strings.finalCtaButton}</span><ArrowRightIcon aria-hidden="true" />
+          </a>
         </div>
       </div>
     </div>

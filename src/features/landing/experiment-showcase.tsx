@@ -1,135 +1,67 @@
 import Link from 'next/link'
 import { APP_STRINGS } from '@/content/index.js'
-import {
-  ArrowRightIcon,
-  FlaskIcon,
-  LayersIcon,
-  MoleculeIcon,
-  type IconComponent,
-} from './icons.js'
-import { AcidShowcaseVisual } from './acid-showcase-visual.js'
-import { CopperShowcaseVisual } from './copper-showcase-visual.js'
-import { PlasticShowcaseVisual } from './plastic-showcase-visual.js'
+import { ArrowRightIcon } from './icons.js'
 import { ShowcaseCarouselTrack } from './showcase-carousel-track.js'
 
-type BadgeTone = 'icon-badge-blue' | 'icon-badge-green' | 'icon-badge-teal'
-
-interface ShowcaseCardConfig {
-  scenarioKey: string
-  title: string
-  summary: string
-  isLive: boolean
-  Icon: IconComponent
-  tone: BadgeTone
-  VisualComponent: () => React.JSX.Element
+/** These diagrams are schematic only, not model-derived observations. */
+function ScenarioSketch({ scenarioKey }: { scenarioKey: string }) {
+  const jar = scenarioKey === 'jar-test'
+  const adsorption = scenarioKey === 'methylene-blue-adsorption'
+  return (
+    <svg className="landing-scenario-visual" viewBox="0 0 320 170" role="img"
+      aria-label={jar ? 'Minh họa hai cốc và hai cánh khuấy Jar Test' :
+        adsorption ? 'Minh họa bình tiếp xúc than hoạt tính theo mẻ' :
+        'Minh họa cốc và dụng cụ thêm NaOH'}>
+      <g fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M58 41v86q0 15 15 15h72q15 0 15-15V41" />
+        {jar ? <path d="M187 41v86q0 15 15 15h72q15 0 15-15V41" /> : null}
+        {jar ? <path d="M108 15v94m-15 0h30m115-94v94m-15 0h30" /> : null}
+        {!jar && !adsorption ? <path d="M110 7v77m-7 0h14M101 7h18" /> : null}
+        {adsorption ? <path d="M105 12v32m-7-12h14" /> : null}
+      </g>
+      <path d="M61 88h96v39q0 12-12 12H73q-12 0-12-12Z" fill="#3ba7ad" opacity=".3" />
+      {jar ? <path d="M190 94h96v33q0 12-12 12h-72q-12 0-12-12Z" fill="#3ba7ad" opacity=".19" /> : null}
+      {adsorption ? <g fill="currentColor" opacity=".65"><circle cx="95" cy="113" r="4"/><circle cx="120" cy="124" r="5"/><circle cx="139" cy="103" r="3"/><circle cx="80" cy="132" r="3"/></g> : null}
+      {!jar && !adsorption ? <g fill="#0284c7"><circle cx="110" cy="85" r="3"/><circle cx="110" cy="95" r="2"/></g> : null}
+      {jar ? <g fill="currentColor" opacity=".45"><circle cx="97" cy="116" r="3"/><circle cx="123" cy="125" r="4"/><circle cx="228" cy="118" r="3"/><circle cx="250" cy="128" r="5"/></g> : null}
+    </svg>
+  )
 }
-
-const SHOWCASE_CARDS: readonly ShowcaseCardConfig[] = [
-  {
-    scenarioKey: 'acid-neutralization',
-    title: 'Trung hòa axit',
-    summary: 'Khám phá quá trình trung hòa, theo dõi sự thay đổi pH theo thời gian.',
-    isLive: true,
-    Icon: FlaskIcon,
-    tone: 'icon-badge-blue',
-    VisualComponent: AcidShowcaseVisual,
-  },
-  {
-    scenarioKey: 'copper-precipitation',
-    title: 'Kết tủa Cu²⁺',
-    summary: 'Quan sát quá trình tạo kết tủa, theo dõi nồng độ ion trong dung dịch.',
-    isLive: false,
-    Icon: MoleculeIcon,
-    tone: 'icon-badge-green',
-    VisualComponent: CopperShowcaseVisual,
-  },
-  {
-    scenarioKey: 'plastic-density-separation',
-    title: 'Phân loại nhựa',
-    summary: 'Tìm hiểu tính chất, tách và nhận diện các loại nhựa phổ biến.',
-    isLive: false,
-    Icon: LayersIcon,
-    tone: 'icon-badge-teal',
-    VisualComponent: PlasticShowcaseVisual,
-  },
-]
 
 export function ExperimentShowcase() {
   const strings = APP_STRINGS.home
-
+  const cards = strings.showcaseCards
   return (
     <div className="experiment-showcase-section reveal" data-reveal-variant="focus">
-      {/* Centered Section Heading matching approved reference */}
       <div className="section-head-center">
-        <p className="eyebrow">{strings.showcaseEyebrow}</p>
         <h2 id="showcase-heading" className="showcase-main-heading">{strings.showcaseHeading}</h2>
         <p className="lede showcase-lede">{strings.showcaseLede}</p>
       </div>
-
-      {/* Accessible Interactive Showcase Track */}
-      <ShowcaseCarouselTrack totalSlides={SHOWCASE_CARDS.length} headingId="showcase-heading">
-        {SHOWCASE_CARDS.map((card, idx) => {
-          const { scenarioKey, title, summary, isLive, Icon, tone, VisualComponent } = card
-          const href = scenarioKey === 'plastic-density-separation'
-            ? '/simulate/plastic-density-separation'
-            : isLive
-              ? `/simulate/${scenarioKey}`
-              : '/experiments'
-
-          return (
-            <div
-              key={scenarioKey}
-              id={`showcase-slide-${idx}`}
-              role="group"
-              aria-roledescription="slide"
-              aria-label={`${idx + 1} / ${SHOWCASE_CARDS.length}: ${title}`}
-              className={`showcase-card ${isLive ? 'showcase-card-live' : 'showcase-card-preview'}`}
-              style={{ '--card-index': idx } as React.CSSProperties}
-              data-active={idx === 0 ? 'true' : undefined}
-            >
-              {/* Honest Capability / Status Badge */}
-              {!isLive ? (
-                <span className="showcase-status-badge showcase-status-upcoming">
-                  {strings.comingSoonBadge}
-                </span>
-              ) : (
-                <span className="showcase-status-badge showcase-status-live">
-                  Khả dụng
-                </span>
-              )}
-
-              {/* Card Header: Icon + Title + Summary */}
-              <div className="showcase-card-head">
-                <span className={`icon-badge ${tone} showcase-icon-box`} aria-hidden="true">
-                  <Icon />
-                </span>
-                <div className="showcase-card-title-group">
-                  <h3 className="showcase-card-title">{title}</h3>
-                  <p className="showcase-card-summary">{summary}</p>
-                </div>
-              </div>
-
-              {/* Dedicated Scientific Visual Stage */}
-              <div className="showcase-media-stage">
-                <VisualComponent />
-              </div>
-
-              {/* Card Bottom Action */}
-              <div className="showcase-card-footer">
-                <Link
-                  className={`showcase-cta-link ${isLive ? 'cta-live' : 'cta-preview'}`}
-                  href={href}
-                  aria-label={`${isLive ? strings.showcaseCtaLabel : strings.comingSoonCta}: ${title}`}
-                >
-                  <span>{isLive ? strings.showcaseCtaLabel : strings.comingSoonCta}</span>
-                  <ArrowRightIcon className="showcase-cta-arrow" />
-                </Link>
+      <ShowcaseCarouselTrack totalSlides={cards.length} headingId="showcase-heading">
+        {cards.map((card, idx) => (
+          <article key={card.scenarioKey} id={'showcase-slide-' + idx}
+            role="group" aria-roledescription="slide"
+            aria-label={(idx + 1) + ' / ' + cards.length + ': ' + card.title}
+            className={'showcase-card ' + (card.available ? 'showcase-card-live' : 'showcase-card-preview')}
+            data-active={idx === 0 ? 'true' : undefined}>
+            <span className={'showcase-status-badge ' + (card.available ? 'showcase-status-live' : 'showcase-status-upcoming')}>{card.status}</span>
+            <div className="showcase-card-head">
+              <div className="showcase-card-title-group">
+                <h3 className="showcase-card-title">{card.title}</h3>
+                <p className="showcase-card-summary">{card.summary}</p>
               </div>
             </div>
-          )
-        })}
+            <div className="showcase-media-stage"><ScenarioSketch scenarioKey={card.scenarioKey} /></div>
+            <div className="showcase-card-footer">
+              {card.available ? (
+                <Link className="showcase-cta-link cta-live" href={card.href}>
+                  <span>{card.actionLabel}</span><ArrowRightIcon className="showcase-cta-arrow" aria-hidden="true" />
+                </Link>
+              ) : <span className="showcase-unavailable">Nội dung bài đang được xây dựng</span>}
+            </div>
+          </article>
+        ))}
       </ShowcaseCarouselTrack>
     </div>
   )
 }
-

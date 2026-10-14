@@ -17,7 +17,7 @@ import './globals.css'
  */
 
 const SITE_DESCRIPTION =
-  'Nền tảng mô phỏng quy trình xử lý nước có căn cứ khoa học: mỗi con số đi kèm công thức, nguồn và giới hạn mô hình.'
+  'VECLab giúp sinh viên thực hành xử lý nước qua mô phỏng, quan sát và giải thích số đo theo giới hạn từng bài.'
 
 export const metadata: Metadata = {
   title: {
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'vi_VN',
     siteName: 'VECLab',
-    title: 'VECLab — Mô phỏng quy trình hóa học có căn cứ khoa học',
+    title: 'VECLab — Thực hành xử lý nước qua mô phỏng',
     description: SITE_DESCRIPTION,
   },
   formatDetection: { telephone: false, address: false, email: false },
@@ -133,7 +133,7 @@ function SiteFooter() {
               </span>
               <span className="brand-name">{APP_STRINGS.brand}</span>
             </Link>
-            <p className="footer-tagline">Khoa học hôm nay. Tương lai ngày mai.</p>
+            
           </div>
 
           <AppFooterNav />
@@ -141,16 +141,9 @@ function SiteFooter() {
 
         <div className="footer-legal">
           <div className="footer-disclaimers">
-            <p>
-              Giá trị pH hiển thị là pH* — kết quả mô hình tính từ nồng độ H⁺ với hệ số hoạt
-              độ bằng 1, không phải phép đo bench. Mô hình áp dụng ở 25 °C và 0,1 MPa, hệ
-              carbon kín; không dùng để suy ra liều xử lý cho mẫu thật chưa biết thành phần.
-            </p>
-            <p>
-              Thí nghiệm thật chỉ thực hiện dưới sự giám sát của người phụ trách phòng thí
-              nghiệm, với trang bị bảo hộ phù hợp. Công cụ giáo dục — không thay thế phép đo,
-              jar test, thiết kế kỹ thuật, đánh giá an toàn, quản lý chất thải hoặc kết luận
-              tuân thủ pháp luật.
+            <p>VECLab phục vụ học tập. Kết quả phụ thuộc mô hình và điều kiện của từng bài;
+              không thay thế phép đo hoặc quy trình xử lý nước thực tế.
+              {' '}<Link href="/evidence">Nguồn và giới hạn</Link>
             </p>
           </div>
           <div className="footer-legal-row">
