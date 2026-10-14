@@ -2822,7 +2822,9 @@ td[data-numeric],
   font-size: 1.25rem;
   font-weight: 720;
   margin: 0 0 var(--space-2);
-  line-height: var(--leading-tight);
+  /* At 200% text scaling, long lesson names must wrap inside narrow cards. */
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .showcase-card-summary {

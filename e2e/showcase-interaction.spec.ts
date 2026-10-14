@@ -34,14 +34,16 @@ test.describe('UI-02 lesson showcase', () => {
   })
 })
 
-/** Geometry regression: visible text assertions cannot detect absolute badge overlap. */
+/** Measure actual text fragments against the clipped card instead of treating the
+ * 1-2px glyph ink beyond a line box (scrollHeight) as text clipping. */
 for (const width of [390, 768, 1279, 1440]) {
-  test('UI02-F3: badge does not cover methylene title at ' + width + 'px or 200% text', async ({ page }) => {
+  test('UI02-F3: badge and complete methylene title at ' + width + 'px, including 200% text', async ({ page }) => {
     await page.setViewportSize({ width, height: 900 })
     await page.goto('/')
     const card = page.locator('.showcase-card').nth(2)
     const badge = card.locator('.showcase-status-badge')
     const title = card.locator('.showcase-card-title')
+
     const inspect = async (phase: string) => {
       await card.scrollIntoViewIfNeeded()
       await expect(title).toHaveText('Hấp phụ xanh methylene')
@@ -49,21 +51,43 @@ for (const width of [390, 768, 1279, 1440]) {
         const badgeNode = node.querySelector<HTMLElement>('.showcase-status-badge')
         const titleNode = node.querySelector<HTMLElement>('.showcase-card-title')
         if (!badgeNode || !titleNode) throw new Error('Badge/title missing')
+
+        const cardRect = node.getBoundingClientRect()
         const badgeRect = badgeNode.getBoundingClientRect()
         const titleRect = titleNode.getBoundingClientRect()
+        const cardStyle = getComputedStyle(node)
+        const range = document.createRange()
+        range.selectNodeContents(titleNode)
+        const textFragments = Array.from(range.getClientRects()).filter((rect) => rect.width > 0 && rect.height > 0)
+        // The card has overflow:hidden; its content box is safely inside the clip.
+        const contentBounds = {
+          left: cardRect.left + parseFloat(cardStyle.paddingLeft),
+          right: cardRect.right - parseFloat(cardStyle.paddingRight),
+          top: cardRect.top + parseFloat(cardStyle.paddingTop),
+          bottom: cardRect.bottom - parseFloat(cardStyle.paddingBottom),
+        }
+        const precision = 1 / window.devicePixelRatio
         return {
           badgePosition: getComputedStyle(badgeNode).position,
           verticalGap: titleRect.top - badgeRect.bottom,
           badgeOverflow: badgeNode.scrollWidth - badgeNode.clientWidth,
           titleOverflow: titleNode.scrollWidth - titleNode.clientWidth,
-          titleVerticalOverflow: titleNode.scrollHeight - titleNode.clientHeight,
+          textFragmentCount: textFragments.length,
+          // Require every rendered text fragment to fit within the card's
+          // clipped ancestor rather than trusting element visibility alone.
+          textClipped: textFragments.some((rect) =>
+            rect.left < contentBounds.left - precision ||
+            rect.right > contentBounds.right + precision ||
+            rect.top < contentBounds.top - precision ||
+            rect.bottom > contentBounds.bottom + precision),
         }
       })
       expect(geometry.badgePosition, phase + ': badge must be in normal flow').toBe('static')
       expect(geometry.verticalGap, phase + ': badge overlaps the title').toBeGreaterThanOrEqual(0)
       expect(geometry.badgeOverflow, phase + ': badge clips text').toBeLessThanOrEqual(1)
-      expect(geometry.titleOverflow, phase + ': title clips text horizontally').toBeLessThanOrEqual(1)
-      expect(geometry.titleVerticalOverflow, phase + ': title clips lines').toBeLessThanOrEqual(1)
+      expect(geometry.titleOverflow, phase + ': heading overflows horizontally').toBeLessThanOrEqual(1)
+      expect(geometry.textFragmentCount, phase + ': no text fragments').toBeGreaterThan(0)
+      expect(geometry.textClipped, phase + ': title intersects the clipped card edge').toBe(false)
     }
 
     await expect(badge).toContainText('Đang phát triển')

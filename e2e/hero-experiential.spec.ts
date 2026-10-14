@@ -47,21 +47,27 @@ function contrastRatio(first: [number, number, number], second: [number, number,
 }
 
 async function expectReadableHero(page: import('@playwright/test').Page, label: string) {
-  const colors = await page.locator('.hero').evaluate((hero) => {
-    const heading = hero.querySelector<HTMLElement>('.hero-headline')
-    if (!heading) throw new Error('Hero heading missing')
-    return {
-      foreground: getComputedStyle(heading).color,
-      ground: getComputedStyle(hero).backgroundImage,
+  // The inherited heading color transitions for 200ms on theme changes.
+  // Poll computed contrast until it settles, rather than accepting an in-flight frame.
+  await expect.poll(async () => {
+    const colors = await page.locator('.hero').evaluate((hero) => {
+      const heading = hero.querySelector<HTMLElement>('.hero-headline')
+      if (!heading) throw new Error('Hero heading missing')
+      return {
+        foreground: getComputedStyle(heading).color,
+        ground: getComputedStyle(hero).backgroundImage,
+      }
+    })
+    const text = opaqueRgbValues(colors.foreground)[0]
+    const groundStops = opaqueRgbValues(colors.ground).slice(-2)
+    if (!text || groundStops.length !== 2) {
+      throw new Error(label + ': unable to read the heading and both opaque gradient stops')
     }
-  })
-  const text = opaqueRgbValues(colors.foreground)[0]
-  const groundStops = opaqueRgbValues(colors.ground).slice(-2)
-  expect(text, label + ': missing computed heading color').toBeDefined()
-  expect(groundStops, label + ': expected two opaque hero gradient stops').toHaveLength(2)
-  for (const stop of groundStops) {
-    expect(contrastRatio(text!, stop), label + ': hero heading lacks contrast').toBeGreaterThanOrEqual(4.5)
-  }
+    return Math.min(...groundStops.map((stop) => contrastRatio(text, stop)))
+  }, {
+    message: label + ': contrast with both hero gradient stops',
+    timeout: 3_000,
+  }).toBeGreaterThanOrEqual(4.5)
 }
 
 test('UI02-F1: automatic system dark with empty storage keeps hero readable', async ({ page }) => {
