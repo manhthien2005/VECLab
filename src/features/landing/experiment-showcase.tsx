@@ -14,15 +14,25 @@ export function ExperimentShowcase() {
   const strings = APP_STRINGS.home
   return (
     <div className="experiment-showcase-section">
-      <svg className="showcase-background-art" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
-        <defs><pattern id="showcase-tech-dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="0.8" fill="currentColor" /></pattern></defs>
-        <g fill="url(#showcase-tech-dots)" opacity="0.22"><rect x="28" y="100" width="220" height="180" /><rect x="1200" y="470" width="240" height="240" /></g>
-        <g fill="none" stroke="currentColor" strokeWidth="1" opacity="0.3">
-          <path d="M0 370h120l65 110h150M1440 200h-120l-65 110h-155M0 660h320l45-78h220M1440 640h-260l-45-78h-190" />
-          <path d="m110 320 22-38h44l22 38-22 38h-44ZM1260 390l28-48h56l28 48-28 48h-56Z" />
-          <path d="M80 710h1280" strokeDasharray="2 10" />
+      <svg className="showcase-background-art" viewBox="0 0 1440 820" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <defs><pattern id="showcase-tech-dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="0.9" fill="currentColor" /></pattern></defs>
+        <g fill="url(#showcase-tech-dots)" opacity="0.28">
+          <rect x="32" y="28" width="250" height="140" /><rect x="1170" y="28" width="238" height="140" />
+          <rect x="110" y="690" width="200" height="100" /><rect x="1130" y="690" width="200" height="100" />
         </g>
-        <g fill="currentColor" opacity="0.45"><circle cx="335" cy="480" r="3" /><circle cx="1100" cy="310" r="3" /><circle cx="585" cy="582" r="3" /><circle cx="945" cy="562" r="3" /></g>
+        <g fill="none" stroke="currentColor" strokeWidth="1.2" opacity="0.32">
+          <path d="M0 105h140l36 62h184M1440 105h-140l-36 62h-184" />
+          <path d="M0 220h70l42 73v140M1440 220h-70l-42 73v140" />
+          <path d="M0 740h300l40-70h210M1440 740h-300l-40-70H890" />
+          <path d="m300 72 18-31h36l18 31-18 31h-36Zm768 0 18-31h36l18 31-18 31h-36Z" />
+          <ellipse cx="720" cy="590" rx="590" ry="108" opacity="0.7" />
+          <ellipse cx="720" cy="590" rx="640" ry="135" strokeDasharray="2 12" opacity="0.6" />
+        </g>
+        <g fill="currentColor" opacity="0.55">
+          <circle cx="360" cy="167" r="3" /><circle cx="1080" cy="167" r="3" />
+          <circle cx="112" cy="433" r="3" /><circle cx="1328" cy="433" r="3" />
+          <circle cx="550" cy="670" r="3" /><circle cx="890" cy="670" r="3" />
+        </g>
       </svg>
       <div className="section-head-center">
         <p className="eyebrow">{strings.showcaseEyebrow}</p>

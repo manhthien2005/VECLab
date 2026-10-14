@@ -37,6 +37,10 @@ test('centers cards using next, previous and keyboard without moving the page ve
   await expect(cards.nth(2)).toHaveAttribute('data-active', 'true')
   await page.getByRole('button', { name: 'Thí nghiệm trước đó', exact: true }).click()
   await expect(cards.nth(1)).toHaveAttribute('data-active', 'true')
+  for (let step = 0; step < 6; step++) {
+    await page.getByRole('button', { name: 'Thí nghiệm trước đó', exact: true }).click()
+    await expect(cards.nth(((1 - step - 1) % 3 + 3) % 3)).toHaveAttribute('data-active', 'true')
+  }
   await cards.nth(1).locator('summary').focus()
   const top = await page.evaluate(() => scrollY)
   await page.keyboard.press('ArrowLeft')
@@ -79,4 +83,17 @@ test('selects a side card before opening it and supports a horizontal swipe', as
   await page.mouse.up()
   await expect(cards.nth(2)).toHaveAttribute('data-active', 'true')
   await expect(page).toHaveURL(/#showcase$/)
+})
+
+test('uses rotation normally and brief opacity feedback with reduced motion', async ({ page }) => {
+  const card = page.locator('.showcase-card').first()
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await expect(card).toHaveCSS('transition-duration', '0.68s, 0.38s')
+  await page.getByRole('button', { name: 'Thí nghiệm tiếp theo', exact: true }).click()
+  await expect.poll(() => card.evaluate((el) => el.getAnimations().some(animation => animation.effect?.getTiming().duration === 680))).toBe(true)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.getByRole('button', { name: 'Chuyển đến thí nghiệm 3', exact: true }).click()
+  const selected = page.locator('.showcase-card').nth(2)
+  await expect(selected).toHaveCSS('transition-duration', '0s')
+  await expect(selected).toHaveCSS('animation-duration', '0.18s')
 })

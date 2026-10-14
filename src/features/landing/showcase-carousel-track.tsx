@@ -10,14 +10,18 @@ interface ShowcaseCarouselTrackProps {
 
 /** Three positions form a circular picker; native card contents retain their actions. */
 export function ShowcaseCarouselTrack({ children, totalSlides, headingId }: ShowcaseCarouselTrackProps) {
-  const [activeIndex, setActiveIndex] = useState(0)
+  const [activeStep, setActiveStep] = useState(0)
   const trackRef = useRef<HTMLDivElement>(null)
   const gesture = useRef<{ x: number; y: number } | null>(null)
   const suppressClick = useRef(false)
-  const wrap = (index: number) => (index + totalSlides) % totalSlides
+  const wrap = (index: number) => ((index % totalSlides) + totalSlides) % totalSlides
+  const activeIndex = wrap(activeStep)
   const select = (index: number, focus = false) => {
     const next = wrap(index)
-    setActiveIndex(next)
+    setActiveStep((step) => {
+      const distance = wrap(next - wrap(step))
+      return step + (distance > totalSlides / 2 ? distance - totalSlides : distance)
+    })
     if (focus) trackRef.current?.children[next]?.querySelector<HTMLElement>('a, summary')?.focus({ preventScroll: true })
   }
 
@@ -55,7 +59,7 @@ export function ShowcaseCarouselTrack({ children, totalSlides, headingId }: Show
           if (!(event.target as HTMLElement).matches(':focus-visible')) return
           const card = (event.target as HTMLElement).closest('.showcase-card')
           const index = Array.from(trackRef.current?.children ?? []).indexOf(card as Element)
-          if (index >= 0) setActiveIndex(index)
+          if (index >= 0) select(index)
         }}
         onKeyDown={(event) => {
           if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
@@ -68,6 +72,7 @@ export function ShowcaseCarouselTrack({ children, totalSlides, headingId }: Show
           const offset = wrap(idx - activeIndex)
           return cloneElement(child, {
             'data-active': String(idx === activeIndex),
+            style: { ...child.props.style as React.CSSProperties, '--ring-angle': `${(idx - activeStep) * 120}deg` } as React.CSSProperties,
             'data-position': offset === 0 ? 'center' : offset === 1 ? 'right' : 'left',
           })
         })}
