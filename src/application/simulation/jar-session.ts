@@ -4,7 +4,9 @@ import type {
 import { createInitialResourceLedger } from '@/domain/process/ledger.js'
 import { replayEvents, normalizeParameters } from '@/domain/process/lifecycle.js'
 import { requestFingerprint, stateHash } from '@/domain/process/hashing.js'
-import { modelInvalid, preconditionFailed, unsupportedRelease } from '@/shared/errors/domain-errors.js'
+import {
+  modelInvalid, preconditionFailed, revisionConflict, unsupportedRelease,
+} from '@/shared/errors/domain-errors.js'
 import { newUUID } from '@/shared/ids.js'
 import {
   createJarModule, JAR_PROFILE,
@@ -21,6 +23,8 @@ import type {
 import { commitAction } from './commit-action.js'
 
 const engine = createJarModule()
+/** Repository reads are separate transactions; retry a changing snapshot, never forever. */
+const MAX_COHERENT_READS = 4
 export type JarCommitIdentity = { actionId?: UUID; expectedRevision?: number }
 export type JarWriteRefusal = Extract<WriteResult<JarState>, { ok: false }>
 
@@ -117,31 +121,58 @@ export function createJarSession(repository: AttemptRepository<JarState>): JarSe
   async function requireAttempt(
     attemptId: UUID,
   ): Promise<{ ok: true; loaded: Loaded } | { ok: false; error: DomainError } | null> {
-    const attempt = await repository.getAttempt(attemptId)
-    if (attempt === null) return null
+    for (let read = 0; read < MAX_COHERENT_READS; read += 1) {
+      const attempt = await repository.getAttempt(attemptId)
+      if (attempt === null) return null
 
-    // Discriminator and release BEFORE reading the initial/current state or replaying.
-    if (attempt.scenarioKey !== 'jar-test' ||
-        attempt.scenarioReleaseId !== JAR_PROFILE.releaseId) {
-      return { ok: false, error: unsupportedRelease(attempt.scenarioReleaseId) }
-    }
-    if (attempt.initialState?.profileId !== JAR_PROFILE.id ||
-        attempt.initialState?.profileVersion !== JAR_PROFILE.version ||
-        attempt.projectionVersion !== JAR_PROJECTION_VERSION) {
-      return { ok: false, error: unsupportedRelease(attempt.scenarioReleaseId) }
-    }
-    const events = await repository.getAttemptEvents(attemptId)
-    const replay = replayEvents(attempt.initialState, createInitialResourceLedger(), events)
-    if (!replay.ok) return { ok: false, error: replay.error }
-    if (events.length !== attempt.lastSequence ||
-        stateHash(replay.state) !== stateHash(attempt.currentState)) {
-      return {
-        ok: false, error: invalidChain({
-          expectedSequence: attempt.lastSequence, actualSequence: events.length,
-        }),
+      // Check discriminator/release BEFORE casting or replaying foreign state.
+      if (attempt.scenarioKey !== 'jar-test' ||
+          attempt.scenarioReleaseId !== JAR_PROFILE.releaseId) {
+        return { ok: false, error: unsupportedRelease(attempt.scenarioReleaseId) }
+      }
+      if (attempt.initialState?.profileId !== JAR_PROFILE.id ||
+          attempt.initialState?.profileVersion !== JAR_PROFILE.version ||
+          attempt.projectionVersion !== JAR_PROJECTION_VERSION) {
+        return { ok: false, error: unsupportedRelease(attempt.scenarioReleaseId) }
+      }
+
+      // Attempt and events have independent read transactions. An action may
+      // commit between them: a newer event chain is not evidence of tampering
+      // against the older attempt snapshot. Re-read both as a pair, bounded.
+      const events = await repository.getAttemptEvents(attemptId)
+      const replay = replayEvents(attempt.initialState, createInitialResourceLedger(), events)
+      if (!replay.ok) return { ok: false, error: replay.error }
+      if (events.length === attempt.lastSequence &&
+          stateHash(replay.state) === stateHash(attempt.currentState)) {
+        return { ok: true, loaded: { attempt, ledger: replay.ledger } }
+      }
+      if (read === MAX_COHERENT_READS - 1) {
+        // The read budget ended. Distinguish ongoing legitimate writes
+        // from a stable yet inconsistent persisted chain. Never label a
+        // changing revision as tampering.
+        const latest = await repository.getAttempt(attemptId)
+        if (latest === null) return null
+        if (latest.scenarioKey !== 'jar-test' ||
+            latest.scenarioReleaseId !== JAR_PROFILE.releaseId) {
+          return { ok: false, error: unsupportedRelease(latest.scenarioReleaseId) }
+        }
+        if (latest.revision !== attempt.revision ||
+            latest.lastSequence !== attempt.lastSequence) {
+          return {
+            ok: false, error: revisionConflict({
+              attemptId, expectedRevision: attempt.revision, currentRevision: latest.revision,
+            }),
+          }
+        }
+        return {
+          ok: false, error: invalidChain({
+            expectedSequence: attempt.lastSequence, actualSequence: events.length,
+          }),
+        }
       }
     }
-    return { ok: true, loaded: { attempt, ledger: replay.ledger } }
+    // Defensive unreachable branch; the loop either reads a coherent pair or refuses.
+    return { ok: false, error: invalidChain({}) }
   }
 
   function view(attempt: Attempt<JarState>): JarSessionView {
@@ -243,9 +274,14 @@ export function createJarSession(repository: AttemptRepository<JarState>): JarSe
       )
       if (duplicate.kind === 'conflict') return duplicate.result
       if (duplicate.kind === 'replay') {
+        // The event lookup may have observed a commit newer than 'attempt'.
+        // Refresh the coherent attempt + ledger so revision, dose and report
+        // always describe the same stored snapshot.
+        const fresh = await readAfterWrite(attemptId)
+        if (!fresh.ok) return fresh
         return {
           ok: true,
-          state: view(attempt),
+          state: fresh.state,
           feedback: {
             actionType, sequence: duplicate.record.sequence, idempotentReplay: true,
           },
@@ -326,11 +362,16 @@ export function createJarSession(repository: AttemptRepository<JarState>): JarSe
       const duplicate = await existingAction(attemptId, commit.actionId, 'complete', {}, {})
       if (duplicate.kind === 'conflict') return duplicate.result
       if (duplicate.kind === 'replay') {
-        const existing = view(attempt)
-        if (existing.report === null) {
+        // A concurrent complete may have committed after our initial read.
+        // Load its immutable report from the now-completed stored attempt.
+        const fresh = await readAfterWrite(attemptId)
+        if (!fresh.ok) return fresh
+        if (fresh.state.report === null) {
           return { ok: false, error: invalidChain({ sequence: duplicate.record.sequence }) }
         }
-        return { ok: true, state: existing, report: existing.report, idempotentReplay: true }
+        return {
+          ok: true, state: fresh.state, report: fresh.state.report, idempotentReplay: true,
+        }
       }
       if (commit.expectedRevision !== undefined && commit.expectedRevision !== attempt.revision) {
         return { ok: false, outcome: 'revision_conflict', currentRevision: attempt.revision }

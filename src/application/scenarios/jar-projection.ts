@@ -67,7 +67,11 @@ export function projectJar(state: JarState): JarProjection {
         doseMgL: cup.totalDoseMgL,
         measurements: cup.measurements.map(reading),
         submittedRemovalPercent: cup.submittedRemovalPercent,
-        measuredRemovalPercent: measuredJarRemoval(state, cup),
+        // The learner can see the measured NTU but not the model-derived
+        // expected calculation before submission/completion, even after recording.
+        measuredRemovalPercent: state.phase === 'completed'
+          ? measuredJarRemoval(state, cup)
+          : null,
       }]
     }),
     selectedCupId: state.submission.selectedCupId,

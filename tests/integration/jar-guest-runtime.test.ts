@@ -1,6 +1,8 @@
 import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it } from 'vitest'
 import type { SimulationAction, UUID } from '@/domain/process/contracts.js'
+import type { StoredEvent } from '@/domain/process/lifecycle.js'
+import type { AttemptRepository } from '@/application/attempts/repository.js'
 import { GuestAttemptRepository } from '@/application/attempts/guest-repository.js'
 import { createAcidSession } from '@/application/simulation/acid-session.js'
 import type { AcidNeutralizationState } from '@/domain/experiments/acid-neutralization/state.js'
@@ -15,6 +17,47 @@ function session(): JarSession {
   return createJarSession(repository())
 }
 type Parameters = SimulationAction['parameters']
+
+/**
+ * Deterministic read hooks over the real IndexedDB adapter. A second session
+ * commits while this session is between two public repository reads. No fake
+ * mutable state or mocking of replay/commit behavior.
+ */
+function interleavedRepository(hooks: {
+  afterGetAttempt?: (id: UUID) => Promise<void>
+  beforeGetEventRecords?: (id: UUID) => Promise<void>
+  afterAppendAction?: (id: UUID) => Promise<void>
+  alterEvents?: (events: readonly StoredEvent<JarState>[]) => readonly StoredEvent<JarState>[]
+}): AttemptRepository<JarState> {
+  const underlying = repository()
+  return {
+    storageMode: underlying.storageMode,
+    async getAttempt(id) {
+      const snapshot = await underlying.getAttempt(id)
+      await hooks.afterGetAttempt?.(id)
+      return snapshot
+    },
+    createAttempt: (input) => underlying.createAttempt(input),
+    async appendAction(input) {
+      const written = await underlying.appendAction(input)
+      if (written.ok && written.outcome === 'committed') {
+        await hooks.afterAppendAction?.(input.attemptId)
+      }
+      return written
+    },
+    completeAttempt: (input) => underlying.completeAttempt(input),
+    listAttempts: (filter) => underlying.listAttempts(filter),
+    deleteAttempt: (id) => underlying.deleteAttempt(id),
+    async getAttemptEvents(id) {
+      const stored = await underlying.getAttemptEvents(id)
+      return hooks.alterEvents?.(stored) ?? stored
+    },
+    async getAttemptEventRecords(id) {
+      await hooks.beforeGetEventRecords?.(id)
+      return underlying.getAttemptEventRecords(id)
+    },
+  }
+}
 
 async function step(
   active: JarSession,
@@ -200,6 +243,171 @@ describe('Jar Task 2 guest session through IndexedDB', () => {
     expect((await repository().getAttempt(attempt.attemptId))?.revision).toBe(1)
   })
 
+  it('load reconciles a newer event chain observed after an older attempt snapshot', async () => {
+    const other = session()
+    const started = await other.start()
+    await step(other, started.attemptId, 'prepare_cup', { cupId: 'A', initialPh: 7 })
+    await step(other, started.attemptId, 'measure_initial')
+    let reads = 0
+    const racing = createJarSession(interleavedRepository({
+      async afterGetAttempt(id) {
+        reads += 1
+        if (reads === 1) {
+          await step(other, id, 'add_coagulant', { cupId: 'A', incrementMgL: 50 })
+        }
+      },
+    }))
+    const loaded = await racing.load(started.attemptId)
+    if (!loaded || !loaded.ok) throw new Error('valid interleaved load refused')
+    expect(reads).toBe(2)
+    expect(loaded.state.revision).toBe(3)
+    expect(loaded.state.projection.cups[0]?.doseMgL).toBe(50)
+    expect(loaded.state.projection.initialMeasurement?.valueNtu).toBe(125)
+    expect(loaded.state.lastSequence).toBe(3)
+  })
+
+  it('read-after-write reconciles another tab committing between attempt and events reads', async () => {
+    const other = session()
+    let armed = false
+    let injected = false
+    const racing = createJarSession(interleavedRepository({
+      async afterAppendAction() { armed = true },
+      async afterGetAttempt(id) {
+        if (armed && !injected) {
+          injected = true
+          await step(other, id, 'measure_initial')
+        }
+      },
+    }))
+    const started = await racing.start()
+    const result = await racing.apply(started.attemptId, 'prepare_cup',
+      { cupId: 'A', initialPh: 7 })
+    if (!result.ok) throw new Error('read-after-write refused')
+    expect(injected).toBe(true)
+    expect(result.state.revision).toBe(2)
+    expect(result.state.lastSequence).toBe(2)
+    expect(result.state.projection.initialMeasurement?.valueNtu).toBe(125)
+    expect(result.feedback.sequence).toBe(1)
+    expect((await repository().getAttempt(started.attemptId))?.revision).toBe(2)
+  })
+
+  it('duplicate apply discovered after initial load returns current revision, dose and event', async () => {
+    const other = session()
+    const started = await other.start()
+    await step(other, started.attemptId, 'prepare_cup', { cupId: 'A', initialPh: 7 })
+    await step(other, started.attemptId, 'measure_initial')
+    const actionId = newUUID()
+    let injected = false
+    const racing = createJarSession(interleavedRepository({
+      async beforeGetEventRecords(id) {
+        if (!injected) {
+          injected = true
+          await step(other, id, 'add_coagulant', { cupId: 'A', incrementMgL: 50 },
+            { actionId, expectedRevision: 2 })
+        }
+      },
+    }))
+    const reply = await racing.apply(started.attemptId, 'add_coagulant',
+      { cupId: 'A', incrementMgL: 50 }, {}, { actionId, expectedRevision: 2 })
+    if (!reply.ok) throw new Error('identical duplicate apply refused')
+    expect(injected).toBe(true)
+    expect(reply.feedback).toMatchObject({ sequence: 3, idempotentReplay: true })
+    expect(reply.state.revision).toBe(3)
+    expect(reply.state.projection.cups[0]?.doseMgL).toBe(50)
+    const events = await repository().getAttemptEventRecords(started.attemptId)
+    expect(events.filter((event) => event.actionId === actionId)).toHaveLength(1)
+    expect((await repository().getAttempt(started.attemptId))?.currentState.cups.A?.totalDoseMgL)
+      .toBe(50)
+  })
+
+  it('duplicate completion discovered after initial load returns stored immutable report', async () => {
+    const other = session()
+    const started = await other.start()
+    await step(other, started.attemptId, 'prepare_cup', { cupId: 'A', initialPh: 9 })
+    await step(other, started.attemptId, 'measure_initial')
+    await step(other, started.attemptId, 'add_coagulant',
+      { cupId: 'A', incrementMgL: 150 })
+    const actionId = newUUID()
+    let injected = false
+    let storedReport: import('@/application/scenarios/jar-projection.js').JarReportSnapshot | null = null
+    const racing = createJarSession(interleavedRepository({
+      async beforeGetEventRecords(id) {
+        if (!injected) {
+          injected = true
+          const done = await other.complete(id, { actionId, expectedRevision: 3 })
+          if (!done.ok) throw new Error('concurrent completion refused')
+          storedReport = done.report
+        }
+      },
+    }))
+    const result = await racing.complete(started.attemptId, {
+      actionId, expectedRevision: 3,
+    })
+    if (!result.ok) throw new Error('identical completed retry refused')
+    expect(injected).toBe(true)
+    expect(result.idempotentReplay).toBe(true)
+    expect(result.state.status).toBe('completed')
+    expect(result.state.revision).toBe(4)
+    expect(result.state.projection.cups[0]?.doseMgL).toBe(150)
+    expect(result.report).toEqual(storedReport)
+    expect(result.report.resources.reagents.alum?.amount).toBeCloseTo(0.075, 12)
+    const events = await repository().getAttemptEventRecords(started.attemptId)
+    expect(events.filter((event) => event.actionType === 'completed')).toHaveLength(1)
+  })
+
+  it('exhausted reads during continuous valid writes return conflict, not a tampering error', async () => {
+    const other = session()
+    const started = await other.start()
+    await step(other, started.attemptId, 'prepare_cup', { cupId: 'A', initialPh: 7 })
+    await step(other, started.attemptId, 'measure_initial')
+    let reads = 0
+    const racing = createJarSession(interleavedRepository({
+      async afterGetAttempt(id) {
+        reads += 1
+        if (reads <= 4) {
+          await step(other, id, 'add_coagulant', { cupId: 'A', incrementMgL: 50 })
+        }
+      },
+    }))
+    const reply = await racing.load(started.attemptId)
+    expect(reply).toMatchObject({
+      ok: false, error: { category: 'conflict', code: 'REVISION_CONFLICT' },
+    })
+    expect(reads).toBe(5)
+    expect((await repository().getAttempt(started.attemptId))?.currentState.cups.A?.totalDoseMgL)
+      .toBe(200)
+  })
+
+  it('bounds incoherent reads and still rejects genuinely tampered hashes', async () => {
+    const valid = session()
+    const started = await valid.start()
+    await step(valid, started.attemptId, 'prepare_cup', { cupId: 'A', initialPh: 7 })
+    let reads = 0
+    const truncated = createJarSession(interleavedRepository({
+      async afterGetAttempt() { reads += 1 },
+      alterEvents: () => [],
+    }))
+    const inconsistent = await truncated.load(started.attemptId)
+    expect(inconsistent).toMatchObject({
+      ok: false, error: { code: 'STATE_HASH_MISMATCH' },
+    })
+    expect(reads).toBe(5) // Four pairs plus one final stability read.
+
+    let hashReads = 0
+    const corrupted = createJarSession(interleavedRepository({
+      async afterGetAttempt() { hashReads += 1 },
+      alterEvents: (events) => events.map((event) => ({
+        ...event, stateAfterHash: 'tampered-hash',
+      })),
+    }))
+    const invalid = await corrupted.load(started.attemptId)
+    expect(invalid).toMatchObject({
+      ok: false, error: { code: 'STATE_HASH_MISMATCH' },
+    })
+    expect(hashReads).toBe(1)
+    expect((await repository().getAttempt(started.attemptId))?.revision).toBe(1)
+  })
+
   it('wrong_release_is_not_cast_to_jar before projection, replay or writing', async () => {
     const acid = createAcidSession(new GuestAttemptRepository<AcidNeutralizationState>())
     const foreign = await acid.start()
@@ -268,11 +476,24 @@ describe('Jar Task 2 guest session through IndexedDB', () => {
     expect(beforeRead.state.report).toBeNull()
     const after = await step(active, attemptId, 'measure_final', { cupId: 'A' })
     expect(after.projection.cups[0]?.measurements[1]?.valueNtu).toBeCloseTo(16.5125, 8)
-    expect(after.projection.cups[0]?.measuredRemovalPercent).toBeCloseTo(86.79, 8)
+    expect(after.projection.cups[0]?.measuredRemovalPercent).toBeNull()
     expect(after.report).toBeNull()
     expect(JSON.stringify(after)).not.toContain('arithmeticCorrect')
     expect(JSON.stringify(after)).not.toContain('reference')
     expect(JSON.stringify(after)).not.toContain('goalMet')
+
+    // Entering the learner's own calculation must not reveal the model answer.
+    const submitted = await step(active, attemptId, 'record_result',
+      { cupId: 'A', removalPercent: 86.79 })
+    expect(submitted.projection.cups[0]?.submittedRemovalPercent).toBe(86.79)
+    expect(submitted.projection.cups[0]?.measuredRemovalPercent).toBeNull()
+    const reopened = await active.load(attemptId)
+    if (reopened === null || !reopened.ok) throw new Error('reload refused')
+    expect(reopened.state.projection.cups[0]?.measuredRemovalPercent).toBeNull()
+    const completed = await active.complete(attemptId)
+    if (!completed.ok) throw new Error('complete refused')
+    expect(completed.report.cups[0]?.measuredRemovalPercent).toBeCloseTo(86.79, 8)
+    expect(completed.state.projection.cups[0]?.measuredRemovalPercent).toBeCloseTo(86.79, 8)
   })
 
   it('report diagnostics cite persisted action IDs and preserve invalid/missing as null', async () => {
