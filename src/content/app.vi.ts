@@ -88,22 +88,22 @@ export const APP_STRINGS = {
       'Chọn điều kiện, quan sát quá trình và đo kết quả. Cuối mỗi lượt, xem lại các bước để hiểu vì sao kết quả khác nhau.',
     workbenchSteps: ['Chuẩn bị mẫu', 'Chọn điều kiện', 'Khuấy và lắng', 'Đo và ghi kết quả'],
 
-    evidenceEyebrow: 'Nền tảng vững chắc',
+    evidenceEyebrow: 'Cơ sở khoa học',
     evidenceSectionHeading: 'Mỗi kết quả đều có căn cứ',
     evidenceSectionLede:
-      'Các mô phỏng trong VECLab được xây dựng từ mô hình khoa học và tài liệu đáng tin cậy.',
+      'Xem cách mô hình tính kết quả, điều kiện áp dụng và tài liệu được sử dụng.',
     evidenceCards: [
       {
-        title: 'Mô hình tính toán',
-        body: 'Dựa trên cân bằng hóa học và các hằng số đã được kiểm chứng.',
+        title: 'Mô hình và giới hạn',
+        body: 'Xem điều kiện áp dụng và các giả định của mô hình.',
       },
       {
-        title: 'Công thức minh họa',
-        body: 'Cơ sở tính toán của quá trình, hiển thị ngay trong lúc làm.',
+        title: 'Cách tính kết quả',
+        body: 'Theo dõi công thức, đơn vị và các đại lượng trong phép tính.',
       },
       {
-        title: 'Nguồn tham khảo',
-        body: 'Tài liệu kỹ thuật và nghiên cứu khoa học có thể kiểm tra lại.',
+        title: 'Tài liệu tham khảo',
+        body: 'Tra cứu tài liệu gốc, phân biệt dữ liệu có nguồn với giả định.',
       },
     ],
 
