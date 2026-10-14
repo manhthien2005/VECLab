@@ -23,13 +23,13 @@ export default async function JarTestPage({ searchParams }: JarPageProps) {
     (typeof attempt !== 'string' || attempt.length === 0)
   const attemptId = typeof attempt === 'string' && attempt.length > 0 ? attempt : null
   return (
-    <main className="page stack">
+    <div className="page stack">
       <header className="stack-tight">
         <h1>Bàn thí nghiệm Jar Test</h1>
         <p className="muted">Keo tụ · Tạo bông · Lắng · Đo độ đục</p>
       </header>
       <JarWorkbench attemptId={attemptId} invalidAttempt={invalidAttempt}
         storageMode={storageMode} />
-    </main>
+    </div>
   )
 }
