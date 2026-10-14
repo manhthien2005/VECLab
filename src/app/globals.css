@@ -1627,7 +1627,8 @@ td[data-numeric],
 }
 
 .hero {
-  --hero-ground: #f5f8fa;
+  --hero-ground: #f4f8fc;
+  --hero-pattern-opacity: 0.5;
   position: relative;
   overflow: hidden;
   border-bottom: 1px solid var(--border);
@@ -1640,17 +1641,19 @@ td[data-numeric],
   width: 100%;
   height: 100%;
   color: var(--accent);
-  opacity: 0.12;
+  opacity: var(--hero-pattern-opacity);
   pointer-events: none;
 }
 
 [data-theme='dark'] .hero {
   --hero-ground: #0b1528;
+  --hero-pattern-opacity: 0.24;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) .hero {
     --hero-ground: #0b1528;
+    --hero-pattern-opacity: 0.24;
   }
 }
 

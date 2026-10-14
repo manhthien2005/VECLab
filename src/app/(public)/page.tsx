@@ -47,18 +47,48 @@ export default function HomePage() {
 
       <section className="hero">
         <svg className="hero-background-art" viewBox="0 0 1440 820" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
-          <g fill="none" stroke="currentColor" strokeWidth="1" opacity="0.55">
-            <path d="M830 0v110q0 40 40 40h290q40 0 40 40v140" />
-            <path d="M1440 390h-90q-40 0-40 40v110q0 40-40 40H880" />
-            <path d="M1050 820V720q0-40 40-40h270" />
+          <defs>
+            <pattern id="hero-tech-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M40 0H0v40" fill="none" stroke="currentColor" strokeWidth="0.65" />
+            </pattern>
+            <pattern id="hero-tech-dots" width="9" height="9" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1" fill="currentColor" />
+            </pattern>
+            <path id="hero-tech-hexagon" d="M-24 0l12-21h24L24 0 12 21h-24Z" />
+          </defs>
+          <rect width="1440" height="820" fill="url(#hero-tech-grid)" opacity="0.085" />
+          <g fill="url(#hero-tech-dots)" opacity="0.26">
+            <rect x="670" y="92" width="260" height="98" />
+            <rect x="1260" y="238" width="180" height="134" />
+            <rect x="144" y="622" width="244" height="104" />
+            <rect x="1060" y="698" width="250" height="122" />
           </g>
-          <g fill="currentColor">
-            <circle cx="80" cy="150" r="2" /><circle cx="360" cy="90" r="1.5" />
-            <circle cx="670" cy="180" r="2" /><circle cx="940" cy="80" r="2" />
-            <circle cx="1200" cy="330" r="3" /><circle cx="1330" cy="120" r="2" />
-            <circle cx="880" cy="580" r="3" /><circle cx="1380" cy="650" r="1.5" />
-            <circle cx="90" cy="670" r="1.5" /><circle cx="490" cy="700" r="2" />
-            <circle cx="780" cy="740" r="1.5" /><circle cx="1360" cy="680" r="3" />
+          <g fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" opacity="0.45">
+            <path d="M780 0l72 124h246l72 124h270" />
+            <path d="M960 74h206l82 142h192" />
+            <path d="M1440 430h-168l-76 132H940l-64 110H620" />
+            <path d="M1440 474h-136l-84 146H982l-62 108H596" />
+            <path d="M1440 122h-86l-74 128v106" />
+            <path d="M0 590h88l80 138h250l54-94h120" />
+            <path d="M0 632h64l76 132h302l54-94h140" />
+            <path d="M1090 820l58-100h168l58-100h66" />
+            <use href="#hero-tech-hexagon" transform="translate(1244 132) scale(1.2)" />
+            <use href="#hero-tech-hexagon" transform="translate(1310 148) scale(.55)" />
+            <use href="#hero-tech-hexagon" transform="translate(708 704) scale(1.4)" />
+            <use href="#hero-tech-hexagon" transform="translate(772 744) scale(.65)" />
+            <use href="#hero-tech-hexagon" transform="translate(76 710) scale(.7)" />
+          </g>
+          <g fill="currentColor" opacity="0.65">
+            <circle cx="852" cy="124" r="3.5" /><circle cx="960" cy="74" r="3" />
+            <circle cx="1280" cy="356" r="3.5" /><circle cx="940" cy="562" r="3" />
+            <circle cx="620" cy="672" r="4" /><circle cx="596" cy="728" r="3" />
+            <circle cx="88" cy="590" r="3.5" /><circle cx="592" cy="634" r="3" />
+            <circle cx="1316" cy="720" r="3" /><circle cx="636" cy="670" r="3" />
+          </g>
+          <g fill="currentColor" opacity="0.35">
+            <circle cx="90" cy="160" r="1.5" /><circle cx="380" cy="112" r="1.5" />
+            <circle cx="638" cy="310" r="2" /><circle cx="702" cy="396" r="1.5" />
+            <circle cx="456" cy="710" r="2" /><circle cx="1004" cy="682" r="1.5" />
           </g>
         </svg>
         <div className="hero-inner">
