@@ -186,5 +186,5 @@ describe.runIf(enabled)('Jar cloud local HTTP + real Supabase (two learners)', (
     } finally {
       if (id) await call(cookieA, 'DELETE', `/${id}`, {})
     }
-  })
+  }, 30_000)
 })
