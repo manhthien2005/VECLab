@@ -3983,7 +3983,26 @@ td[data-numeric],
 .wb-concept-status { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; padding: 0.85rem 1.25rem; font-size: 0.75rem; color: var(--ink-muted); background: var(--surface-2); border-top: 1px solid var(--border); }
 .wb-concept-status > span:first-child { display: inline-flex; align-items: center; gap: 0.5rem; }
 .wb-concept-status-dot { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: var(--accent); }
-.wb-concept-note { position: absolute; z-index: 1; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 12px; padding: 1rem 1.15rem; box-shadow: 0 12px 32px -16px rgba(11, 31, 61, 0.22); }
+.wb-concept-note {
+  position: absolute;
+  z-index: 1;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  box-shadow: 0 12px 32px -16px rgba(11, 31, 61, 0.22);
+  translate: 0 0;
+  transition: translate 380ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 380ms ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+  .wb-concept-note:hover { box-shadow: 0 18px 38px -16px rgba(11, 31, 61, 0.28); }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .wb-concept-note:hover { translate: 0 -5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wb-concept-note { transition-property: box-shadow; transition-duration: 180ms !important; }
+}
 .wb-concept-note h3 { font-size: 0.9375rem; line-height: 1.4; margin: 0 0 0.35rem; letter-spacing: -0.015em; }
 .wb-concept-note p { font-size: 0.8125rem; color: var(--ink-muted); line-height: 1.6; margin: 0; }
 .wb-note-icon { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 1.5rem; height: 1.5rem; color: var(--accent); }
