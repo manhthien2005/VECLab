@@ -41,10 +41,6 @@ export const APP_STRINGS = {
     lede: 'Mô phỏng hóa học và môi trường theo từng thao tác. Thay đổi thông số, quan sát trạng thái và hiểu cơ sở khoa học phía sau kết quả.',
     heroPrimaryCta: 'Bắt đầu trải nghiệm',
     heroSecondaryCta: 'Xem cách hoạt động',
-    /** §4.1 "Cảnh báo giới hạn mô hình" — must stay beside the hero CTA, not in a footer. */
-    modelWarning:
-      'Đây là công cụ học tập. Kết quả là pH* mô hình ở 25 °C và 0,1 MPa, không phải phép đo bench và không dùng để vận hành hay suy liều cho mẫu thật.',
-
     trustItems: [
       { label: 'An toàn, không rủi ro', hint: 'Không cần đăng ký, dùng thử an toàn ở chế độ khách' },
       { label: 'Học qua thực hành', hint: 'Thao tác từng bước, cân bằng hóa học xác thực' },

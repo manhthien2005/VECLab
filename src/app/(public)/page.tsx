@@ -9,7 +9,6 @@ import {
   GraduationCapIcon,
   PlayIcon,
   ShieldCheckIcon,
-  WarningIcon,
   type IconComponent,
 } from '@/features/landing/icons.js'
 import { HeroPreview } from '@/features/landing/hero-preview.js'
@@ -78,20 +77,6 @@ export default function HomePage() {
               </a>
             </div>
 
-            {/* Lightweight learning value benefit row beneath CTA matching approved reference */}
-            <ul className="hero-trust-strip" aria-label="Giá trị học tập và cam kết giáo dục">
-              {strings.trustItems.map((item, index) => {
-                const Icon = TRUST_ICONS[index] ?? CheckCircleIcon
-                return (
-                  <li className="hero-trust-item" key={item.label}>
-                    <Icon className="hero-trust-icon" />
-                    <span>{item.label}</span>
-                    <span className="sr-only"> ({item.hint})</span>
-                  </li>
-                )
-              })}
-            </ul>
-
             {/* Preserved learning values educational statements for accessibility and auditing */}
             <ul className="sr-only" aria-label={strings.learningValueHeading}>
               {strings.learningValues.map((value, idx) => (
@@ -99,18 +84,23 @@ export default function HomePage() {
               ))}
             </ul>
 
-            {/* Compact refined scientific model limitation disclosure */}
-            <div className="hero-model-disclosure" role="note" aria-label="Giới hạn mô hình giáo dục">
-              <WarningIcon className="hero-model-icon" />
-              <p>
-                <strong>Mô hình học tập:</strong> {strings.modelWarning}
-              </p>
-            </div>
           </div>
 
           {/* Hero product preview frame */}
           <HeroPreview />
         </div>
+        <ul className="hero-trust-strip" aria-label="Giá trị học tập và cam kết giáo dục">
+          {strings.trustItems.map((item, index) => {
+            const Icon = TRUST_ICONS[index] ?? CheckCircleIcon
+            return (
+              <li className="hero-trust-item" key={item.label}>
+                <Icon className="hero-trust-icon" />
+                <span>{item.label}</span>
+                <span className="sr-only"> ({item.hint})</span>
+              </li>
+            )
+          })}
+        </ul>
       </section>
 
       {/* Landing Flow Sections with Distinct Chapter Framing */}
