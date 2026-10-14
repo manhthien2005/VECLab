@@ -25,13 +25,13 @@ import { ScrollReveal } from '@/features/landing/scroll-reveal.js'
  * Storytelling sequence:
  * 1. Hero with interactive preview (HeroPreview) and integrated learning value trust row
  * 2. 3-experiment showcase with centered heading (ExperimentShowcase)
- * 3. Workbench preview of the real 4-beat lab cycle (WorkbenchPreview)
+ * 3. Static concept preview of the planned workbench (WorkbenchPreview)
  * 4. Scientific Evidence & Trust (EvidenceSection)
  * 5. Final conversion banner (FinalCtaBanner)
  * 6. Scientific model disclosure & locked evidence register (ScientificDisclosure)
  *
  * Server Component reading only the release registries, statically renderable.
- * `ScrollReveal` and `WorkbenchPreview` are client leaves where needed.
+ * `ScrollReveal` handles page reveals; the workbench concept is static server markup.
  */
 
 const TRUST_ICONS: readonly IconComponent[] = [ShieldCheckIcon, GraduationCapIcon, BookIcon]

@@ -82,18 +82,11 @@ export const APP_STRINGS = {
       },
     ],
 
-    workbenchEyebrow: 'Trải nghiệm chi tiết',
-    workbenchHeading: 'Chu kỳ trên workbench',
+    workbenchEyebrow: 'Không gian thực hành',
+    workbenchHeading: 'Thực hành trên workbench',
     workbenchLede:
-      'Bốn nhịp như lab: chuẩn bị mẫu, thêm từng giọt NaOH, đọc pH*, xem đường cong. Minh họa dưới đây không tính cân bằng — mở không gian mô phỏng để đo thật.',
-    workbenchSteps: ['Chuẩn bị mẫu', 'Thêm từng giọt', 'Đọc pH', 'Xem đường cong'],
-    workbenchDemoCta: 'Thêm và đo 1,00 mL',
-    workbenchDemoReset: 'Đặt lại',
-    workbenchDemoFeedback:
-      'Đã thêm 1,00 mL (mô phỏng cục bộ). pH* không đổi trên minh họa. Mở không gian mô phỏng để tính cân bằng.',
-    workbenchReagent: 'NaOH 0,0100 M',
-    workbenchChartTitle: 'Đường cong pH',
-    workbenchIdleStatus: 'Minh họa',
+      'Chọn điều kiện, quan sát quá trình và đo kết quả. Cuối mỗi lượt, xem lại các bước để hiểu vì sao kết quả khác nhau.',
+    workbenchSteps: ['Chuẩn bị mẫu', 'Chọn điều kiện', 'Khuấy và lắng', 'Đo và ghi kết quả'],
 
     evidenceEyebrow: 'Nền tảng vững chắc',
     evidenceSectionHeading: 'Mỗi kết quả đều có căn cứ',
