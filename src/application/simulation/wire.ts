@@ -1,4 +1,5 @@
 import type { DomainError, UUID } from '@/domain/process/contracts.js'
+import { ACID_RELEASE_ID } from '@/domain/experiments/acid-neutralization/index.js'
 import type { AttemptSummary, StoredAttemptEventRecord } from '@/application/attempts/repository.js'
 import type {
   AcidSessionState,
@@ -196,10 +197,23 @@ export function fromReportDto(dto: ReportDto): FinalReportSnapshot | null {
 }
 
 export function fromSessionStateDto(dto: SessionStateDto): AcidSessionState {
+  // Check identity before interpreting acid-specific domain and projection.
+  if (dto.releaseId !== ACID_RELEASE_ID ||
+      dto.projection?.scenarioReleaseId !== ACID_RELEASE_ID) {
+    throw new Error('Acid DTO contains an unsupported scenario or release')
+  }
+  const createdAt = new Date(dto.createdAt)
+  const completedAt = dto.completedAt === null ? null : new Date(dto.completedAt)
+  if (typeof dto.createdAt !== 'string' || !Number.isFinite(createdAt.getTime()) ||
+      (dto.completedAt !== null &&
+        (typeof dto.completedAt !== 'string' ||
+          completedAt === null || !Number.isFinite(completedAt.getTime())))) {
+    throw new Error('Acid DTO contains an invalid timestamp')
+  }
   return {
     ...dto,
-    createdAt: new Date(dto.createdAt),
-    completedAt: dto.completedAt === null ? null : new Date(dto.completedAt),
+    createdAt,
+    completedAt,
     finalReportSnapshot:
       dto.finalReportSnapshot === null ? null : fromReportDto(dto.finalReportSnapshot),
   }

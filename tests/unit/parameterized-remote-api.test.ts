@@ -5,6 +5,9 @@ import { POST } from '@/app/api/simulation/attempts/route.js'
 import { NextRequest } from 'next/server'
 import type { UUID } from '@/domain/process/contracts.js'
 import { createInitialResourceLedger } from '@/domain/experiments/acid-neutralization/resources.js'
+import { projectionVersionFor, restoreJarReportDate } from '@/application/attempts/supabase-repository.js'
+import { JAR_PROFILE } from '@/domain/experiments/jar-test/model.js'
+import { fromSessionStateDto } from '@/application/simulation/wire.js'
 
 describe('RemoteAcidSession and Start Attempt BFF Contract', () => {
   const originalFetch = globalThis.fetch
@@ -150,4 +153,38 @@ describe('RemoteAcidSession and Start Attempt BFF Contract', () => {
       expect(data.error).toBeDefined()
     }
   })
+  it('keeps acid DTO compatible but refuses Jar releases and malformed timestamps', () => {
+    const dto = mockSessionResponse()
+    expect(fromSessionStateDto(dto).createdAt).toBeInstanceOf(Date)
+    expect(() => fromSessionStateDto({ ...dto, releaseId: JAR_PROFILE.releaseId })).toThrow()
+    expect(() => fromSessionStateDto({ ...dto, createdAt: 'invalid' })).toThrow()
+    expect(() => fromSessionStateDto({ ...dto, completedAt: 'invalid' })).toThrow()
+  })
+
+  it('uses locked Jar projection version without registering Jar as a served catalog release', () => {
+    expect(projectionVersionFor(JAR_PROFILE.releaseId)).toBe(1)
+    expect(projectionVersionFor('acid-neutralization@1.0.0')).toBe(1)
+    expect(() => projectionVersionFor('jar-test@999')).toThrow()
+  })
+
+  it('restores a valid JSONB Jar report timestamp without defaulting corrupt data', () => {
+    const jsonb = {
+      schemaVersion: 1,
+      scenarioKey: 'jar-test',
+      generatedAt: '2026-10-14T03:00:00.000Z',
+    }
+    const hydrated = restoreJarReportDate(JAR_PROFILE.releaseId, jsonb) as {
+      generatedAt: Date
+    }
+    expect(hydrated.generatedAt).toBeInstanceOf(Date)
+    expect(hydrated.generatedAt.toISOString()).toBe(jsonb.generatedAt)
+    expect(() => restoreJarReportDate(JAR_PROFILE.releaseId, {
+      ...jsonb, generatedAt: '2026-02-30T00:00:00.000Z',
+    })).toThrow()
+    expect(() => restoreJarReportDate(JAR_PROFILE.releaseId, {
+      ...jsonb, generatedAt: 'not-a-timestamp',
+    })).toThrow()
+    expect(restoreJarReportDate('acid-neutralization@1.0.0', jsonb)).toBe(jsonb)
+  })
+
 })
