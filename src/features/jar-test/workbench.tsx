@@ -125,6 +125,7 @@ export function JarWorkbench({ attemptId, invalidAttempt = false, storageMode }:
 
   useEffect(() => {
     let cancelled = false
+    void (async () => {
     if (invalidAttempt) {
       setLoadState('missing')
       setView(null)
@@ -141,7 +142,7 @@ export function JarWorkbench({ attemptId, invalidAttempt = false, storageMode }:
       return
     }
     setLoadState('loading')
-    void session.load(id).then((result) => {
+    await session.load(id).then((result) => {
       if (cancelled) return
       if (result === null) {
         setLoadState('missing')
@@ -161,6 +162,7 @@ export function JarWorkbench({ attemptId, invalidAttempt = false, storageMode }:
         setIssue({ message: 'Không kết nối được nơi lưu lượt. Kiểm tra kết nối rồi thử tải lại.', conflict: false })
       }
     })
+    })()
     return () => { cancelled = true }
   }, [attemptId, invalidAttempt, session])
 
@@ -503,7 +505,10 @@ export function JarWorkbench({ attemptId, invalidAttempt = false, storageMode }:
                         <th scope="row">Cốc {id}</th>
                         <td>{entry ? entry.initialPh : 'N/A'}</td>
                         <td>{entry ? entry.doseMgL : 'N/A'}</td>
-                        <td title={readingNote(last)}>{readingLabel(last)}</td>
+                        <td title={readingNote(last)}>
+                          {readingLabel(last)}
+                          {last && !last.valid && <small> · Chưa đủ quy trình</small>}
+                        </td>
                         <td>{entry?.submittedRemovalPercent === null || !entry
                           ? 'N/A' : entry.submittedRemovalPercent}</td>
                       </tr>
@@ -523,6 +528,7 @@ export function JarWorkbench({ attemptId, invalidAttempt = false, storageMode }:
                 (sum, item) => sum + item.measurements.length, 0,
               )} phép đo cuối (bao gồm số đo không hợp lệ).</p>
               <p className={styles.underText}>Đây là xác nhận tối thiểu. Báo cáo phân tích đầy đủ thuộc giai đoạn tiếp theo.</p>
+              <a className="btn" href={JAR_PATH}>Bắt đầu mẻ Jar Test mới</a>
             </section>
           )}
         </>
