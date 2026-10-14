@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { APP_STRINGS } from '@/content/index.js'
 import { currentStorageMode } from '@/features/auth/session.js'
 import { LabClient } from '@/features/learner-lab/lab-client.js'
 
@@ -16,7 +15,7 @@ import { LabClient } from '@/features/learner-lab/lab-client.js'
  */
 
 export const metadata: Metadata = {
-  title: APP_STRINGS.lab.title,
+  title: 'Lab thực hành',
   // A per-learner list. Indexing it would put one learner's attempts in a shared index.
   robots: { index: false, follow: false },
 }
@@ -24,5 +23,5 @@ export const metadata: Metadata = {
 export default async function LabPage() {
   const storageMode = await currentStorageMode()
 
-  return <LabClient storageMode={storageMode} />
+  return <LabClient key={storageMode} storageMode={storageMode} />
 }

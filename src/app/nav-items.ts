@@ -14,7 +14,7 @@ export type NavItem = {
 export const GUEST_NAV_ITEMS: readonly NavItem[] = [
   { href: '/experiments', label: APP_STRINGS.nav.experiments },
   { href: '/evidence', label: APP_STRINGS.nav.evidence },
-  { href: '/lab', label: APP_STRINGS.nav.lab },
+  { href: '/lab', label: APP_STRINGS.nav.labGuest },
 ]
 
 const SIGNED_IN_EXTRA_ITEMS: readonly NavItem[] = [
@@ -28,11 +28,17 @@ const SIGN_IN_ITEM: NavItem = {
 }
 
 export function headerNavItems(signedIn: boolean): readonly NavItem[] {
-  return signedIn ? [...GUEST_NAV_ITEMS, ...SIGNED_IN_EXTRA_ITEMS] : GUEST_NAV_ITEMS
+  return [{ href: '/', label: APP_STRINGS.nav.home }, ...baseNavItems(signedIn)]
 }
 
 export function footerNavItems(signedIn: boolean): readonly NavItem[] {
   return signedIn
-    ? [...GUEST_NAV_ITEMS, ...SIGNED_IN_EXTRA_ITEMS]
+    ? baseNavItems(true)
     : [...GUEST_NAV_ITEMS, SIGN_IN_ITEM]
+}
+
+function baseNavItems(signedIn: boolean): readonly NavItem[] {
+  return signedIn
+    ? [...GUEST_NAV_ITEMS.map(item => item.href === '/lab' ? { ...item, label: APP_STRINGS.nav.lab } : item), ...SIGNED_IN_EXTRA_ITEMS]
+    : GUEST_NAV_ITEMS
 }

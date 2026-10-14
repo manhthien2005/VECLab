@@ -21,9 +21,11 @@ export const APP_STRINGS = {
   },
 
   nav: {
+    home: 'Trang chủ',
     experiments: 'Thí nghiệm',
     evidence: 'Nguồn khoa học',
     lab: 'Phòng lab của tôi',
+    labGuest: 'Lab dùng thử',
     compare: 'So sánh',
     account: 'Tài khoản',
     signIn: 'Đăng nhập',
@@ -248,7 +250,7 @@ export const APP_STRINGS = {
 
   lab: {
     title: 'Phòng lab của tôi',
-    lede: 'Các lượt thử của bạn. Không cần đăng nhập — lượt khách chỉ tồn tại trên trình duyệt này.',
+    lede: 'Tiếp tục lượt đang làm hoặc xem lại kết quả thực hành.',
     emptyTitle: 'Chưa có lượt thử nào',
     emptyBody: 'Chọn một thí nghiệm từ danh mục để bắt đầu.',
     browseCatalog: 'Xem danh mục thí nghiệm',
