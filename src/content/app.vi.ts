@@ -108,8 +108,8 @@ export const APP_STRINGS = {
     ],
 
     finalCtaHeading: 'Sẵn sàng vào lab?',
-    finalCtaLede: 'Khám phá thế giới hóa học và môi trường qua mô phỏng tương tác cùng VECLab.',
-    finalCtaButton: 'Bắt đầu ngay',
+    finalCtaLede: 'Bắt đầu với bài điều chỉnh pH. Tự chọn lượng hóa chất, đo và xem lại kết quả.',
+    finalCtaButton: 'Vào lab thực hành',
 
     catalogHeading: 'Thí nghiệm',
     catalogEmpty: 'Hiện chưa có thí nghiệm nào được khóa trong phiên bản triển khai này.',
