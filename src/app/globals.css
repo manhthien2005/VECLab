@@ -4387,29 +4387,23 @@ td[data-numeric],
 .final-cta-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
 .final-cta-btn:active { transform: translateY(0) scale(0.99); }
 .final-cta-lab { min-width: 0; color: var(--accent); }
-.final-cta-lab-svg { display: block; width: 100%; max-width: 28rem; height: auto; margin: 0 auto; }
+.final-cta-image-stage { position: relative; width: 100%; height: clamp(19rem, 28vw, 24rem); isolation: isolate; }
+.final-cta-image-stage img { object-fit: contain; }
+.final-cta-image-ambient { z-index: -1; opacity: 0.16; filter: blur(22px); transform: scale(1.08); pointer-events: none; }
+.final-cta-image { filter: drop-shadow(0 12px 16px rgba(11, 31, 61, 0.1)); transition: transform 480ms cubic-bezier(0.22, 1, 0.36, 1); }
 .final-cta-lab p { margin: 0.25rem 0 0; text-align: center; font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.03em; color: var(--ink-muted); }
-.final-cta-drop { opacity: 0; }
 @media (prefers-reduced-motion: no-preference) {
-  .final-cta-surface:is(:hover, :focus-within) .final-cta-drop { animation: final-cta-dose 750ms ease-in 1; }
-  .final-cta-surface:is(:hover, :focus-within) .final-cta-waterline { animation: final-cta-water 750ms ease-out 1; transform-origin: 214px 181px; }
+  .final-cta-surface:is(:hover, :focus-within) .final-cta-image { transform: translateY(-5px) scale(1.02); }
 }
-@keyframes final-cta-dose {
-  0% { opacity: 0; transform: translateY(-3px); }
-  20% { opacity: 1; }
-  85% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(18px); }
-}
-@keyframes final-cta-water {
-  0%, 50%, 100% { transform: scaleX(1); }
-  75% { transform: scaleX(0.94); }
+@media (prefers-reduced-motion: reduce) {
+  .final-cta-image { transition: none !important; }
 }
 @media (max-width: 48rem) {
   .final-cta-surface { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
   .final-cta-title { max-width: none; }
   .final-cta-desc { max-width: none; }
   .final-cta-btn { width: 100%; }
-  .final-cta-lab-svg { max-width: 20rem; }
+  .final-cta-image-stage { height: 19rem; }
 }
 
 /* --- Landing Scientific Disclosure Wrapper -------------------------------- */
