@@ -1,0 +1,59 @@
+{
+  "v": 1,
+  "kind": "task",
+  "id": "UI-02",
+  "coder": 2,
+  "repo": "manhthien2005/VECLab",
+  "branch": "feature/coder-2-landing-polish",
+  "target": "chore/pre-refactor-cleanup",
+  "base": "a7c8e86349ccd54ac04dbb714e7bb836fd02fdef",
+  "goal": "Polish the existing project landing: concise Vietnamese copy, three agreed experiments, truthful previews and calmer responsive design. Implement docs/ui/landing-page-audit.md.",
+  "read": [
+    "AGENTS.md",
+    ".agents/skills/veclab-implement/SKILL.md",
+    "docs/workflow/web-handoff-contract.md",
+    "docs/workflow/ui-skills.md",
+    ".agents/skills/impeccable/SKILL.md",
+    ".agents/skills/taste-skill/SKILL.md",
+    "docs/superpowers/specs/2026-10-13-simulation-v1-design.md",
+    "docs/ui/landing-page-audit.md"
+  ],
+  "files": [
+    "src/app/(public)/page.tsx",
+    "src/app/layout.tsx",
+    "src/app/globals.css",
+    "src/content/app.vi.ts",
+    "src/features/landing/hero-preview.tsx",
+    "src/features/landing/hero-pointer-stage.tsx",
+    "src/features/landing/landing-visuals.tsx",
+    "src/features/landing/experiment-showcase.tsx",
+    "src/features/landing/showcase-carousel-track.tsx",
+    "src/features/landing/workbench-preview.tsx",
+    "src/features/landing/evidence-section.tsx",
+    "src/features/landing/book-stack-visual.tsx",
+    "src/features/landing/final-cta-banner.tsx",
+    "src/features/landing/scroll-reveal.tsx",
+    "tests/unit/experiment-showcase.test.ts",
+    "e2e/landing-page.spec.ts",
+    "e2e/hero-experiential.spec.ts",
+    "e2e/showcase-interaction.spec.ts",
+    "e2e/workbench-preview.spec.ts",
+    "e2e/choreography-integrated.spec.ts"
+  ],
+  "accept": [
+    "Follow the audit copy deck and ownership limits: home copy only, layout footer/description only, landing/footer CSS only. Keep chapter order, existing Vietnamese font and light/dark identity.",
+    "Show pH, Jar Test and batch methylene-blue adsorption from one landing metadata source. pH links to the existing acid route and is labeled current; the other two are in development with no fabricated Start route.",
+    "Preview labels remain visible; adding/resetting demonstrates only supported local presentation, never invents measurements, scoring, API calls or stored attempts. Remove obsolete copper/plastic marketing, Ksp, fixed source counts and repeated acid-only homepage disclosures.",
+    "Improve hierarchy, mobile preview density and restrained motion; preserve keyboard/focus/menu, reduced motion, readable 200% zoom and no horizontal overflow at 390/768/1440px. Local verifies browser evidence if unavailable on web.",
+    "Work only on the assigned branch from the pinned base; read the required source first. Stop after one implementation handback using result JSON v1 with coder/branch, actual head and all check IDs. No next task, merge or deployment."
+  ],
+  "checks": {
+    "unit": "npm run test -- tests/unit/experiment-showcase.test.ts",
+    "types": "npm run typecheck",
+    "lint": "npx --no-install eslint 'src/app/(public)/page.tsx' src/app/layout.tsx src/content/app.vi.ts src/features/landing e2e tests/unit/experiment-showcase.test.ts",
+    "diff": "git diff a7c8e86349ccd54ac04dbb714e7bb836fd02fdef --check",
+    "ui_desktop": "npm run test:e2e -- e2e/landing-page.spec.ts e2e/hero-experiential.spec.ts e2e/showcase-interaction.spec.ts e2e/workbench-preview.spec.ts e2e/choreography-integrated.spec.ts e2e/guest-ia.spec.ts --project=chromium",
+    "ui_mobile": "npm run test:e2e -- e2e/landing-page.spec.ts e2e/hero-experiential.spec.ts e2e/showcase-interaction.spec.ts e2e/workbench-preview.spec.ts e2e/choreography-integrated.spec.ts e2e/guest-ia.spec.ts --project=mobile",
+    "build": "npm run build"
+  }
+}
