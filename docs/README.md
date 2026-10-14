@@ -16,6 +16,7 @@ Bộ tài liệu được giữ lại để hỗ trợ kiểm tra và refactor. 
 - [Local review Jar Task 1 — commit 69f8b30](workflow/reviews/jar-test-01.md): bằng chứng đã chạy, hai finding cần sửa và gói sửa giới hạn hai file.
 - [Kết quả local Round 1 — commit 5a920ee](workflow/reviews/jar-test-01-r1.json): hai finding đóng; 95 tests, typecheck và lint qua; nghiệm thu phạm vi Task 1.
 - [Quy trình hai coder song song](workflow/parallel-work.md): nhánh riêng theo task, owner file, JSON ghi rõ coder và gate tích hợp/test người dùng.
+- [Hai session Tech Lead](workflow/tech-lead-sessions.md): TL1/coder 1 phụ trách mô phỏng và tích hợp; session gốc là TL2/coder 2/UI; [handoff TL1](workflow/handoffs/tech-lead-1.json) chuẩn bị review Jar Task 2 Round 1.
 - [Review local Jar Task 2 — commit 7421c0c](workflow/reviews/jar-test-02.json): 65 tests/typecheck/lint qua; còn ba finding runtime/visibility cần coder 1 sửa.
 - Gói giao riêng: [Coder 1 — sửa Jar Task 2](workflow/tasks/coder-1-jar-02-r1.json), [Coder 2 — audit và đề xuất UI ngoài](workflow/tasks/coder-2-ui-01.json).
 

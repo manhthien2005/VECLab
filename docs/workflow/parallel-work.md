@@ -2,6 +2,8 @@
 
 Quyết định của người dùng ngày 13/10/2026: hai coder GPT web, local lập kế hoạch/review/tích hợp; người dùng thử UI khi được báo. Không spawn subagent nội bộ trừ khi người dùng yêu cầu rõ cho task hiện tại.
 
+Cập nhật: người dùng tách local thành hai session Tech Lead. TL1 phụ trách coder 1 và điều phối tích hợp; session gốc giữ TL2/coder 2/UI. [Phân công và handoff](tech-lead-sessions.md) quy định checkout riêng, owner contract và trạng thái đang bàn giao. Hai coder web vẫn là hai phiên do người dùng vận hành.
+
 ## Nhánh và nền source
 
 - `chore/pre-refactor-cleanup` là nhánh chuẩn bị/tích hợp tạm thời của nền Hoang đã được người dùng yêu cầu. Đây là ngoại lệ có giới hạn cho đợt này; Git workflow bình thường vẫn feature/fix/chore → PR develop → PR main theo AGENTS.
@@ -16,7 +18,8 @@ Quyết định của người dùng ngày 13/10/2026: hai coder GPT web, local 
 | --- | --- |
 | Coder 1 | Domain, session, projection/report data, API và tests liên quan theo allowlist từng task |
 | Coder 2 | Audit/thiết kế, outer UI và tests UI theo allowlist; trước mắt đề xuất giao diện, chưa sửa workbench Jar |
-| Local Tech Lead | AGENTS, contract, templates, lockfile/dependencies, migrations/CI, shared tokens/layout và các điểm nối cần phối hợp |
+| Local TL1 | Contract/API/projection, điều phối AGENTS/templates, dependency/CI/migration và tích hợp; vẫn theo allowlist và quyền production riêng |
+| Local TL2 | Chiến lược/review UI, docs UI và phối hợp shared tokens/layout/navigation khi được giao độc quyền; không tự đổi contract mô phỏng |
 
 Không phải thư mục nào trong bảng cũng được sửa tự do: `files` trong JSON là allowlist thực. Cùng chạm file là lý do tách task/tuần tự hóa phần đó trước khi giao. Global CSS, shared layout/navigation, catalog registry và package/lockfile chỉ có một người được giao sửa ở một thời điểm. Không tự sửa file ngoài scope để làm tests xanh.
 
