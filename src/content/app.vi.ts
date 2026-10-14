@@ -55,33 +55,29 @@ export const APP_STRINGS = {
       'Nguồn và giới hạn mô hình xuất hiện ngay trong lúc làm, không phải phụ lục.',
     ],
 
-    /** §4.1 "Ba thẻ thí nghiệm" — MVP scope names all three (docs/core-project-scope.md §1),
-     * but only acid neutralization has a registered engine today
-     * (src/application/scenarios/registry.ts). The other two are shown honestly as
-     * upcoming rather than linked to an attempt that cannot start (system-architecture §2.4). */
     showcaseEyebrow: 'Khám phá ngay',
     showcaseHeading: '3 thí nghiệm mô phỏng',
-    showcaseLede: 'Những chủ đề tiêu biểu, sát thực tế, giúp bạn vừa học vừa khám phá.',
+    showcaseLede: 'Chọn một quy trình xử lý nước để thực hành.',
     showcaseCtaLabel: 'Thử ngay',
     comingSoonBadge: 'Sắp ra mắt',
     comingSoonCta: 'Xem trước',
     showcaseCards: [
       {
         scenarioKey: 'acid-neutralization',
-        title: 'Trung hòa axit',
-        summary: 'Khám phá quá trình trung hòa, theo dõi sự thay đổi pH theo thời gian.',
+        title: 'Điều chỉnh pH',
+        summary: 'Chọn lượng hóa chất và theo dõi pH của mẫu nước.',
         available: true,
       },
       {
-        scenarioKey: 'copper-precipitation',
-        title: 'Kết tủa Cu²⁺',
-        summary: 'Quan sát quá trình tạo kết tủa, theo dõi nồng độ ion trong dung dịch.',
+        scenarioKey: 'jar-test',
+        title: 'Jar Test',
+        summary: 'So sánh liều keo tụ, khuấy và lắng để giảm độ đục.',
         available: false,
       },
       {
-        scenarioKey: 'plastic-density-separation',
-        title: 'Phân loại nhựa',
-        summary: 'Tìm hiểu tính chất, tách và nhận diện các loại nhựa phổ biến.',
+        scenarioKey: 'methylene-blue-adsorption',
+        title: 'Hấp phụ xanh methylene',
+        summary: 'Khảo sát khả năng loại màu bằng than hoạt tính.',
         available: false,
       },
     ],
