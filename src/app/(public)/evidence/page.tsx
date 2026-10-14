@@ -1,296 +1,188 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import {
-  APP_STRINGS,
-  ACID_STRINGS,
-  ACID_SOURCES,
-  ACID_CLAIMS,
-  ACID_DERIVED_VALUES,
-  ACID_GOLDEN_PROVENANCE,
-  ACID_NEUTRALIZATION_RELEASE,
-  EVIDENCE_REGISTER_VERSION,
+  APP_STRINGS, ACID_STRINGS, ACID_SOURCES, ACID_CLAIMS, ACID_DERIVED_VALUES,
+  ACID_GOLDEN_PROVENANCE, ACID_NEUTRALIZATION_RELEASE, EVIDENCE_REGISTER_VERSION,
 } from '@/content/index.js'
-import type { EvidenceStatus } from '@/content/index.js'
-import { listCatalog } from '@/features/experiment-catalog/catalog.js'
-import { SourceList } from '@/shared/ui/scientific-disclosure.js'
+import type { EvidenceSource, SourceType, EvidenceStatus, ClaimEvidenceLink } from '@/content/index.js'
+import { EXPERIMENT_OVERVIEWS } from '@/features/experiment-catalog/overviews.js'
+import { EvidenceExperimentBrowser } from '@/features/scientific-evidence/experiment-browser.js'
+import { ArrowRightIcon, BookIcon, CalculatorIcon, FlaskIcon, ShieldCheckIcon, MoleculeIcon } from '@/features/landing/icons.js'
+import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
+import { ClaimList } from '@/shared/ui/scientific-disclosure.js'
 import { formatPhTechnical, formatScientific } from '@/shared/ui/format.js'
-
-/**
- * Scientific sources (docs/web-application-scope.md §4.3).
- *
- * Public: a learner does not sign in to check where a number came from, and neither
- * should anyone else auditing the model. That is the point of the page — traceability —
- * so gating it would defeat it.
- *
- * Two things §4.3 requires that are easy to conflate, and are therefore separated here
- * into distinct sections:
- *
- *   * SOURCED data — constants and procedures with a citation, a check date and stated
- *     conditions (pKw, carbonate constants, the pH definition).
- *   * SCENARIO ASSUMPTIONS — choices the scenario makes that no source mandates: the
- *     pedagogical target band, the cost and safety conventions, the permitted aliquot
- *     set. These are legitimate but they are conventions, and a learner must be able to
- *     tell them apart from a measured constant.
- *
- * Every claim below carries its evidence status, because "verified" and "model-derived"
- * are different amounts of confidence and collapsing them would misrepresent the
- * register.
- *
- * Server Component over the locked evidence register: statically renderable, and a
- * re-release updates this page with no edit here.
- */
 
 export const metadata: Metadata = {
   title: APP_STRINGS.evidence.title,
-  description:
-    'Sổ đăng ký bằng chứng: nguồn, loại bằng chứng, điều kiện áp dụng và giới hạn cho từng hằng số và quy trình trong mô phỏng.',
+  description: 'Tài liệu tham khảo theo từng bài thí nghiệm: nguồn, cách sử dụng, điều kiện áp dụng và giới hạn của mô hình.',
 }
 
-export default function EvidencePage() {
-  const strings = APP_STRINGS.evidence
-  const catalog = listCatalog()
-  const sources = Object.values(ACID_SOURCES)
-  const claims = Object.values(ACID_CLAIMS)
-  const derived = Object.values(ACID_DERIVED_VALUES)
+const SOURCE_TYPE_LABELS: Record<SourceType, string> = {
+  'authoritative-definition': 'Định nghĩa khoa học',
+  'authoritative-technical': 'Tài liệu kỹ thuật',
+  'primary-experimental': 'Nghiên cứu thực nghiệm',
+  'laboratory-procedure': 'Quy trình phòng thí nghiệm',
+  'safety-authority': 'An toàn hóa chất',
+  'supporting-study': 'Nghiên cứu bổ trợ',
+}
+const SOURCE_CATEGORY: Record<SourceType, string> = {
+  'authoritative-definition': 'foundations',
+  'authoritative-technical': 'foundations',
+  'primary-experimental': 'research',
+  'laboratory-procedure': 'procedure',
+  'safety-authority': 'safety',
+  'supporting-study': 'research',
+}
+const SOURCE_GROUPS = [
+  { key: 'foundations', title: 'Định nghĩa và tài liệu kỹ thuật', Icon: BookIcon },
+  { key: 'procedure', title: 'Quy trình thực hành', Icon: FlaskIcon },
+  { key: 'research', title: 'Nghiên cứu tham khảo', Icon: MoleculeIcon },
+  { key: 'safety', title: 'An toàn hóa chất', Icon: ShieldCheckIcon },
+] as const
+const STATUS_LABELS: Record<EvidenceStatus, string> = {
+  'source-checked': 'Đã đối chiếu nguồn',
+  'cross-checked': 'Đã kiểm tra chéo',
+  'model-derived': 'Dẫn xuất từ mô hình',
+  'supporting-only': 'Chỉ dùng tham khảo',
+  'excluded-from-model': 'Không dùng trong mô hình',
+}
+const USAGE_LABELS = {
+  constant: 'Hằng số', procedure: 'Quy trình', limitation: 'Giới hạn', safety: 'An toàn', supporting: 'Bổ trợ',
+} as const
 
-  // Claims a source did NOT mandate. Splitting them out is what makes the
-  // sourced-vs-assumed distinction visible rather than something a reader has to infer.
-  const assumptions = claims.filter((claim) => claim.usage === 'supporting')
-  const sourced = claims.filter((claim) => claim.usage !== 'supporting')
+/** Presentation of the existing register only. Unpublished source sets stay explicitly empty. */
+export default function EvidencePage() {
+  const acidSources = ACID_NEUTRALIZATION_RELEASE.sourceKeys
+    .map(key => ACID_SOURCES[key])
+    .filter((source): source is EvidenceSource => source !== undefined)
+  const experiments = EXPERIMENT_OVERVIEWS.map(experiment => ({
+    key: experiment.scenarioKey,
+    title: experiment.title,
+    category: experiment.category,
+    sourceCount: experiment.scenarioKey === ACID_NEUTRALIZATION_RELEASE.scenarioKey ? acidSources.length : null,
+  }))
 
   return (
-    <div className="page page-narrow stack-loose">
-      <nav aria-label="Breadcrumb">
-        <Link className="small" href="/">
-          ← {strings.backToCatalog}
-        </Link>
-      </nav>
-
-      <header className="stack-tight">
-        <p className="eyebrow">
-          {strings.registerVersion} {EVIDENCE_REGISTER_VERSION}
-        </p>
-        <h1>{strings.title}</h1>
-        <p className="muted">{strings.lede}</p>
+    <div className="page evidence-library">
+      <EvidenceBackground />
+      <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: 'Nguồn khoa học' }]} />
+      <header className="evidence-library-header">
+        <h1>Nguồn khoa học</h1>
+        <p>Tra cứu tài liệu và cách từng bài thí nghiệm sử dụng nguồn. Chọn một bài để xem định nghĩa, quy trình, nghiên cứu và hướng dẫn an toàn liên quan.</p>
       </header>
-
-      {/* Sources grouped by experiment, as §4.3 requires. One scenario is locked in
-          this release, so there is one group; the loop keeps that fact data-driven
-          rather than hardcoded, and a second locked scenario appears here with no edit. */}
-      {catalog.map((entry) => (
-        <section key={entry.releaseId} className="card stack-tight">
-          <h2>{entry.title}</h2>
-          <dl className="meta-list">
-            <dt>{APP_STRINGS.release.releaseId}</dt>
-            <dd>{entry.releaseId}</dd>
-            <dt>{APP_STRINGS.release.contentVersion}</dt>
-            <dd>{entry.contentVersion}</dd>
-            <dt>{APP_STRINGS.release.evidenceRegisterVersion}</dt>
-            <dd>{entry.evidenceRegisterVersion}</dd>
-          </dl>
-          <SourceList sourceKeys={ACID_NEUTRALIZATION_RELEASE.sourceKeys} />
-        </section>
-      ))}
-
-      {/* Sourced data: constants and procedures with a citation. */}
-      <section className="card stack-tight">
-        <h2>Dữ liệu có nguồn</h2>
-        <p className="small muted">
-          Mỗi dòng dưới đây trỏ về một tài liệu đã kiểm tra. Trạng thái cho biết mức độ
-          bằng chứng: kiểm tra chéo là mạnh nhất, còn dẫn xuất mô hình nghĩa là giá trị
-          được tính từ một nguồn qua một phép biến đổi đã nêu rõ.
-        </p>
-        <table>
-          <caption className="visually-hidden">
-            Tuyên bố có nguồn, nguồn hỗ trợ, vai trò và trạng thái bằng chứng
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">Tuyên bố</th>
-              <th scope="col">Vai trò</th>
-              <th scope="col">Nguồn</th>
-              <th scope="col">Trạng thái</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sourced.map((claim) => (
-              <tr key={claim.claimKey}>
-                <td>
-                  <code>{claim.claimKey}</code>
-                  {claim.transformation !== undefined && (
-                    <>
-                      <br />
-                      <span className="tiny faint">{claim.transformation}</span>
-                    </>
-                  )}
-                </td>
-                <td className="small">{claim.usage}</td>
-                <td className="small">{claim.sourceKeys.join(', ')}</td>
-                <td>
-                  <span className={`badge ${statusTone(claim.status)}`}>
-                    {claim.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-
-      {/* Derived values: a sourced number run through a stated transformation. Kept in
-          its own section because the transformation is the part a reader must be able to
-          audit — the value alone does not show it is not itself sourced. */}
-      <section className="card stack-tight">
-        <h2>{strings.derivedHeading}</h2>
-        <table>
-          <caption className="visually-hidden">
-            Giá trị dẫn xuất, tuyên bố nguồn, phép biến đổi và giá trị trong mô hình
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">Giá trị</th>
-              <th scope="col">Tuyên bố nguồn</th>
-              <th scope="col">{strings.transformation}</th>
-              <th scope="col" className="num">
-                {strings.implementationValue}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {derived.map((value) => (
-              <tr key={value.key}>
-                <td>
-                  <code>{value.key}</code>
-                </td>
-                <td className="small">{value.claimKey}</td>
-                <td className="small">{value.transformation}</td>
-                {/* An equilibrium constant, not a pH: fixed decimals rendered every one
-                    of these as 0,00000. */}
-                <td className="num">{formatScientific(value.implementationValue)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-
-      {/* Scenario assumptions: conventions no source mandates. */}
-      <section className="card stack-tight">
-        <h2>Giả định và quy ước của kịch bản</h2>
-        <p className="alert alert-warn small">
-          Những mục dưới đây KHÔNG có nguồn thực nghiệm bắt buộc. Chúng là quy ước sư
-          phạm do kịch bản đặt ra để việc chấm điểm ổn định và so sánh được, và chúng có
-          phiên bản riêng. Nhầm chúng với hằng số có nguồn là nhầm loại bằng chứng.
-        </p>
-        <ul className="stack-tight small">
-          <li>
-            <strong>{ACID_STRINGS['scenarios.acid-neutralization.target-band']}</strong>
-          </li>
-          <li>
-            <strong>{ACID_STRINGS['resources.cost-index-label']}:</strong>{' '}
-            {ACID_STRINGS['resources.cost-index-explanation']}
-          </li>
-          <li>
-            <strong>{ACID_STRINGS['resources.safety-index-label']}:</strong>{' '}
-            {ACID_STRINGS['resources.safety-index-explanation']}
-          </li>
-        </ul>
-        {assumptions.length > 0 && (
-          <table>
-            <caption className="visually-hidden">
-              Tuyên bố hỗ trợ, không phải dữ liệu đầu vào của mô hình
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">Tuyên bố</th>
-                <th scope="col">Nguồn</th>
-                <th scope="col">Trạng thái</th>
-              </tr>
-            </thead>
-            <tbody>
-              {assumptions.map((claim) => (
-                <tr key={claim.claimKey}>
-                  <td>
-                    <code>{claim.claimKey}</code>
-                  </td>
-                  <td className="small">{claim.sourceKeys.join(', ')}</td>
-                  <td>
-                    <span className={`badge ${statusTone(claim.status)}`}>
-                      {claim.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
-
-      {/* Provenance of the acceptance fixtures: the eight golden pH values the test
-          suite pins. Publishing the derivation lets a reviewer reproduce them rather
-          than take the numbers on trust. */}
-      <section className="card stack-tight">
-        <h2>{strings.provenanceHeading}</h2>
-        <dl className="meta-list">
-          <dt>Mã trường hợp</dt>
-          <dd>{ACID_GOLDEN_PROVENANCE.caseId}</dd>
-          <dt>Phiên bản kịch bản</dt>
-          <dd>{ACID_GOLDEN_PROVENANCE.scenarioVersion}</dd>
-          <dt>Bộ hằng số</dt>
-          <dd>{ACID_GOLDEN_PROVENANCE.constantBundle}</dd>
-          <dt>Nguồn</dt>
-          <dd>{ACID_GOLDEN_PROVENANCE.sourceKeys.join(', ')}</dd>
-          <dt>Cách dẫn xuất</dt>
-          <dd>{ACID_GOLDEN_PROVENANCE.derivation}</dd>
-          <dt>Kiểm tra độc lập</dt>
-          <dd>{ACID_GOLDEN_PROVENANCE.independentCheck ? 'có' : 'không'}</dd>
-          <dt>Dung sai pH*</dt>
-          <dd>± {formatPhTechnical(ACID_GOLDEN_PROVENANCE.tolerances.pH ?? 0)}</dd>
-        </dl>
-      </section>
-
-      {/* Limitations of applying each source to the model — §4.3 requires this
-          per-source, and the disclosure renders it alongside every citation. */}
-      <section className="card stack-tight">
-        <h2>Giới hạn khi áp dụng nguồn vào mô hình</h2>
-        <ul className="stack-tight small">
-          {sources
-            .filter((source) => source.limitations.length > 0)
-            .map((source) => (
-              <li key={source.key}>
-                <strong>{source.key}</strong>: {source.limitations.join('; ')}
-              </li>
-            ))}
-        </ul>
-        <p className="small faint">
-          Ngày kiểm tra và liên kết của từng nguồn được liệt kê ở phần Nguồn phía trên.
-          Toàn bộ trang này là nội dung công khai của phiên bản đã khóa{' '}
-          {ACID_NEUTRALIZATION_RELEASE.releaseId}.
-        </p>
-      </section>
+      <EvidenceExperimentBrowser experiments={experiments}>
+        {experiments.map(experiment => experiment.key === ACID_NEUTRALIZATION_RELEASE.scenarioKey ? (
+          <div key={experiment.key}>
+            <div className="evidence-lesson-heading">
+              <div><h2>{experiment.title}</h2><p>Thông tin cơ bản hiển thị dưới đây. Mở từng nguồn để xem điều kiện, giới hạn và cách dùng trong bài.</p></div>
+              <Link href={`/experiments/${experiment.key}`}>Xem bài thí nghiệm <ArrowRightIcon /></Link>
+            </div>
+            <div className="evidence-source-groups">
+              {SOURCE_GROUPS.map(({ key, title, Icon }) => {
+                const sources = acidSources.filter(source => SOURCE_CATEGORY[source.sourceType] === key)
+                if (sources.length === 0) return null
+                return (
+                  <section className={`evidence-source-group evidence-source-group-${key}`} key={key} aria-labelledby={`source-group-${key}`}>
+                    <h3 id={`source-group-${key}`}><Icon />{title}<span>{sources.length} nguồn</span></h3>
+                    <div className="evidence-source-grid">{sources.map(source => <SourceCard key={source.key} source={source} />)}</div>
+                  </section>
+                )
+              })}
+            </div>
+            <AcidModelDetails />
+          </div>
+        ) : (
+          <div className="evidence-empty" key={experiment.key}>
+            <BookIcon />
+            <h2>{experiment.title}</h2>
+            <p>Chưa có danh mục nguồn được công bố cho bài này trong phiên bản hiện tại.</p>
+            <Link href="/experiments">Xem các bài thí nghiệm <ArrowRightIcon /></Link>
+          </div>
+        ))}
+      </EvidenceExperimentBrowser>
     </div>
   )
 }
 
-/**
- * Badge tone per evidence status.
- *
- * A strength scale, not pass/fail: `excluded-from-model` must read as distinct because a
- * reader who mistakes it for a supporting claim would think the model rests on something
- * it explicitly rejects. Duplicated from the disclosure component rather than shared
- * because that one is scoped to the compact scenario surfaces; if a third call site
- * appears, both should move to one helper.
- */
-function statusTone(status: EvidenceStatus): string {
-  switch (status) {
-    case 'cross-checked':
-    case 'source-checked':
-      return 'badge-ok'
-    case 'excluded-from-model':
-      return 'badge-danger'
-    case 'supporting-only':
-      return 'badge-warn'
-    case 'model-derived':
-    default:
-      return ''
-  }
+function SourceCard({ source }: { source: EvidenceSource }) {
+  const relatedClaims = ACID_NEUTRALIZATION_RELEASE.claimKeys
+    .map(key => ACID_CLAIMS[key])
+    .filter((claim): claim is ClaimEvidenceLink => claim !== undefined && claim.sourceKeys.includes(source.key))
+
+  return (
+    <article className="evidence-source-card">
+      <div className="evidence-source-meta"><span>{SOURCE_TYPE_LABELS[source.sourceType]}</span>{source.year !== null && <span>{source.year}</span>}</div>
+      <h4>{source.title}</h4>
+      <p className="evidence-source-organization">{source.authorsOrOrganization}</p>
+      <div className="evidence-source-actions">
+        <a href={source.url} target="_blank" rel="noopener noreferrer" aria-label={`Mở tài liệu gốc — ${source.title}`}>Tài liệu gốc <ArrowRightIcon /></a>
+      </div>
+      <details className="evidence-disclosure evidence-source-detail">
+        <summary>Điều kiện và cách sử dụng <ArrowRightIcon /></summary>
+        <div className="evidence-disclosure-body">
+          <dl className="evidence-source-facts">
+            <div><dt>Mã nguồn</dt><dd>{source.key}</dd></div>
+            <div><dt>Ngày đối chiếu trong hồ sơ</dt><dd><time dateTime={source.checkedAt}>{source.checkedAt}</time></dd></div>
+            {source.locations.length > 0 && <div><dt>Phần được trích dẫn</dt><dd>{source.locations.join('; ')}</dd></div>}
+            {source.conditions.length > 0 && <div><dt>Điều kiện áp dụng</dt><dd>{source.conditions.join('; ')}</dd></div>}
+          </dl>
+          {source.limitations.length > 0 && <div className="evidence-source-limit"><h5>Giới hạn khi sử dụng nguồn</h5><ul>{source.limitations.map(limit => <li key={limit}>{limit}</li>)}</ul></div>}
+          <h5>Liên kết với mô hình</h5>
+          {relatedClaims.length === 0 ? <p>Nguồn được liệt kê để tham khảo; hồ sơ hiện tại chưa liên kết nguồn này với một tuyên bố cụ thể của mô hình.</p> : (
+            <ul className="evidence-source-claims">{relatedClaims.map(claim => <li key={claim.claimKey}><code>{claim.claimKey}</code><span>{USAGE_LABELS[claim.usage]} · {STATUS_LABELS[claim.status]}</span>{claim.transformation !== undefined && <p>{claim.transformation}</p>}</li>)}</ul>
+          )}
+        </div>
+      </details>
+    </article>
+  )
+}
+
+/** Keep technical traceability available without making it the default reading view. */
+function AcidModelDetails() {
+  const derived = Object.values(ACID_DERIVED_VALUES)
+  const supportingClaims = ACID_NEUTRALIZATION_RELEASE.claimKeys.filter(key => ACID_CLAIMS[key]?.usage === 'supporting')
+  return (
+    <section className="evidence-model-details" aria-labelledby="evidence-model-title">
+      <h2 id="evidence-model-title"><CalculatorIcon />Cách sử dụng nguồn trong mô hình</h2>
+      <p>Dữ liệu có nguồn, giá trị tính toán và quy ước học tập được trình bày riêng để bạn tiện đối chiếu.</p>
+      <details className="evidence-disclosure">
+        <summary>Tuyên bố và nguồn hỗ trợ <ArrowRightIcon /></summary>
+        <div className="evidence-disclosure-body"><p>Trạng thái được giữ theo sổ bằng chứng của phiên bản. “Dẫn xuất từ mô hình” là giá trị được tính qua phép biến đổi; “chỉ dùng tham khảo” không phải dữ liệu đầu vào.</p><div className="evidence-table-scroll" role="region" aria-label="Bảng tuyên bố và nguồn hỗ trợ" tabIndex={0}><ClaimList claimKeys={ACID_NEUTRALIZATION_RELEASE.claimKeys.filter(key => ACID_CLAIMS[key]?.usage !== 'supporting')} /></div></div>
+      </details>
+      <details className="evidence-disclosure">
+        <summary>Giá trị dẫn xuất và trường hợp chuẩn <ArrowRightIcon /></summary>
+        <div className="evidence-disclosure-body">
+          <div className="evidence-table-scroll" role="region" aria-label="Bảng giá trị dẫn xuất" tabIndex={0}>
+            <table><caption>Giá trị được tính từ hằng số có nguồn</caption><thead><tr><th scope="col">Giá trị</th><th scope="col">Tuyên bố nguồn</th><th scope="col">Phép biến đổi</th><th scope="col">Giá trị trong mô hình</th></tr></thead><tbody>{derived.map(value => <tr key={value.key}><td><code>{value.key}</code></td><td>{value.claimKey}</td><td>{value.transformation}</td><td className="num">{formatScientific(value.implementationValue)}</td></tr>)}</tbody></table>
+          </div>
+          <h3>Nguồn gốc các trường hợp chuẩn</h3>
+          <dl className="evidence-provenance">
+            <div><dt>Mã trường hợp</dt><dd>{ACID_GOLDEN_PROVENANCE.caseId}</dd></div>
+            <div><dt>Phiên bản kịch bản</dt><dd>{ACID_GOLDEN_PROVENANCE.scenarioVersion}</dd></div>
+            <div><dt>Bộ hằng số</dt><dd>{ACID_GOLDEN_PROVENANCE.constantBundle}</dd></div>
+            <div><dt>Nguồn</dt><dd>{ACID_GOLDEN_PROVENANCE.sourceKeys.join(', ')}</dd></div>
+            <div><dt>Cách dẫn xuất</dt><dd>{ACID_GOLDEN_PROVENANCE.derivation}</dd></div>
+            <div><dt>Kiểm tra độc lập theo hồ sơ</dt><dd>{ACID_GOLDEN_PROVENANCE.independentCheck ? 'Có' : 'Không'}</dd></div>
+            <div><dt>Dung sai pH*</dt><dd>± {formatPhTechnical(ACID_GOLDEN_PROVENANCE.tolerances.pH ?? null)}</dd></div>
+          </dl>
+        </div>
+      </details>
+      <details className="evidence-disclosure">
+        <summary>Giả định và quy ước của bài <ArrowRightIcon /></summary>
+        <div className="evidence-disclosure-body">
+          <p>Đây là các lựa chọn sư phạm của bài, không phải hằng số khoa học hoặc kết quả thực nghiệm.</p>
+          <ul className="evidence-conventions"><li>{ACID_STRINGS['scenarios.acid-neutralization.target-band']}</li><li>{ACID_STRINGS['resources.cost-index-explanation']}</li><li>{ACID_STRINGS['resources.safety-index-explanation']}</li></ul>
+          {supportingClaims.length > 0 && <div className="evidence-table-scroll" role="region" aria-label="Tuyên bố chỉ dùng tham khảo" tabIndex={0}><ClaimList claimKeys={supportingClaims} /></div>}
+        </div>
+      </details>
+      <details className="evidence-disclosure">
+        <summary>Thông tin phiên bản <ArrowRightIcon /></summary>
+        <div className="evidence-disclosure-body"><dl className="evidence-provenance"><div><dt>Bản phát hành</dt><dd>{ACID_NEUTRALIZATION_RELEASE.releaseId}</dd></div><div><dt>Nội dung</dt><dd>{ACID_NEUTRALIZATION_RELEASE.contentVersion}</dd></div><div><dt>Sổ bằng chứng của bài</dt><dd>{ACID_NEUTRALIZATION_RELEASE.evidenceRegisterVersion}</dd></div><div><dt>Sổ bằng chứng hiện tại</dt><dd>{EVIDENCE_REGISTER_VERSION}</dd></div></dl></div>
+      </details>
+    </section>
+  )
+}
+
+function EvidenceBackground() {
+  return <svg className="evidence-library-background" aria-hidden="true" focusable="false" width="1400" height="1200" viewBox="0 0 1400 1200" preserveAspectRatio="xMidYMin slice" fill="none"><g stroke="currentColor" opacity="0.15"><path d="m1100 35 35-20 35 20v40l-35 20-35-20Zm70 0 35-20 35 20v40l-35 20-35-20Zm-35 60 35-20 35 20v40l-35 20-35-20ZM1270 90v100l-45 45h-160M95 500v85l-35 35v115m0 70 30-17 30 17v34l-30 17-30-17Z" /><circle cx="1065" cy="235" r="4" /><circle cx="60" cy="735" r="4" /></g><g fill="currentColor" opacity="0.13"><circle cx="1300" cy="300" r="2" /><circle cx="1010" cy="90" r="2" /><circle cx="95" cy="450" r="2" /></g></svg>
 }
