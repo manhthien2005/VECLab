@@ -1,0 +1,56 @@
+{
+  "v": 1,
+  "kind": "task",
+  "id": "JAR-04-R1",
+  "coder": 1,
+  "repo": "manhthien2005/VECLab",
+  "branch": "fix/coder-1-jar04-review",
+  "target": "chore/pre-refactor-cleanup",
+  "base": "f38133767b6c377e75e37e5af3b6a487e5687bcd",
+  "goal": "Đóng hai findings JAR-04: locator conflict E2E bị ambiguous và thiếu mục tiêu học tập công khai. Giữ nguyên chức năng bàn Jar đã bàn giao; không mở Task 5.",
+  "read": [
+    "AGENTS.md",
+    ".agents/skills/veclab-implement/SKILL.md",
+    "docs/workflow/web-handoff-contract.md",
+    "docs/workflow/parallel-work.md",
+    "docs/workflow/ui-skills.md",
+    ".agents/skills/impeccable/SKILL.md",
+    ".agents/skills/impeccable/reference/operate.md",
+    ".agents/skills/impeccable/reference/craft-floor.md",
+    "docs/workflow/templates/result.json",
+    "docs/superpowers/specs/2026-10-13-simulation-v1-design.md",
+    "docs/superpowers/plans/2026-10-13-jar-test-first-slice.md",
+    "src/features/jar-test/workbench.tsx",
+    "src/domain/experiments/jar-test/model.ts",
+    "e2e/jar-test-workbench.spec.ts",
+    "playwright.config.ts",
+    "https://raw.githubusercontent.com/manhthien2005/VECLab/81de581324b6911ed5b074103dfef8694f5239e5/docs/workflow/tasks/coder-1-jar-04.json",
+    "https://raw.githubusercontent.com/manhthien2005/VECLab/8b4778606234803419b7c81c8a71cb201fec0b50/docs/workflow/reviews/jar-test-04.json",
+    "https://raw.githubusercontent.com/manhthien2005/VECLab/b8a2b2c8ec53e93c639b72cd5da292ace421941d/docs/workflow/references/next-16.3.4-jar-ui.md"
+  ],
+  "files": [
+    "src/features/jar-test/workbench.tsx",
+    "e2e/jar-test-workbench.spec.ts"
+  ],
+  "accept": [
+    "Nhánh R1 đã được local tạo/publish tại đúng base chưa nghiệm thu. Xác nhận SHA và công cụ thực có; đọc review/brief/guide ghim URL riêng, không đổi code base để lấy docs. No subagents/delegation; human updates ngắn gọn tiếng Việt, handback đúng một JSON v1.",
+    "Sửa assertion line 190 để chỉ chọn alert conflict của workbench. Có thể scope theo region 'Bàn thí nghiệm Jar Test' hoặc filter thông điệp; locator phải duy nhất. Không dùng first()/nth() để bỏ ambiguity, không xóa/bỏ qua test, không sửa app alert hoặc Next announcer để làm test xanh.",
+    "Công bố mục tiêu học tập giảm độ đục ít nhất 80% trong mô hình, lấy giá trị từ JAR_PROFILE.goalRemovalPercent; người học đọc được trước start và khi đang học/resume bằng URL. Nêu đây là mục tiêu sư phạm, không phải ngưỡng chất lượng nước hoặc chứng nhận nước an toàn. Giữ nội dung ngắn, tiếng Việt và visual system hiện có; không redesign hoặc thêm file/shared CSS.",
+    "Mục tiêu công khai không tiết lộ cốc/pH/liều tối ưu, expected removal từng cốc, score, tick đúng/sai hoặc reference trước complete. Không tự tính NTU/removal, không điền đáp số và không bắt đạt 80% mới cho nộp. Giữ nguyên incomplete completion, N/A và toàn bộ session/domain/API contracts.",
+    "Thêm assertions quan sát được cho mục tiêu và nhãn mô hình trước start và sau resume; giữ nguyên các assertions numeric values, dose additive, hidden outcomes, immutable completion, keyboard/reduced motion, double-click và hai tab/reload. Chụp screenshot sau đưa trang về đầu hoặc vùng được đặt tên rõ để fixed header không nằm giữa full-page capture do scroll.",
+    "Chỉ sửa hai files allowlist. Không đổi CSS, apparatus/route, test config, timeout, domain/session/API, auth/Supabase, dependencies, registry/catalog, global layout hoặc source Task 5. Lỗi ngoài phạm vi báo riêng cho TL1; không tự sửa.",
+    "Chạy checks tại final SHA nếu môi trường có; nếu không có terminal/browser/dependencies ghi not_run trung thực. Local sẽ chạy lại official E2E và các checks trước nghiệm thu. Probe 2/2 về scoped locator và 4/4 behavior tại base chỉ là evidence chẩn đoán, không được báo thành official R1 pass. Khi local chạy E2E dùng server riêng localhost:3174 và E2E_BASE_URL, thêm --output vào thư mục con riêng để không xóa evidence test-results khác.",
+    "Handback id JAR-04-R1, coder 1, branch/base/head thật, status pending_review hoặc blocked, đủ check IDs pass/fail/not_run và next local_review. Chỉ commit/push nhánh R1; không mở PR, push target, merge, deploy hoặc bắt đầu Task 5."
+  ],
+  "checks": {
+    "unit": "npm run test -- tests/unit/jar-engine.test.ts tests/integration/jar-guest-runtime.test.ts tests/integration/guest-runtime.test.ts tests/unit/jar-remote-api.test.ts",
+    "types": "npm run typecheck",
+    "lint": "npx --no-install eslint src/features/jar-test/workbench.tsx src/features/jar-test/apparatus.tsx src/app/simulate/jar-test/page.tsx e2e/jar-test-workbench.spec.ts",
+    "build": "npm run build",
+    "e2e_desktop": "npm run test:e2e -- e2e/jar-test-workbench.spec.ts --project=chromium",
+    "e2e_mobile": "npm run test:e2e -- e2e/jar-test-workbench.spec.ts --project=mobile",
+    "acid_smoke": "npm run test:e2e -- e2e/workbench-v1-production.spec.ts --project=chromium --grep \"Desktop basic layout\"",
+    "ui_detector": ".agents/skills/impeccable/scripts/impeccable.cmd detect --json src/features/jar-test/workbench.tsx src/features/jar-test/apparatus.tsx src/features/jar-test/workbench.module.css src/app/simulate/jar-test/page.tsx",
+    "diff": "git diff f38133767b6c377e75e37e5af3b6a487e5687bcd HEAD --check"
+  }
+}
