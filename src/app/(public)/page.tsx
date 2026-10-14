@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { APP_STRINGS } from '@/content/index.js'
 import { listCatalog } from '@/features/experiment-catalog/catalog.js'
 import { ScientificDisclosure } from '@/shared/ui/scientific-disclosure.js'
@@ -47,15 +46,21 @@ export default function HomePage() {
       <ScrollReveal />
 
       <section className="hero">
-        <Image
-          className="hero-background-image"
-          src="/assets/hero-water-technology.png"
-          alt=""
-          fill
-          sizes="100vw"
-          loading="eager"
-          fetchPriority="high"
-        />
+        <svg className="hero-background-art" viewBox="0 0 1440 820" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <g fill="none" stroke="currentColor" strokeWidth="1" opacity="0.55">
+            <path d="M830 0v110q0 40 40 40h290q40 0 40 40v140" />
+            <path d="M1440 390h-90q-40 0-40 40v110q0 40-40 40H880" />
+            <path d="M1050 820V720q0-40 40-40h270" />
+          </g>
+          <g fill="currentColor">
+            <circle cx="80" cy="150" r="2" /><circle cx="360" cy="90" r="1.5" />
+            <circle cx="670" cy="180" r="2" /><circle cx="940" cy="80" r="2" />
+            <circle cx="1200" cy="330" r="3" /><circle cx="1330" cy="120" r="2" />
+            <circle cx="880" cy="580" r="3" /><circle cx="1380" cy="650" r="1.5" />
+            <circle cx="90" cy="670" r="1.5" /><circle cx="490" cy="700" r="2" />
+            <circle cx="780" cy="740" r="1.5" /><circle cx="1360" cy="680" r="3" />
+          </g>
+        </svg>
         <div className="hero-inner">
           <div className="hero-copy rise">
             <p className="hero-eyebrow">{strings.heroEyebrow}</p>
