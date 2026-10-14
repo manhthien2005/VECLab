@@ -2705,7 +2705,9 @@ td[data-numeric],
   overflow: hidden;
   background: var(--surface);
   border-radius: 16px;
-  box-shadow: 0 8px 28px -12px rgba(11, 31, 61, 0.2);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 8px 24px -10px rgba(11, 31, 61, 0.18),
+    0 2px 6px rgba(11, 31, 61, 0.06);
   transform-origin: center;
   transition: transform 680ms cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 380ms ease-out;
   transform: translateZ(calc(-1 * var(--ring-radius))) rotateY(var(--ring-angle, 0deg)) translateZ(var(--ring-radius)) rotateY(calc(-1 * var(--ring-angle, 0deg)));
@@ -2715,7 +2717,7 @@ td[data-numeric],
 
 .showcase-card[data-position='center'] { z-index: 3; }
 .showcase-card[data-position='left'], .showcase-card[data-position='right'] { z-index: 1; }
-.showcase-card:hover { box-shadow: 0 14px 34px -12px rgba(11, 31, 61, 0.26); }
+.showcase-card:hover { box-shadow: 0 12px 28px -10px rgba(11, 31, 61, 0.22), 0 2px 8px rgba(11, 31, 61, 0.08); }
 .showcase-card:focus-within { outline: 2px solid var(--accent); outline-offset: 4px; }
 
 .showcase-card-link {
