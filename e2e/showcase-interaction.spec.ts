@@ -33,3 +33,42 @@ test.describe('UI-02 lesson showcase', () => {
     expect(overflow).toBe(false)
   })
 })
+
+/** Geometry regression: visible text assertions cannot detect absolute badge overlap. */
+for (const width of [390, 768, 1279, 1440]) {
+  test('UI02-F3: badge does not cover methylene title at ' + width + 'px or 200% text', async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('/')
+    const card = page.locator('.showcase-card').nth(2)
+    const badge = card.locator('.showcase-status-badge')
+    const title = card.locator('.showcase-card-title')
+    const inspect = async (phase: string) => {
+      await card.scrollIntoViewIfNeeded()
+      await expect(title).toHaveText('Hấp phụ xanh methylene')
+      const geometry = await card.evaluate((node) => {
+        const badgeNode = node.querySelector<HTMLElement>('.showcase-status-badge')
+        const titleNode = node.querySelector<HTMLElement>('.showcase-card-title')
+        if (!badgeNode || !titleNode) throw new Error('Badge/title missing')
+        const badgeRect = badgeNode.getBoundingClientRect()
+        const titleRect = titleNode.getBoundingClientRect()
+        return {
+          badgePosition: getComputedStyle(badgeNode).position,
+          verticalGap: titleRect.top - badgeRect.bottom,
+          badgeOverflow: badgeNode.scrollWidth - badgeNode.clientWidth,
+          titleOverflow: titleNode.scrollWidth - titleNode.clientWidth,
+          titleVerticalOverflow: titleNode.scrollHeight - titleNode.clientHeight,
+        }
+      })
+      expect(geometry.badgePosition, phase + ': badge must be in normal flow').toBe('static')
+      expect(geometry.verticalGap, phase + ': badge overlaps the title').toBeGreaterThanOrEqual(0)
+      expect(geometry.badgeOverflow, phase + ': badge clips text').toBeLessThanOrEqual(1)
+      expect(geometry.titleOverflow, phase + ': title clips text horizontally').toBeLessThanOrEqual(1)
+      expect(geometry.titleVerticalOverflow, phase + ': title clips lines').toBeLessThanOrEqual(1)
+    }
+
+    await expect(badge).toContainText('Đang phát triển')
+    await inspect('regular font at ' + width)
+    await page.evaluate(() => { document.documentElement.style.fontSize = '200%' })
+    await inspect('200% font at ' + width)
+  })
+}

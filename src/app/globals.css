@@ -1482,6 +1482,15 @@ td[data-numeric],
     linear-gradient(180deg, #0b1528 0%, #090e17 100%);
 }
 
+/* Honor the OS preference until a visitor chooses a theme. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .hero {
+    background:
+      var(--hero-glow),
+      linear-gradient(180deg, #0b1528 0%, #090e17 100%);
+  }
+}
+
 .hero::before {
   content: '';
   position: absolute;
@@ -2763,15 +2772,15 @@ td[data-numeric],
 }
 
 .showcase-status-badge {
-  position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
+  position: static;
+  align-self: flex-start;
+  max-width: 100%;
+  margin-bottom: var(--space-3);
   padding: 0.25rem 0.65rem;
   border-radius: var(--radius-pill);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
   font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .showcase-status-live {
@@ -2791,7 +2800,7 @@ td[data-numeric],
   align-items: flex-start;
   gap: 0.85rem;
   margin-bottom: 1rem;
-  padding-right: 4.5rem;
+  padding-right: 0;
 }
 
 .showcase-icon-box {
@@ -3810,6 +3819,21 @@ td[data-numeric],
   transition: transform var(--motion-micro, 120ms) var(--spring-tactile, cubic-bezier(0.34, 1.56, 0.64, 1)),
     box-shadow var(--motion-fast) var(--ease),
     background-color var(--motion-fast) var(--ease);
+}
+
+/* The generic .btn:hover clears .btn-primary's gradient. Keep the landing
+   illustration action legible across theme and pointer/focus states. */
+.landing-section-workbench .wp-action-btn:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: transparent;
+}
+.landing-section-workbench .wp-action-btn:hover:not(:disabled),
+.landing-section-workbench .wp-action-btn:focus-visible:not(:disabled),
+.landing-section-workbench .wp-action-btn:active:not(:disabled) {
+  background: var(--accent-hover);
+  color: var(--accent-contrast);
+  border-color: transparent;
 }
 
 .wp-action-btn:active {
