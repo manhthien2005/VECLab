@@ -4422,6 +4422,59 @@ td[data-numeric],
    18. Catalog
    ========================================================================== */
 
+/* Experiment library and contextual navigation. */
+.page-breadcrumbs { margin: 0 0 1.75rem; font-size: 0.8125rem; line-height: 1.6; color: var(--ink-muted); }
+.page-breadcrumbs ol { display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem 0.6rem; list-style: none; padding: 0; margin: 0; }
+.page-breadcrumbs li { display: inline-flex; align-items: baseline; gap: 0.6rem; min-width: 0; overflow-wrap: anywhere; }
+.page-breadcrumbs a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink-muted); text-decoration: none; }
+.page-breadcrumbs a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 0.25em; }
+.page-breadcrumbs a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.page-breadcrumbs [aria-current='page'] { color: var(--ink); font-weight: 600; }
+.breadcrumb-divider { color: var(--ink-muted); }
+.experiment-library.page { max-width: 88rem; padding: 1.5rem clamp(1.25rem, 3.5vw, 2.5rem) 4rem; }
+.experiment-library-header { max-width: 46rem; margin: 0 0 2rem; }
+.experiment-library-header h1 { font-size: 2.25rem; font-weight: 750; line-height: 1.2; letter-spacing: -0.03em; margin: 0 0 0.85rem; }
+.experiment-library-header p { margin: 0; font-size: 1.0625rem; color: var(--ink-muted); line-height: 1.7; }
+.experiment-library-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; align-items: start; }
+.experiment-library-card { min-width: 0; overflow: hidden; border: 1px solid var(--border-strong); border-radius: 14px; background: var(--surface); box-shadow: 0 6px 20px -14px rgba(11, 31, 61, 0.2); }
+.experiment-library-image { position: relative; aspect-ratio: 3 / 2; background: #edf4f8; border-bottom: 1px solid var(--border); }
+.experiment-library-image img { object-fit: cover; }
+.experiment-library-body { padding: 1.5rem; }
+.experiment-library-tags { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; font-size: 0.75rem; line-height: 1.5; }
+.experiment-topic { padding: 0.3rem 0.55rem; color: var(--ink-muted); background: var(--surface-2); border: 1px solid var(--border); border-radius: 5px; }
+.experiment-availability { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0; color: var(--ink-muted); }
+.experiment-availability > span { width: 0.35rem; height: 0.35rem; flex-shrink: 0; border-radius: 50%; background: currentColor; }
+.experiment-availability.is-available { color: var(--ink); font-weight: 600; }
+.experiment-availability.is-available > span { background: var(--accent); }
+.experiment-library-body h2 { margin: 0 0 0.7rem; font-size: 1.375rem; font-weight: 750; letter-spacing: -0.025em; line-height: 1.4; overflow-wrap: anywhere; }
+.experiment-library-description { min-height: 5.1em; margin: 0 0 1.25rem; color: var(--ink-muted); font-size: 0.9375rem; line-height: 1.7; }
+.experiment-library-facts { display: grid; gap: 0.85rem; margin: 0; padding: 1.15rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 0.8125rem; line-height: 1.6; }
+.experiment-library-facts > div { display: grid; grid-template-columns: 5rem minmax(0, 1fr); gap: 0.75rem; }
+.experiment-library-facts dt { color: var(--ink-muted); font-weight: 500; }
+.experiment-library-facts dd { margin: 0; color: var(--ink); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.experiment-library-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 0.65rem 1rem; margin-top: 1.25rem; }
+.experiment-library-start.btn { flex: 1 1 12rem; gap: 0.6rem; border-radius: 8px; min-height: 44px; padding: 0.7rem 0.8rem; background: var(--accent); color: var(--accent-contrast); font-size: 0.875rem; font-weight: 650; white-space: normal; }
+.experiment-library-start.btn:hover { background: var(--accent-hover); color: var(--accent-contrast); }
+.experiment-library-start svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+.experiment-library-detail { display: inline-flex; align-items: center; min-height: 44px; font-size: 0.8125rem; color: var(--ink); text-underline-offset: 0.25em; }
+.experiment-library-plan { width: 100%; }
+.experiment-library-plan summary { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; min-height: 44px; color: var(--ink); font-size: 0.875rem; font-weight: 600; cursor: pointer; list-style: none; }
+.experiment-library-plan summary::-webkit-details-marker { display: none; }
+.experiment-library-plan summary svg { width: 1rem; height: 1rem; flex-shrink: 0; rotate: 90deg; }
+.experiment-library-plan[open] summary svg { rotate: -90deg; }
+.experiment-library-plan ol { padding-left: 1.15rem; margin: 0.75rem 0; color: var(--ink-muted); font-size: 0.8125rem; line-height: 1.7; }
+.experiment-library-plan li + li { margin-top: 0.4rem; }
+.experiment-library-plan p { margin: 0.75rem 0 0; color: var(--ink-muted); font-size: 0.75rem; line-height: 1.6; }
+.experiment-library-start:focus-visible, .experiment-library-detail:focus-visible, .experiment-library-plan summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
+@media (max-width: 70rem) { .experiment-library-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 45rem) {
+  .experiment-library-grid { grid-template-columns: minmax(0, 1fr); }
+  .experiment-library-header h1 { font-size: 1.875rem; }
+  .experiment-library-body { padding: 1.25rem; }
+  .experiment-library-description { min-height: 0; }
+  .experiment-library-facts > div { grid-template-columns: 4.75rem minmax(0, 1fr); gap: 0.65rem; }
+}
+
 .catalog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr));

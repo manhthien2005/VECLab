@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import {
@@ -48,8 +49,9 @@ export async function generateMetadata({
   const { scenarioKey } = await params
   const entry = findCatalogEntry(scenarioKey)
 
+  const title = APP_STRINGS.home.showcaseCards.find(card => card.scenarioKey === scenarioKey)?.title ?? entry?.title
   return {
-    title: entry?.title ?? APP_STRINGS.experimentDetail.notFoundTitle,
+    title: title ?? APP_STRINGS.experimentDetail.notFoundTitle,
     description: entry?.summary,
   }
 }
@@ -64,6 +66,7 @@ export default async function ExperimentDetailPage({ params }: DetailPageProps) 
 
   const manifest = manifestFor(entry.releaseId)
   const actions = listActions(entry.scenarioKey)
+  const displayTitle = APP_STRINGS.home.showcaseCards.find(card => card.scenarioKey === scenarioKey)?.title ?? entry.title
   const strings = APP_STRINGS.experimentDetail
   const benchmark = ACID_INPUT_DOMAIN.benchmark
   const limits = ACID_INPUT_DOMAIN.limits
@@ -74,18 +77,14 @@ export default async function ExperimentDetailPage({ params }: DetailPageProps) 
 
   return (
     <div className="page stack-loose">
-      <nav aria-label="Breadcrumb">
-        <Link className="small" href="/experiments">
-          ← {strings.backToCatalog}
-        </Link>
-      </nav>
+      <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: 'Thí nghiệm', href: '/experiments' }, { label: displayTitle }]} />
 
       <header className="stack">
         <div className="row">
           <span className="badge badge-mono badge-accent">{entry.releaseId}</span>
           <span className="badge badge-mono">mô hình {entry.modelSpecVersion}</span>
         </div>
-        <h1>{entry.title}</h1>
+        <h1>{displayTitle}</h1>
         <p className="lede">{entry.summary}</p>
         <div className="row">
           <Link className="btn btn-primary btn-lg" href={`/simulate/${entry.scenarioKey}`}>
