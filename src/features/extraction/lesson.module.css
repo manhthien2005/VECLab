@@ -1,0 +1,31 @@
+.page { position:relative; isolation:isolate; padding-bottom:3rem; }
+.heading { display:flex; justify-content:space-between; align-items:center; gap:1.5rem; margin:2rem 0; }
+.heading h1 { font-size:2.2rem; letter-spacing:-.025em; margin:0 0 .75rem; }
+.heading p { max-width:65ch; color:var(--ink-muted); line-height:1.7; }
+.heading a { flex-shrink:0; }
+.bento { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:1rem; }
+.bento section { border:1px solid var(--border); border-radius:14px; padding:1.5rem; min-width:0; }
+.bento h2 { display:flex; align-items:center; gap:.65rem; font-size:1.18rem; margin:0 0 1rem; }
+.bento h2 svg { width:24px; height:24px; flex-shrink:0; }
+.bento p,.bento li { font-size:.92rem; line-height:1.8; }
+.bento li { margin-bottom:.65rem; }
+.bento a { color:var(--accent); overflow-wrap:anywhere; }
+.bento summary { cursor:pointer; font-size:.88rem; font-weight:600; padding:.65rem 0; }
+.bento details { border-top:1px solid var(--border); margin-top:.8rem; }
+.principle { grid-column:span 7; background:var(--surface); }
+.principle h2 { color:#276a88; }
+.goal { grid-column:span 5; background:var(--accent-softer); }
+.goal h2 { color:var(--accent); }
+.procedure { grid-column:span 12; background:var(--surface); }
+.procedure ol { columns:2; column-gap:3rem; padding-left:1.5rem; }
+.procedure li { break-inside:avoid; padding-left:.25rem; }
+.calculation { grid-column:span 6; background:var(--surface-2); }
+.limits { grid-column:span 6; background:var(--surface); }
+.sources { grid-column:span 12; background:var(--surface); }
+.formula { font-weight:650; background:var(--surface); border-radius:8px; padding:1rem; }
+.tableScroll { overflow:auto; }
+.tableScroll table { width:100%; border-collapse:collapse; font-size:.88rem; }
+.tableScroll th,.tableScroll td { text-align:left; padding:.7rem; border-bottom:1px solid var(--border); }
+.tableScroll caption { text-align:left; margin-bottom:.7rem; font-weight:650; }
+.end { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-top:1.5rem; }
+@media(max-width:700px){.heading{flex-direction:column;align-items:flex-start}.heading h1{font-size:1.8rem}.bento section{grid-column:span 12;padding:1.25rem}.procedure ol{columns:1}}

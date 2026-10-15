@@ -1,6 +1,8 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import styles from './tour.module.css'
 
+export type WorkbenchTourStep = { area: 'header' | 'shelf' | 'simulation' | 'controls' | 'notebook'; title: string; description: string }
+
 export const WORKBENCH_TOUR = [
   { area: 'header', title: 'Mục tiêu & lượt thực hành', description: 'Xem mục tiêu học tập và trạng thái lưu ở đầu trang. Nút Nộp bài kết thúc lượt và khóa các thao tác; bạn vẫn có thể xem lại số liệu.' },
   { area: 'shelf', title: 'Mẫu & dụng cụ', description: 'Kệ bên trái giới thiệu mẫu, hóa chất và thiết bị của bài. Bạn thao tác với chúng qua bảng Thao tác, không cần kéo thả. Có thể mở lại hướng dẫn này bất cứ lúc nào.' },
@@ -12,7 +14,8 @@ export const WORKBENCH_TOUR = [
 type Box = { x: number; y: number; width: number; height: number }
 
 /** An optional orientation tour. It never invokes an experiment command. */
-export function WorkbenchTour({ root, step, onStepChange, onClose }: {
+export function WorkbenchTour({ root, step, onStepChange, onClose, steps = WORKBENCH_TOUR }: {
+  steps?: readonly WorkbenchTourStep[]
   root: RefObject<HTMLElement | null>
   step: number
   onStepChange: (step: number) => void
@@ -23,7 +26,7 @@ export function WorkbenchTour({ root, step, onStepChange, onClose }: {
   const [box, setBox] = useState<Box | null>(null)
   const [position, setPosition] = useState({ left: 16, top: 16 })
   const uid = useId()
-  const current = WORKBENCH_TOUR[step]!
+  const current = steps[step]!
 
   useLayoutEffect(() => {
     const element = dialog.current
@@ -88,14 +91,14 @@ export function WorkbenchTour({ root, step, onStepChange, onClose }: {
       {box && <rect {...box} rx="12" fill="none" stroke="#007b80" strokeWidth="2" data-testid="workbench-tour-highlight"/>}
     </svg>
     <div ref={card} className={styles.card} style={position}>
-      <div className={styles.progress}><span>Khám phá workbench</span><span>{step + 1} / {WORKBENCH_TOUR.length}</span></div>
+      <div className={styles.progress}><span>Khám phá workbench</span><span>{step + 1} / {steps.length}</span></div>
       <div key={current.area} className={styles.content} aria-live="polite" aria-atomic="true">
         <h2>{current.title}</h2><p id={uid + '-description'}>{current.description}</p>
       </div>
       <div className={styles.actions}>
         <button type="button" onClick={onClose}>Tôi đã rõ</button>
         <div><button type="button" disabled={step === 0} onClick={() => onStepChange(step - 1)}>Quay lại</button>
-          {step < WORKBENCH_TOUR.length - 1 && <button type="button" className={styles.next} onClick={() => onStepChange(step + 1)}>Tiếp theo</button>}</div>
+          {step < steps.length - 1 && <button type="button" className={styles.next} onClick={() => onStepChange(step + 1)}>Tiếp theo</button>}</div>
       </div>
     </div>
   </dialog>

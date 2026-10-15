@@ -1,7 +1,7 @@
 'use client'
 
 import { useId, useRef, useState, type ReactNode } from 'react'
-import { WorkbenchTour, WORKBENCH_TOUR } from './tour.js'
+import { WorkbenchTour, WORKBENCH_TOUR, type WorkbenchTourStep } from './tour.js'
 import { ToolsIcon } from './icons.js'
 import styles from './frame.module.css'
 
@@ -9,7 +9,7 @@ export type WorkbenchPane = 'simulation' | 'controls' | 'notebook'
 
 /** Presentation slots only. Each experiment owns its apparatus, actions and data. */
 export function WorkbenchFrame({ label, header, notices, shelf, simulation, controls, notebook,
-  pane, onPaneChange, tourOpen = false, onTourClose, onShelfInfo }: {
+  pane, onPaneChange, tourOpen = false, onTourClose, onShelfInfo, tourSteps }: {
   label: string
   header: ReactNode
   notices?: ReactNode
@@ -19,6 +19,7 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
   notebook: ReactNode
   pane: WorkbenchPane
   onPaneChange: (pane: WorkbenchPane) => void
+  tourSteps?: readonly WorkbenchTourStep[]
   tourOpen?: boolean
   onTourClose?: () => void
   onShelfInfo?: () => void
@@ -27,7 +28,7 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
   const [mobileShelf, setMobileShelf] = useState(false)
   const [tourStep, setTourStep] = useState(0)
   const root = useRef<HTMLElement>(null)
-  const tourArea = tourOpen ? WORKBENCH_TOUR[tourStep]!.area : null
+  const tourArea = tourOpen ? (tourSteps ?? WORKBENCH_TOUR)[tourStep]!.area : null
   const displayedPane = tourArea === 'controls' || tourArea === 'notebook' ? tourArea : tourOpen ? 'simulation' : pane
   const displayedShelf = tourOpen ? tourArea === 'shelf' : mobileShelf
   const displayedCollapsed = tourOpen ? false : collapsed
@@ -59,7 +60,7 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
         <aside className={styles.controls} aria-label="Thao tác thí nghiệm" data-workbench-area="controls">{controls}</aside>
         <div className={styles.notebook} data-workbench-area="notebook">{notebook}</div>
       </div>
-      {tourOpen && <WorkbenchTour root={root} step={tourStep} onStepChange={setTourStep}
+      {tourOpen && <WorkbenchTour steps={tourSteps ?? WORKBENCH_TOUR} root={root} step={tourStep} onStepChange={setTourStep}
         onClose={() => { setTourStep(0); onTourClose?.() }} />}
     </section>
   )

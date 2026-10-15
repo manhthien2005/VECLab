@@ -1,0 +1,15 @@
+import Link from 'next/link'
+import type { ExtractionReportSnapshot } from '@/application/scenarios/extraction-projection.js'
+import styles from './workbench.module.css'
+export const fmt = (value: number | null, digits = 2) => value === null ? 'N/A' : value.toLocaleString('vi-VN', { maximumFractionDigits: digits })
+export function ExtractionReport({ report }: { report: ExtractionReportSnapshot }) {
+  return <div className={styles.report}>
+    <p className={styles.disclosure}>Kết quả của mẫu chuẩn A/B/N trong mô hình học tập. Không phải dữ liệu thực nghiệm hoặc dự đoán cho hóa chất thật.</p>
+    <h2>{!report.goalStatus.evaluable ? 'Chưa đủ dữ liệu để đánh giá' : report.goalStatus.goalMet ? 'Đã đạt mục tiêu mẫu chuẩn' : 'Đã nộp · Còn điểm cần xem lại'}</h2>
+    <div className={styles.tableScroll}><table><caption>Sản phẩm đã khai báo</caption><thead><tr><th>Cấu tử</th><th>Bình</th><th>Cân (mg)</th><th>Thu hồi thực theo mô hình (%)</th><th>Độ tinh khiết mô hình (%)</th><th>Đáp số (%)</th><th>Lệch phép tính (điểm %)</th></tr></thead><tbody>{report.products.map(p => <tr key={p.component}><th>{p.component}</th><td>{p.vesselId ?? 'Chưa chọn'}</td><td>{fmt(p.measuredMassMg)}{!p.currentMeasurement && p.measuredMassMg !== null ? ' · Số đo cũ' : ''}</td><td>{fmt(p.recovery)}</td><td>{fmt(p.purity)}</td><td>{fmt(p.answer)}</td><td>{fmt(p.answerError)}</td></tr>)}</tbody></table></div>
+    <p>Thu hồi biểu kiến tính từ khối lượng đã cân, có thể cao do lẫn tạp hoặc còn dung môi. Thu hồi từng cấu tử và độ tinh khiết bên trên lấy từ cân bằng lượng chất của mô hình.</p>
+    <p>Một phần chất có thể còn trong dịch mẹ do giới hạn độ tan. Lượng chưa thu hồi không tự chứng minh một thao tác sai.</p><h3>Điểm cần xem lại</h3>{report.diagnostics.length ? <ul>{report.diagnostics.map((d,i) => <li key={i}>{d.message}{d.actionIds.length > 0 && <details><summary>Thao tác liên quan</summary><p>{d.actionIds.map(id => id.slice(0,8)).join(' · ')}</p></details>}</li>)}</ul> : <p>Không ghi nhận thiếu phép cân, bỏ mẫu vào thải hoặc độ tinh khiết dưới mục tiêu. Xem bảng kết quả để đối chiếu thu hồi và đáp số.</p>}
+    <details open><summary>Cấu tử đang nằm ở đâu?</summary><div className={styles.tableScroll}><table><caption>Cân bằng mẫu chuẩn — ban đầu 100 mg mỗi cấu tử</caption><thead><tr><th>Bình</th><th>A (mg)</th><th>B (mg)</th><th>N (mg)</th></tr></thead><tbody>{report.distribution.map(row => <tr key={row.vesselId}><th>{row.vesselId}</th><td>{fmt(row.amountsMg.A)}</td><td>{fmt(row.amountsMg.B)}</td><td>{fmt(row.amountsMg.N)}</td></tr>)}</tbody></table></div></details>
+    <details><summary>Hồ sơ và tài nguyên</summary><p>{report.releaseId} · {report.versions.modelSpecVersion}</p><p>{report.resources.operationCount} thao tác đã lưu.</p><ul>{Object.entries(report.resources.reagents).map(([id,quantity]) => <li key={id}>{({acid:'Dung dịch axit',base:'Dung dịch bazơ',water:'Nước',solvent:'Dung môi hữu cơ'} as Record<string,string>)[id] ?? id}: {fmt(quantity.amount*1000)} mL</li>)}</ul><Link href="/experiments/acid-base-extraction/guide">Nguồn và giới hạn mô hình</Link></details>
+  </div>
+}
