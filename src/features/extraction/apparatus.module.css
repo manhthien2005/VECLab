@@ -1,0 +1,79 @@
+.stage { display:flex; flex-direction:column; flex:1; min-width:0; gap:12px; padding:18px 20px 14px; }
+.stageHeading { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.stageHeading h2 { margin:0; font-size:1.2rem; line-height:1.35; font-weight:750; letter-spacing:-.02em; }
+.stageHeading p { display:flex; flex-wrap:wrap; gap:4px 10px; margin:5px 0 0; font-size:.73rem; line-height:1.6; color:var(--ink-muted); }
+.stageHeading p strong { color:#294e61; font-weight:650; }
+.stageHeading p span { color:#577384; }
+.phaseTag { display:inline-flex; align-items:center; gap:6px; padding:5px 9px; border-radius:6px; background:#edf2f6; color:#486275; font-size:.69rem; white-space:nowrap; }
+.phaseTag::before { content:''; width:5px; height:5px; border-radius:50%; background:#91a8b7; }
+.phaseTag[data-filled=true] { background:#e4f1f2; color:#00656a; }
+.phaseTag[data-filled=true]::before { background:#007b80; }
+.scene { position:relative; display:flex; align-items:center; justify-content:center; flex:1; min-height:220px; border-radius:10px; background:#f7fafc; }
+.sceneFocus { display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; padding:0 10px 5px; border:0; border-radius:10px; background:transparent; font:inherit; cursor:help; }
+.sceneArt { display:block; width:100%; height:245px; max-height:270px; }
+.inspectHint { display:flex; align-items:center; gap:6px; color:#567383; font-size:.66rem; line-height:1.5; }
+.inspectHint svg { width:13px; height:13px; }
+.vesselArt { display:block; width:100%; height:100%; }
+.deviceDock { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.device { display:flex; align-items:center; gap:4px; min-width:0; min-height:73px; padding:5px 7px; border:1px solid #d4e0e8; border-radius:8px; background:#f8fafc; text-align:left; color:var(--ink); font:inherit; cursor:pointer; transition:background 180ms ease-out,border-color 180ms ease-out; }
+.device:hover { border-color:#8ab2bd; background:#edf6f8; }
+.device[data-active=true] { border-color:#76aaaf; background:#e7f3f3; }
+.device > span { flex:1; min-width:0; }
+.device strong { display:block; font-size:.73rem; line-height:1.5; font-weight:700; }
+.device small { display:block; margin-top:3px; font-size:.63rem; line-height:1.5; color:#536f80; }
+.device > svg:last-child { flex:0 0 13px; width:13px; height:13px; color:#698895; }
+.toolArt { display:block; flex:0 0 72px; width:72px; height:58px; }
+.readouts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; padding:10px 13px; border-radius:8px; background:#eaf2f6; }
+.readouts > div { min-width:0; }
+.readouts > div + div { border-left:1px solid #ccdde5; padding-left:13px; }
+.readouts div > span { display:block; margin-bottom:3px; color:#496879; font-size:.66rem; line-height:1.5; }
+.readouts strong { display:block; color:#234a5c; font-size:1.05rem; line-height:1.4; font-variant-numeric:tabular-nums; font-weight:750; }
+.readouts strong small { font-size:.75rem; font-weight:550; }
+.readouts div > small { display:block; margin-top:3px; color:#557383; font-size:.6rem; line-height:1.5; }
+.vesselPicker { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; }
+.vesselSlot { position:relative; min-width:0; }
+.vesselCard { display:flex; align-items:center; flex-direction:column; width:100%; min-width:0; padding:5px 3px 8px; border:1px solid #cad9e3; border-radius:8px; background:#f8fafc; color:var(--ink); font:inherit; cursor:pointer; transition:background 180ms ease-out,border-color 180ms ease-out; }
+.vesselCard:hover { background:#eff7f8; border-color:#88b1bb; }
+.vesselCard[aria-pressed=true] { border-color:var(--accent); background:#def0f1; }
+.vesselCard[aria-pressed=true] .vesselTitle strong { color:#00656a; }
+.vesselCard .vesselArt { width:56px; height:68px; }
+.vesselTitle { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:2px 4px; min-height:18px; font-size:.67rem; line-height:1.5; }
+.vesselTitle strong { font-size:.8rem; font-weight:750; }
+.vesselTitle > span { color:#476577; }
+.vesselCard > small { margin-top:3px; color:#557383; font-size:.64rem; font-variant-numeric:tabular-nums; line-height:1.5; }
+.sampleTip { position:absolute; width:275px; max-width:calc(100vw - 60px); z-index:20; padding:14px; border:1px solid #bbceda; border-radius:10px; background:white; box-shadow:0 10px 28px rgb(27 62 83 / 16%); color:#16394c; cursor:default; text-align:left; }
+.sceneTip { right:8px; top:8px; }
+.cardTip { bottom:calc(100% - 1px); left:50%; transform:translateX(-50%); }
+.vesselSlot:nth-child(-n+2) .cardTip { left:0; transform:none; }
+.vesselSlot:nth-last-child(-n+2) .cardTip { left:auto; right:0; transform:none; }
+.sampleTip header { display:flex; align-items:center; gap:10px; padding-bottom:10px; margin-bottom:9px; border-bottom:1px solid #dfE9ef; }
+.sampleTip header > span { display:grid; place-items:center; flex:0 0 30px; width:30px; height:30px; border-radius:6px; background:#e4f1f2; color:#00656a; font-size:.9rem; font-weight:750; }
+.sampleTip header strong { display:block; font-size:.83rem; line-height:1.4; }
+.sampleTip header small { display:block; margin-top:3px; color:#526f80; font-size:.65rem; }
+.sampleTip dl { margin:0; }
+.sampleTip dl > div { display:flex; justify-content:space-between; gap:12px; padding:4px 0; font-size:.73rem; line-height:1.5; }
+.sampleTip dt { color:#526f80; }
+.sampleTip dd { margin:0; font-weight:650; font-variant-numeric:tabular-nums; }
+.sampleTip p { margin:9px 0 0; color:#526f80; font-size:.66rem; line-height:1.7; }
+.sampleTip .inspectionNote { padding-top:9px; border-top:1px solid #dfe9ef; }
+.composition { margin-top:9px; padding-top:9px; border-top:1px solid #dfe9ef; }
+.composition > span { color:#526f80; font-size:.65rem; }
+.composition > div { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:8px; font-size:.7rem; font-variant-numeric:tabular-nums; }
+.composition strong { display:block; color:#00656a; margin-bottom:3px; }
+.visualNote { margin:0; color:#5a7788; text-align:center; font-size:.63rem; line-height:1.5; }
+.vesselMotion { transform-origin:90px 120px; }
+.swirl { opacity:0; }
+.vesselMotion[data-motion=mix] { animation:extractionRock 900ms ease-in-out; }
+.vesselMotion[data-motion=mix] .swirl { animation:extractionSwirl 900ms ease-out; }
+.transferFlow { animation:extractionFlow 1s ease-out 2; }
+.vapour, .ventPuff { animation:extractionVapour 1s ease-out 2; }
+.toolArt[data-active=true] .toolFlow { animation:extractionFlow 1s ease-out 2; }
+.toolArt[data-active=true] .toolVapour { animation:extractionVapour 1s ease-out 2; }
+@keyframes extractionRock { 0%,100%{transform:rotate(0)}30%{transform:rotate(5deg)}65%{transform:rotate(-4deg)} }
+@keyframes extractionSwirl { 20%,80%{opacity:.85}50%{transform:translateY(-5px)}100%{opacity:0} }
+@keyframes extractionFlow { 0%{opacity:.15;stroke-dashoffset:12}45%{opacity:1}100%{opacity:.2;stroke-dashoffset:0} }
+@keyframes extractionVapour { 0%{opacity:.1;transform:translateY(3px)}50%{opacity:.75}100%{opacity:0;transform:translateY(-7px)} }
+@media(max-width:1250px) and (min-width:1051px) { .toolArt { flex-basis:48px;width:48px;height:50px; }.device>svg:last-child{display:none}.readouts{gap:7px;padding-inline:9px}.readouts>div+div{padding-left:9px}.readouts strong{font-size:.9rem}.vesselTitle>span{font-size:.6rem} }
+@media(max-width:1050px) { .vesselPicker{grid-template-columns:repeat(3,minmax(0,1fr))}.sceneArt{height:260px}.vesselSlot:nth-child(n) .cardTip{left:50%;right:auto;transform:translateX(-50%)}.vesselSlot:nth-child(3n+1) .cardTip{left:0;transform:none}.vesselSlot:nth-child(3n) .cardTip{left:auto;right:0;transform:none} }
+@media(max-width:600px) { .stage{padding:14px;gap:10px}.stageHeading{flex-wrap:wrap;gap:8px}.stageHeading h2{font-size:1.05rem}.stageHeading p{font-size:.7rem}.scene{min-height:210px}.sceneFocus{padding-inline:0}.sceneArt{height:220px}.sceneTip{left:50%;right:auto;transform:translateX(-50%);top:0}.inspectHint{font-size:.6rem}.device{flex-direction:column;gap:0;padding:5px}.toolArt{width:64px;height:47px;flex-basis:47px}.device>svg:last-child{display:none}.device strong{font-size:.65rem;text-align:center}.device small{display:none}.readouts{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.readouts>div:nth-child(3){border-left:0;padding-left:0}.readouts strong{font-size:1rem}.visualNote{text-align:left}.vesselTitle>span{font-size:.63rem} }
+@media(prefers-reduced-motion:reduce) { .stage * { animation:none!important;transition:none!important; } }
