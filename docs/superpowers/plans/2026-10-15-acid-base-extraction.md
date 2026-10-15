@@ -58,15 +58,23 @@ Files: `src/features/extraction/report.tsx`; `src/app/experiments/acid-base-extr
 - [x] Tự chạy hai hướng tách, lượt chuyển nhầm pha và lượt thiếu dữ liệu; kiểm tra state/ledger/report match FE. Không chụp ảnh hoặc chạy suite lặp vô ích.
 - [x] Typecheck/lint/test tập trung; build là bước chốt trước khi giao link local. Người dùng review rồi mới quyết định cải thiện hoặc phát hành.
 
-## Tích hợp sau review
+## Giới hạn tích hợp và phát hành
 
-Chỉ thêm entry/catalog/lab theo scenario discriminator khi bài được người dùng nghiệm thu. Không đổi các thẻ bài khác trong vòng này. Không merge main/develop, deploy hoặc sửa cloud khi chưa có yêu cầu mới.
+Người dùng đã yêu cầu kích hoạt bài sau bản đầu: catalog, landing, evidence và lab được nối vào đúng route chiết tách. Giữ bài Jar, để hấp phụ ở trạng thái chưa triển khai và thay thẻ pH theo lựa chọn đã chốt. Không merge main/develop, deploy hoặc sửa cloud khi chưa có yêu cầu mới.
 
 ## Kết quả triển khai local
 
 - Hai hướng tách đã qua integration, cùng kiểm tra bảo toàn A/B/N và report bất biến. Retry/changed intent/stale revision/foreign scenario được kiểm tra.
 - Một lượt browser đầy đủ (tách A trước) đã chạy trên Chromium desktop và Pixel 7 mobile, có reload giữa lượt, nộp và mở lại report. Không chụp screenshot.
-- Bài chỉ có route riêng; chưa thêm vào danh mục chung, lab/account/compare và chưa thay thẻ pH. Người dùng yêu cầu không đụng các bài khác trong vòng này.
+- Bài có route riêng, thẻ hoạt động ở landing/thư viện và các lượt lưu trong lab. Account/compare vẫn có phạm vi Jar như nhãn hiện hành; chưa bổ sung cloud cho bài chiết tách.
 - Dữ liệu mẫu chuẩn và giới hạn được công bố trong guide và hồ sơ khoa học. Không tuyên bố hiệu chuẩn cho ba hóa chất thực.
 
 - Tour có nội dung riêng cho phễu chiết; kiểm tra desktop/mobile và regression tour Jar đều đạt. Workbench chỉ hiện sau khi URL lượt được tải xong, tránh đóng tour khi đổi khóa trang.
+
+
+## Polish và kích hoạt — theo yêu cầu tiếp theo của người dùng
+
+- Đồng bộ giao diện bài chiết tách với Jar Test: nền sáng, teal, nút 8px, nhóm thao tác, ô nhập, sổ đo, header/trạng thái lưu, dụng cụ và report. Không sửa engine hoặc UI Jar.
+- Đưa bài vào catalog/thẻ landing và thư viện, thay bài pH độc lập theo lựa chọn đã chốt. Hấp phụ vẫn chưa triển khai.
+- Kết nối lab với các lượt chiết tách thật; mở đúng URL tiếp tục/sổ đo/report và chỉ xóa đúng scenario. Thêm nguồn phương pháp vào trang evidence, không thay đổi ý nghĩa hoặc tính xác thực của mô hình quy ước.
+- Kiểm tra giới hạn ở các đường này: unit catalog/lab, browser desktop/mobile cho mở bài, thao tác, nộp và mở lại báo cáo từ lab; typecheck, lint và build.

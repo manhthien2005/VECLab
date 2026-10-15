@@ -26,11 +26,25 @@ test('extraction full workflow, resume and report use the same persisted values'
  const report=page.getByRole('dialog',{name:'Báo cáo chiết tách axit–bazơ',exact:true});await expect(report.getByRole('heading',{name:'Đã đạt mục tiêu mẫu chuẩn',exact:true})).toBeVisible();const snapshot=await report.getByRole('table',{name:'Sản phẩm đã khai báo',exact:true}).textContent()
  await page.goto(url);await page.getByRole('button',{name:'Báo cáo',exact:true}).click();await expect(report.getByRole('table',{name:'Sản phẩm đã khai báo',exact:true})).toHaveText(snapshot!)
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true)
+ await report.getByRole('button',{name:'Đóng',exact:true}).click()
+ await page.goto('/lab')
+ expect(await page.getByRole('link',{name:'Bắt đầu lượt mới',exact:true}).locator('svg').evaluate(svg=>svg.getBoundingClientRect().width)).toBe(16)
+ const attempt=url.split('attempt=')[1]!
+ const saved=page.getByRole('article',{name:'Lượt chiết tách '+attempt,exact:true})
+ await expect(saved).toContainText('3 / 3')
+ await saved.getByRole('link',{name:'Xem báo cáo',exact:true}).click()
+ await expect(report.getByRole('table',{name:'Sản phẩm đã khai báo',exact:true})).toHaveText(snapshot!)
+
 })
 
 test('extraction tour uses its own apparatus language and preserves the attempt',async({page})=>{
  await page.goto('/simulate/acid-base-extraction')
  await page.getByRole('button',{name:'Bắt đầu chiết tách',exact:true}).click()
+ const submit=page.getByRole('button',{name:'Nộp bài',exact:true})
+ await expect(submit).toBeVisible()
+ const appearance=await submit.evaluate(button=>{const style=getComputedStyle(button);return {background:style.backgroundColor,radius:style.borderRadius}})
+ expect(appearance).toEqual({background:'rgb(0, 123, 128)',radius:'8px'})
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true)
  await pane(page,'Dụng cụ')
  await page.getByRole('button',{name:'Hướng dẫn workbench',exact:true}).click()
  const tour=page.getByRole('dialog',{name:'Làm quen với workbench',exact:true})
@@ -41,4 +55,24 @@ test('extraction tour uses its own apparatus language and preserves the attempt'
  await tour.getByRole('button',{name:'Tôi đã rõ',exact:true}).click()
  await pane(page,'Sổ đo')
  await expect(page.getByText('Bản lưu 0',{exact:true})).toBeVisible()
+})
+
+
+test('extraction is connected from the homepage and its guide and evidence stay readable',async({page})=>{
+ await page.goto('/')
+ await expect(page.getByRole('link',{name:'Mở thí nghiệm Chiết tách axit–bazơ',exact:true})).toHaveAttribute('href','/simulate/acid-base-extraction')
+ for(const route of ['/experiments/acid-base-extraction','/experiments/acid-base-extraction/guide']){
+  await page.goto(route)
+  await expect(page.getByRole('heading',{level:1})).toContainText('Chiết tách axit–bazơ')
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true)
+  const icons=await page.locator('h2 svg').evaluateAll(nodes=>nodes.every(node=>node.getBoundingClientRect().width<=32&&node.getBoundingClientRect().height<=32))
+  expect(icons).toBe(true)
+ }
+ await page.goto('/evidence')
+ await page.getByRole('button',{name:/Chiết tách axit–bazơ/}).click()
+ const panel=page.locator('#evidence-panel-acid-base-extraction')
+ await expect(panel.getByRole('heading',{name:'Chiết tách axit–bazơ',exact:true})).toBeVisible()
+ await expect(panel.getByRole('link',{name:'Tài liệu gốc',exact:true})).toHaveCount(3)
+ await expect(panel).toContainText('chưa hiệu chuẩn theo hóa chất thật')
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true)
 })

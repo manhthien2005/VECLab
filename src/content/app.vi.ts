@@ -58,7 +58,7 @@ export const APP_STRINGS = {
 
     showcaseEyebrow: 'Khám phá ngay',
     showcaseHeading: '3 thí nghiệm mô phỏng',
-    showcaseLede: 'Jar Test đã mở thực hành. Hai bài còn lại chưa triển khai.',
+    showcaseLede: 'Thực hành Jar Test và chiết tách axit–bazơ. Bài hấp phụ đang được xây dựng.',
     showcaseCtaLabel: 'Thử ngay',
     comingSoonBadge: 'Sắp ra mắt',
     comingSoonCta: 'Xem trước',
@@ -70,10 +70,10 @@ export const APP_STRINGS = {
         available: true,
       },
       {
-        scenarioKey: 'acid-neutralization',
-        title: 'Điều chỉnh pH',
-        summary: 'Chọn lượng hóa chất và theo dõi pH của mẫu nước.',
-        available: false,
+        scenarioKey: 'acid-base-extraction',
+        title: 'Chiết tách axit–bazơ',
+        summary: 'Chọn hướng tách, thu từng phần mẫu và đối chiếu kết quả.',
+        available: true,
       },
       {
         scenarioKey: 'methylene-blue-adsorption',

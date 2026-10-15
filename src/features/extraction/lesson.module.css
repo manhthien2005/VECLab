@@ -1,31 +1,45 @@
-.page { position:relative; isolation:isolate; padding-bottom:3rem; }
-.heading { display:flex; justify-content:space-between; align-items:center; gap:1.5rem; margin:2rem 0; }
-.heading h1 { font-size:2.2rem; letter-spacing:-.025em; margin:0 0 .75rem; }
-.heading p { max-width:65ch; color:var(--ink-muted); line-height:1.7; }
-.heading a { flex-shrink:0; }
-.bento { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:1rem; }
-.bento section { border:1px solid var(--border); border-radius:14px; padding:1.5rem; min-width:0; }
-.bento h2 { display:flex; align-items:center; gap:.65rem; font-size:1.18rem; margin:0 0 1rem; }
-.bento h2 svg { width:24px; height:24px; flex-shrink:0; }
-.bento p,.bento li { font-size:.92rem; line-height:1.8; }
-.bento li { margin-bottom:.65rem; }
-.bento a { color:var(--accent); overflow-wrap:anywhere; }
-.bento summary { cursor:pointer; font-size:.88rem; font-weight:600; padding:.65rem 0; }
-.bento details { border-top:1px solid var(--border); margin-top:.8rem; }
-.principle { grid-column:span 7; background:var(--surface); }
-.principle h2 { color:#276a88; }
-.goal { grid-column:span 5; background:var(--accent-softer); }
-.goal h2 { color:var(--accent); }
+.page { position:relative; isolation:isolate; padding-bottom:48px; }
+.heading { display:flex; align-items:center; justify-content:space-between; gap:24px; margin:28px 0; }
+.heading h1 { margin:12px 0 10px; color:var(--ink); font-size:2rem; line-height:1.3; letter-spacing:-.025em; }
+.heading p { max-width:65ch; margin:0; color:var(--ink-muted); font-size:.95rem; line-height:1.75; }
+.tags { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; font-size:.72rem; }
+.tags span:first-child { padding:5px 8px; background:var(--surface-2); border:1px solid var(--border); border-radius:5px; color:var(--ink-muted); }
+.tags span:last-child { color:var(--accent-hover); font-weight:650; }
+.action { display:inline-flex; align-items:center; justify-content:center; gap:8px; flex-shrink:0; min-height:44px; padding:10px 16px; border:1px solid var(--accent); border-radius:8px; background:var(--accent); color:var(--surface); text-decoration:none; font:inherit; font-size:.85rem; font-weight:650; transition:background 180ms ease-out,border-color 180ms ease-out; }
+.action:hover { background:var(--accent-hover); border-color:var(--accent-hover); }
+.action svg { width:18px; height:18px; }
+.action:focus-visible, .bento :focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
+.bento { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:16px; }
+.bento section { min-width:0; border:1px solid var(--border); border-radius:12px; padding:24px; }
+.bento h2 { display:flex; align-items:center; gap:10px; margin:0 0 18px; color:var(--ink); font-size:1.12rem; letter-spacing:-.02em; line-height:1.4; }
+.bento h2 svg { flex:0 0 30px; width:30px; height:30px; padding:5px; border-radius:7px; background:color-mix(in srgb,var(--accent) 10%,transparent); color:var(--accent-hover); }
+.bento p, .bento li { font-size:.88rem; line-height:1.8; color:var(--ink-muted); }
+.bento p + p { margin-top:12px; }
+.bento li { margin-bottom:10px; }
+.bento strong { color:var(--ink); }
+.bento a { color:var(--accent-hover); text-underline-offset:3px; overflow-wrap:anywhere; }
+.bento summary { padding:13px 0; font-size:.82rem; font-weight:650; cursor:pointer; color:var(--ink); }
+.bento details { margin-top:16px; border-top:1px solid var(--border); }
+.goal { grid-column:span 5; background:color-mix(in srgb,var(--surface) 96%,#007b80); }
+.goal ul { padding-left:20px; }
+.principle { grid-column:span 7; background:color-mix(in srgb,var(--surface) 96%,#528ab7); }
 .procedure { grid-column:span 12; background:var(--surface); }
-.procedure ol { columns:2; column-gap:3rem; padding-left:1.5rem; }
-.procedure li { break-inside:avoid; padding-left:.25rem; }
-.calculation { grid-column:span 6; background:var(--surface-2); }
-.limits { grid-column:span 6; background:var(--surface); }
+.procedure ol { columns:2; column-gap:40px; padding-left:22px; margin:0; }
+.procedure li { break-inside:avoid; padding-left:5px; margin-bottom:18px; }
+.procedure li::marker { color:var(--accent-hover); font-weight:750; }
+.calculation { grid-column:span 6; background:color-mix(in srgb,var(--surface) 96%,#7276ae); }
+.limits { grid-column:span 6; background:color-mix(in srgb,var(--surface) 96%,#a97636); }
+.limits h2 svg { color:#956722; background:color-mix(in srgb,#a97636 12%,transparent); }
 .sources { grid-column:span 12; background:var(--surface); }
-.formula { font-weight:650; background:var(--surface); border-radius:8px; padding:1rem; }
-.tableScroll { overflow:auto; }
-.tableScroll table { width:100%; border-collapse:collapse; font-size:.88rem; }
-.tableScroll th,.tableScroll td { text-align:left; padding:.7rem; border-bottom:1px solid var(--border); }
-.tableScroll caption { text-align:left; margin-bottom:.7rem; font-weight:650; }
-.end { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-top:1.5rem; }
-@media(max-width:700px){.heading{flex-direction:column;align-items:flex-start}.heading h1{font-size:1.8rem}.bento section{grid-column:span 12;padding:1.25rem}.procedure ol{columns:1}}
+.sources ul { padding-left:20px; }
+.sources li { margin-bottom:16px; }
+.sources li p { margin:4px 0 0; font-size:.8rem; }
+.formula { margin:14px 0; padding:14px; border:1px solid var(--border); border-radius:8px; color:var(--ink)!important; font-weight:650; font-variant-numeric:tabular-nums; background:var(--surface); }
+.tableScroll { width:100%; overflow-x:auto; }
+.tableScroll table { width:100%; border-collapse:separate; border-spacing:0; font-size:.82rem; font-variant-numeric:tabular-nums; }
+.tableScroll th, .tableScroll td { padding:10px 12px; text-align:left; border-bottom:1px solid var(--border); }
+.tableScroll thead { background:var(--surface-2); }
+.tableScroll caption { text-align:left; margin-bottom:12px; color:var(--ink-muted); font-weight:650; }
+.end { display:flex; align-items:center; flex-wrap:wrap; gap:16px; margin-top:24px; font-size:.85rem; }
+@media(max-width:800px) { .heading{flex-direction:column;align-items:flex-start}.heading h1{font-size:1.75rem}.bento section{grid-column:span 12;padding:20px}.procedure ol{columns:1}.heading .action{width:100%} }
+@media(prefers-reduced-motion:reduce) { .action { transition:none; } }
