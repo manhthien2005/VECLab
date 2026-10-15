@@ -52,10 +52,3 @@ export function VesselArt({vessel,compact=false,motion='idle'}:{vessel:VisibleVe
     {!compact&&<text x="90" y="247" textAnchor="middle" fontSize="8" fill="#617e90">Dung tích 250 mL</text>}
   </svg>
 }
-
-export function BenchToolArt({kind,active=false}:{kind:'filter'|'recovery'|'meter';active?:boolean}) {
-  return <svg viewBox="0 0 110 80" aria-hidden="true" className={styles.toolArt} data-active={active}>
-    <ellipse cx="56" cy="73" rx="42" ry="4" fill="#8ba8b6" opacity=".14"/>
-    {kind==='filter'?<g stroke="#7897a7" strokeWidth="1.4" strokeLinejoin="round"><path d="M26 8h36v21l-12 12v9H38v-9L26 29Z" fill="#f2f7fa"/><path d="M29 16h30m-30 5h30" stroke="#b0c4ce"/><path d="M38 48h12v8l14 10q5 7-4 7H28q-8 0-3-7l13-10Z" fill="#e7f2f4"/><path d="M53 56h15l4-17h15" fill="none" stroke="#72959e"/><rect x="77" y="35" width="22" height="30" rx="4" fill="#dce8ee"/><circle cx="88" cy="44" r="4" fill="#4b7182"/><path className={styles.toolFlow} d="M44 43v3" stroke="#007b80" strokeWidth="2"/></g>:kind==='recovery'?<g stroke="#7897a7" strokeWidth="1.4" strokeLinejoin="round"><rect x="14" y="54" width="82" height="17" rx="5" fill="#dce8ee"/><rect x="21" y="49" width="68" height="7" rx="2" fill="#648596"/><rect x="25" y="60" width="23" height="6" rx="1" fill="#2b5361" stroke="none"/><circle cx="80" cy="62" r="3" fill="#007b80"/><path d="M47 10h16v17l14 19q3 5-4 5H37q-7 0-4-5l14-19Z" fill="#f3f9fa"/><path d="M38 43h34l3 5H35Z" fill="#d9dccf" stroke="none"/><path className={styles.toolVapour} d="M44 24q-5-6 0-12m29 12q5-6 0-12" fill="none" stroke="#96afb9"/></g>:<g stroke="#7897a7" strokeWidth="1.4" strokeLinejoin="round"><rect x="10" y="42" width="62" height="28" rx="5" fill="#dce8ee"/><ellipse cx="41" cy="40" rx="21" ry="4" fill="#e8f1f5"/><rect x="18" y="49" width="31" height="12" rx="2" fill="#2f5362"/><path d="M24 55h18" stroke="#afd7d7"/><circle cx="61" cy="55" r="3" fill="#007b80"/><path d="M91 66V14H71v10" fill="none" stroke="#628799" strokeWidth="3"/><path d="M69 25v26h5V25" fill="#e2f2f3"/><circle cx="91" cy="14" r="4" fill="#8db4c0"/></g>}
-  </svg>
-}

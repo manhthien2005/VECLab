@@ -2,9 +2,7 @@
 import { useEffect, useId, useState } from 'react'
 import type { ExtractionProjection, ExtractionReportSnapshot } from '@/application/scenarios/extraction-projection.js'
 import type { VesselId } from '@/domain/experiments/acid-base-extraction/model.js'
-import type { ExtractionEquipmentKind } from './equipment-panel.js'
-import { InfoIcon } from '@/features/workbench/icons.js'
-import { VesselArt, BenchToolArt, liquidLayout, type VisibleVessel } from './vessel-art.js'
+import { VesselArt, liquidLayout, type VisibleVessel } from './vessel-art.js'
 import styles from './apparatus.module.css'
 
 export const VESSEL_NAMES:Record<VesselId,string>={S:'Bình mẫu',F:'Phễu chiết',R1:'Bình thu 1',R2:'Bình thu 2',R3:'Bình thu 3',W:'Bình thải'}
@@ -49,7 +47,6 @@ function FocusScene({projection,vessel,operation}:{projection:ExtractionProjecti
       <rect x="224" y="66" width="56" height="15" rx="5" fill="#698b9e"/>
       <rect x="143" y="246" width="165" height="13" rx="5" fill={'url(#'+uid+'steel)'}/>
       <rect x="150" y="257" width="150" height="4" rx="2" fill="#668696"/>
-      <path d="M151 50H110" stroke="#a6bdca"/><text x="105" y="47" textAnchor="end" fontSize="10" fill="#58778b">Giá đỡ cố định</text>
     </g>}
     <svg x="192" y="-1" width="195" height="270"><VesselArt vessel={vessel} motion={operation}/></svg>
     {(vessel.separated||vessel.waterMl===0||vessel.organicMl===0)&&total>0?<g strokeWidth="1" fill="none">
@@ -66,8 +63,8 @@ function FocusScene({projection,vessel,operation}:{projection:ExtractionProjecti
   </svg>
 }
 
-export function ExtractionApparatus({projection,selected,onSelect,motion,distribution,onEquipmentInfo}:{
-  projection:ExtractionProjection;selected:VesselId;onSelect:(id:VesselId)=>void;motion:string;distribution?:Distribution|undefined;onEquipmentInfo:(kind:ExtractionEquipmentKind)=>void
+export function ExtractionApparatus({projection,selected,onSelect,motion,distribution}:{
+  projection:ExtractionProjection;selected:VesselId;onSelect:(id:VesselId)=>void;motion:string;distribution?:Distribution|undefined
 }) {
   const [inspect,setInspect]=useState<{id:VesselId;anchor:'card'|'scene'}|null>(null),uid=useId()
   const vessel=projection.vessels.find(v=>v.id===selected)!,parts=motion.split('-'),operation=parts[1]===selected?(parts[0]??'idle'):'idle'
@@ -84,11 +81,8 @@ export function ExtractionApparatus({projection,selected,onSelect,motion,distrib
   return <section className={styles.stage} aria-label="Khu vực thực hành chiết tách">
     <div className={styles.stageHeading}><div><h2>Khu vực thực hành</h2><p><strong>{selected} · {VESSEL_NAMES[selected]}</strong><span>{ROLES[selected]}</span></p></div><span className={styles.phaseTag} data-filled={vessel.waterMl+vessel.organicMl>0||vessel.solidPresent}>{vesselStatus(vessel)}</span></div>
     <div className={styles.scene} data-vessel-inspect onPointerEnter={event=>{if(event.pointerType==='mouse')setInspect({id:selected,anchor:'scene'})}} onPointerLeave={event=>{if(event.pointerType==='mouse')setInspect(null)}}>
-      <button type="button" className={styles.sceneFocus} aria-label={'Xem mẫu trong bình '+selected} aria-describedby={inspect?.anchor==='scene'&&inspect.id===selected?uid+'-'+selected+'-scene':undefined} onClick={()=>setInspect({id:selected,anchor:'scene'})} onFocus={()=>setInspect({id:selected,anchor:'scene'})} onBlur={()=>setInspect(null)}><FocusScene key={motion} projection={projection} vessel={vessel} operation={operation}/><span className={styles.inspectHint}><InfoIcon/>Rê chuột hoặc bấm vào bình để xem mẫu</span></button>
+      <button type="button" className={styles.sceneFocus} aria-label={'Xem mẫu trong bình '+selected} aria-describedby={inspect?.anchor==='scene'&&inspect.id===selected?uid+'-'+selected+'-scene':undefined} onClick={()=>setInspect({id:selected,anchor:'scene'})} onFocus={()=>setInspect({id:selected,anchor:'scene'})} onBlur={()=>setInspect(null)}><FocusScene key={motion} projection={projection} vessel={vessel} operation={operation}/></button>
       {tip(selected,'scene')}
-    </div>
-    <div className={styles.deviceDock} aria-label="Thiết bị thực hành">
-      {([{kind:'filter',title:'Trạm lọc',role:'Tách chất rắn khỏi dịch',item:'filter',active:operation==='filter'},{kind:'recovery',title:'Trạm cô & sấy',role:'Loại dung môi, làm khô',item:'filter',active:operation==='evaporate'||operation==='dry'},{kind:'meter',title:'Trạm đo & cân',role:'Đọc pH, cân sản phẩm',item:'meter',active:operation==='measure'}] as const).map(tool=><button key={tool.kind} type="button" className={styles.device} aria-label={'Tìm hiểu '+tool.title.toLowerCase()} data-active={tool.active} onClick={()=>onEquipmentInfo(tool.item)}><BenchToolArt kind={tool.kind} active={tool.active}/><span><strong>{tool.title}</strong><small>{tool.role}</small></span><InfoIcon/></button>)}
     </div>
     <div className={styles.readouts}>
       <div><span>Pha hữu cơ</span><strong>{number(vessel.organicMl)} <small>mL</small></strong></div>
@@ -100,6 +94,5 @@ export function ExtractionApparatus({projection,selected,onSelect,motion,distrib
       <button type="button" className={styles.vesselCard} data-testid={'extraction-vessel-'+item.id} aria-label={item.id+' · '+VESSEL_NAMES[item.id]} aria-pressed={selected===item.id} aria-describedby={inspect?.id===item.id&&inspect.anchor==='card'?uid+'-'+item.id+'-card':undefined} onClick={()=>{onSelect(item.id);setInspect({id:item.id,anchor:'card'})}} onFocus={()=>setInspect({id:item.id,anchor:'card'})} onBlur={()=>setInspect(null)}><VesselArt vessel={item} compact/><span className={styles.vesselTitle}><strong>{item.id}</strong><span>{VESSEL_NAMES[item.id]}</span></span><small>{number(item.waterMl+item.organicMl)} mL{item.solidPresent?' · Có rắn':''}</small></button>
       {tip(item.id,'card')}
     </div>)}</div>
-    <p className={styles.visualNote}>Mức chất lỏng và hạt chỉ minh họa. Thể tích, pH và khối lượng đọc ở thông số đã lưu.</p>
   </section>
 }
