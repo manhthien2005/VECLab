@@ -53,7 +53,7 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d={collapsed ? 'm6 3 5 5-5 5' : 'm10 3-5 5 5 5'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
           </div>
-          <div id={shelfId} hidden={displayedCollapsed && !displayedShelf}>{shelf}</div>
+          <div className={styles.shelfBody} id={shelfId} hidden={displayedCollapsed && !displayedShelf}>{shelf}</div>
         </aside>
         <div className={styles.simulation} data-workbench-area="simulation">{simulation}</div>
         <aside className={styles.controls} aria-label="Thao tác thí nghiệm" data-workbench-area="controls">{controls}</aside>

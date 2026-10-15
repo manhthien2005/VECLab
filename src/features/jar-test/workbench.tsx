@@ -129,7 +129,7 @@ function JarLearningGoal() {
   return <div className={styles.goal} data-testid="jar-public-goal">
     <details ref={details} className={styles.goalDetails} onKeyDown={(event) => {
       if (event.key === 'Escape' && details.current?.open) { event.stopPropagation(); closeScope() }
-    }}><summary aria-label="Mục tiêu"><TargetIcon /><span className={styles.goalButtonLabel}>Mục tiêu</span><span className={styles.goalThreshold}>≥ {JAR_PROFILE.goalRemovalPercent}%</span></summary>
+    }}><summary aria-label="Mục tiêu"><TargetIcon /><span className={styles.goalButtonCopy}><strong>Mục tiêu</strong><span>Giảm độ đục ≥ {JAR_PROFILE.goalRemovalPercent}%</span></span></summary>
       <section className={styles.goalPanel} aria-label="Mục tiêu và phạm vi Jar Test">
         <div className={styles.goalPanelHeading}><h2>Mục tiêu & phạm vi</h2>
           <button type="button" aria-label="Đóng mục tiêu & phạm vi" onClick={closeScope}><CloseIcon /></button>

@@ -80,6 +80,7 @@ test.describe('Jar Test — light workbench, persisted guest flow', () => {
     const headerHeight = (await header.boundingBox())!.height
     expect(headerHeight).toBeLessThan(105)
     const summary = goal.locator('summary')
+    await expect(summary).toContainText('Giảm độ đục ≥ 80%')
     const panel = page.getByRole('region', { name: 'Mục tiêu và phạm vi Jar Test' })
     await expect(panel).toBeHidden()
     await activate(summary, true)
@@ -178,8 +179,12 @@ test.describe('Jar Test — light workbench, persisted guest flow', () => {
   test('collapsible equipment and outer navigation preserve the saved run', async ({ page }) => {
     const id = await begin(page)
     const mobileNav = page.getByRole('navigation', { name: 'Khu vực workbench' })
+    if (await mobileNav.isVisible()) await mobileNav.getByRole('button', { name: 'Dụng cụ', exact: true }).click()
+    const titleBounds = (await page.getByRole('button', { name: 'Tìm hiểu mẫu & dụng cụ', exact: true }).boundingBox())!
+    const toggleBounds = (await page.getByRole('button', { name: 'Thu gọn kệ mẫu và dụng cụ' }).boundingBox())!
+    expect(Math.abs(titleBounds.y + titleBounds.height / 2 - toggleBounds.y - toggleBounds.height / 2)).toBeLessThan(2)
+    expect(toggleBounds.x).toBeGreaterThanOrEqual(titleBounds.x + titleBounds.width - 1)
     if (await mobileNav.isVisible()) {
-      await mobileNav.getByRole('button', { name: 'Dụng cụ', exact: true }).click()
       await expect(page.getByText('Mẫu kaolin', { exact: true })).toBeVisible()
       await page.getByRole('button', { name: 'Thu gọn kệ mẫu và dụng cụ' }).click()
       await expect(page.getByText('Mẫu kaolin', { exact: true })).toBeHidden()
