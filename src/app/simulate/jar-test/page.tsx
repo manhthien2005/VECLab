@@ -19,16 +19,5 @@ export default async function JarTestPage({ searchParams }: JarPageProps) {
   const invalidAttempt = attempt !== undefined &&
     (typeof attempt !== 'string' || attempt.length === 0)
   const attemptId = typeof attempt === 'string' && attempt.length > 0 ? attempt : null
-  return (
-    <div className="page stack">
-      <header className="stack-tight">
-        <h1>Bàn thí nghiệm Jar Test</h1>
-        <p className="muted">Keo tụ · Tạo bông · Lắng · Đo độ đục</p>
-        <p className="muted">Bản thực hành thử: lượt Jar Test chỉ lưu trong trình duyệt này,
-          kể cả khi đã đăng nhập. Lượt chưa được đồng bộ vào tài khoản.</p>
-      </header>
-      <JarWorkbench attemptId={attemptId} invalidAttempt={invalidAttempt}
-        storageMode="local" />
-    </div>
-  )
+  return <JarWorkbench attemptId={attemptId} invalidAttempt={invalidAttempt} storageMode="local" />
 }
