@@ -6,6 +6,7 @@ import { parseUUID } from '@/shared/ids.js'
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
 import { ScienceBackdrop } from '@/shared/ui/science-backdrop.js'
 import { JAR_SOURCES } from '@/content/evidence/jar-test.js'
+import { ControlIcon } from '@/features/workbench/icons.js'
 import { ArrowRightIcon, BookIcon, FlaskIcon, CalculatorIcon, WarningIcon } from '@/features/landing/icons.js'
 import styles from './page.module.css'
 
@@ -61,14 +62,19 @@ export default async function JarGuidePage({ searchParams }: {
         <section className={styles.panel + ' ' + styles.procedure} aria-labelledby="jar-procedure">
           <h2 id="jar-procedure"><FlaskIcon />Quy trình trên workbench</h2>
           <p>Thực hiện một mẻ với tối đa sáu cốc A–F. Các cốc có thể khác pH và liều phèn, nhưng dùng chung chương trình khuấy và lắng.</p>
+          <ol className={styles.stageStrip} aria-label="Ba chặng thực hành">
+            <li><ControlIcon kind="prepare" /><div><strong>Chuẩn bị mẫu</strong><span>Chọn cốc · Đo đầu · Cấp phèn</span></div></li>
+            <li><ControlIcon kind="program" /><div><strong>Chạy xử lý</strong><span>Khuấy nhanh · Khuấy chậm · Lắng</span></div></li>
+            <li><ControlIcon kind="results" /><div><strong>Đo & nộp bài</strong><span>Đo cuối · Ghi đáp số · Chọn cốc</span></div></li>
+          </ol>
           <ol className={styles.steps}>
-            <li><h3>Chọn cốc và chuẩn bị mẫu</h3><p>Bấm một cốc trên dàn. Trong <strong>Thao tác → Chuẩn bị mẫu</strong>, chọn pH ban đầu rồi bấm <strong>Chuẩn bị cốc</strong>. Mỗi cốc chứa {JAR_PROFILE.aliquotVolumeL.toLocaleString('vi-VN')} L mẫu trong cốc {JAR_PROFILE.beakerCapacityL} L. Làm tương tự với các cốc muốn so sánh; không bắt buộc dùng cả sáu.</p><p>pH là điều kiện của mẫu đã chuẩn bị sẵn, không phải pH cuối sau xử lý.</p></li>
+            <li><h3>Chọn cốc và chuẩn bị mẫu</h3><p>Bấm một cốc trên dàn. Mở <strong>Thao tác → Chuẩn bị mẫu</strong>, chọn pH rồi bấm <strong>Chuẩn bị cốc</strong>. Lặp lại với các cốc muốn so sánh.</p><details><summary>Thể tích và pH của mẫu</summary><p>Mỗi cốc chứa {JAR_PROFILE.aliquotVolumeL.toLocaleString('vi-VN')} L mẫu trong cốc {JAR_PROFILE.beakerCapacityL} L. Không bắt buộc dùng cả sáu cốc. pH được chọn là điều kiện ban đầu của mẫu đã chuẩn bị sẵn, không phải pH cuối sau xử lý.</p></details></li>
             <li><h3>Đo mẫu ban đầu</h3><p>Mở <strong>Sổ đo</strong> và bấm <strong>Đo mẫu ban đầu</strong> trước khi chạy chương trình. Đây là số liệu chung để tính mức giảm đục của các cốc. Số đo chỉ xuất hiện sau khi bạn thực hiện phép đo.</p></li>
-            <li><h3>Cấp phèn cho từng cốc</h3><p>Chọn cốc, mở <strong>Thao tác → Cấp phèn</strong>, chọn liều tăng rồi bấm nút thêm phèn. Liều được cộng dồn; kiểm tra <strong>Tổng liều hiện tại</strong> trước mỗi lần thêm.</p><p>Mỗi cốc cần tổng liều từ {JAR_PROFILE.minDoseMgL} đến {JAR_PROFILE.maxDoseMgL} mg/L, theo bước {JAR_PROFILE.doseStepMgL} mg/L. Hoàn tất thiết kế các cốc trước khi khuấy: mẫu và liều sẽ khóa khi chương trình bắt đầu.</p></li>
+            <li><h3>Cấp phèn cho từng cốc</h3><p>Mở <strong>Thao tác → Cấp phèn</strong>, chọn liều tăng và bấm thêm phèn. Liều được cộng dồn; kiểm tra <strong>Tổng liều hiện tại</strong> trước mỗi lần thêm.</p><p>Hoàn tất các cốc trước khi khuấy: mẫu và liều sẽ khóa khi chương trình bắt đầu.</p><details><summary>Liều và đơn vị sử dụng</summary><p>Tổng liều mỗi cốc từ {JAR_PROFILE.minDoseMgL} đến {JAR_PROFILE.maxDoseMgL} mg/L, theo bước {JAR_PROFILE.doseStepMgL} mg/L. mg/L là liều tính theo thể tích mẫu, không phải khối lượng mg.</p></details></li>
             <li><h3>Chạy đủ ba pha</h3><p>Trong <strong>Thao tác → Khuấy & lắng</strong>, chạy lần lượt <strong>Khuấy nhanh → Khuấy chậm → Lắng</strong>. Mỗi nút áp dụng cho cả dàn cốc. Thời gian là thời gian mô phỏng; bạn không cần chờ hết số phút ngoài đời thực.</p>
               <div className={styles.tableScroll}><table><caption>Chương trình chung cho các cốc</caption><thead><tr><th scope="col">Pha</th><th scope="col">Tốc độ</th><th scope="col">Thời gian</th></tr></thead><tbody>{phases.map(([name, phase, purpose]) => <tr key={name}><th scope="row" title={purpose}>{name}</th><td>{phase.rpm ? phase.rpm + ' rpm' : 'Dừng khuấy'}</td><td>{phase.durationSeconds < 120 ? phase.durationSeconds + ' giây' : phase.durationSeconds / 60 + ' phút'}</td></tr>)}</tbody></table></div>
             </li>
-            <li><h3>Đo độ đục cuối của từng cốc</h3><p>Chọn cốc cần đo, mở <strong>Thao tác → Đo & ghi kết quả</strong>, bấm <strong>Đo độ đục cuối cốc</strong>. Đọc số đo trên máy và trong sổ đo. Lặp lại với các cốc còn lại để có dữ liệu so sánh.</p><p>Nếu đo trước khi chạy đủ ba pha, phép đo được lưu với <strong>N/A</strong>. Sau khi hoàn tất chương trình, bạn có thể đo lại; lịch sử vẫn giữ phép đo sớm.</p></li>
+            <li><h3>Đo độ đục cuối của từng cốc</h3><p>Chọn cốc, mở <strong>Thao tác → Đo & ghi kết quả</strong>, bấm <strong>Đo độ đục cuối cốc</strong>. Đọc số đo trên máy và trong sổ đo, rồi đo các cốc còn lại.</p><details><summary>Nếu thực hiện phép đo quá sớm</summary><p>Đo trước khi chạy đủ ba pha được lưu với <strong>N/A</strong>. Sau khi hoàn tất chương trình, bạn có thể đo lại; lịch sử vẫn giữ phép đo sớm.</p></details></li>
             <li><h3>Tự tính, ghi đáp số và chọn phương án</h3><p>Dùng NTU đầu và NTU cuối hợp lệ để tính phần trăm giảm đục theo công thức bên dưới. Nhập kết quả vào <strong>Phần trăm giảm đục tự tính (%)</strong>, bấm <strong>Ghi đáp số</strong> cho từng cốc. Sau đó chọn một cốc làm phương án nộp.</p></li>
             <li><h3>Kiểm tra sổ đo rồi nộp bài</h3><p>Đối chiếu pH, tổng liều, số đo cuối và đáp số đã ghi. Bấm <strong>Nộp bài</strong>, kiểm tra thông tin trong bảng xác nhận rồi chọn <strong>Xác nhận nộp bài</strong>. Báo cáo sẽ đối chiếu đáp số và chỉ ra những điểm cần xem lại. Lượt đã nộp chỉ có thể xem lại; muốn thử phương án khác, bắt đầu một mẻ mới.</p></li>
           </ol>

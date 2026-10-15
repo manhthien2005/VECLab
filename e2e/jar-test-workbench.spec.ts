@@ -85,12 +85,21 @@ test.describe('Jar Test — light workbench, persisted guest flow', () => {
       for (const icon of icons) { expect(icon.width).toBeLessThanOrEqual(24); expect(icon.height).toBeLessThanOrEqual(24) }
       await expect(page.locator('svg[data-science-backdrop]')).toBeAttached()
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
+      if (route === '/evidence') {
+        const source = page.locator('.evidence-source-card').first()
+        await source.locator('summary').click()
+        await expect(source).toContainText('Equation 3')
+        await expect(source.getByRole('link', { name: 'Tài liệu gốc', exact: true })).toBeVisible()
+      }
     }
     const panels = page.locator('main section[aria-labelledby^="jar-"]')
     await expect(panels).toHaveCount(6)
     const colors = await panels.evaluateAll(elements => elements.map(element => getComputedStyle(element).backgroundColor))
     expect(new Set(colors).size).toBeGreaterThanOrEqual(4)
     await expect(page.getByRole('heading', { name: 'Quy trình trên workbench', exact: true })).toBeVisible()
+    await expect(page.getByRole('list', { name: 'Ba chặng thực hành', exact: true }).getByRole('listitem')).toHaveCount(3)
+    await page.getByText('Thể tích và pH của mẫu', { exact: true }).click()
+    await expect(page.getByText(/không phải pH cuối sau xử lý/)).toBeVisible()
   })
   test('catalog and citations expose Jar Test and label future lessons honestly', async ({ page }) => {
     test.setTimeout(60_000) // Multiple routes may compile on their first dev-server visit.

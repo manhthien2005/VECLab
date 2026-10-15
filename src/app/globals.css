@@ -7612,3 +7612,31 @@ td[data-numeric],
 /* Reading-page links keep decorative icons bounded and aligned with their labels. */
 .experiment-detail-process > a, .evidence-model-details > a { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; font-size: .875rem; text-underline-offset: .25em; }
 .experiment-detail a > svg, .evidence-library a > svg { width: 1rem; height: 1rem; flex: 0 0 1rem; }
+
+/* Jar reading surfaces: compact summaries and clear citation roles. */
+.experiment-detail-brief { display:grid; gap:1rem; margin:.25rem 0 0; padding:1.25rem 0; border-block:1px solid color-mix(in srgb,var(--detail-tone) 18%,var(--border)); }
+.experiment-detail-brief dt { margin-bottom:.3rem; color:var(--detail-tone); font-size:.8125rem; font-weight:700; }
+.experiment-detail-brief dd { margin:0; color:var(--ink); font-size:.9rem; line-height:1.7; }
+.experiment-detail-goal .experiment-detail-learning { margin-top:0; padding-top:1.25rem; }
+.experiment-detail-sources .experiment-detail-disclosure ul { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.5rem; list-style:none; padding:0; margin:1.25rem 0; }
+.experiment-detail-sources .experiment-detail-disclosure li { min-width:0; }
+.experiment-detail-sources .experiment-detail-disclosure li > a { font-size:.875rem; line-height:1.75; font-weight:650; text-underline-offset:.2em; }
+.experiment-detail-sources .experiment-detail-disclosure li > p { margin:.5rem 0 0; font-size:.8rem; color:var(--ink-muted); }
+.evidence-source-grid { align-items:stretch; }
+.evidence-source-card { --source-hue:#315aa0; --source-tone:color-mix(in srgb,var(--source-hue) 70%,var(--ink)); display:flex; flex-direction:column; padding:1.5rem 1.5rem .5rem; }
+.evidence-source-card[data-source-role='procedure'] { --source-hue:#0f766e; }
+.evidence-source-role { display:flex; align-items:center; gap:.75rem; margin-bottom:1.25rem; }
+.evidence-source-role > span { display:grid; place-items:center; flex:0 0 36px; width:36px; height:36px; border-radius:9px; color:var(--source-tone); background:color-mix(in srgb,var(--source-tone) 10%,var(--surface)); }
+.evidence-source-role svg { width:19px; height:19px; }
+.evidence-source-role strong { color:var(--source-tone); font-size:.875rem; }
+.evidence-source-role p { margin:.2rem 0 0; color:var(--ink-muted); font-size:.75rem; line-height:1.65; }
+.evidence-source-card h4 { font-size:1rem; line-height:1.7; }
+.evidence-source-card .evidence-source-actions { margin-top:auto; padding-top:.75rem; }
+.evidence-source-card .evidence-source-detail { margin-top:.25rem; }
+.evidence-profile-summary { display:grid; grid-template-columns:1fr 1.2fr 1.1fr; gap:1.25rem; margin:1.25rem 0; padding:1.25rem 0; border-block:1px solid var(--border); }
+.evidence-profile-summary dt { margin-bottom:.4rem; font-size:.75rem; color:var(--ink-muted); }
+.evidence-profile-summary dd { margin:0; font-size:.875rem; line-height:1.65; font-weight:650; color:var(--ink); font-variant-numeric:tabular-nums; }
+@media (max-width:700px) {
+  .experiment-detail-sources .experiment-detail-disclosure ul, .evidence-profile-summary { grid-template-columns:1fr; gap:1rem; }
+  .evidence-source-card { padding:1.25rem 1.25rem .35rem; }
+}
