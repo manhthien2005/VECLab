@@ -5,7 +5,7 @@ export const WORKBENCH_TOUR = [
   { area: 'header', title: 'Mục tiêu & lượt thực hành', description: 'Xem mục tiêu học tập và trạng thái lưu ở đầu trang. Nút Nộp bài kết thúc lượt và khóa các thao tác; bạn vẫn có thể xem lại số liệu.' },
   { area: 'shelf', title: 'Mẫu & dụng cụ', description: 'Kệ bên trái giới thiệu mẫu, hóa chất và thiết bị của bài. Bạn thao tác với chúng qua bảng Thao tác, không cần kéo thả. Có thể mở lại hướng dẫn này bất cứ lúc nào.' },
   { area: 'simulation', title: 'Khu vực thực hành', description: 'Chọn một cốc trên dàn để làm việc với cốc đó. Các nhịp phía trên mở nhóm thao tác tương ứng. Chuyển động giúp quan sát quy trình; độ đục phải được đo bằng thiết bị.' },
-  { area: 'controls', title: 'Thao tác với cốc đang chọn', description: 'Tên cốc đang chọn nằm ngay dưới tiêu đề. Mở từng nhóm để chuẩn bị mẫu, cấp hóa chất, chạy chương trình hoặc đo. Chương trình khuấy và lắng áp dụng cho cả dàn, không phải một cốc riêng.' },
+  { area: 'controls', title: 'Thao tác với cốc đang chọn', description: 'Chọn cốc ở đầu bảng để chuyển nhanh giữa các mẫu. Mở từng nhóm để chuẩn bị mẫu, cấp hóa chất, chạy chương trình hoặc đo. Chương trình khuấy và lắng áp dụng cho cả dàn, không phải một cốc riêng.' },
   { area: 'notebook', title: 'Sổ đo & lịch sử', description: 'Đo mẫu ban đầu tại đây. Sổ đo giữ số liệu từng cốc và đáp số bạn tự tính; tab Lịch sử thao tác giúp xem lại những gì đã làm. Chưa đo khác với N/A: N/A là phép đo không hợp lệ, không phải bằng 0.' },
 ] as const
 

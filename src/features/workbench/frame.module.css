@@ -19,9 +19,9 @@
 .notices { padding: 8px 18px 0; }
 .body {
   display: grid; grid-template-columns: 200px minmax(0, 1fr) 304px;
-  grid-template-rows: minmax(550px, 1.8fr) minmax(240px, 1fr);
+  grid-template-rows: minmax(600px, 1.8fr) minmax(240px, 1fr);
   gap: 14px; padding: 14px 18px 18px;
-  height: calc(100dvh - 96px); min-height: 840px;
+  height: calc(100dvh - 96px); min-height: 890px;
 }
 .body[data-collapsed='true'] { grid-template-columns: 48px minmax(0,1fr) 304px; }
 .shelf, .simulation, .controls, .notebook {
