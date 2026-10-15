@@ -4,7 +4,9 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'reac
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.js'
-import { FlaskIcon, ArrowRightIcon, BookIcon, CheckCircleIcon } from '@/features/landing/icons.js'
+import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/icons.js'
+import { TargetIcon, GuideIcon, TheoryIcon, SourcesIcon, ReportIcon, SubmitIcon, CloseIcon, InfoIcon, ControlIcon } from '@/features/workbench/icons.js'
+import { EquipmentPanel, type EquipmentKind } from './equipment-panel.js'
 import { EquipmentArt } from './equipment-art.js'
 import { JarHistory } from './history.js'
 import type { UUID } from '@/domain/process/contracts.js'
@@ -125,15 +127,15 @@ function JarLearningGoal() {
     details.current.querySelector('summary')?.focus()
   }
   return <div className={styles.goal} data-testid="jar-public-goal">
-    <p className={styles.goalTitle}><strong>Mục tiêu: giảm độ đục ít nhất {JAR_PROFILE.goalRemovalPercent}%</strong></p>
-    <p className={styles.goalSubtitle}>So sánh các cốc, đo NTU và chọn phương án xử lý.</p>
     <details ref={details} className={styles.goalDetails} onKeyDown={(event) => {
       if (event.key === 'Escape' && details.current?.open) { event.stopPropagation(); closeScope() }
-    }}><summary><BookIcon />Mục tiêu & phạm vi<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></summary>
+    }}><summary aria-label="Mục tiêu"><TargetIcon /><span className={styles.goalButtonLabel}>Mục tiêu</span><span className={styles.goalThreshold}>≥ {JAR_PROFILE.goalRemovalPercent}%</span></summary>
       <section className={styles.goalPanel} aria-label="Mục tiêu và phạm vi Jar Test">
         <div className={styles.goalPanelHeading}><h2>Mục tiêu & phạm vi</h2>
-          <button type="button" aria-label="Đóng mục tiêu & phạm vi" onClick={closeScope}><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg></button>
+          <button type="button" aria-label="Đóng mục tiêu & phạm vi" onClick={closeScope}><CloseIcon /></button>
         </div>
+        <div className={styles.goalIntro}><p className={styles.goalTitle}><strong>Mục tiêu: giảm độ đục ít nhất {JAR_PROFILE.goalRemovalPercent}%</strong></p>
+          <p className={styles.goalSubtitle}>So sánh các cốc, đo NTU và chọn phương án xử lý.</p></div>
         <div className={styles.goalPanelGrid}>
           <section><h3>Kết quả cần nộp</h3><ul><li>Số đo NTU ban đầu và cuối hợp lệ.</li><li>Hiệu suất giảm đục do bạn tự tính.</li><li>Một cốc được chọn làm phương án nộp.</li></ul></section>
           <section><h3>Bạn được chọn</h3><dl>
@@ -184,6 +186,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
   const animationSkipped = skipAnimation || (reducedMotion && !motionOptIn)
   const [visualCue, setVisualCue] = useState<JarVisualCue | null>(null)
   const [tourOpen, setTourOpen] = useState(false)
+  const [equipmentItem, setEquipmentItem] = useState<EquipmentKind | null>(null)
   const tourTrigger = useRef<HTMLButtonElement>(null)
   const [pane, setPane] = useState<WorkbenchPane>('simulation')
   const [group, setGroup] = useState<string | null>('prepare')
@@ -398,10 +401,10 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
         {busy ? 'Đang lưu…' : uncertain ? 'Chưa xác nhận lưu' : ready ? (storageMode === 'local' ? 'Đã lưu trên thiết bị' : 'Đã lưu trong tài khoản') : 'Lưu trên thiết bị'}
         {notice && <span className={styles.srOnly}>{notice}</span>}
       </span>
-      <button className={styles.button} disabled title="Báo cáo phân tích đầy đủ sẽ được bổ sung">Báo cáo</button>
+      <button className={styles.button} disabled title="Báo cáo phân tích đầy đủ sẽ được bổ sung"><ReportIcon />Báo cáo</button>
       <button className={styles.primary} type="button" disabled={!ready || locked}
         aria-label="Hoàn thành và lưu lượt Jar Test" onClick={() => submit(null)}>
-        {view?.status === 'completed' ? 'Đã nộp' : 'Nộp bài'}
+        <SubmitIcon />{view?.status === 'completed' ? 'Đã nộp' : 'Nộp bài'}
       </button>
     </div>
   </>
@@ -409,15 +412,15 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
   const shelf = <div className={styles.shelfContent}>
     <div className={styles.inventory}>
       {([['sample', 'Mẫu kaolin', '0,5 L / cốc'], ['coagulant', 'Phèn nhôm', '50–250 mg/L'], ['meter', 'Máy đo độ đục', 'NTU']] as const)
-        .map(([kind, title, description]) => <div className={styles.equipment} key={kind}>
-          <EquipmentArt kind={kind} /><div><strong>{title}</strong><span>{description}</span></div>
-        </div>)}
+        .map(([kind, title, description]) => <button type="button" className={styles.equipment} key={kind} aria-haspopup="dialog" aria-label={'Tìm hiểu ' + title} onClick={() => setEquipmentItem(kind)}>
+          <EquipmentArt kind={kind} /><span className={styles.equipmentText}><strong>{title}</strong><span>{description}</span></span><span className={styles.equipmentInfo}><InfoIcon /></span>
+        </button>)}
     </div>
     <div className={styles.shelfHelp}>
       <p className={styles.shelfNote}>Mẫu tổng hợp dùng để học tập. Lượt này chỉ lưu trong trình duyệt, kể cả khi đã đăng nhập.</p>
-      <button ref={tourTrigger} type="button" className={styles.guideButton} onClick={() => setTourOpen(true)}><BookIcon />Hướng dẫn thao tác</button>
-      <Link className={styles.theoryLink} href={'/experiments/jar-test/guide' + (view?.attemptId ? '?attempt=' + encodeURIComponent(view.attemptId) : '')}><BookIcon /><span>Lý thuyết & cách làm bài</span></Link>
-      <details><summary><FlaskIcon />Nguồn & giới hạn</summary>
+      <button ref={tourTrigger} type="button" className={styles.guideButton} onClick={() => setTourOpen(true)}><GuideIcon />Hướng dẫn thao tác</button>
+      <Link className={styles.theoryLink} href={'/experiments/jar-test/guide' + (view?.attemptId ? '?attempt=' + encodeURIComponent(view.attemptId) : '')}><TheoryIcon /><span>Lý thuyết & cách làm bài</span></Link>
+      <details><summary><SourcesIcon />Nguồn & giới hạn</summary>
         <p>Chỉ áp dụng cho hồ sơ mẫu, pH, liều và chương trình đã khóa. Hình ảnh hạt không dùng để suy ra hiệu suất.</p>
         <a href={'https://doi.org/' + JAR_PROFILE.sourceDoi} target="_blank" rel="noreferrer">Nghiên cứu dùng xây dựng mô hình <ArrowRightIcon /></a>
         <p>Không suy liều cho mẫu nước thật từ kết quả này.</p>
@@ -540,19 +543,19 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
     </>}
   </section>
 
-  return <WorkbenchFrame label="Bàn thí nghiệm Jar Test" header={header} notices={notices} shelf={shelf} simulation={simulation} controls={controls} notebook={notebook} pane={pane} onPaneChange={setPane} tourOpen={tourOpen} onTourClose={() => {
+  return <><WorkbenchFrame label="Bàn thí nghiệm Jar Test" header={header} notices={notices} shelf={shelf} simulation={simulation} controls={controls} notebook={notebook} pane={pane} onPaneChange={setPane} onShelfInfo={() => setEquipmentItem('sample')} tourOpen={tourOpen} onTourClose={() => {
     setTourOpen(false)
     // The shelf is temporarily hidden during the mobile tour. Restore focus
     // after the original pane and shelf visibility have been committed.
     requestAnimationFrame(() => tourTrigger.current?.focus({ preventScroll: true }))
-  }} />
+  }} />{equipmentItem && <EquipmentPanel item={equipmentItem} onItemChange={setEquipmentItem} onClose={() => setEquipmentItem(null)} />}</>
 }
 
 function ControlGroup({ id, title, summary, open, onToggle, children }: {
   id: string; title: string; summary: string; open: boolean; onToggle: () => void; children: React.ReactNode
 }) {
   return <details className={styles.controlGroup} open={open} data-testid={'jar-control-' + id}>
-    <summary onClick={(e) => { e.preventDefault(); onToggle() }}><span><strong>{title}</strong><small>{summary}</small></span></summary>
+    <summary onClick={(e) => { e.preventDefault(); onToggle() }}><span className={styles.controlIcon}><ControlIcon kind={id} /></span><span className={styles.controlText}><strong>{title}</strong><small>{summary}</small></span></summary>
     <div className={styles.groupBody}>{children}</div>
   </details>
 }

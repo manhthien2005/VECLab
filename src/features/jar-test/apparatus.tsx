@@ -59,6 +59,7 @@ export function JarApparatus({ projection, selectedCupId, onSelectCup, disabled 
           return <button key={id} type="button" className={styles.vessel} data-selected={selected}
             aria-pressed={selected} disabled={disabled} onClick={() => onSelectCup(id)}
             aria-label={'Cốc ' + id + ', ' + (cup ? 'đã chuẩn bị' : 'chưa chuẩn bị') + (selected ? ', đang thao tác' : '')}>
+            {selected && <span className={styles.selectedBadge} aria-hidden="true">Đang chọn</span>}
             <svg viewBox="0 0 144 310" aria-hidden="true" className={styles.vesselDrawing}>
               <defs>
                 <linearGradient id={steel}><stop stopColor="#78929f"/><stop offset=".4" stopColor="#e9f1f5"/><stop offset=".65" stopColor="#bacdd7"/><stop offset="1" stopColor="#6f8999"/></linearGradient>
@@ -74,6 +75,7 @@ export function JarApparatus({ projection, selectedCupId, onSelectCup, disabled 
               <rect x="59" y="7" width="26" height="28" rx="5" fill={'url(#' + steel + ')'} stroke="#8097a5"/>
               <path d="M64 12v16m5-16v16m6-16v16m5-16v16" stroke="#8299a7" strokeWidth="1"/>
               <rect x="64" y="60" width="16" height="10" rx="3" fill="#607e90"/>
+              {selected && <rect x="12" y="82" width="120" height="197" rx="11" fill="none" stroke="#007b80" strokeWidth="2.5"/>}
               <path d="M18 93v175q54 19 108 0V93" fill={'url(#' + glass + ')'} stroke={selected ? '#48888e' : '#8da9b8'} strokeWidth="1.8"/>
               {cup && <g clipPath={'url(#' + uid + id + 'fill)'}>
                 <path d="M21 184q51-9 102 0v82q-51 18-102 0Z" fill="#c5d3d1" fillOpacity=".68"/>

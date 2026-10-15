@@ -2,13 +2,14 @@
 
 import { useId, useRef, useState, type ReactNode } from 'react'
 import { WorkbenchTour, WORKBENCH_TOUR } from './tour.js'
+import { ToolsIcon } from './icons.js'
 import styles from './frame.module.css'
 
 export type WorkbenchPane = 'simulation' | 'controls' | 'notebook'
 
 /** Presentation slots only. Each experiment owns its apparatus, actions and data. */
 export function WorkbenchFrame({ label, header, notices, shelf, simulation, controls, notebook,
-  pane, onPaneChange, tourOpen = false, onTourClose }: {
+  pane, onPaneChange, tourOpen = false, onTourClose, onShelfInfo }: {
   label: string
   header: ReactNode
   notices?: ReactNode
@@ -20,6 +21,7 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
   onPaneChange: (pane: WorkbenchPane) => void
   tourOpen?: boolean
   onTourClose?: () => void
+  onShelfInfo?: () => void
 }) {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileShelf, setMobileShelf] = useState(false)
@@ -43,11 +45,14 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
       </nav>
       <div className={styles.body} data-collapsed={displayedCollapsed} data-pane={displayedPane}>
         <aside className={styles.shelf} data-mobile-open={displayedShelf} data-workbench-area="shelf">
+          <div className={styles.shelfHeading}>
+          {onShelfInfo ? <button type="button" className={styles.shelfTitle} onClick={onShelfInfo} aria-haspopup="dialog" aria-label="Tìm hiểu mẫu & dụng cụ"><ToolsIcon /><span>Mẫu & dụng cụ</span></button> : <span className={styles.shelfTitle}><ToolsIcon /><span>Mẫu & dụng cụ</span></span>}
           <button className={styles.shelfToggle} type="button" aria-controls={shelfId}
             aria-expanded={displayedShelf || !displayedCollapsed} onClick={() => { if (mobileShelf) setMobileShelf(false); else setCollapsed(!collapsed) }}
             aria-label={collapsed && !mobileShelf ? 'Mở kệ mẫu và dụng cụ' : 'Thu gọn kệ mẫu và dụng cụ'}>
-            <span>Mẫu & dụng cụ</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d={collapsed ? 'm6 3 5 5-5 5' : 'm10 3-5 5 5 5'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d={collapsed ? 'm6 3 5 5-5 5' : 'm10 3-5 5 5 5'} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
+          </div>
           <div id={shelfId} hidden={displayedCollapsed && !displayedShelf}>{shelf}</div>
         </aside>
         <div className={styles.simulation} data-workbench-area="simulation">{simulation}</div>
