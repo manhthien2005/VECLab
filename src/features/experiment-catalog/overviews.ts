@@ -1,5 +1,5 @@
-import { ACID_INPUT_DOMAIN, APP_STRINGS } from '@/content/index.js'
-import { formatLitresAsMl } from '@/shared/ui/format.js'
+import { APP_STRINGS } from '@/content/index.js'
+import { JAR_PROFILE } from '@/domain/experiments/jar-test/model.js'
 
 const PRESENTATION = {
   'acid-neutralization': {
@@ -10,7 +10,7 @@ const PRESENTATION = {
     learning: 'Đọc pH, điều chỉnh liều và đối chiếu kết quả.',
     tools: 'Buret, máy khuấy và máy đo pH.',
     prerequisites: 'Hiểu pH và phản ứng axit–bazơ cơ bản.',
-    input: `Mẫu axit ${formatLitresAsMl(ACID_INPUT_DOMAIN.benchmark.acidVolumeL)}`,
+    input: 'Mẫu nước cần điều chỉnh pH · Nội dung dự kiến',
     parameters: 'Thể tích, nồng độ và lượng hóa chất',
     outcome: 'Độ lệch pH, lượng hóa chất đã dùng',
     procedure: ['Chuẩn bị mẫu và hiệu chuẩn máy đo', 'Thêm hóa chất, khuấy và chờ ổn định', 'Đo pH và đối chiếu kết quả'],
@@ -21,12 +21,12 @@ const PRESENTATION = {
     category: 'Keo tụ – tạo bông',
     question: 'Điều kiện nào giúp giảm độ đục sau lắng?',
     learning: 'Thiết kế các mẫu so sánh và lựa chọn phương án xử lý.',
-    tools: 'Dàn khuấy Jar Test, pipet và máy đo độ đục.',
+    tools: 'Dàn khuấy sáu vị trí, cốc và máy đo độ đục.',
     prerequisites: 'Hiểu pH, nồng độ và cách so sánh các mẫu nước.',
-    input: 'Mẫu nước đục, chất keo tụ alum',
-    parameters: 'pH ban đầu và liều alum',
+    input: `Mẫu kaolin ${JAR_PROFILE.initialNtu} NTU · ${JAR_PROFILE.aliquotVolumeL.toLocaleString('vi-VN')} L/cốc · Phèn nhôm`,
+    parameters: `pH ${JAR_PROFILE.availableInitialPh.join(' / ')} · Liều ${JAR_PROFILE.minDoseMgL}–${JAR_PROFILE.maxDoseMgL} mg/L`,
     outcome: 'Độ đục sau lắng, hiệu suất xử lý',
-    procedure: ['Chuẩn bị các cốc và chọn pH, liều alum', 'Chạy chương trình khuấy nhanh, khuấy chậm và lắng', 'Đo độ đục và so sánh các phương án'],
+    procedure: ['Chuẩn bị các cốc, đo mẫu đầu và chọn liều phèn', 'Khuấy nhanh 60 giây, khuấy chậm 20 phút và lắng 30 phút mô phỏng', 'Đo độ đục, tự tính hiệu suất và chọn phương án nộp'],
   },
   'methylene-blue-adsorption': {
     image: '/assets/experiments/adsorption.webp',

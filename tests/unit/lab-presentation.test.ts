@@ -13,11 +13,12 @@ describe('lab storage presentation', () => {
     expect(html).not.toContain('href="/account"')
   })
 
-  it('labels account data separately and keeps browser guest data distinct', () => {
+  it('keeps Jar browser persistence explicit even for a signed-in learner', () => {
     const html = renderToStaticMarkup(createElement(LabStorageNotice, { storageMode: 'cloud' }))
     expect(html).toContain('Đã đăng nhập')
-    expect(html).toContain('Lưu vào tài khoản')
-    expect(html).toContain('Dữ liệu khách trên trình duyệt được lưu riêng')
+    expect(html).toContain('Lưu trên trình duyệt này')
+    expect(html).toContain('Jar Test hiện chưa hỗ trợ lưu vào tài khoản')
+    expect(html).not.toContain('Dùng cùng tài khoản trên thiết bị khác')
     expect(html).toContain('href="/account"')
     expect(html).not.toContain('href="/sign-in"')
     expect(html).not.toContain('Đã đồng bộ')

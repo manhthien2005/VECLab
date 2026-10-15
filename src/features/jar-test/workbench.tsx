@@ -37,6 +37,8 @@ type Props = {
   attemptId: string | null
   invalidAttempt?: boolean
   storageMode: Mode
+  openReport?: boolean
+  initialPane?: WorkbenchPane
 }
 type PendingIntent = {
   attemptId: UUID
@@ -182,7 +184,7 @@ export function JarWorkbench(props: Props) {
   return <JarWorkbenchSession key={sessionKey} {...props} />
 }
 
-function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }: Props) {
+function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, openReport = false, initialPane = 'simulation' }: Props) {
   const router = useRouter()
   const session: JarSession = useMemo(
     () => createJarSessionForStorageMode(storageMode), [storageMode],
@@ -205,7 +207,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
   const notebookRef = useRef<HTMLElement>(null)
   const submitTrigger = useRef<HTMLButtonElement>(null)
   const tourTrigger = useRef<HTMLButtonElement>(null)
-  const [pane, setPane] = useState<WorkbenchPane>('simulation')
+  const [pane, setPane] = useState<WorkbenchPane>(initialPane)
   const [group, setGroup] = useState<string | null>('prepare')
   const [notebookTab, setNotebookTab] = useState<'readings' | 'history'>('readings')
   const [busy, setBusy] = useState(false)
@@ -247,6 +249,11 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
         setView(null)
       } else {
         setView(result.state)
+        setReportOpen(openReport && result.state.status === 'completed' && result.state.report !== null)
+        if (initialPane === 'notebook') {
+          setPane('notebook')
+          requestAnimationFrame(() => { notebookRef.current?.scrollIntoView({ block: 'start', behavior: 'instant' }); notebookRef.current?.focus({ preventScroll: true }) })
+        }
         const cupId = result.state.projection.selectedCupId ?? result.state.projection.cups[0]?.id ?? 'A'
         setSelectedCupId(cupId)
         setGroup(controlGroupFor(result.state.projection, cupId))
@@ -261,7 +268,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
     })
     })()
     return () => { cancelled = true }
-  }, [attemptId, invalidAttempt, session])
+  }, [attemptId, invalidAttempt, session, openReport, initialPane])
 
   async function reload(): Promise<void> {
     const id = view?.attemptId ?? parseUUID(attemptId)

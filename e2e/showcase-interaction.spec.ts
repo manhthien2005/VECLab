@@ -49,14 +49,14 @@ test('centers cards using next, previous and keyboard without moving the page ve
   expect(await page.evaluate(() => scrollY)).toBe(top)
 })
 
-test('whole cards open honest introductions or the existing pH simulator', async ({ page }) => {
+test('whole cards open planned introductions or the current Jar simulator', async ({ page }) => {
   await page.getByRole('button', { name: 'Chuyển đến thí nghiệm 2', exact: true }).click()
   await page.locator('.showcase-card').nth(1).locator('summary').click()
   await expect(page.locator('.showcase-card').nth(1).locator('details')).toHaveAttribute('open', '')
-  await expect(page.getByText('Bài thực hành đang được xây dựng, hiện chưa thể bắt đầu.', { exact: true }).first()).toBeVisible()
+  await expect(page.locator('.showcase-card').nth(1).getByText('Chưa triển khai bài thực hành.', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Chuyển đến thí nghiệm 1', exact: true }).click()
-  await page.getByRole('link', { name: 'Mở thí nghiệm Điều chỉnh pH', exact: true }).click()
-  await expect(page).toHaveURL(/\/simulate\/acid-neutralization/, { timeout: 15000 })
+  await page.getByRole('link', { name: 'Mở thí nghiệm Jar Test', exact: true }).click()
+  await expect(page).toHaveURL(/\/simulate\/jar-test/, { timeout: 15000 })
 })
 
 test('selects a side card before opening it and supports a horizontal swipe', async ({ page }) => {

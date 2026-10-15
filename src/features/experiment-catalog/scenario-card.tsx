@@ -9,12 +9,12 @@ export function ScenarioCard({ overview, entry }: { overview: ExperimentOverview
   return (
     <article className="experiment-library-card" aria-labelledby={`experiment-${overview.scenarioKey}`}>
       <div className="experiment-library-image">
-        <Image src={overview.image} alt={overview.imageAlt} fill sizes="(max-width: 58rem) 92vw, 420px" />
+        <Image src={overview.image} alt={overview.imageAlt} fill sizes="(max-width: 58rem) 92vw, 420px" loading={available ? 'eager' : 'lazy'} />
       </div>
       <div className="experiment-library-body">
         <div className="experiment-library-tags">
           <span className="experiment-topic">{overview.category}</span>
-          <span className={`experiment-availability${available ? ' is-available' : ''}`}><span aria-hidden="true" />{available ? 'Có thể thực hành' : 'Đang xây dựng'}</span>
+          <span className={`experiment-availability${available ? ' is-available' : ''}`}><span aria-hidden="true" />{available ? 'Có thể thực hành · Lưu trên trình duyệt' : 'Chưa triển khai'}</span>
         </div>
         <h2 id={`experiment-${overview.scenarioKey}`}>{overview.title}</h2>
         <p className="experiment-library-question">{overview.question}</p>
@@ -40,7 +40,7 @@ export function ScenarioCard({ overview, entry }: { overview: ExperimentOverview
             <Link className="btn experiment-library-start" href={`/simulate/${entry.scenarioKey}`}>Bắt đầu thực hành<ArrowRightIcon /></Link>
             <Link className="experiment-library-detail" href={`/experiments/${entry.scenarioKey}`}>Xem chi tiết<span className="sr-only"> — {overview.title}</span></Link>
           </> : (
-            <p className="experiment-library-unavailable">Bài này chưa mở thực hành.</p>
+            <p className="experiment-library-unavailable">Chưa triển khai bài thực hành.</p>
           )}
         </div>
       </div>

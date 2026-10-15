@@ -5,8 +5,8 @@ import { LabClient } from '@/features/learner-lab/lab-client.js'
 /**
  * `/lab` — My Lab (docs/web-application-scope.md §4.5).
  *
- * Public. A guest's IndexedDB attempts and a signed-in learner's account
- * attempts share this URL; `currentStorageMode` picks which store to read.
+ * Public. Jar Test currently persists in IndexedDB for guests and signed-in learners.
+ * Auth state changes the account notice and title, never the Jar storage location.
  * Nothing here trusts the route group name (docs/system-architecture.md).
  *
  * Reads cookies to pick the storage mode, so it renders per request: the same URL lists

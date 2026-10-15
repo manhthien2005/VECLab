@@ -7600,3 +7600,11 @@ td[data-numeric],
   .auth-card { padding: 1.5rem; }
   .auth-card-heading h1 { font-size: 1.5rem; }
 }
+
+/* Locked Jar lesson inputs in the existing landing preview. */
+.hero-jar-conditions { margin: 0; display: grid; gap: 1rem; padding: .75rem .25rem; }
+.hero-jar-conditions > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem .75rem; }
+.hero-jar-conditions dt { font-size: .75rem; color: var(--ink-muted); }
+.hero-jar-conditions dd { margin: 0; font-size: .8rem; font-weight: 650; color: var(--ink); }
+.experiment-detail-sources { grid-column: 1 / -1; }
+.showcase-card-state { display: inline-block; margin-top: .4rem; font-size: .75rem; font-weight: 650; color: var(--ink-muted); }

@@ -6,7 +6,7 @@ import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
 
 export const metadata: Metadata = {
   title: 'Thí nghiệm',
-  description: 'Các bài thực hành mô phỏng xử lý nước: điều chỉnh pH, Jar Test và hấp phụ xanh methylene.',
+  description: 'Thực hành Jar Test; điều chỉnh pH và hấp phụ xanh methylene hiện chưa triển khai.',
 }
 
 export default function ExperimentsPage() {

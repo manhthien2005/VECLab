@@ -58,21 +58,21 @@ export const APP_STRINGS = {
 
     showcaseEyebrow: 'Khám phá ngay',
     showcaseHeading: '3 thí nghiệm mô phỏng',
-    showcaseLede: 'Chọn một quy trình xử lý nước để thực hành.',
+    showcaseLede: 'Jar Test đã mở thực hành. Hai bài còn lại chưa triển khai.',
     showcaseCtaLabel: 'Thử ngay',
     comingSoonBadge: 'Sắp ra mắt',
     comingSoonCta: 'Xem trước',
     showcaseCards: [
       {
-        scenarioKey: 'acid-neutralization',
-        title: 'Điều chỉnh pH',
-        summary: 'Chọn lượng hóa chất và theo dõi pH của mẫu nước.',
-        available: true,
-      },
-      {
         scenarioKey: 'jar-test',
         title: 'Jar Test',
         summary: 'So sánh liều keo tụ, khuấy và lắng để giảm độ đục.',
+        available: true,
+      },
+      {
+        scenarioKey: 'acid-neutralization',
+        title: 'Điều chỉnh pH',
+        summary: 'Chọn lượng hóa chất và theo dõi pH của mẫu nước.',
         available: false,
       },
       {

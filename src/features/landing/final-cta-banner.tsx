@@ -8,7 +8,7 @@ interface FinalCtaBannerProps {
 }
 
 /** An invitation to the served experiment, with decorative apparatus rather than fake telemetry. */
-export function FinalCtaBanner({ scenarioKey = 'acid-neutralization' }: FinalCtaBannerProps) {
+export function FinalCtaBanner({ scenarioKey = 'jar-test' }: FinalCtaBannerProps) {
   const strings = APP_STRINGS.home
   return (
     <div className="final-cta-section reveal" data-reveal-variant="invite" aria-labelledby="final-cta-heading">

@@ -54,12 +54,12 @@ export function WorkbenchPreview() {
               </ol>
               <div className="wb-concept-tools">
                 <p className="wb-concept-caption">Dụng cụ</p>
-                <p>Máy khuấy Jar Test</p><p>Máy đo pH</p><p>Máy đo độ đục</p>
+                <p>Máy khuấy Jar Test</p><p>Cốc thí nghiệm</p><p>Máy đo độ đục</p>
               </div>
             </div>
 
             <div className="wb-concept-bench">
-              <div className="wb-concept-bench-heading"><h3>Bàn thí nghiệm</h3><span>Hai cốc so sánh</span></div>
+              <div className="wb-concept-bench-heading"><h3>Bàn thí nghiệm</h3><span>Tối đa sáu cốc so sánh</span></div>
               <div className="wb-concept-apparatus">
                 <Image src="/assets/experiments/jar.webp" alt="Minh họa dàn Jar Test với hai cốc nước và cánh khuấy" fill sizes="(max-width: 48rem) 90vw, (max-width: 68rem) 55vw, 620px" />
                 <div className="wb-concept-cup-labels"><span>Cốc A</span><span>Cốc B</span></div>
@@ -78,7 +78,7 @@ export function WorkbenchPreview() {
               <dl className="wb-concept-fields">
                 <div><dt>Thể tích mẫu</dt><dd>500 <span>mL</span></dd></div>
                 <div><dt>pH ban đầu</dt><dd>7</dd></div>
-                <div><dt>Chất keo tụ</dt><dd>Alum</dd></div>
+                <div><dt>Chất keo tụ</dt><dd>Phèn nhôm</dd></div>
                 <div><dt>Liều sử dụng</dt><dd>150 <span>mg/L</span></dd></div>
               </dl>
               <div className="wb-concept-action-samples" aria-label="Minh họa các thao tác trong bài thực hành">

@@ -46,7 +46,7 @@ export function ExperimentShowcase() {
             <>
               <div className="showcase-card-head">
                 <span className="showcase-icon-box" aria-hidden="true"><Icon /></span>
-                <div className="showcase-card-title-group"><h3 className="showcase-card-title">{card.title}</h3><p className="showcase-card-summary">{card.summary}</p></div>
+                <div className="showcase-card-title-group"><h3 className="showcase-card-title">{card.title}</h3><p className="showcase-card-summary">{card.summary}</p>{!card.available && <span className="showcase-card-state">Chưa triển khai</span>}</div>
               </div>
               <div className="showcase-media-stage"><Image src={image} alt={alt} fill sizes="(max-width: 42rem) 82vw, (max-width: 66rem) 65vw, 544px" /></div>
             </>
@@ -60,8 +60,8 @@ export function ExperimentShowcase() {
                 <details className="showcase-card-details">
                   <summary className="showcase-card-link" aria-label={`Thông tin thí nghiệm ${card.title}`}>{content}</summary>
                   <div className="showcase-experiment-note">
-                    <p>{card.scenarioKey === 'jar-test' ? 'So sánh các mẫu nước qua bước thêm chất keo tụ, khuấy và lắng. Đánh giá độ đục để chọn điều kiện xử lý.' : 'Thay đổi lượng than hoạt tính và thời gian tiếp xúc. So sánh màu dung dịch trước và sau xử lý.'}</p>
-                    <p className="muted">Bài thực hành đang được xây dựng, hiện chưa thể bắt đầu.</p>
+                    <p>{card.summary}</p>
+                    <p className="muted">Chưa triển khai bài thực hành.</p>
                   </div>
                 </details>
               )}

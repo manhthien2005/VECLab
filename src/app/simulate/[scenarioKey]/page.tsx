@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { APP_STRINGS } from '@/content/index.js'
 import { currentStorageMode, isSupabaseConfigured } from '@/features/auth/session.js'
 import { WORKBENCH_SCENARIO_KEY } from '@/features/simulation-workbench/scenario.js'
@@ -60,6 +60,8 @@ export default async function WorkbenchPage({
   // parameter was repeated, which is not a resolvable attempt, so it is treated as absent
   // rather than picking one arbitrarily and silently resuming the wrong run.
   const attemptId = typeof attempt === 'string' && attempt !== '' ? attempt : null
+  // Old saved runs remain readable, but this retired lesson cannot start new runs.
+  if (attemptId === null) redirect('/experiments')
 
   const storageMode = await currentStorageMode()
   const strings = APP_STRINGS.workbench
