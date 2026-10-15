@@ -62,7 +62,7 @@ export default async function JarGuidePage({ searchParams }: {
             </li>
             <li><h3>Đo độ đục cuối của từng cốc</h3><p>Chọn cốc cần đo, mở <strong>Thao tác → Đo & ghi kết quả</strong>, bấm <strong>Đo độ đục cuối cốc</strong>. Đọc số đo trên máy và trong sổ đo. Lặp lại với các cốc còn lại để có dữ liệu so sánh.</p><p>Nếu đo trước khi chạy đủ ba pha, phép đo được lưu với <strong>N/A</strong>. Sau khi hoàn tất chương trình, bạn có thể đo lại; lịch sử vẫn giữ phép đo sớm.</p></li>
             <li><h3>Tự tính, ghi đáp số và chọn phương án</h3><p>Dùng NTU đầu và NTU cuối hợp lệ để tính phần trăm giảm đục theo công thức bên dưới. Nhập kết quả vào <strong>Phần trăm giảm đục tự tính (%)</strong>, bấm <strong>Ghi đáp số</strong> cho từng cốc. Sau đó chọn một cốc làm phương án nộp.</p></li>
-            <li><h3>Kiểm tra sổ đo rồi nộp bài</h3><p>Đối chiếu pH, tổng liều, số đo cuối và đáp số đã ghi. Xem <strong>Lịch sử thao tác</strong> nếu cần kiểm tra lại. Bấm <strong>Nộp bài</strong> khi đã sẵn sàng: lượt sẽ chỉ đọc và không sửa được nữa. Muốn thử phương án khác, bắt đầu một mẻ mới.</p></li>
+            <li><h3>Kiểm tra sổ đo rồi nộp bài</h3><p>Đối chiếu pH, tổng liều, số đo cuối và đáp số đã ghi. Bấm <strong>Nộp bài</strong>, kiểm tra thông tin trong bảng xác nhận rồi chọn <strong>Xác nhận nộp bài</strong>. Báo cáo sẽ đối chiếu đáp số và chỉ ra những điểm cần xem lại. Lượt đã nộp chỉ có thể xem lại; muốn thử phương án khác, bắt đầu một mẻ mới.</p></li>
           </ol>
         </section>
 

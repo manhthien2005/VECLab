@@ -8,6 +8,7 @@ import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/i
 import { TargetIcon, GuideIcon, TheoryIcon, SourcesIcon, ReportIcon, SubmitIcon, CloseIcon, InfoIcon, ControlIcon } from '@/features/workbench/icons.js'
 import { EquipmentPanel, type EquipmentKind } from './equipment-panel.js'
 import { EquipmentArt } from './equipment-art.js'
+import { JarSubmitDialog, JarReportDialog } from './completion.js'
 import { JarHistory } from './history.js'
 import type { UUID } from '@/domain/process/contracts.js'
 import { parseUUID, newUUID } from '@/shared/ids.js'
@@ -199,6 +200,10 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
   const [visualCue, setVisualCue] = useState<JarVisualCue | null>(null)
   const [tourOpen, setTourOpen] = useState(false)
   const [equipmentItem, setEquipmentItem] = useState<EquipmentKind | null>(null)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [reportOpen, setReportOpen] = useState(false)
+  const notebookRef = useRef<HTMLElement>(null)
+  const submitTrigger = useRef<HTMLButtonElement>(null)
   const tourTrigger = useRef<HTMLButtonElement>(null)
   const [pane, setPane] = useState<WorkbenchPane>('simulation')
   const [group, setGroup] = useState<string | null>('prepare')
@@ -322,10 +327,12 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
         const result = await session.complete(intent.attemptId, {
           actionId: intent.actionId, expectedRevision: intent.expectedRevision,
         })
+        setConfirmOpen(false)
         if (result.ok) {
           pendingRef.current = null
           setUncertain(false)
           setView(result.state)
+          setReportOpen(true)
           setNotice('Đã lưu kết quả. Lượt này chỉ có thể xem lại.')
         } else {
           pendingRef.current = null
@@ -356,6 +363,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
         }
       }
     } catch {
+      setConfirmOpen(false)
       // Transport failure leaves commit status unknown. Keep the exact intent
       // and actionId for a deliberate idempotent retry, never mint a new one.
       setUncertain(true)
@@ -403,6 +411,25 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
     setGroup(projection ? controlGroupFor(projection, id) : 'prepare')
   }
 
+  function showNotebook() {
+    setReportOpen(false)
+    setNotebookTab('readings')
+    setPane('notebook')
+    // The mobile pane and closing dialog must commit before scrolling/focusing.
+    requestAnimationFrame(() => {
+      notebookRef.current?.scrollIntoView({ block: 'start', behavior: 'instant' })
+      notebookRef.current?.focus({ preventScroll: true })
+    })
+  }
+
+  function closeReport() {
+    setReportOpen(false)
+    requestAnimationFrame(() => {
+      // The first report replaces the confirmation, whose focused button unmounts.
+      if (document.activeElement === document.body) submitTrigger.current?.focus({ preventScroll: true })
+    })
+  }
+
   const header = <>
     <Link href="/" className={styles.brand} aria-label="Trang chủ VECLab"><span><FlaskIcon /></span><strong>VECLab</strong></Link>
     <Link href="/experiments" className={styles.back}><ArrowRightIcon />Thí nghiệm</Link>
@@ -413,10 +440,10 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
         {busy ? 'Đang lưu…' : uncertain ? 'Chưa xác nhận lưu' : ready ? (storageMode === 'local' ? 'Đã lưu trên thiết bị' : 'Đã lưu trong tài khoản') : 'Lưu trên thiết bị'}
         {notice && <span className={styles.srOnly}>{notice}</span>}
       </span>
-      <button className={styles.button} disabled title="Báo cáo phân tích đầy đủ sẽ được bổ sung"><ReportIcon />Báo cáo</button>
-      <button className={styles.primary} type="button" disabled={!ready || locked}
-        aria-label="Hoàn thành và lưu lượt Jar Test" onClick={() => submit(null)}>
-        <SubmitIcon />{view?.status === 'completed' ? 'Đã nộp' : 'Nộp bài'}
+      <button type="button" className={styles.button + ' ' + styles.reportButton} disabled={!view?.report || busy} aria-label="Báo cáo Jar Test" title={view?.report ? 'Xem kết quả và đối chiếu đáp số đã nộp' : 'Báo cáo xuất hiện sau khi nộp bài'} onClick={() => setReportOpen(true)}><ReportIcon /><span>Báo cáo</span></button>
+      <button ref={submitTrigger} className={styles.primary} type="button" disabled={view?.status === 'completed' ? !view.report || busy : !ready || locked}
+        aria-label={view?.status === 'completed' ? 'Xem kết quả đã nộp' : 'Hoàn thành và lưu lượt Jar Test'} onClick={() => view?.status === 'completed' ? setReportOpen(true) : setConfirmOpen(true)}>
+        {view?.status === 'completed' ? <CheckCircleIcon /> : <SubmitIcon />}{view?.status === 'completed' ? 'Đã nộp' : 'Nộp bài'}
       </button>
     </div>
   </>
@@ -485,7 +512,8 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
     {!ready || !projection ? <p className={styles.empty}>Bắt đầu lượt để chuẩn bị mẫu và sử dụng dụng cụ.</p> : !active ? <div className={styles.readonly}>
       <h3>Lượt đã hoàn thành</h3><p>Bạn vẫn có thể chọn các cốc để xem số liệu. Các thao tác đã khóa.</p>
       <p>Phương án đã nộp: {projection.selectedCupId ? 'Cốc ' + projection.selectedCupId : 'Chưa chọn'}.</p>
-      <button type="button" className={styles.button} onClick={() => setPane('notebook')}>Xem sổ đo</button>
+      {view?.report && <button type="button" className={styles.primary} onClick={() => setReportOpen(true)}><ReportIcon />Xem báo cáo kết quả</button>}
+      <button type="button" className={styles.button} onClick={showNotebook}>Xem sổ đo</button>
       <a className={styles.button} href={JAR_PATH}>Bắt đầu mẻ Jar Test mới</a>
     </div> : <>
       <ControlGroup id="prepare" title="Chuẩn bị mẫu" summary={cup ? '0,5 L · pH đầu ' + cup.initialPh + ' · Đã chuẩn bị' : '0,5 L · Chọn pH ban đầu'} open={group === 'prepare'} onToggle={() => setGroup(group === 'prepare' ? null : 'prepare')}>
@@ -533,7 +561,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
     </>}
   </>
 
-  const notebook = <section className={styles.notebook} aria-label="Sổ đo Jar Test">
+  const notebook = <section ref={notebookRef} tabIndex={-1} className={styles.notebook} aria-label="Sổ đo Jar Test">
     <div className={styles.notebookHeading}><h2>Sổ đo</h2>
       <div className={styles.notebookTabs}><button type="button" aria-pressed={notebookTab === 'readings'} onClick={() => setNotebookTab('readings')}>Số liệu</button>
         <button type="button" aria-pressed={notebookTab === 'history'} onClick={() => setNotebookTab('history')}>Lịch sử thao tác</button></div>
@@ -550,8 +578,8 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
               <td>{entry?.submittedRemovalPercent === null || !entry ? 'Chưa nộp' : entry.submittedRemovalPercent.toLocaleString('vi-VN')}</td></tr>
           })}</tbody></table>
       </div>}
-      <div className={styles.notebookFooter}><span>Đáp số do bạn tự tính; phân tích sau khi nộp.</span><span data-testid="jar-revision">Bản lưu {view.revision}</span></div>
-      {view.status === 'completed' && <section className={styles.completed} aria-label="Kết quả lưu sau khi hoàn thành"><h2>Đã hoàn thành và lưu lượt</h2><p>Lượt chỉ đọc. Đã lưu {projection.cups.length} cốc cùng các phép đo và đáp số đã thực hiện.</p><p>Báo cáo phân tích đầy đủ sẽ được bổ sung.</p></section>}
+      <div className={styles.notebookFooter}><span>{view.status === 'completed' ? 'Số liệu đã nộp · Lượt chỉ đọc' : 'Đáp số do bạn tự tính; phân tích sau khi nộp.'}</span><span data-testid="jar-revision">Bản lưu {view.revision}</span></div>
+      {view.status === 'completed' && <section className={styles.completed} aria-label="Kết quả lưu sau khi hoàn thành"><h2>Đã hoàn thành và lưu lượt</h2><p>Đã lưu {projection.cups.length} cốc cùng các phép đo và đáp số đã thực hiện.</p>{view.report ? <button type="button" className={styles.button} onClick={() => setReportOpen(true)}>Xem báo cáo & đối chiếu đáp số</button> : <p role="alert">Chưa đọc được báo cáo đã lưu. Hãy tải lại lượt.</p>}</section>}
     </>}
   </section>
 
@@ -560,7 +588,10 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
     // The shelf is temporarily hidden during the mobile tour. Restore focus
     // after the original pane and shelf visibility have been committed.
     requestAnimationFrame(() => tourTrigger.current?.focus({ preventScroll: true }))
-  }} />{equipmentItem && <EquipmentPanel item={equipmentItem} onItemChange={setEquipmentItem} onClose={() => setEquipmentItem(null)} />}</>
+  }} />{equipmentItem && <EquipmentPanel item={equipmentItem} onItemChange={setEquipmentItem} onClose={() => setEquipmentItem(null)} />}
+    {confirmOpen && active && projection && <JarSubmitDialog projection={projection} drafts={answerDrafts} busy={busy} onClose={() => setConfirmOpen(false)} onConfirm={() => submit(null)} />}
+    {reportOpen && view?.status === 'completed' && view.report && <JarReportDialog report={view.report} onClose={closeReport} onNotebook={showNotebook} />}
+  </>
 }
 
 function ControlGroup({ id, title, summary, open, onToggle, children }: {

@@ -237,7 +237,7 @@
 .muted { color:var(--ink-muted); }
 .srOnly { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 @media (min-width:1600px) { .vesselLabel > span { font-size:.75rem; } .table { font-size:.85rem; } .table th, .table td { padding:9px; } }
-@media (max-width:1300px) { .back { font-size:0; min-width:32px; padding:8px; } .brand { font-size:1.1rem; } .brand > span { width:34px; height:34px; } .headerActions { gap:7px; } .headerActions .button { display:none; } }
+@media (max-width:1300px) { .back { font-size:0; min-width:32px; padding:8px; } .brand { font-size:1.1rem; } .brand > span { width:34px; height:34px; } .headerActions { gap:7px; } .headerActions .button:not(.reportButton), .headerActions .reportButton:disabled { display:none; } }
 @media (max-width:1050px) { .shelfContent { min-height:0; } .inventory { grid-template-columns:repeat(3,minmax(0,1fr)); } .shelfHelp { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; } .shelfHelp .shelfNote { grid-column:1/-1; margin-bottom:0; } .stageHeader { padding:16px 14px 0; } .notebook { min-height:320px; } .headerActions .primary { padding-inline:14px; } }
 @media (max-width:600px) { .brand { font-size:1rem; gap:7px; } .brand > span { width:30px; height:30px; } .brand svg { width:22px; height:22px; } .title { min-width:0; flex:1; } .title h1 { font-size:1.1rem; } .title p { font-size:.65rem; } .headerActions { margin-left:0; } .saveState { display:none; } .goal { font-size:.75rem; min-width:0; } .stageHeader h2 { font-size:1.05rem; } .steps { flex-basis:100%; margin:0; } .inventory { grid-template-columns:1fr; } .shelfHelp { display:block; } .equipment { min-height:80px; } .stageFooter { font-size:.65rem; padding-inline:12px; } .notebookHeading { gap:8px 14px; } .initialReading { margin:0; width:100%; justify-content:space-between; } .notebookTabs { gap:14px; } .table { font-size:.72rem; } .notebookFooter { font-size:.65rem; } }
 @media (max-width:1300px) { .meterPanel { gap:10px; flex-wrap:wrap; } .meterNote { flex-basis:100%; max-width:none; margin:0; } }
@@ -250,5 +250,7 @@
 @media (max-width:1050px) { .goal { flex:0 0 auto; margin-left:auto; } .goalPanel { position:fixed; inset:80px 12px auto; transform:none; width:520px; max-width:calc(100vw - 24px); max-height:calc(100dvh - 96px); margin-inline:auto; } }
 @media (max-width:600px) { .goalTitle { font-size:.875rem; } .goalPanel { padding:16px; } .goalPanelGrid { grid-template-columns:1fr; gap:18px; } .goalPanelHeading button { width:40px; height:40px; } }
 @media (prefers-reduced-motion:reduce) { .goalDetails summary { transition:none; } }
+.notebook { scroll-margin-top:16px; }
+@media (max-width:600px) { .headerActions .reportButton { padding:8px; min-width:40px; } .reportButton span { display:none; } }
 
 @media (max-width:600px) { .brand strong, .title p { display:none; } .brand { gap:0; } .goalDetails summary { gap:6px; padding:8px; } .goalButtonCopy strong { font-size:.65rem; } .goalScopeCopy, .goalDivider { display:none; } .mobileScopeLabel { display:inline; } .goalButtonCopy > span { max-width:104px; white-space:normal; } .headerActions { margin-left:0; } .headerActions .primary { padding-inline:10px; } .headerActions .primary svg { display:none; } }
