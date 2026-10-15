@@ -56,6 +56,32 @@
 .secondary:hover:not(:disabled) { background:#e4f1f4; }
 .dialog button:disabled { cursor:default; opacity:.6; }
 .dialog :focus-visible { outline:3px solid #007b80; outline-offset:3px; }
+.chartSection { padding:20px; border:1px solid #cbdbe4; border-radius:12px; background:#f7fafc; }
+.removalChart { margin-top:18px; }
+.chartRow { display:grid; grid-template-columns:10rem minmax(0,1fr); gap:18px; align-items:center; margin:0; padding:14px 0; border-top:1px solid #dce6ed; }
+.chartRow[data-chosen=true] { background:#eaf7f5; border-radius:8px; padding-inline:10px; }
+.chartRow figcaption strong { display:block; font-size:.83rem; }
+.chartRow figcaption > span { display:block; font-size:.72rem; color:#405b6e; }
+.barBody { min-width:0; }
+.barBody p { margin-top:7px; font-size:.76rem; color:#294e62; font-variant-numeric:tabular-nums; }
+.barTrack { position:relative; height:18px; border-radius:4px; background:#e1eaf0; }
+.barFill { display:block; height:100%; border-radius:4px; background:#a8752d; }
+.barFill[data-met=true] { background:#007b80; }
+.barTarget { position:absolute; top:-4px; height:26px; width:2px; background:#21495c; transform:translateX(-1px); }
+.ntuGrid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; margin-top:20px; }
+.ntuCup { margin:0; min-width:0; }
+.ntuCup figcaption { margin-bottom:10px; font-size:.85rem; font-weight:750; }
+.ntuReading { display:flex; flex-wrap:wrap; justify-content:space-between; gap:5px; margin-top:12px; font-size:.73rem; }
+.ntuReading > span { color:#405b6e; }
+.ntuReading > strong { font-size:.78rem; font-variant-numeric:tabular-nums; }
+.ntuTrack { position:relative; width:100%; height:8px; background:#e1eaf0; border-radius:2px; }
+.ntuTrack > span { display:block; height:100%; background:#007b80; border-radius:2px; }
+.ntuReading:first-of-type .ntuTrack > span { background:#8098a9; }
+.ntuTrack > i { position:absolute; top:-3px; height:14px; width:2px; background:#21495c; }
+.observations { padding:18px; background:#edf8f8; border-radius:12px; }
+.observations p { font-size:.8rem; color:#294e62; }
+.observations p + p { margin-top:12px; }
+@media(max-width:700px) { .ntuGrid { grid-template-columns:minmax(0,1fr); gap:22px; }.chartRow { grid-template-columns:minmax(0,1fr); gap:12px; }.chartSection{padding:16px} }
 @media (max-width:600px) {
   .dialog { max-width:calc(100% - 20px); max-height:calc(100dvh - 24px); }
   .layout { max-height:calc(100dvh - 24px); }

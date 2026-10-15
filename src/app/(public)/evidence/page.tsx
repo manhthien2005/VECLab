@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { EXTRACTION_SOURCES } from '@/content/evidence/acid-base-extraction.js'
+import { ExtractionEvidence } from '@/features/extraction/evidence.js'
 import { JAR_PROFILE } from '@/domain/experiments/jar-test/model.js'
 import { JAR_LIMITS, JAR_SOURCES } from '@/content/evidence/jar-test.js'
 import { EXPERIMENT_OVERVIEWS } from '@/features/experiment-catalog/overviews.js'
@@ -10,18 +12,18 @@ import { ScienceBackdrop } from '@/shared/ui/science-backdrop.js'
 
 export const metadata: Metadata = {
   title: 'Nguồn khoa học',
-  description: 'Nguồn mô hình Jar Test, tài liệu quy trình và giới hạn áp dụng.',
+  description: 'Nguồn Jar Test và chiết tách axit–bazơ, tài liệu phương pháp và giới hạn áp dụng.',
 }
 
 export default function EvidencePage() {
   const experiments = [...EXPERIMENT_OVERVIEWS].sort((a, b) => Number(b.scenarioKey === 'jar-test') - Number(a.scenarioKey === 'jar-test'))
-    .map(item => ({ key: item.scenarioKey, title: item.title, category: item.category, sourceCount: item.scenarioKey === 'jar-test' ? JAR_SOURCES.length : null }))
+    .map(item => ({ key: item.scenarioKey, title: item.title, category: item.category, sourceCount: item.scenarioKey === 'jar-test' ? JAR_SOURCES.length : item.scenarioKey === 'acid-base-extraction' ? EXTRACTION_SOURCES.length : null }))
   return <div className="page evidence-library">
     <ScienceBackdrop />
     <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: 'Nguồn khoa học' }]} />
     <header className="evidence-library-header"><h1>Nguồn khoa học</h1><p>Tài liệu được sử dụng cho từng bài, cách áp dụng và những giới hạn cần biết.</p></header>
     <EvidenceExperimentBrowser experiments={experiments}>
-      {experiments.map(experiment => experiment.key !== 'jar-test' ? <div className="evidence-empty" key={experiment.key}><h2>{experiment.title}</h2><p>Chưa triển khai bài thực hành. Danh mục nguồn cho bài này chưa được công bố.</p><Link href="/experiments">Xem các bài thí nghiệm <ArrowRightIcon /></Link></div> : <div key={experiment.key}>
+      {experiments.map(experiment => experiment.key === 'acid-base-extraction' ? <ExtractionEvidence key={experiment.key}/> : experiment.key !== 'jar-test' ? <div className="evidence-empty" key={experiment.key}><h2>{experiment.title}</h2><p>Chưa triển khai bài thực hành. Danh mục nguồn cho bài này chưa được công bố.</p><Link href="/experiments">Xem các bài thí nghiệm <ArrowRightIcon /></Link></div> : <div key={experiment.key}>
         <div className="evidence-lesson-heading"><div><h2>Jar Test</h2><p>Một nguồn cho phương trình tính kết quả, một nguồn cho quy trình thực hành. Mở từng tài liệu để xem cách bài học sử dụng.</p></div><Link href="/experiments/jar-test">Xem bài thí nghiệm <ArrowRightIcon /></Link></div>
         <div className="evidence-source-groups"><section className="evidence-source-group"><h3><BookIcon />Tài liệu đang sử dụng <span>{JAR_SOURCES.length} nguồn</span></h3><div className="evidence-source-grid">{JAR_SOURCES.map(source => <article className="evidence-source-card" key={source.key} data-source-role={source.key === 'alateef-2024-rsm' ? 'model' : 'procedure'}>
           <div className="evidence-source-role"><span aria-hidden="true">{source.key === 'alateef-2024-rsm' ? <CalculatorIcon /> : <BookIcon />}</span><div><strong>{source.kind}</strong><p>{source.key === 'alateef-2024-rsm' ? 'Phương trình giảm độ đục cuối quy trình' : 'Thao tác Jar Test và an toàn phòng thí nghiệm'}</p></div></div>

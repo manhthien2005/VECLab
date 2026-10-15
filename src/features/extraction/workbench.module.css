@@ -1,0 +1,51 @@
+/* The accepted Jar workbench uses a light, cool surface and compact teal actions. */
+.root, .modal {
+  --ink:#122f40; --ink-muted:#405b6e; --ink-faint:#577587;
+  --surface:#fff; --surface-2:#edf3f7; --surface-3:#dfeaf1;
+  --border:#cad9e3; --border-strong:#a7bfce;
+  --accent:#007b80; --accent-hover:#00656a; --accent-soft:#d6ecee; --accent-softer:#edf9f9;
+  --accent-ring:#007b80; --danger:#a62e35; --danger-soft:#fff2f2;
+  color-scheme:light; color:var(--ink);
+}
+.root { min-height:100dvh; background:#eaf1f6; }
+.root :focus-visible, .modal :focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
+.disclosure { margin:0 0 14px; padding:12px; border-radius:8px; background:#f1f6f9; color:var(--ink-muted); font-size:.75rem; line-height:1.7; }
+.tableScroll { width:100%; overflow-x:auto; margin:12px 0; }
+.tableScroll table { width:100%; font-size:.8rem; border-collapse:separate; border-spacing:0; font-variant-numeric:tabular-nums; }
+.tableScroll caption { text-align:left; margin-bottom:10px; color:var(--ink-muted); font-size:.75rem; }
+.tableScroll td, .tableScroll th { padding:9px; border-bottom:1px solid #e5edf3; text-align:left; font-weight:500; }
+.tableScroll thead th { background:#f8fafc; color:var(--ink-muted); font-weight:550; }
+.tableScroll td:not(:first-child) { white-space:nowrap; }
+.history { margin:0; }
+.history summary { cursor:pointer; color:#21495c; font-size:.95rem; font-weight:750; line-height:1.6; padding:0; }
+.history[open] summary { margin-bottom:12px; }
+.historyPreview { margin:9px 0 0; color:var(--ink-muted); font-size:.76rem; line-height:1.7; }
+.history[open] + .historyPreview { display:none; }
+.historyList { list-style:none; margin:0; padding:0; }
+.historyList li { display:grid; grid-template-columns:3.5rem minmax(0,1fr); align-items:baseline; gap:10px; padding:9px 0; border-bottom:1px solid #e5edf3; font-size:.78rem; }
+.historyList strong { font-weight:550; }
+.historySequence { color:var(--ink-muted); font-variant-numeric:tabular-nums; }
+.historyPagination { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:12px; }
+.historyPagination > span { color:var(--ink-muted); font-size:.72rem; font-variant-numeric:tabular-nums; }
+.historyEmpty { color:var(--ink-muted); font-size:.78rem; }
+.error { display:flex; align-items:center; flex-wrap:wrap; gap:10px; padding:10px 14px; border:1px solid #e2b8bd; border-radius:9px; background:var(--danger-soft); color:#82272e; font-size:.8rem; }
+.modal { width:min(940px,calc(100% - 32px)); max-height:88dvh; margin:auto; padding:22px; border:1px solid var(--border); border-radius:12px; background:white; box-shadow:0 18px 60px rgb(28 60 80 / 18%); overflow:auto; }
+.modal::backdrop { background:rgb(19 45 64 / 38%); }
+.modal > header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding-bottom:16px; margin-bottom:18px; border-bottom:1px solid var(--border); }
+.modal h2 { margin:0; font-size:1.15rem; line-height:1.4; letter-spacing:-.02em; }
+.modal p, .modal li { font-size:.85rem; line-height:1.75; }
+.links { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-top:20px; }
+@media(prefers-reduced-motion:reduce) { .root *, .root *::before, .root *::after, .modal * { animation:none!important; transition:none!important; } }
+
+@media(max-width:600px) { .modal { padding:16px; } }
+
+/* The extraction notebook expands as distinct sections below the apparatus. */
+.root [data-workbench-area="notebook"] { background:transparent; box-shadow:none; border-radius:0; overflow:visible; }
+@media(min-width:1051px) {
+  .root [data-pane] { grid-template-rows:minmax(660px,auto) auto; }
+  .root [data-workbench-area="shelf"], .root [data-workbench-area="controls"] { align-self:start; }
+}
+
+.submissionReview { list-style:none; padding:0; margin:20px 0; }
+.submissionReview li { display:grid; grid-template-columns:75px minmax(0,1fr); gap:12px; padding:12px 0; border-bottom:1px solid #d5e2e8; color:#365e70; font-size:.82rem; line-height:1.7; }
+.submissionReview strong { color:#00656a; }

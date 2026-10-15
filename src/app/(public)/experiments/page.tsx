@@ -6,7 +6,7 @@ import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
 
 export const metadata: Metadata = {
   title: 'Thí nghiệm',
-  description: 'Thực hành Jar Test; điều chỉnh pH và hấp phụ xanh methylene hiện chưa triển khai.',
+  description: 'Thực hành Jar Test và chiết tách axit–bazơ. Hấp phụ xanh methylene chưa triển khai.',
 }
 
 export default function ExperimentsPage() {
@@ -43,7 +43,7 @@ export default function ExperimentsPage() {
       <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: 'Thí nghiệm' }]} />
       <header className="experiment-library-header">
         <h1>Thí nghiệm</h1>
-        <p>Chọn một bài để tìm hiểu quy trình, điều chỉnh điều kiện và quan sát kết quả xử lý nước.</p>
+        <p>Chọn một bài để tìm hiểu quy trình, điều chỉnh điều kiện và quan sát kết quả.</p>
       </header>
       <div className="experiment-library-grid">
         {EXPERIMENT_OVERVIEWS.map(overview => <ScenarioCard key={overview.scenarioKey} overview={overview} entry={catalog.find(entry => entry.scenarioKey === overview.scenarioKey)} />)}

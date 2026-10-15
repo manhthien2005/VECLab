@@ -40,9 +40,10 @@ async function prepare(page: Page, cup: 'A' | 'B', ph: '7' | '9') {
   await expect(page.getByRole('button', { name: new RegExp('^Cốc ' + cup + ',') })).toHaveAttribute('aria-label', new RegExp('đã chuẩn bị'))
 }
 async function initial(page: Page) {
-  await pane(page, 'Sổ đo')
+  await control(page, 'baseline')
   await page.getByRole('button', { name: 'Đo mẫu ban đầu', exact: true }).click()
   await expect(page.getByTestId('jar-initial-ntu')).toHaveText('125 NTU')
+  await control(page, 'baseline')
   await expect(page.getByRole('button', { name: 'Đo mẫu ban đầu', exact: true })).toBeDisabled()
 }
 async function dose(page: Page, cup: 'A' | 'B', amount: '50' | '100' | '150') {
@@ -55,6 +56,7 @@ async function phases(page: Page) {
   for (const [label, elapsed] of [['Khuấy nhanh', 60], ['Khuấy chậm', 1260], ['Lắng', 3060]] as const) {
     await control(page, 'program')
     await page.getByRole('button', { name: 'Chạy pha ' + label, exact: false }).click()
+    if (label === 'Khuấy nhanh') await page.getByRole('dialog', { name: 'Chạy chương trình chung', exact: true }).getByRole('button', { name: 'Bắt đầu khuấy cả mẻ', exact: true }).click()
     await pane(page, 'Mô phỏng')
     await expect(page.getByText('Thời gian mô phỏng: ' + elapsed + ' giây')).toBeVisible()
   }
@@ -120,13 +122,12 @@ test.describe('Jar Test — light workbench, persisted guest flow', () => {
       }
     }
     const panels = page.locator('main section[aria-labelledby^="jar-"]')
-    await expect(panels).toHaveCount(6)
+    await expect(panels).toHaveCount(9)
     const colors = await panels.evaluateAll(elements => elements.map(element => getComputedStyle(element).backgroundColor))
     expect(new Set(colors).size).toBeGreaterThanOrEqual(4)
     await expect(page.getByRole('heading', { name: 'Quy trình trên workbench', exact: true })).toBeVisible()
-    await expect(page.getByRole('list', { name: 'Ba chặng thực hành', exact: true }).getByRole('listitem')).toHaveCount(3)
-    await page.getByText('Thể tích và pH của mẫu', { exact: true }).click()
-    await expect(page.getByText(/không phải pH cuối sau xử lý/)).toBeVisible()
+    await expect(page.locator('#jar-procedure').locator('..').locator('ol > li')).toHaveCount(8)
+    await expect(page.getByText(/không mô phỏng tự pha axit/)).toBeVisible()
   })
   test('catalog and citations expose Jar Test and label future lessons honestly', async ({ page }) => {
     test.setTimeout(60_000) // Multiple routes may compile on their first dev-server visit.
@@ -383,9 +384,10 @@ test.describe('Jar Test — light workbench, persisted guest flow', () => {
     await pane(page, 'Sổ đo')
     await expect(page.getByRole('row', { name: /Cốc A/ })).toContainText('49,2125')
     await expect(page.getByRole('row', { name: /Cốc B/ })).toContainText('16,5125')
-    await page.getByRole('button', { name: 'Lịch sử thao tác', exact: true }).click()
-    await expect(page.getByText('Chuẩn bị cốc', { exact: true })).toHaveCount(2)
-    await expect(page.getByText('Cấp phèn', { exact: true })).toHaveCount(4) // three events plus contextual group heading
+    const history = page.getByRole('region', { name: 'Sổ đo Jar Test', exact: true }).locator('details')
+    await history.locator('summary').click()
+    await expect(history.getByRole('listitem')).toHaveCount(6)
+    await expect(history.getByRole('button', { name: 'Cũ hơn', exact: true })).toBeEnabled()
     await page.reload()
     await expect(page).toHaveURL(new RegExp('attempt=' + id))
     await expect(page.getByTestId('jar-control-results')).toHaveAttribute('open', '')
@@ -450,7 +452,7 @@ test.describe('Jar Test — light workbench, persisted guest flow', () => {
     await page.getByLabel('pH ban đầu của cốc').focus(); await page.getByLabel('pH ban đầu của cốc').press('End')
     await expect(page.getByLabel('pH ban đầu của cốc')).toHaveValue('9')
     await activate(page.getByRole('button', { name: 'Chuẩn bị cốc B', exact: true }), true)
-    await pane(page, 'Sổ đo', true); await activate(page.getByRole('button', { name: 'Đo mẫu ban đầu', exact: true }), true)
+    await control(page, 'baseline', true); await activate(page.getByRole('button', { name: 'Đo mẫu ban đầu', exact: true }), true)
     await expect(page.getByTestId('jar-initial-ntu')).toHaveText('125 NTU')
     await control(page, 'dose', true)
     await page.getByLabel('Liều tăng (mg/L)').focus(); await page.getByLabel('Liều tăng (mg/L)').press('Home')
@@ -475,6 +477,7 @@ test.describe('Jar Test — light workbench, persisted guest flow', () => {
     await begin(page); await prepare(page, 'A', '7'); await initial(page); await dose(page, 'A', '50')
     await control(page, 'program')
     await page.getByRole('button', { name: 'Chạy pha Khuấy nhanh', exact: false }).click()
+    await page.getByRole('dialog', { name: 'Chạy chương trình chung', exact: true }).getByRole('button', { name: 'Bắt đầu khuấy cả mẻ', exact: true }).click()
     await pane(page, 'Mô phỏng')
     const paddle = page.getByTestId('jar-paddle-A')
     const shaft = page.getByTestId('jar-shaft-A')

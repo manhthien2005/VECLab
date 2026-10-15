@@ -18,6 +18,7 @@ type Entry = { sequence: number; label: string; detail: string; time: string }
 export function JarHistory({ attemptId, revision }: { attemptId: UUID; revision: number }) {
   const [entries, setEntries] = useState<Entry[] | null>(null)
   const [failed, setFailed] = useState(false)
+  const [page, setPage] = useState(0)
   useEffect(() => {
     let cancelled = false
     void new GuestAttemptRepository<JarState>().getAttemptEventRecords(attemptId).then((events) => {
@@ -42,9 +43,10 @@ export function JarHistory({ attemptId, revision }: { attemptId: UUID; revision:
   if (failed) return <p role="alert">Chưa tải được lịch sử. Mở lại mục này để thử lại.</p>
   if (!entries) return <p role="status">Đang tải thao tác đã lưu…</p>
   if (!entries.length) return <p className={styles.muted}>Chưa có thao tác. Lịch sử sẽ xuất hiện sau khi bạn chuẩn bị mẫu.</p>
-  return <ol className={styles.historyList}>{entries.map((entry) => <li key={entry.sequence}>
+  const current = Math.min(page, Math.ceil(entries.length / 6) - 1)
+  return <div><ol className={styles.historyList}>{entries.slice(current * 6, current * 6 + 6).map((entry) => <li key={entry.sequence}>
     <span className={styles.historyIndex}>{entry.sequence}</span>
     <div><strong>{entry.label}</strong>{entry.detail && <p>{entry.detail}</p>}</div>
     <time>{entry.time}</time>
-  </li>)}</ol>
+  </li>)}</ol><div className={styles.historyPagination}><button type="button" className={styles.button} disabled={current === 0} onClick={() => setPage(current - 1)}>Mới hơn</button><span>{current * 6 + 1}–{Math.min(entries.length, current * 6 + 6)} / {entries.length} thao tác</span><button type="button" className={styles.button} disabled={(current + 1) * 6 >= entries.length} onClick={() => setPage(current + 1)}>Cũ hơn</button></div></div>
 }

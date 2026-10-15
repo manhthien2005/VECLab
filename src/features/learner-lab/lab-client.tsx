@@ -8,6 +8,7 @@ import type { UUID } from '@/domain/process/contracts.js'
 import { GuestAttemptRepository } from '@/application/attempts/guest-repository.js'
 import type { JarState } from '@/domain/experiments/jar-test/model.js'
 import { listJarLabRows, removeJarLabAttempt, type JarLabRow } from './jar-attempts.js'
+import { ExtractionLabSection } from './extraction-section.js'
 import { EXPERIMENT_OVERVIEWS } from '@/features/experiment-catalog/overviews.js'
 import { ArrowRightIcon, FlaskIcon, GuestIcon, ShieldCheckIcon, WarningIcon } from '@/features/landing/icons.js'
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
@@ -96,7 +97,9 @@ export function LabClient({ storageMode }: { storageMode: StorageMode }) {
         <div className="row"><Link className="btn" href="/compare">So sánh lượt đã nộp</Link><Link className="btn experiment-library-start" href="/experiments">Chọn thí nghiệm <ArrowRightIcon /></Link></div>
       </header>
       <LabStorageNotice storageMode={storageMode} />
+      <ExtractionLabSection />
 
+      <section aria-labelledby="jar-lab-heading"><div className="learner-lab-group-heading"><div><h2 id="jar-lab-heading">Jar Test</h2><p>Các lượt chuẩn bị mẫu, so sánh cốc và ghi kết quả.</p></div></div>
       {deleteError && <p className="learner-lab-error" role="alert">Chưa xóa được lượt thực hành. Dữ liệu vẫn hiển thị bên dưới; bạn có thể thử lại.</p>}
 
       {state.kind === 'loading' ? <LabSkeleton /> : state.kind === 'error' ? (
@@ -105,7 +108,7 @@ export function LabClient({ storageMode }: { storageMode: StorageMode }) {
         <section className="learner-lab-empty"><FlaskIcon /><h2>Chưa có lượt Jar Test</h2><p>Bắt đầu một mẻ để chuẩn bị mẫu, so sánh các cốc và ghi kết quả. Tiến độ được lưu trên trình duyệt này.</p><Link className="btn experiment-library-start" href="/simulate/jar-test">Bắt đầu Jar Test <ArrowRightIcon /></Link></section>
       ) : (
         <>
-          <div className="learner-lab-filters" role="group" aria-label="Lọc theo trạng thái thực hành">
+          <div className="learner-lab-filters" role="group" aria-label="Lọc các lượt Jar Test theo trạng thái">
             {FILTERS.map(item => <button type="button" key={item.key} aria-pressed={filter === item.key} onClick={() => setFilter(item.key)}>{item.label}<span>{item.key === 'all' ? rows.length : rows.filter(row => row.status === item.key).length}</span></button>)}
           </div>
           {groups.filter(group => filter === 'all' || filter === group.status).map(group => {
@@ -119,7 +122,7 @@ export function LabClient({ storageMode }: { storageMode: StorageMode }) {
           })}
           {filter !== 'all' && !rows.some(row => row.status === filter) && <div className="learner-lab-filter-empty"><p>Chưa có lượt nào ở trạng thái này.</p><button type="button" onClick={() => setFilter('all')}>Xem tất cả lượt thực hành</button></div>}
         </>
-      )}
+      )}</section>
     </div>
   )
 }
@@ -133,8 +136,8 @@ export function LabStorageNotice({ storageMode }: { storageMode: StorageMode }) 
       <Icon />
       <div className="learner-lab-storage-copy">
         <div className="learner-lab-storage-title"><h2>Lưu trên trình duyệt này</h2><span>{local ? 'Chưa đăng nhập' : 'Đã đăng nhập'}</span></div>
-        <p>Các lượt Jar Test bên dưới được lưu trên thiết bị này, kể cả khi đã đăng nhập. Dữ liệu không đồng bộ sang thiết bị khác và có thể mất khi xóa dữ liệu web hoặc đóng cửa sổ riêng tư.</p>
-        <p className="learner-lab-storage-hint">Jar Test hiện chưa hỗ trợ lưu vào tài khoản. Dùng cùng trình duyệt để tiếp tục lượt.</p>
+        <p>Các lượt Jar Test và chiết tách bên dưới được lưu trên thiết bị này, kể cả khi đã đăng nhập. Dữ liệu không đồng bộ sang thiết bị khác và có thể mất khi xóa dữ liệu web hoặc đóng cửa sổ riêng tư.</p>
+        <p className="learner-lab-storage-hint">Jar Test hiện chưa hỗ trợ lưu vào tài khoản. Bài chiết tách cũng chỉ lưu trên trình duyệt. Dùng cùng trình duyệt để tiếp tục lượt.</p>
       </div>
       <Link href={local ? '/sign-in' : '/account'}>{local ? 'Đăng nhập' : 'Quản lý tài khoản'}<ArrowRightIcon /></Link>
     </section>

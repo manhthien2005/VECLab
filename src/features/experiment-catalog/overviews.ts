@@ -2,18 +2,18 @@ import { APP_STRINGS } from '@/content/index.js'
 import { JAR_PROFILE } from '@/domain/experiments/jar-test/model.js'
 
 const PRESENTATION = {
-  'acid-neutralization': {
-    image: '/assets/experiments/ph.webp',
-    imageAlt: 'Cốc phản ứng, buret và điện cực đo pH',
-    category: 'Axit – bazơ',
-    question: 'Thêm bao nhiêu chất trung hòa để đạt pH mục tiêu?',
-    learning: 'Đọc pH, điều chỉnh liều và đối chiếu kết quả.',
-    tools: 'Buret, máy khuấy và máy đo pH.',
-    prerequisites: 'Hiểu pH và phản ứng axit–bazơ cơ bản.',
-    input: 'Mẫu nước cần điều chỉnh pH · Nội dung dự kiến',
-    parameters: 'Thể tích, nồng độ và lượng hóa chất',
-    outcome: 'Độ lệch pH, lượng hóa chất đã dùng',
-    procedure: ['Chuẩn bị mẫu và hiệu chuẩn máy đo', 'Thêm hóa chất, khuấy và chờ ổn định', 'Đo pH và đối chiếu kết quả'],
+  'acid-base-extraction': {
+    image: '/assets/experiments/extraction.webp',
+    imageAlt: 'Phễu chiết với pha hữu cơ phía trên, pha nước phía dưới và các bình thu',
+    category: 'Chiết lỏng – lỏng',
+    question: 'Thứ tự chiết và cách thu pha ảnh hưởng thế nào đến sản phẩm?',
+    learning: 'Tách riêng ba chất, theo dõi thất thoát và phân biệt thu hồi với độ tinh khiết.',
+    tools: 'Phễu chiết, bình thu, máy đo pH, bộ lọc và cân.',
+    prerequisites: 'Hiểu axit–bazơ, hai pha không trộn lẫn và cách sử dụng phễu chiết.',
+    input: 'Mẫu mô phỏng A/B/N · 100 mg mỗi chất · 40 mL dung môi hữu cơ',
+    parameters: 'Hướng chiết, thể tích dung dịch, số lần chiết và phần pha thu',
+    outcome: 'Khối lượng đã cân, thu hồi và độ tinh khiết theo mô hình',
+    procedure: ['Chọn hướng chiết, trộn, xả áp và phân lớp', 'Thu từng pha, kết tủa, lọc hoặc cô rồi làm khô', 'Cân, tự tính thu hồi và khai báo ba sản phẩm'],
   },
   'jar-test': {
     image: '/assets/experiments/jar.webp',
