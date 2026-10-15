@@ -107,6 +107,7 @@ export type WorkbenchControllerState = {
   readonly operationStage: OperationStage
   readonly lastError: ControllerError | null
   readonly lastSuccessfulInteraction: InteractionAcknowledgement | null
+  readonly dosingFinished: boolean
 }
 
 /**
@@ -141,6 +142,7 @@ export type WorkbenchControllerActions = {
   setSelectedAliquot: (aliquotL: number) => void
   setStirrerRpm: (rpm: number) => void
   clearError: () => void
+  finishDosing: () => void
 }
 
 export type WorkbenchController = WorkbenchControllerState & WorkbenchControllerActions

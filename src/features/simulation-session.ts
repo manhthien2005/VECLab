@@ -2,6 +2,9 @@ import type { AcidNeutralizationState } from '@/domain/experiments/acid-neutrali
 import { GuestAttemptRepository } from '@/application/attempts/guest-repository.js'
 import { RemoteAcidSession } from '@/application/simulation/remote-session.js'
 import { createAcidSession, type AcidSession } from '@/application/simulation/acid-session.js'
+import { createJarSession, type JarSession } from '@/application/simulation/jar-session.js'
+import { RemoteJarSession } from '@/application/simulation/remote-jar-session.js'
+import type { JarState } from '@/domain/experiments/jar-test/model.js'
 
 /**
  * Which `AcidSession` a screen gets, from its storage mode.
@@ -24,4 +27,11 @@ export function createSessionForStorageMode(storageMode: 'local' | 'cloud'): Aci
   return storageMode === 'local'
     ? createAcidSession(new GuestAttemptRepository<AcidNeutralizationState>())
     : new RemoteAcidSession()
+}
+
+/** Explicit Jar seam. Existing acid storage selection stays unchanged. */
+export function createJarSessionForStorageMode(storageMode: 'local' | 'cloud'): JarSession {
+  return storageMode === 'local'
+    ? createJarSession(new GuestAttemptRepository<JarState>())
+    : new RemoteJarSession()
 }

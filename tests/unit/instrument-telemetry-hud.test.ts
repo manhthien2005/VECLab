@@ -66,6 +66,8 @@ describe('InstrumentTelemetryHud & State Truth Contract (WB-R5)', () => {
       )
 
       expect(html).toContain('data-testid="instrument-telemetry-hud"')
+      expect(html).toContain('data-testid="telemetry-target-ph"')
+      expect(html).toContain('Mục tiêu pH*')
       expect(html).toContain('2,05')
       expect(html).toContain('status-stable')
       expect(html).toContain('Ổn định')

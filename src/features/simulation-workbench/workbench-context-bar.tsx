@@ -3,6 +3,7 @@
 import type { WorkbenchMode, SaveStatus } from './controller/types.js'
 import type { AttemptStatus } from '@/domain/process/contracts.js'
 import { APP_STRINGS } from '@/content/index.js'
+import { workbenchModeLabel } from './guidance/protocol.js'
 
 export type WorkbenchContextBarProps = {
   readonly mode: WorkbenchMode
@@ -10,7 +11,6 @@ export type WorkbenchContextBarProps = {
   readonly saveStatus: SaveStatus
   readonly storageMode: 'local' | 'cloud'
   readonly isPreStart: boolean
-  readonly onModeChange?: (mode: WorkbenchMode) => void
   readonly className?: string
 }
 
@@ -20,7 +20,6 @@ export function WorkbenchContextBar({
   saveStatus,
   storageMode,
   isPreStart,
-  onModeChange,
   className = '',
 }: WorkbenchContextBarProps) {
   const saveLabel = () => {
@@ -49,33 +48,12 @@ export function WorkbenchContextBar({
       </div>
 
       <div className="wb-context-right">
-        {/* Mode Selector / Pill */}
         <div className="wb-context-mode">
-          {isPreStart ? (
-            <div className="wb-mode-toggle-compact" role="group" aria-label="Chọn chế độ">
-              <button
-                type="button"
-                className={`wb-mode-btn-compact ${mode === 'GUIDED' ? 'is-active' : ''}`}
-                onClick={() => onModeChange?.('GUIDED')}
-              >
-                GUIDED
-              </button>
-              <button
-                type="button"
-                className={`wb-mode-btn-compact ${mode === 'EXPLORE' ? 'is-active' : ''}`}
-                onClick={() => onModeChange?.('EXPLORE')}
-              >
-                EXPLORE
-              </button>
-            </div>
-          ) : (
-            <span className="badge badge-accent badge-mono">
-              Chế độ: {mode}
-            </span>
+          {!isPreStart && (
+            <span className="badge badge-accent">{workbenchModeLabel(mode)}</span>
           )}
         </div>
 
-        {/* Run Status */}
         {status && (
           <span
             className={`badge ${status === 'completed' ? 'badge-ok' : status === 'in_progress' ? 'badge-info' : 'badge-warn'}`}
@@ -88,7 +66,6 @@ export function WorkbenchContextBar({
           </span>
         )}
 
-        {/* Save Status */}
         <span className="wb-save-indicator" role="status" aria-live="polite">
           <span className="wb-save-dot" data-state={saveStatus} />
           <span className="wb-save-text">{saveLabel()}</span>

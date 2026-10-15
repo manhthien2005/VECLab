@@ -1,17 +1,19 @@
 # BÁO CÁO CHỐT PHẠM VI ỨNG DỤNG WEB
 
+> Baseline lịch sử: trải nghiệm mô phỏng mới theo [thiết kế ngày 13/10/2026](superpowers/specs/2026-10-13-simulation-v1-design.md), gồm tương tác 2D và phân tích đúng/sai chủ yếu cuối lượt. Các quy tắc cũ cần được đối chiếu khi audit, không mặc định áp dụng nguyên trạng cho refactor.
+
 ## Nền tảng mô phỏng quy trình hóa học có căn cứ khoa học
 
 **Trạng thái:** Đã được duyệt làm phạm vi web chính thức<br>
 **Ngày chốt:** 27/08/2026<br>
 **Giả định sizing ban đầu:** Một học kỳ ngắn, khoảng 2 tháng<br>
-**Kế hoạch triển khai hiện hành:** Đội 6 người, milestone MVP ngày 07/10/2026<br>
+**Kế hoạch MVP ban đầu (lịch sử):** Đội 6 người, milestone ngày 07/10/2026<br>
 **Vai trò người dùng:** Người học<br>
 **Ngôn ngữ sản phẩm:** Tiếng Việt
 
 > Tài liệu này xác định sản phẩm web cần xây dựng: các khu vực chức năng, luồng người dùng, cách lưu dữ liệu, hành vi đồng bộ, cách hiển thị kết quả, yêu cầu trên các thiết bị và những nội dung không thuộc phạm vi. Nội dung và mô hình khoa học của ba thí nghiệm được quyết định tại [Báo cáo chốt phạm vi lõi dự án](core-project-scope.md).
 
-> Phân công và checkpoint một tháng nằm tại [Team Delivery Plan](team/README.md); tài liệu này vẫn là nguồn quyết định hành vi web.
+> Phân công chuyên môn tham khảo tại [Ownership đội ngũ](team/README.md); kế hoạch refactor được xác định riêng.
 
 ### Quan hệ giữa hai tài liệu scope
 
@@ -61,7 +63,7 @@
 - [13. Cấu trúc khái niệm của web](#13-cấu-trúc-khái-niệm-của-web)
 - [14. Tiêu chí hoàn thành phạm vi web](#14-tiêu-chí-hoàn-thành-phạm-vi-web)
 - [15. Ngoài phạm vi web](#15-ngoài-phạm-vi-web)
-- [16. Mockup tham chiếu đã duyệt](#16-mockup-tham-chiếu-đã-duyệt)
+- [16. Nguyên tắc bố cục tham chiếu](#16-nguyên-tắc-bố-cục-tham-chiếu)
 - [17. Kết luận chốt scope](#17-kết-luận-chốt-scope)
 <!-- TOC:END -->
 
@@ -767,15 +769,9 @@ Không thực hiện trong phiên bản này:
 ---
 
 
-## 16. Mockup tham chiếu đã duyệt
+## 16. Nguyên tắc bố cục tham chiếu
 
-Các file mockup dùng để định hình bố cục, không phải mã nguồn production:
-
-- [Trang mở nhanh hai phiên bản](mockups/index.html)
-- [Không gian mô phỏng trên máy tính](mockups/simulation-workbench-desktop.html)
-- [Không gian mô phỏng trên điện thoại](mockups/simulation-workbench-mobile.html)
-
-Quyết định giao diện chính:
+Mockup HTML cũ đã được gỡ trong đợt chuẩn bị refactor; có thể tra lại trong Git tại commit c60ac86. Các nguyên tắc bố cục được giữ làm tham khảo:
 
 - Giữ bố cục “bàn thí nghiệm cân bằng”.
 - Trên desktop hiển thị đồng thời tiến trình, trạng thái và thao tác.

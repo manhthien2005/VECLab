@@ -1,8 +1,8 @@
 /**
  * The post-sign-in destination (docs/web-application-scope.md §4.4).
  *
- * Middleware appends `?next=<pathname>` when it bounces a signed-out learner away from
- * `/lab`, `/compare` or `/account`, so signing in can put them back where they were heading
+ * Proxy appends `?next=<pathname>` when it bounces a signed-out learner away from
+ * `/compare` or `/account`, so signing in can put them back where they were heading
  * rather than dumping everyone on the lab.
  *
  * That parameter is attacker-controlled, because it is in a URL a learner can be handed:
@@ -57,4 +57,11 @@ export function safeNextPath(value: string | null | undefined): string | null {
  */
 export function destinationAfterSignIn(next: string | null | undefined): string {
   return safeNextPath(next) ?? '/lab'
+}
+
+/** Used for both confirmation and recovery; the destination stays on this origin. */
+export function authCallbackUrl(origin: string, next: string | null | undefined): string {
+  const url = new URL('/auth/callback', origin)
+  url.searchParams.set('next', destinationAfterSignIn(next))
+  return url.toString()
 }

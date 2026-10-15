@@ -1,0 +1,19 @@
+.tour { position:fixed; inset:0; width:100%; height:100%; max-width:none; max-height:none; margin:0; padding:0; border:0; background:transparent; color:#172c3b; overflow:hidden; font:inherit; }
+.tour::backdrop { background:transparent; }
+.shade { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.card { position:absolute; width:min(370px,calc(100% - 32px)); max-height:calc(100dvh - 32px); overflow:auto; padding:22px; background:#fff; border-radius:14px; box-shadow:0 16px 56px rgb(13 36 52 / 22%); }
+.progress { display:flex; justify-content:space-between; gap:12px; color:#506477; font-size:.75rem; }
+.progress span:last-child { font-variant-numeric:tabular-nums; }
+.content { animation:tourReveal 220ms ease-out; }
+.content h2 { margin:12px 0 8px; font-size:1.15rem; line-height:1.35; letter-spacing:-.02em; }
+.content p { font-size:.875rem; line-height:1.7; margin:0; color:#40576a; }
+.actions { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:22px; }
+.actions > div { display:flex; gap:5px; }
+.actions button { border:0; padding:10px 8px; min-height:44px; border-radius:8px; font:inherit; font-size:.8rem; font-weight:650; background:transparent; color:#00656a; cursor:pointer; transition:background 180ms ease-out; }
+.actions button:hover { background:#edf9f9; }
+.actions button:disabled { color:#667889; cursor:default; background:transparent; }
+.actions .next { background:#007b80; color:#fff; padding-inline:14px; }
+.actions .next:hover { background:#00656a; }
+@keyframes tourReveal { from { opacity:.6; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+@media (max-width:400px) { .card { padding:18px; } .actions { gap:2px; } .actions button { padding-inline:6px; } }
+@media (prefers-reduced-motion:reduce) { .content { animation:none; } .actions button { transition:none; } }

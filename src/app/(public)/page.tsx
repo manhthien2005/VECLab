@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { APP_STRINGS } from '@/content/index.js'
 import { listCatalog } from '@/features/experiment-catalog/catalog.js'
-import { ScientificDisclosure } from '@/shared/ui/scientific-disclosure.js'
 import {
   ArrowRightIcon,
   BookIcon,
@@ -9,7 +8,6 @@ import {
   GraduationCapIcon,
   PlayIcon,
   ShieldCheckIcon,
-  WarningIcon,
   type IconComponent,
 } from '@/features/landing/icons.js'
 import { HeroPreview } from '@/features/landing/hero-preview.js'
@@ -26,13 +24,12 @@ import { ScrollReveal } from '@/features/landing/scroll-reveal.js'
  * Storytelling sequence:
  * 1. Hero with interactive preview (HeroPreview) and integrated learning value trust row
  * 2. 3-experiment showcase with centered heading (ExperimentShowcase)
- * 3. Interactive Workbench demonstration in subtle icy-blue framing (WorkbenchPreview)
+ * 3. Static concept preview of the planned workbench (WorkbenchPreview)
  * 4. Scientific Evidence & Trust (EvidenceSection)
  * 5. Final conversion banner (FinalCtaBanner)
- * 6. Scientific model disclosure & locked evidence register (ScientificDisclosure)
  *
  * Server Component reading only the release registries, statically renderable.
- * `ScrollReveal` and `WorkbenchPreview` are client leaves where needed.
+ * `ScrollReveal` handles page reveals; the workbench concept is static server markup.
  */
 
 const TRUST_ICONS: readonly IconComponent[] = [ShieldCheckIcon, GraduationCapIcon, BookIcon]
@@ -47,6 +44,51 @@ export default function HomePage() {
       <ScrollReveal />
 
       <section className="hero">
+        <svg className="hero-background-art" viewBox="0 0 1440 820" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <defs>
+            <pattern id="hero-tech-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M40 0H0v40" fill="none" stroke="currentColor" strokeWidth="0.65" />
+            </pattern>
+            <pattern id="hero-tech-dots" width="9" height="9" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1" fill="currentColor" />
+            </pattern>
+            <path id="hero-tech-hexagon" d="M-24 0l12-21h24L24 0 12 21h-24Z" />
+          </defs>
+          <rect width="1440" height="820" fill="url(#hero-tech-grid)" opacity="0.085" />
+          <g fill="url(#hero-tech-dots)" opacity="0.26">
+            <rect x="670" y="92" width="260" height="98" />
+            <rect x="1260" y="238" width="180" height="134" />
+            <rect x="144" y="622" width="244" height="104" />
+            <rect x="1060" y="698" width="250" height="122" />
+          </g>
+          <g fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" opacity="0.45">
+            <path d="M780 0l72 124h246l72 124h270" />
+            <path d="M960 74h206l82 142h192" />
+            <path d="M1440 430h-168l-76 132H940l-64 110H620" />
+            <path d="M1440 474h-136l-84 146H982l-62 108H596" />
+            <path d="M1440 122h-86l-74 128v106" />
+            <path d="M0 590h88l80 138h250l54-94h120" />
+            <path d="M0 632h64l76 132h302l54-94h140" />
+            <path d="M1090 820l58-100h168l58-100h66" />
+            <use href="#hero-tech-hexagon" transform="translate(1244 132) scale(1.2)" />
+            <use href="#hero-tech-hexagon" transform="translate(1310 148) scale(.55)" />
+            <use href="#hero-tech-hexagon" transform="translate(708 704) scale(1.4)" />
+            <use href="#hero-tech-hexagon" transform="translate(772 744) scale(.65)" />
+            <use href="#hero-tech-hexagon" transform="translate(76 710) scale(.7)" />
+          </g>
+          <g fill="currentColor" opacity="0.65">
+            <circle cx="852" cy="124" r="3.5" /><circle cx="960" cy="74" r="3" />
+            <circle cx="1280" cy="356" r="3.5" /><circle cx="940" cy="562" r="3" />
+            <circle cx="620" cy="672" r="4" /><circle cx="596" cy="728" r="3" />
+            <circle cx="88" cy="590" r="3.5" /><circle cx="592" cy="634" r="3" />
+            <circle cx="1316" cy="720" r="3" /><circle cx="636" cy="670" r="3" />
+          </g>
+          <g fill="currentColor" opacity="0.35">
+            <circle cx="90" cy="160" r="1.5" /><circle cx="380" cy="112" r="1.5" />
+            <circle cx="638" cy="310" r="2" /><circle cx="702" cy="396" r="1.5" />
+            <circle cx="456" cy="710" r="2" /><circle cx="1004" cy="682" r="1.5" />
+          </g>
+        </svg>
         <div className="hero-inner">
           <div className="hero-copy rise">
             <p className="hero-eyebrow">{strings.heroEyebrow}</p>
@@ -78,20 +120,6 @@ export default function HomePage() {
               </a>
             </div>
 
-            {/* Lightweight learning value benefit row beneath CTA matching approved reference */}
-            <ul className="hero-trust-strip" aria-label="Giá trị học tập và cam kết giáo dục">
-              {strings.trustItems.map((item, index) => {
-                const Icon = TRUST_ICONS[index] ?? CheckCircleIcon
-                return (
-                  <li className="hero-trust-item" key={item.label}>
-                    <Icon className="hero-trust-icon" />
-                    <span>{item.label}</span>
-                    <span className="sr-only"> ({item.hint})</span>
-                  </li>
-                )
-              })}
-            </ul>
-
             {/* Preserved learning values educational statements for accessibility and auditing */}
             <ul className="sr-only" aria-label={strings.learningValueHeading}>
               {strings.learningValues.map((value, idx) => (
@@ -99,18 +127,23 @@ export default function HomePage() {
               ))}
             </ul>
 
-            {/* Compact refined scientific model limitation disclosure */}
-            <div className="hero-model-disclosure" role="note" aria-label="Giới hạn mô hình giáo dục">
-              <WarningIcon className="hero-model-icon" />
-              <p>
-                <strong>Mô hình học tập:</strong> {strings.modelWarning}
-              </p>
-            </div>
           </div>
 
           {/* Hero product preview frame */}
           <HeroPreview />
         </div>
+        <ul className="hero-trust-strip" aria-label="Giá trị học tập và cam kết giáo dục">
+          {strings.trustItems.map((item, index) => {
+            const Icon = TRUST_ICONS[index] ?? CheckCircleIcon
+            return (
+              <li className="hero-trust-item" key={item.label}>
+                <Icon className="hero-trust-icon" />
+                <span>{item.label}</span>
+                <span className="sr-only"> ({item.hint})</span>
+              </li>
+            )
+          })}
+        </ul>
       </section>
 
       {/* Landing Flow Sections with Distinct Chapter Framing */}
@@ -139,13 +172,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="landing-section landing-section-disclosure reveal" data-reveal-variant="simple" aria-label="Nguồn và giới hạn mô hình">
-          <div className="landing-section-inner">
-            <div className="landing-disclosure-card">
-              <ScientificDisclosure />
-            </div>
-          </div>
-        </section>
       </div>
     </>
   )

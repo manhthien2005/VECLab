@@ -1,143 +1,115 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import { useState, type ReactNode, type InputHTMLAttributes } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
 import { APP_STRINGS } from '@/content/index.js'
+import { FlaskIcon, ArrowRightIcon, ShieldCheckIcon, CheckCircleIcon, WarningIcon } from '@/features/landing/icons.js'
+import { destinationAfterSignIn } from '@/features/auth/redirect.js'
 
-/**
- * The card every §4.4 auth screen is built from.
- *
- * Sign-in, sign-up, forgot-password and reset-password differ in their fields and in what
- * submitting does. They do NOT differ in their shape: a heading, an optional explanation, one
- * notice slot, a field list, a single submit button that goes busy, and footer links. Four
- * copies of that shape is four chances for one screen to lose the busy state or to render an
- * error somewhere the others do not.
- *
- * Presentational only. It owns no Supabase call and no field value — each screen keeps those,
- * because what is valid differs between them (sign-up needs a second password field, reset
- * needs no email). Keeping the state out of here is what lets this be a plain function
- * component that every screen can trust to behave the same way.
- */
-
-/** The one notice slot, used for either a failure or a success. */
 export type AuthNotice = { tone: 'danger' | 'ok'; text: string } | null
 
 type AuthCardProps = {
   title: string
-  /** Short explanation above the fields. Omitted where the title says enough. */
   lede?: string
   notice: AuthNotice
-  /** Field controls. Rendered inside the `<form>` so Enter submits. */
-  children: ReactNode
-  /**
-   * Submit label and handler, TOGETHER or not at all.
-   *
-   * Both are optional because some auth cards have nothing to submit: the verify screen
-   * reports the outcome of a link the learner already clicked. Making them optional rather
-   * than requiring a no-op pair is what keeps such a card from rendering a button that looks
-   * actionable and does nothing — the learner's reasonable response to which is to click it
-   * again and conclude the app is broken.
-   */
+  children?: ReactNode
   submitLabel?: string
+  busyLabel?: string
   onSubmit?: () => void
-  /** True while a request is in flight: disables the controls and labels the button. */
   busy?: boolean
-  /** Links below the button — the other auth screens, or "continue as a guest". */
+  disabled?: boolean
+  unavailable?: boolean
   footer?: ReactNode
+  mode?: 'sign-in' | 'sign-up' | 'forgot-password' | 'reset-password' | 'verify'
+  next?: string
 }
 
-export function AuthCard({
-  title,
-  lede,
-  notice,
-  children,
-  submitLabel,
-  onSubmit,
-  busy = false,
-  footer,
-}: AuthCardProps) {
-  // A card submits only when it was given something to do. One of the pair without the other
-  // is a programming error, so the button is rendered only when both are present.
+/** Shared frame; the individual forms own their values and authentication requests. */
+export function AuthCard({ title, lede, notice, children, submitLabel, busyLabel = 'Đang xử lý…', onSubmit, busy = false, disabled = false, unavailable = false, footer, mode = 'sign-in', next }: AuthCardProps) {
   const canSubmit = onSubmit !== undefined && submitLabel !== undefined
+  const destination = destinationAfterSignIn(next)
+  const query = destination === '/lab' ? '' : `?next=${encodeURIComponent(destination)}`
   return (
     <div className="auth-shell">
-      <div className="card auth-card stack">
-        <header className="stack-tight">
-          {/* The mark repeats the header's, so a learner who arrived from an email link
-              onto a bare auth screen can still tell what they are signing in to. */}
-          <span className="brand-mark" aria-hidden="true">
-            pH
-          </span>
-          <h1>{title}</h1>
-          {lede === undefined ? null : <p className="muted small">{lede}</p>}
-        </header>
-
-        {notice === null ? null : (
-          // Polite rather than assertive: these appear on submit, when focus is already on
-          // the form, and an assertive announcement would interrupt the learner mid-action.
-          <p className={`alert alert-${notice.tone}`} role="status">
-            {notice.text}
-          </p>
-        )}
-
-        {canSubmit ? (
-          <form
-            className="stack"
-            onSubmit={(event) => {
-              // Every auth screen submits to Supabase from the browser; there is no server
-              // action to post to, and a real page navigation would discard the notice.
-              event.preventDefault()
-              if (!busy) onSubmit()
-            }}
-          >
-            <fieldset className="stack" disabled={busy}>
-              <legend className="visually-hidden">{title}</legend>
-              {children}
-            </fieldset>
-
-            {/* Full width: on a one-field form the submit is the only action, and a
-                half-width button beside empty space reads as optional. */}
-            <button className="btn btn-primary btn-block" disabled={busy} type="submit">
-              {busy ? APP_STRINGS.storage.saving : submitLabel}
-            </button>
-          </form>
-        ) : (
-          // No form at all, so no submit semantics: Enter does nothing and the content is
-          // read rather than filled in.
-          <div className="stack">{children}</div>
-        )}
-
-        {footer === undefined ? null : <footer className="stack-tight small">{footer}</footer>}
+      <AuthBackground />
+      <div className="auth-layout">
+        <aside className="auth-story" aria-label="Tài khoản VECLab">
+          <Link className="auth-story-brand" href="/"><FlaskIcon />VECLab</Link>
+          <h2>Tiếp tục bài đang làm.<br />Xem lại kết quả đã lưu.</h2>
+          <p>Tài khoản giúp lưu các lượt thực hành và mở lại trên thiết bị khác.</p>
+          <div className="auth-story-visual">
+            <AuthIllustrationFrame />
+            <Image src="/assets/auth-laboratory-v2.webp" alt="" fill sizes="(max-width: 48rem) 0px, (max-width: 66rem) 42vw, 450px" />
+          </div>
+          <div className="auth-story-note"><ShieldCheckIcon /><p>Chưa cần tài khoản? Bạn vẫn có thể thực hành và lưu tiến độ trên trình duyệt này.</p></div>
+          <Link className="auth-story-guest" href="/experiments">Khám phá thí nghiệm <ArrowRightIcon /></Link>
+        </aside>
+        <div className="auth-card">
+          <AuthCardPattern />
+          <nav className="auth-mode-nav" aria-label="Đăng nhập và đăng ký">
+            <Link href={`/sign-in${query}`} aria-current={mode === 'sign-in' ? 'page' : undefined}>Đăng nhập</Link>
+            <Link href={`/sign-up${query}`} aria-current={mode === 'sign-up' ? 'page' : undefined}>Đăng ký</Link>
+          </nav>
+          <header className="auth-card-heading"><h1>{title}</h1>{lede !== undefined && <p>{lede}</p>}</header>
+          {unavailable && <div className="auth-notice is-unavailable" role="status"><WarningIcon /><p>{APP_STRINGS.auth.errors.notConfigured}</p></div>}
+          {notice !== null && <div className={`auth-notice is-${notice.tone}`} role={notice.tone === 'danger' ? 'alert' : 'status'}>{notice.tone === 'ok' ? <CheckCircleIcon /> : <WarningIcon />}<p>{notice.text}</p></div>}
+          {canSubmit ? (
+            <form className="auth-form" aria-busy={busy} onSubmit={event => { event.preventDefault(); if (!busy && !disabled && !unavailable) onSubmit() }}>
+              <fieldset disabled={busy || disabled || unavailable}><legend className="visually-hidden">{title}</legend>{children}</fieldset>
+              <button className="btn auth-submit" disabled={busy || disabled || unavailable} type="submit">{busy ? busyLabel : submitLabel}{!busy && <ArrowRightIcon />}</button>
+            </form>
+          ) : <div className="auth-result">{children}</div>}
+          {footer !== undefined && <footer className="auth-card-footer">{footer}</footer>}
+        </div>
       </div>
     </div>
   )
 }
 
-/**
- * One labelled field.
- *
- * The id is required rather than generated, so a screen with two password fields cannot end
- * up with colliding ids — which would silently attach the label to the wrong input and break
- * the association for a screen reader.
- */
-export function AuthField({
-  id,
-  label,
-  hint,
-  ...input
-}: {
+export function AuthField({ id, label, hint, action, type, ...input }: {
   id: string
   label: string
   hint?: string
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'id'>) {
+  action?: ReactNode
+} & Omit<InputHTMLAttributes<HTMLInputElement>, 'id'>) {
+  const [revealed, setRevealed] = useState(false)
+  const password = type === 'password'
   return (
-    <div className="field">
-      <label htmlFor={id}>{label}</label>
-      <input aria-describedby={hint === undefined ? undefined : `${id}-hint`} id={id} {...input} />
-      {hint === undefined ? null : (
-        <span className="hint" id={`${id}-hint`}>
-          {hint}
-        </span>
-      )}
+    <div className="auth-field">
+      <div className="auth-field-label"><label htmlFor={id}>{label}</label>{action}</div>
+      <div className={`auth-input-wrap${password ? ' has-password-toggle' : ''}`}>
+        <input {...input} aria-describedby={hint === undefined ? undefined : `${id}-hint`} id={id} type={password && revealed ? 'text' : type} />
+        {password && <button className="auth-password-toggle" type="button" aria-label={revealed ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'} aria-pressed={revealed} aria-controls={id} onClick={() => setRevealed(value => !value)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" />{revealed && <path strokeLinecap="round" d="m4 3 16 18" />}</svg></button>}
+      </div>
+      {hint !== undefined && <span className="auth-field-hint" id={`${id}-hint`}>{hint}</span>}
     </div>
+  )
+}
+
+function AuthBackground() {
+  return <svg className="auth-background" aria-hidden="true" focusable="false" width="1400" height="900" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice" fill="none"><g stroke="currentColor" opacity="0.17"><path d="m1150 60 36-21 36 21v42l-36 21-36-21Zm72 0 36-21 36 21v42l-36 21-36-21Zm-36 63 36-21 36 21v42l-36 21-36-21ZM1300 180v140l-44 44h-70M60 460v170l52 52v80H28m1154-67 30-17 30 17v34l-30 17-30-17Z" /><circle cx="1186" cy="364" r="4" /><circle cx="28" cy="762" r="4" /><path d="M280 90h130m-80-10v20m520 680h100" /></g></svg>
+}
+
+function AuthIllustrationFrame() {
+  return (
+    <svg className="auth-illustration-frame" viewBox="0 0 480 320" preserveAspectRatio="none" fill="none" aria-hidden="true" focusable="false">
+      <g stroke="currentColor" strokeWidth="1" opacity="0.5"><path d="M16 44V24a8 8 0 0 1 8-8h26m380 0h26a8 8 0 0 1 8 8v20M16 276v20a8 8 0 0 0 8 8h26m380 0h26a8 8 0 0 0 8-8v-20M204 304h72" /></g>
+      <g fill="currentColor" opacity="0.55"><circle cx="194" cy="304" r="1.5" /><circle cx="286" cy="304" r="1.5" /></g>
+    </svg>
+  )
+}
+
+function AuthCardPattern() {
+  return (
+    <svg className="auth-card-pattern" viewBox="0 0 520 780" preserveAspectRatio="xMidYMid slice" fill="none" aria-hidden="true" focusable="false">
+      <g stroke="currentColor" strokeWidth="0.9" opacity="0.18">
+        <path d="m402 18 25-14 25 14v29l-25 14-25-14Zm50 0 25-14 25 14v29l-25 14-25-14Zm-25 43 25-14 25 14v29l-25 14-25-14Zm50 0 25-14 25 14v29l-25 14-25-14Z" />
+        <path d="M520 140h-45l-25 25v82h-28m98-77h-28l-22 22v83M0 590h24l26 26v92l24 24h42M0 622h14l18 18v83l29 29h79M50 670H25m-25 0h7" />
+        <circle cx="422" cy="247" r="3.5" /><circle cx="470" cy="275" r="3" /><circle cx="116" cy="732" r="3.5" /><circle cx="140" cy="752" r="3" />
+        <path d="m12 468 19-11 19 11v22l-19 11-19-11Zm38 0 19-11 19 11v22l-19 11-19-11Z" opacity="0.5" />
+      </g>
+      <g fill="currentColor" opacity="0.13"><circle cx="484" cy="124" r="1.5" /><circle cx="506" cy="124" r="1.5" /><circle cx="506" cy="102" r="1.5" /><circle cx="16" cy="558" r="1.5" /><circle cx="38" cy="558" r="1.5" /><circle cx="16" cy="536" r="1.5" /></g>
+    </svg>
   )
 }

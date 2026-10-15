@@ -3,62 +3,34 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { APP_STRINGS } from '@/content/index.js'
+import { useSignedIn } from '@/features/auth/use-signed-in.js'
+import { footerNavItems, headerNavItems } from './nav-items.js'
+import { ThemeToggle } from './theme-toggle.js'
 
 /**
  * Primary navigation.
  *
- * A client component for two reasons: marking the current page with
- * `aria-current="page"` needs the live pathname (`usePathname` is a client hook, and a
- * root layout is a Server Component that receives no pathname), and the narrow-viewport
- * panel is a disclosure with open state.
+ * A client component for three reasons: `aria-current="page"` needs the live
+ * pathname, the narrow-viewport panel is a disclosure with open state, and
+ * compare/account appear only after the browser knows there is a session —
+ * so the root layout can stay static for guests.
  *
- * Route groups never appear here or in hrefs — docs/system-architecture.md forbids using
- * a group name as an auth guard, and group folders are not part of the URL anyway.
+ * Route groups never appear here or in hrefs — docs/system-architecture.md
+ * forbids using a group name as an auth guard.
  *
- * WHY A DISCLOSURE BELOW 60rem. The five destinations plus the brand do not fit on one
- * row on a phone; they used to wrap, which doubled the sticky header's height and ate a
- * quarter of a 320px-tall viewport on every scroll. Collapsing them keeps the header one
- * row tall without removing a destination, which §10.2 requires.
+ * WHY A DISCLOSURE BELOW 70rem. Guest destinations plus the brand already
+ * strain a phone row; signed-in extras would wrap. Collapsing them keeps the
+ * header one row tall without removing a destination, which §10.2 requires.
  */
-
-type NavItem = {
-  href: string
-  label: string
-}
-
-/**
- * The five route areas a learner can navigate to directly.
- *
- * `/simulate/[scenarioKey]`, `/attempts/[attemptId]` and `/reports/[attemptId]` are
- * deliberately absent: they are reached FROM the catalog or the lab, not by guessing an
- * id, and an attempt id is not something to hand-type.
- *
- * Labels come from the content bundle rather than being typed here, so navigation wording
- * lives with the rest of the copy (§9).
- */
-const NAV_ITEMS: readonly NavItem[] = [
-  { href: '/experiments', label: APP_STRINGS.nav.experiments },
-  { href: '/evidence', label: APP_STRINGS.nav.evidence },
-  { href: '/lab', label: APP_STRINGS.nav.lab },
-  { href: '/compare', label: APP_STRINGS.nav.compare },
-  { href: '/account', label: APP_STRINGS.nav.account },
-]
 
 export function AppNav() {
   const pathname = usePathname()
   const panelId = useId()
-  const navRef = useRef<HTMLElement>(null)
+  const navRef = useRef<HTMLDivElement>(null)
+  const toggleRef = useRef<HTMLButtonElement>(null)
+  const signedIn = useSignedIn()
+  const items = headerNavItems(signedIn)
 
-  /**
-   * Open state, keyed by the route it was opened on.
-   *
-   * The panel must close when the learner picks a destination, and Next's client
-   * navigation does not unmount this component — so something has to react to the
-   * pathname changing. Storing WHICH route the panel was opened on makes "still open"
-   * a derived value rather than an effect that pushes `false` after every navigation:
-   * the moment `pathname` differs, `open` is false with no extra render.
-   */
   const [openedOn, setOpenedOn] = useState<string | null>(null)
   const open = openedOn === pathname
 
@@ -67,26 +39,20 @@ export function AppNav() {
     [pathname],
   )
 
-  /**
-   * Close on Escape and on a click outside.
-   *
-   * A panel that overlays the page must be dismissible without hitting the exact toggle
-   * again — otherwise a mis-tap beside it leaves the content covered. Listeners are only
-   * attached while open, so a closed nav costs nothing.
-   *
-   * Closes through `setOpenedOn(null)` rather than the `setOpen` wrapper: the wrapper is
-   * rebuilt whenever `pathname` changes, which would re-subscribe both listeners on every
-   * navigation, while React guarantees the raw setter is stable.
-   */
   useEffect(() => {
     if (!open) return
 
     const onKeyDown = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') setOpenedOn(null)
+      if (event.key === 'Escape') {
+        setOpenedOn(null)
+        toggleRef.current?.focus()
+      }
     }
     const onPointerDown = (event: PointerEvent): void => {
       if (!(event.target instanceof Node)) return
-      if (navRef.current !== null && !navRef.current.contains(event.target)) setOpenedOn(null)
+      if (navRef.current !== null && !navRef.current.contains(event.target)) {
+        setOpenedOn(null)
+      }
     }
 
     document.addEventListener('keydown', onKeyDown)
@@ -98,41 +64,81 @@ export function AppNav() {
   }, [open])
 
   return (
-    <nav className="header-tools" aria-label="Điều hướng chính" ref={navRef}>
-      <button
-        className="btn btn-ghost nav-toggle"
-        type="button"
-        aria-expanded={open}
-        aria-controls={panelId}
-        aria-label={open ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'}
-        onClick={() => setOpen(!open)}
-      >
-        <span className="nav-toggle-bars" aria-hidden="true" />
-      </button>
+    <div className="header-tools" ref={navRef}>
+      <nav className="header-navigation" aria-label="Điều hướng chính">
+        <button
+          ref={toggleRef}
+          className="btn btn-ghost nav-toggle"
+          type="button"
+          aria-expanded={open}
+          aria-controls={panelId}
+          aria-label={open ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'}
+          onClick={() => setOpen(!open)}
+        >
+          <span className="nav-toggle-bars" aria-hidden="true" />
+        </button>
 
-      {/*
-        Always rendered, never conditionally mounted: above 60rem this IS the navigation
-        and must be present regardless of `open`. `data-open` is what the narrow-viewport
-        media query reads to collapse it, so one list serves both layouts and the links
-        stay in the document for crawlers and for the keyboard.
-      */}
-      <ul className="app-nav" id={panelId} data-open={open ? 'true' : 'false'}>
-        {NAV_ITEMS.map((item) => {
-          const isCurrent =
-            pathname === item.href || pathname.startsWith(`${item.href}/`)
+        <ul className="app-nav" id={panelId} data-open={open ? 'true' : 'false'}>
+          {items.map((item) => {
+            const isCurrent =
+              pathname === item.href || pathname.startsWith(`${item.href}/`)
 
-          return (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                {...(isCurrent ? { 'aria-current': 'page' as const } : {})}
-              >
-                {item.label}
-              </Link>
-            </li>
-          )
-        })}
-      </ul>
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  {...(isCurrent ? { 'aria-current': 'page' as const } : {})}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </nav>
+      <div className="header-actions">
+        <ThemeToggle />
+        <Link
+          className="account-link"
+          href={signedIn ? '/account' : '/sign-in'}
+          aria-label={signedIn ? 'Tài khoản — đã đăng nhập' : 'Đăng nhập — chưa đăng nhập'}
+          title={signedIn ? 'Đã đăng nhập · Mở tài khoản' : 'Chưa đăng nhập'}
+        >
+          <span className="account-icon" data-signed-in={signedIn ? 'true' : 'false'}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+              <circle cx="12" cy="8" r="3.5" />
+              <path d="M5 21v-2a7 7 0 0 1 14 0v2" strokeLinecap="round" />
+            </svg>
+            {signedIn ? <span className="account-status-dot" aria-hidden="true" /> : null}
+          </span>
+          <span className="account-label">{signedIn ? 'Tài khoản' : 'Đăng nhập'}</span>
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+export function AppFooterNav() {
+  const signedIn = useSignedIn()
+  const items = footerNavItems(signedIn)
+  const groups = [
+    { title: 'Khám phá', items: items.filter((item) => item.href === '/experiments' || item.href === '/evidence') },
+    { title: 'Cá nhân', items: items.filter((item) => item.href !== '/experiments' && item.href !== '/evidence') },
+  ]
+
+  return (
+    <nav aria-label="Liên kết chân trang" className="footer-nav">
+      {groups.map((group) => (
+        <div className="footer-nav-group" key={group.title}>
+          <h2>{group.title}</h2>
+          <ul>
+            {group.items.map((item) => (
+              <li key={item.href}><Link href={item.href}>{item.label}</Link></li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </nav>
   )
 }

@@ -1,0 +1,39 @@
+{
+  "v": 1,
+  "kind": "task",
+  "id": "TL1-JAR-02-R1-REVIEW",
+  "coder": 1,
+  "repo": "manhthien2005/VECLab",
+  "branch": "chore/tl1-jar02-review",
+  "target": "chore/pre-refactor-cleanup",
+  "base": "543caa910620d77d93bd501fdc6ea046e918dea3",
+  "goal": "Act as Codex local Tech Lead 1 for coder 1: review JAR-02-R1 on fix/coder-1-jar02-review, own simulation/session/API contracts and coordinate integration. The original session remains TL2 for coder 2/UI. You are the local reviewer, not the web implementer.",
+  "read": [
+    "AGENTS.md",
+    ".agents/skills/veclab-verify/SKILL.md",
+    "docs/workflow/web-handoff-contract.md",
+    "docs/workflow/parallel-work.md",
+    "https://raw.githubusercontent.com/manhthien2005/VECLab/a12e6a351b9fe3ef7dbcf4b0fb5f8ea0bc8f7965/docs/workflow/tasks/coder-1-jar-02-r1.json",
+    "docs/workflow/reviews/jar-test-02.json",
+    "docs/superpowers/specs/2026-10-13-simulation-v1-design.md",
+    "docs/superpowers/plans/2026-10-13-jar-test-first-slice.md"
+  ],
+  "files": [],
+  "accept": [
+    "No subagents/delegation without explicit human authorization for the current task. Agent prompts/results use one JSON v1 object. Human updates stay concise Vietnamese.",
+    "D:/Dev/Projects/Chemistry belongs to TL2/UI. From your own chat, create a managed worktree at ref f08843057ec7c580763ee3a4d3f40e2a634ab5d7, then create the local review branch specified above inside it. Use only that returned workspace; never checkout/reset/pull or run checks in TL2's checkout. Do not create another chat.",
+    "Observed coder head: f08843057ec7c580763ee3a4d3f40e2a634ab5d7, containing 91692f3 and f088430. Ancestry and the three-file manifest were verified; code/runtime at this head remain unreviewed. Match the coder's incoming final result SHA; fetch and repin if different. Preparation/preliminary candidate review may proceed before that result arrives.",
+    "Task 1 is accepted. Original Task 2 at 7421c0c41b202c9f4bdb43b8afc0ff0ad9d8b3c8 is needs_changes despite 65 passing tests plus types/lint/diff. Historical checks are not evidence for R1. Verify final diff against the original coder brief's three-file allowlist and trace affected callers.",
+    "Close all three recorded findings: reconcile valid concurrent reads without false corruption; return fresh coherent state/revision/report after duplicate apply/complete; hide expected removal/scoring until completion, including after record_result. Check bounded retry exhaustion versus genuine hash/chain corruption.",
+    "Run the checks below at final SHA; inspect deterministic interleaving regressions, idempotency, stale revisions, immutable reports, null measurements and acid compatibility. Restore missing dependencies with npm ci only in TL1's worktree; do not share mutable node_modules or copy TL2's env files.",
+    "Read-only app review: files is empty. Report reproducible file:line findings and prepare a bounded fix task for coder 1 when needed; never silently repair app code. Do not start Task 3, push coder/target branches, merge or deploy in this task.",
+    "TL1 coordinates shared contracts/integration; TL2 owns UI/UX. Coordinate FE/BE or shared-file changes via repo artifacts and exclusive task ownership. Existing PR/required-CI/production gates remain binding; this handoff grants no promotion or production authorization.",
+    "Return result JSON with accepted/needs_changes/missing_evidence, actual head, fresh checks/evidence and limits. Report your actual checkout state in env. If final coder SHA is unconfirmed, use missing_evidence and label candidate findings preliminary. Unit/type/lint success does not verify UI, cloud or empirical chemistry."
+  ],
+  "checks": {
+    "unit": "npm run test -- tests/integration/jar-guest-runtime.test.ts tests/integration/guest-runtime.test.ts tests/unit/jar-engine.test.ts tests/unit/process-core-lifecycle.test.ts",
+    "types": "npm run typecheck",
+    "lint": "npx --no-install eslint src/application/simulation/jar-session.ts src/application/scenarios/jar-projection.ts tests/integration/jar-guest-runtime.test.ts",
+    "diff": "git diff 543caa910620d77d93bd501fdc6ea046e918dea3 HEAD --check"
+  }
+}

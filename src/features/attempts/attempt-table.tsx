@@ -4,6 +4,7 @@ import type { UUID } from '@/domain/process/contracts.js'
 import type { AttemptSummary } from '@/application/attempts/repository.js'
 import { isAcidProjection } from '@/application/scenarios/acid-projection.js'
 import { formatRelativeDate, formatPh, formatScore } from '@/shared/ui/format.js'
+import { workbenchPathForAttempt } from '@/features/simulation-workbench/scenario.js'
 
 /**
  * One attempt, reduced to what a list row shows.
@@ -65,6 +66,13 @@ function experimentTitle(releaseId: string): string {
 /** An attempt is resumable while it is in progress; the other statuses are terminal. */
 export function isInProgress(row: AttemptRow): boolean {
   return row.status === 'in_progress'
+}
+
+/** Open an in-progress run on the workbench; otherwise the attempt document. */
+export function attemptOpenHref(row: AttemptRow): string {
+  return row.status === 'in_progress'
+    ? workbenchPathForAttempt(row.attemptId)
+    : `/attempts/${row.attemptId}`
 }
 
 type AttemptTableProps = {
@@ -148,7 +156,7 @@ export function AttemptTable({
                 which; it is just no longer the headline.
               */}
               <td>
-                <Link href={`/attempts/${row.attemptId}`}>{experimentTitle(row.releaseId)}</Link>
+                <Link href={attemptOpenHref(row)}>{experimentTitle(row.releaseId)}</Link>
                 <br />
                 <code className="tiny faint">{row.releaseId}</code>
               </td>
@@ -165,7 +173,7 @@ export function AttemptTable({
               <td>{formatRelativeDate(row.updatedAt)}</td>
               <td>
                 <span className="row">
-                  <Link className="btn btn-ghost" href={`/attempts/${row.attemptId}`}>
+                  <Link className="btn btn-ghost" href={attemptOpenHref(row)}>
                     {strings.open}
                   </Link>
                   {showReportLink && row.status === 'completed' && (
