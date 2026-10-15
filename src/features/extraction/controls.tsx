@@ -13,15 +13,19 @@ type Command=(type:string,parameters?:Record<string,string|number|boolean>,units
 export function ExtractionControls({projection,selected,onSelect,locked,done,onRun,onReport,onNotebook}: {
   projection:ExtractionProjection;selected:VesselId;onSelect:(id:VesselId)=>void;locked:boolean;done:boolean;onRun:Command;onReport:()=>void;onNotebook:()=>void
 }) {
-  const [group,setGroup]=useState<string|null>('prepare')
-  const [volume,setVolume]=useState('20'),[transferVolume,setTransferVolume]=useState('20'),[reagent,setReagent]=useState('acid')
-  const [destination,setDestination]=useState<VesselId>('R1'),[phase,setPhase]=useState('aqueous')
+  const [group,setGroup]=useState<string|null>('transfer')
+  const [volume,setVolume]=useState('20'),[transferVolume,setTransferVolume]=useState('40'),[reagent,setReagent]=useState('acid')
+  const [destination,setDestination]=useState<VesselId>('F'),[phase,setPhase]=useState('all')
   const [component,setComponent]=useState<Component>('A'),[product,setProduct]=useState<VesselId>('R1'),[answer,setAnswer]=useState('')
   const current=projection.vessels.find(v=>v.id===selected)!
   const receiver=destination===selected?(selected==='R1'?'R2':'R1'):destination
   const latest=projection.readings.filter(r=>r.vesselId===selected).at(-1)
   const toggle=(id:string)=>()=>setGroup(group===id?null:id)
-  function action(label:string,type:string,parameters:Record<string,string|number|boolean>={},primary=false){return <button type="button" className={primary?styles.primary:styles.button} disabled={locked} onClick={()=>onRun(type,parameters)}>{label}</button>}
+  const hasLiquid=current.waterMl+current.organicMl>1e-8
+  function action(label:string,type:string,parameters:Record<string,string|number|boolean>={},primary=false){
+    const reason=['mix','vent','settle'].includes(type)&&!hasLiquid?'Bình chưa có dịch.':type==='filter'&&!current.solidPresent?'Chưa có chất rắn để lọc.':type==='evaporate'&&current.organicMl<=1e-8?'Chưa có dung môi hữu cơ để cô.':type==='dry'&&!hasLiquid&&!current.solidPresent?'Bình chưa có mẫu.':type==='dry'&&current.dry?'Mẫu đã làm khô.':undefined
+    return <button type="button" className={primary?styles.primary:styles.button} disabled={locked||!!reason} title={reason} onClick={()=>onRun(type,parameters)}>{label}</button>
+  }
   return <>
     <div className={styles.controlsHeading}><h2>Thao tác</h2><select className={styles.cupSelect} aria-label="Bình đang thao tác" value={selected} disabled={locked} onChange={event=>onSelect(event.target.value as VesselId)}>{VESSEL_IDS.map(id=><option key={id} value={id}>Bình {id}</option>)}</select></div>
     <p className={styles.cupContext}><span>{VESSEL_NAMES[selected]}</span><span>{fmt(current.waterMl+current.organicMl,1)} mL</span></p>
@@ -33,7 +37,7 @@ export function ExtractionControls({projection,selected,onSelect,locked,done,onR
       </ExtractionControlGroup>
       <ExtractionControlGroup id="program" title="Trộn & phân lớp" summary="Trộn mẫu · Xả áp · Thu hai pha" open={group==='program'} onToggle={toggle('program')}>
         {action('Trộn','mix',{vesselId:selected},true)}{action('Xả áp','vent',{vesselId:selected})}{action('Để phân lớp','settle',{vesselId:selected})}
-        <p>{current.vented?'Đã xả áp':'Chưa xả áp'} · {current.separated?'Đã sẵn sàng thu pha':'Chờ phân lớp'}</p>
+        <p>{hasLiquid?<>{current.vented?'Đã xả áp':'Chưa xả áp'} · {current.separated?'Đã sẵn sàng thu pha':'Chờ phân lớp'}</>:'Bình chưa có dịch.'}</p>
       </ExtractionControlGroup>
       <ExtractionControlGroup id="transfer" title="Chuyển & thu hồi mẫu" summary="Thu pha · Lọc · Cô · Làm khô" open={group==='transfer'} onToggle={toggle('transfer')}>
         <div className={styles.inputField}><label htmlFor="extraction-destination">Bình nhận</label><select id="extraction-destination" value={receiver} disabled={locked} onChange={e=>setDestination(e.target.value as VesselId)}>{VESSEL_IDS.filter(id=>id!==selected).map(id=><option key={id} value={id}>{id} · {VESSEL_NAMES[id]}</option>)}</select></div>

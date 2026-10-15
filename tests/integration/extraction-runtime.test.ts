@@ -2,16 +2,17 @@ import 'fake-indexeddb/auto'
 import { describe, expect, it } from 'vitest'
 import { GuestAttemptRepository } from '@/application/attempts/guest-repository.js'
 import { createExtractionSession } from '@/application/simulation/extraction-session.js'
-import type { ExtractionState } from '@/domain/experiments/acid-base-extraction/model.js'
+import { LEGACY_EXTRACTION_PROFILE, createInitialExtractionState, type ExtractionState } from '@/domain/experiments/acid-base-extraction/model.js'
+import { projectExtraction } from '@/application/scenarios/extraction-projection.js'
 import { newUUID } from '@/shared/ids.js'
 
 describe('extraction guest session', () => {
-  it.each(['acid-first','base-first'])('completes %s with conserved inventory and immutable report', async order => {
+  it.each(['acid-first','base-first','skip-mix'])('completes %s with conserved inventory and immutable report', async order => {
     const repository=new GuestAttemptRepository<ExtractionState>(), session=createExtractionSession(repository), started=await session.start(), id=started.attemptId
     async function action(type:string,parameters:Record<string,string|number>,volume?:number){const result=await session.apply(id,type,volume?{...parameters,volumeL:volume}:parameters,volume?{volumeL:'mL'}:{});expect(result.ok,type+JSON.stringify(parameters)).toBe(true);return result}
     const transfer=(from:string,to:string,phase:string,volume:number)=>action('transfer',{from,to,phase},volume)
     const add=(vesselId:string,reagent:string,volume:number)=>action('add_reagent',{vesselId,reagent},volume)
-    async function extract(reagent:string,volume:number){await add('F',reagent,volume);await action('mix',{vesselId:'F'});await action('vent',{vesselId:'F'});await action('settle',{vesselId:'F'});await transfer('F','S','aqueous',volume)}
+    async function extract(reagent:string,volume:number){await add('F',reagent,volume);if(order!=='skip-mix')await action('mix',{vesselId:'F'});await action('vent',{vesselId:'F'});await action('settle',{vesselId:'F'});await transfer('F','S','aqueous',volume)}
     async function recover(reagent:string,to:string,component:string){await add('S',reagent,30);await action('filter',{from:'S',to});await action('dry',{vesselId:to});const result=await action('measure',{vesselId:to,kind:'mass'});if(!result.ok)throw Error('measure failed');const value=result.state.projection.readings.at(-1)!.value!;await action('record_product',{vesselId:to,component,answer:value});const v=result.state.projection.vessels.find(item=>item.id==='S')!;await transfer('S','W','all',v.waterMl)}
     await transfer('S','F','all',40)
     await extract(order==='acid-first'?'base':'acid',20)
@@ -20,14 +21,19 @@ describe('extraction guest session', () => {
     await recover(order==='acid-first'?'base':'acid','R2',order==='acid-first'?'B':'A')
     await transfer('F','R3','organic',40);await action('evaporate',{vesselId:'R3'});await action('dry',{vesselId:'R3'});const measured=await action('measure',{vesselId:'R3',kind:'mass'});if(!measured.ok)throw Error('measure failed');await action('record_product',{vesselId:'R3',component:'N',answer:measured.state.projection.readings.at(-1)!.value!})
     const complete=await session.complete(id);if(!complete.ok)throw Error('complete failed')
-    expect(complete.report.goalStatus.goalMet).toBe(true)
+    expect(complete.report.goalStatus.goalMet).toBe(order!=='skip-mix')
+    if(order==='skip-mix')expect(complete.report.diagnostics.some(d=>d.message.includes('chưa trộn'))).toBe(true)
     for(const key of ['A','B','N'] as const)expect(complete.report.distribution.reduce((sum,row)=>sum+row.amountsMg[key],0)).toBeCloseTo(100,7)
     const loaded=await session.load(id);if(!loaded?.ok)throw Error('load failed')
     expect(loaded.state.report).toEqual(complete.report)
+    expect(loaded.state.actions.find(a=>a.actionType==='add_reagent')?.parameters).toMatchObject({vesselId:'F',reagent:order==='acid-first'?'base':'acid',volumeL:.02})
+    expect(JSON.stringify(loaded.state.actions)).not.toMatch(/moles|needsMix|protocolIssues/)
     expect(JSON.stringify(started.projection)).not.toContain('moles')
   })
   it('retries once and refuses changed intent, stale revision and foreign scenarios',async()=>{
     const repository=new GuestAttemptRepository<ExtractionState>(),session=createExtractionSession(repository),started=await session.start(),id=newUUID()
+    expect(await session.apply(started.attemptId,'mix',{vesselId:'F'})).toMatchObject({ok:false,error:{code:'NO_LIQUID'}})
+    expect(await session.load(started.attemptId)).toMatchObject({ok:true,state:{revision:0,actions:[]}})
     const first=await session.apply(started.attemptId,'add_reagent',{vesselId:'F',reagent:'water',volumeL:10},{volumeL:'mL'},{actionId:id,expectedRevision:0})
     expect(first.ok).toBe(true)
     expect((await session.apply(started.attemptId,'add_reagent',{vesselId:'F',reagent:'water',volumeL:10},{volumeL:'mL'},{actionId:id,expectedRevision:0})).ok).toBe(true)
@@ -37,5 +43,23 @@ describe('extraction guest session', () => {
     const foreign=await new GuestAttemptRepository<object>().createAttempt({attemptId:newUUID(),scenarioKey:'jar-test',scenarioReleaseId:'jar-test@0.1.0',contentLocale:'vi',initialState:{},initialProjection:{},projectionVersion:1})
     expect(await session.load(foreign.attemptId)).toMatchObject({ok:false})
     const completed=await session.complete(started.attemptId);if(!completed.ok)throw Error('complete failed');expect(completed.report.goalStatus.evaluable).toBe(false);expect(completed.report.products.every(p=>p.measuredMassMg===null&&p.recovery===null&&p.expectedAnswer===null)).toBe(true)
+  })
+  it('keeps an existing v1 chain, report and idempotent completion on its locked rules',async()=>{
+    const repository=new GuestAttemptRepository<ExtractionState>(),session=createExtractionSession(repository),state=createInitialExtractionState(LEGACY_EXTRACTION_PROFILE),id=newUUID()
+    await repository.createAttempt({attemptId:id,scenarioKey:'acid-base-extraction',scenarioReleaseId:LEGACY_EXTRACTION_PROFILE.releaseId,contentLocale:'vi',initialState:state,initialProjection:projectExtraction(state),projectionVersion:1})
+    const actionId=newUUID()
+    const first=await session.apply(id,'mix',{vesselId:'F'},{},{actionId,expectedRevision:0})
+    expect(first).toMatchObject({ok:true,state:{releaseId:'acid-base-extraction@0.1.0',revision:1}})
+    expect((await session.apply(id,'mix',{vesselId:'F'},{},{actionId,expectedRevision:0})).ok).toBe(true)
+    const completionId=newUUID(),complete=await session.complete(id,{actionId:completionId,expectedRevision:1})
+    if(!complete.ok)throw Error('legacy completion failed')
+    expect(complete.report.schemaVersion).toBe(1)
+    expect(complete.report.versions.profileVersion).toBe('1')
+    expect(complete.report.protocol).toBeUndefined()
+    const loaded=await session.load(id);if(!loaded?.ok)throw Error('legacy reload failed')
+    expect(loaded.state.report).toEqual(complete.report)
+    expect(loaded.state.actions[0]?.parameters.vesselId).toBe('F')
+    expect(await session.complete(id,{actionId:completionId,expectedRevision:1})).toMatchObject({ok:true,idempotentReplay:true,report:complete.report})
+    expect((await session.start()).releaseId).toBe('acid-base-extraction@0.2.0')
   })
 })

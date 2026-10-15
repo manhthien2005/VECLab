@@ -1,5 +1,5 @@
 import type { AttemptRepository, AttemptSummary } from '@/application/attempts/repository.js'
-import { EXTRACTION_PROFILE, VESSEL_IDS, type ExtractionState } from '@/domain/experiments/acid-base-extraction/model.js'
+import { resolveExtractionProfile, VESSEL_IDS, type ExtractionState } from '@/domain/experiments/acid-base-extraction/model.js'
 import { EXTRACTION_PROJECTION_VERSION, type ExtractionProjection } from '@/application/scenarios/extraction-projection.js'
 import type { UUID } from '@/domain/process/contracts.js'
 
@@ -7,8 +7,8 @@ export type ExtractionLabRow = Pick<AttemptSummary, 'attemptId' | 'status' | 'up
 export function toExtractionLabRow(summary: AttemptSummary): ExtractionLabRow | null {
   if (summary.scenarioKey !== 'acid-base-extraction') return null
   const value = summary.currentProjection as Partial<ExtractionProjection> | null
-  const valid = summary.scenarioReleaseId === EXTRACTION_PROFILE.releaseId && value?.scenarioKey === 'acid-base-extraction' &&
-    value.scenarioReleaseId === EXTRACTION_PROFILE.releaseId && value.projectionVersion === EXTRACTION_PROJECTION_VERSION &&
+  const valid = resolveExtractionProfile(summary.scenarioReleaseId)!==null && value?.scenarioKey === 'acid-base-extraction' &&
+    value.scenarioReleaseId === summary.scenarioReleaseId && value.projectionVersion === EXTRACTION_PROJECTION_VERSION &&
     ['working', 'completed'].includes(value.phase ?? '') && Array.isArray(value.vessels) && value.vessels.length === 6 &&
     VESSEL_IDS.every(id => value.vessels!.some(v => v?.id === id && Number.isFinite(v.waterMl) && Number.isFinite(v.organicMl))) &&
     Array.isArray(value.readings) && Array.isArray(value.history) && value.submissions !== null && typeof value.submissions === 'object' && !Array.isArray(value.submissions)

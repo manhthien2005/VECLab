@@ -52,3 +52,13 @@ Hướng sửa: ưu tiên chọn mẫu S khi tạo lượt mới và làm rõ t�
 - Probes chạy trong context dữ liệu riêng, không sửa lượt của người dùng. File probe tạm được xóa sau kiểm tra. Không chạy toàn bộ suite/build, không deploy, không dùng subagents hoặc chụp màn hình.
 
 Ưu tiên tiếp theo: EXT-WF-01 và EXT-WF-03, sau đó EXT-WF-02/04. Cần quyết định cách đánh giá thao tác trước khi thay đổi hợp đồng domain; không cần redesign thêm giao diện.
+
+## Round khắc phục được người dùng chấp thuận
+
+- EXT-WF-01: release mới `0.2.0` ghi nhận yêu cầu trộn lại sau khi kết hợp/thêm dung dịch tạo hai pha. Thu pha/lọc khi chưa trộn được chỉ ra theo bước trong báo cáo cuối và không được đánh giá đạt toàn bộ bài. Không thay đổi hệ số hóa học hoặc áp một hệ số giảm thu hồi giả; trộn bù sau khi đã thu mẫu không xóa lịch sử thiếu thao tác.
+- EXT-WF-02: UI khóa thao tác không áp dụng trên bình trống/không có rắn; engine v2 cũng từ chối, không ghi event hay tăng revision. Cân 0 và pH N/A vẫn được ghi nhận.
+- EXT-WF-03: lịch sử phân trang lấy input canonical đã lưu; hiện dung dịch, thể tích, pha, bình đi/đến, phép đo và khai báo. Báo cáo hiện số bước cùng nội dung thao tác thay cho mã ID. Không lộ inventory hoặc lỗi trộn trước nộp.
+- EXT-WF-04: lượt mới chọn S, mở nhóm chuyển mẫu với F / toàn mẫu / 40 mL. Người học vẫn tự chọn hóa chất và hướng chiết.
+- Lượt `0.1.0` được phân giải bằng engine cũ, giữ quy tắc chấm và snapshot; không nâng phiên bản dữ liệu. Lab nhận cả hai release. Quy tắc mới chỉ áp dụng cho lượt mới.
+
+Kiểm chứng: 13 focused unit/integration tests PASS (gồm hai hướng chiết, bỏ trộn, trộn lại sau cấp thêm, từ chối thao tác rỗng, resume/retry, report và legacy v1); 5 desktop + 3 mobile E2E PASS cho các đường liên quan; luồng hợp lệ được xác nhận thêm cả thao tác tạo lượt mới sau nộp. Typecheck, ESLint phạm vi thay đổi, diff check và production build PASS. Không thay thí nghiệm khác, schema database, dependency; không push, merge hoặc deploy.

@@ -29,7 +29,7 @@
 .notebook summary { cursor:pointer; color:var(--accent-hover); padding:8px 0; }
 .history { margin-top:12px; border-top:1px solid var(--border); }
 .historyList { list-style:none; margin:0; padding:0; }
-.historyList li { display:grid; grid-template-columns:3.5rem minmax(0,1fr) auto; align-items:baseline; gap:10px; padding:9px 0; border-bottom:1px solid #e5edf3; font-size:.78rem; }
+.historyList li { display:grid; grid-template-columns:3.5rem minmax(0,1fr); align-items:baseline; gap:10px; padding:9px 0; border-bottom:1px solid #e5edf3; font-size:.78rem; }
 .historyList strong { font-weight:550; }
 .historySequence { color:var(--ink-muted); font-variant-numeric:tabular-nums; }
 .historyPagination { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:12px; }

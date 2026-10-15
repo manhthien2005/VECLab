@@ -1,9 +1,19 @@
 /** Idealised A/B/N teaching profile. Constants are conventions, not measured chemical data. */
-export const EXTRACTION_PROFILE = Object.freeze({
+export const LEGACY_EXTRACTION_PROFILE = Object.freeze({
   id: 'extraction-teaching-abn', version: '1', releaseId: 'acid-base-extraction@0.1.0', modelSpecVersion: 'teaching-equilibrium-1',
   temperatureC: 25, initialMoles: .001, molarMass: 100, initialOrganicMl: 40, capacityMl: 250,
   acidMolarity: .1, baseMolarity: .1, cakeHoldUpMl: .5, targetRecovery: 80, targetPurity: 90,
 })
+export const EXTRACTION_PROFILE = Object.freeze({...LEGACY_EXTRACTION_PROFILE,version:'2',releaseId:'acid-base-extraction@0.2.0'})
+export type ExtractionProfile = typeof EXTRACTION_PROFILE | typeof LEGACY_EXTRACTION_PROFILE
+export function resolveExtractionProfile(releaseId:string):ExtractionProfile|null {
+  return releaseId===EXTRACTION_PROFILE.releaseId?EXTRACTION_PROFILE:releaseId===LEGACY_EXTRACTION_PROFILE.releaseId?LEGACY_EXTRACTION_PROFILE:null
+}
+export function profileForExtraction(state:ExtractionState):ExtractionProfile {
+  if(state.profileVersion===EXTRACTION_PROFILE.version)return EXTRACTION_PROFILE
+  if(state.profileVersion===LEGACY_EXTRACTION_PROFILE.version)return LEGACY_EXTRACTION_PROFILE
+  throw new Error('Unsupported extraction profile')
+}
 export const COMPONENTS = ['A', 'B', 'N'] as const
 export type Component = typeof COMPONENTS[number]
 export const VESSEL_IDS = ['S', 'F', 'R1', 'R2', 'R3', 'W'] as const
@@ -11,17 +21,20 @@ export type VesselId = typeof VESSEL_IDS[number]
 export type Amounts = Record<Component, number>
 export const PROPERTIES = Object.freeze({ A: { partition: 50, pKa: 4.2, solubility: .001 }, B: { partition: 30, pKa: 5, solubility: .001 }, N: { partition: 100, pKa: null, solubility: .0005 } })
 export const zeroAmounts = (): Amounts => ({ A: 0, B: 0, N: 0 })
-export type Vessel = { id: VesselId; waterMl: number; organicMl: number; acidEq: number; moles: Amounts; separated: boolean; vented: boolean; dry: boolean }
+export type Vessel = { id: VesselId; waterMl: number; organicMl: number; acidEq: number; moles: Amounts; separated: boolean; vented: boolean; dry: boolean; needsMix?:boolean }
 export type Reading = { sequence: number; vesselId: VesselId; kind: 'ph' | 'mass'; value: number | null; valid: boolean }
 export type ExtractionState = {
   profileId: string; profileVersion: string; phase: 'working' | 'completed';
   vessels: Record<VesselId, Vessel>; readings: Reading[];
   submissions: Partial<Record<Component, { vesselId: VesselId; answer: number }>>;
   history: { sequence: number; actionType: string; from: string; to: string; moved: Amounts }[];
+  protocolIssues?: {sequence:number;vesselId:VesselId}[];
 }
-export function createInitialExtractionState(): ExtractionState {
+export function createInitialExtractionState(profile:ExtractionProfile=EXTRACTION_PROFILE): ExtractionState {
   const vessels = Object.fromEntries(VESSEL_IDS.map(id => [id, { id, waterMl: 0, organicMl: id === 'S' ? 40 : 0, acidEq: 0, moles: id === 'S' ? { A: .001, B: .001, N: .001 } : zeroAmounts(), separated: true, vented: true, dry: false }])) as Record<VesselId, Vessel>
-  return { profileId: EXTRACTION_PROFILE.id, profileVersion: EXTRACTION_PROFILE.version, phase: 'working', vessels, readings: [], submissions: {}, history: [] }
+  const state:ExtractionState={ profileId: profile.id, profileVersion: profile.version, phase: 'working', vessels, readings: [], submissions: {}, history: [] }
+  if(profile.version==='2'){state.protocolIssues=[];for(const vessel of Object.values(vessels))vessel.needsMix=false}
+  return state
 }
 export const partitionFraction = (distribution: number, organicMl: number, waterMl: number) => organicMl * distribution / (waterMl + organicMl * distribution)
 export type Equilibrium = { ph: number | null; aqueous: Amounts; organic: Amounts; solid: Amounts }

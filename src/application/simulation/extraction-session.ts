@@ -1,5 +1,5 @@
 import type {
-  DomainError, ResourceLedger, SimulationAction, UUID,
+  DomainError, DomainModule, ResourceLedger, SimulationAction, UUID,
 } from '@/domain/process/contracts.js'
 import { createInitialResourceLedger } from '@/domain/process/ledger.js'
 import { replayEvents, normalizeParameters } from '@/domain/process/lifecycle.js'
@@ -9,13 +9,13 @@ import {
 } from '@/shared/errors/domain-errors.js'
 import { newUUID } from '@/shared/ids.js'
 import {
-  createExtractionModule, EXTRACTION_PROFILE,
+  createExtractionModule, resolveExtractionModule, EXTRACTION_PROFILE,
 } from '@/domain/experiments/acid-base-extraction/engine.js'
-import type { ExtractionState } from '@/domain/experiments/acid-base-extraction/model.js'
+import { resolveExtractionProfile, type ExtractionState } from '@/domain/experiments/acid-base-extraction/model.js'
 import {
   EXTRACTION_PROJECTION_VERSION, EXTRACTION_REPORT_SCHEMA_VERSION,
-  buildExtractionReport, projectExtraction,
-  type ExtractionProjection, type ExtractionReportSnapshot,
+  buildExtractionReport, projectExtraction, extractionActions,
+  type ExtractionProjection, type ExtractionReportSnapshot, type ExtractionActionSummary,
 } from '@/application/scenarios/extraction-projection.js'
 import type {
   Attempt, AttemptRepository, StoredAttemptEventRecord, WriteResult,
@@ -39,6 +39,7 @@ export type ExtractionSessionView = {
   createdAt: Date
   completedAt: Date | null
   projection: ExtractionProjection
+  actions: ExtractionActionSummary[]
   report: ExtractionReportSnapshot | null
 }
 
@@ -77,16 +78,20 @@ function invalidChain(data: DomainError['data']): DomainError {
   return modelInvalid('STATE_HASH_MISMATCH', 'errors.revisionConflict', data)
 }
 
-function isExtractionReport(value: unknown): value is ExtractionReportSnapshot {
+function isExtractionReport(value: unknown, releaseId:string): value is ExtractionReportSnapshot {
   if (value === null || typeof value !== 'object') return false
   const report = value as Partial<ExtractionReportSnapshot>
-  return report.schemaVersion === EXTRACTION_REPORT_SCHEMA_VERSION &&
+  const profile=resolveExtractionProfile(releaseId)
+  if(!profile)return false
+  return report.schemaVersion === (profile.version==='1'?1:EXTRACTION_REPORT_SCHEMA_VERSION) &&
     report.scenarioKey === 'acid-base-extraction' &&
-    report.releaseId === EXTRACTION_PROFILE.releaseId &&
+    report.releaseId === releaseId &&
     report.generatedAt instanceof Date &&
     Array.isArray(report.products) && Array.isArray(report.diagnostics) &&
     report.projection?.scenarioKey === 'acid-base-extraction' &&
-    report.versions?.profileVersion === EXTRACTION_PROFILE.version
+    report.projection?.scenarioReleaseId === releaseId &&
+    report.versions?.profileVersion === profile.version &&
+    (profile.version==='1'||(report.versions?.scoringVersion==='2'&&Array.isArray(report.actions)&&typeof report.protocol?.passed==='boolean'&&Array.isArray(report.protocol.issues)))
 }
 
 /**
@@ -96,6 +101,7 @@ function isExtractionReport(value: unknown): value is ExtractionReportSnapshot {
  */
 function fingerprintFor(
   attemptId: UUID,
+  releaseId:string,
   actionType: string,
   parameters: SimulationAction['parameters'],
   unitSelections: SimulationAction['unitSelections'],
@@ -105,7 +111,7 @@ function fingerprintFor(
   try {
     return requestFingerprint({
       attemptId,
-      scenarioReleaseId: EXTRACTION_PROFILE.releaseId,
+      scenarioReleaseId: releaseId,
       actionType,
       normalizedParameters: normalized.parameters,
       canonicalUnits: unitSelections,
@@ -117,7 +123,7 @@ function fingerprintFor(
 }
 
 export function createExtractionSession(repository: AttemptRepository<ExtractionState>): ExtractionSession {
-  type Loaded = { attempt: Attempt<ExtractionState>; ledger: ResourceLedger }
+  type Loaded = { attempt: Attempt<ExtractionState>; ledger: ResourceLedger; engine:DomainModule<ExtractionState>; events:readonly StoredAttemptEventRecord<ExtractionState>[] }
   async function requireAttempt(
     attemptId: UUID,
   ): Promise<{ ok: true; loaded: Loaded } | { ok: false; error: DomainError } | null> {
@@ -125,13 +131,15 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
       const attempt = await repository.getAttempt(attemptId)
       if (attempt === null) return null
 
-      // Check discriminator/release BEFORE casting or replaying foreign state.
-      if (attempt.scenarioKey !== 'acid-base-extraction' ||
-          attempt.scenarioReleaseId !== EXTRACTION_PROFILE.releaseId) {
+      // Resolve the attempt's locked release; never upgrade an existing chain.
+      const profile=resolveExtractionProfile(attempt.scenarioReleaseId)
+      const engine=resolveExtractionModule(attempt.scenarioReleaseId)
+      if (attempt.scenarioKey !== 'acid-base-extraction' || !profile || !engine) {
         return { ok: false, error: unsupportedRelease(attempt.scenarioReleaseId) }
       }
-      if (attempt.initialState?.profileId !== EXTRACTION_PROFILE.id ||
-          attempt.initialState?.profileVersion !== EXTRACTION_PROFILE.version ||
+      if (attempt.initialState?.profileId !== profile.id ||
+          attempt.initialState?.profileVersion !== profile.version ||
+          attempt.currentState?.profileId !== profile.id || attempt.currentState?.profileVersion !== profile.version ||
           attempt.projectionVersion !== EXTRACTION_PROJECTION_VERSION) {
         return { ok: false, error: unsupportedRelease(attempt.scenarioReleaseId) }
       }
@@ -139,12 +147,12 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
       // Attempt and events have independent read transactions. An action may
       // commit between them: a newer event chain is not evidence of tampering
       // against the older attempt snapshot. Re-read both as a pair, bounded.
-      const events = await repository.getAttemptEvents(attemptId)
+      const events = await repository.getAttemptEventRecords(attemptId)
       const replay = replayEvents(attempt.initialState, createInitialResourceLedger(), events)
       if (!replay.ok) return { ok: false, error: replay.error }
       if (events.length === attempt.lastSequence &&
           stateHash(replay.state) === stateHash(attempt.currentState)) {
-        return { ok: true, loaded: { attempt, ledger: replay.ledger } }
+        return { ok: true, loaded: { attempt, ledger: replay.ledger, engine, events } }
       }
       if (read === MAX_COHERENT_READS - 1) {
         // The read budget ended. Distinguish ongoing legitimate writes
@@ -153,7 +161,7 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
         const latest = await repository.getAttempt(attemptId)
         if (latest === null) return null
         if (latest.scenarioKey !== 'acid-base-extraction' ||
-            latest.scenarioReleaseId !== EXTRACTION_PROFILE.releaseId) {
+            latest.scenarioReleaseId !== attempt.scenarioReleaseId) {
           return { ok: false, error: unsupportedRelease(latest.scenarioReleaseId) }
         }
         if (latest.revision !== attempt.revision ||
@@ -175,7 +183,7 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
     return { ok: false, error: invalidChain({}) }
   }
 
-  function view(attempt: Attempt<ExtractionState>): ExtractionSessionView {
+  function view(attempt: Attempt<ExtractionState>,events:readonly StoredAttemptEventRecord<ExtractionState>[]=[]): ExtractionSessionView {
     return {
       scenarioKey: 'acid-base-extraction',
       attemptId: attempt.attemptId,
@@ -187,9 +195,10 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
       createdAt: attempt.createdAt,
       completedAt: attempt.completedAt,
       projection: projectExtraction(attempt.currentState),
+      actions:extractionActions(events),
       report: attempt.status === 'completed' &&
         attempt.currentState.phase === 'completed' &&
-        isExtractionReport(attempt.finalReportSnapshot)
+        isExtractionReport(attempt.finalReportSnapshot,attempt.scenarioReleaseId)
           ? attempt.finalReportSnapshot
           : null,
     }
@@ -201,11 +210,12 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
     const found = await requireAttempt(attemptId)
     if (found === null) return { ok: false, outcome: 'not_found' }
     if (!found.ok) return { ok: false, error: found.error }
-    return { ok: true, state: view(found.loaded.attempt) }
+    return { ok: true, state: view(found.loaded.attempt,found.loaded.events) }
   }
 
   async function existingAction(
     attemptId: UUID,
+    releaseId:string,
     actionId: UUID | undefined,
     actionType: string,
     parameters: SimulationAction['parameters'],
@@ -219,7 +229,7 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
     const events = await repository.getAttemptEventRecords(attemptId)
     const record = events.find((event) => event.actionId === actionId)
     if (!record) return { kind: 'new' }
-    const fingerprint = fingerprintFor(attemptId, actionType, parameters, unitSelections)
+    const fingerprint = fingerprintFor(attemptId, releaseId, actionType, parameters, unitSelections)
     if (fingerprint !== null && record.requestFingerprint === fingerprint) {
       return { kind: 'replay', record }
     }
@@ -249,7 +259,7 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
     async load(attemptId: UUID) {
       const found = await requireAttempt(attemptId)
       if (found === null || !found.ok) return found
-      return { ok: true, state: view(found.loaded.attempt) }
+      return { ok: true, state: view(found.loaded.attempt,found.loaded.events) }
     },
 
     async apply(
@@ -262,7 +272,7 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
       const found = await requireAttempt(attemptId)
       if (found === null) return { ok: false, outcome: 'not_found' }
       if (!found.ok) return { ok: false, error: found.error }
-      const { attempt, ledger } = found.loaded
+      const { attempt, ledger, engine } = found.loaded
       // Completion MUST use completeAttempt, never appendAction.
       if (actionType === 'complete') {
         return { ok: false, error: preconditionFailed(
@@ -270,7 +280,7 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
         ) }
       }
       const duplicate = await existingAction(
-        attemptId, commit.actionId, actionType, parameters, unitSelections,
+        attemptId, attempt.scenarioReleaseId, commit.actionId, actionType, parameters, unitSelections,
       )
       if (duplicate.kind === 'conflict') return duplicate.result
       if (duplicate.kind === 'replay') {
@@ -295,7 +305,7 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
       }
       const result = commitAction(engine, {
         attempt: {
-          attemptId, releaseId: EXTRACTION_PROFILE.releaseId,
+          attemptId, releaseId: engine.manifest.releaseId,
           revision: attempt.revision, lastSequence: attempt.lastSequence,
           state: attempt.currentState, ledger,
         },
@@ -309,7 +319,7 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
 
       const written = await repository.appendAction({
         attemptId,
-        scenarioReleaseId: EXTRACTION_PROFILE.releaseId,
+        scenarioReleaseId: engine.manifest.releaseId,
         expectedRevision: commit.expectedRevision ?? attempt.revision,
         actionId: result.actionId,
         requestFingerprint: result.requestFingerprint,
@@ -358,8 +368,8 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
       const found = await requireAttempt(attemptId)
       if (found === null) return { ok: false, outcome: 'not_found' }
       if (!found.ok) return { ok: false, error: found.error }
-      const { attempt, ledger } = found.loaded
-      const duplicate = await existingAction(attemptId, commit.actionId, 'complete', {}, {})
+      const { attempt, ledger, engine } = found.loaded
+      const duplicate = await existingAction(attemptId, attempt.scenarioReleaseId, commit.actionId, 'complete', {}, {})
       if (duplicate.kind === 'conflict') return duplicate.result
       if (duplicate.kind === 'replay') {
         // A concurrent complete may have committed after our initial read.
@@ -381,7 +391,7 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
       }
       const result = commitAction(engine, {
         attempt: {
-          attemptId, releaseId: EXTRACTION_PROFILE.releaseId,
+          attemptId, releaseId: engine.manifest.releaseId,
           revision: attempt.revision, lastSequence: attempt.lastSequence,
           state: attempt.currentState, ledger,
         },
@@ -399,7 +409,7 @@ export function createExtractionSession(repository: AttemptRepository<Extraction
       const report = buildExtractionReport(result.stateAfter, result.ledgerAfter, records, result.occurredAt)
       const written = await repository.completeAttempt({
         attemptId,
-        scenarioReleaseId: EXTRACTION_PROFILE.releaseId,
+        scenarioReleaseId: engine.manifest.releaseId,
         expectedRevision: commit.expectedRevision ?? attempt.revision,
         actionId: result.actionId,
         requestFingerprint: result.requestFingerprint,

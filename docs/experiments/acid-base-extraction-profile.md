@@ -27,3 +27,11 @@ Kiểm tra toán học độc lập cho một chất giả định K=2, 100 mL p
 ## Ngoài phạm vi
 
 Kinetics, nhũ tương, áp suất, hoạt độ dung dịch đậm đặc, phản ứng phụ, dung môi tự do, nhiệt độ tự do, salts in dry-product mass, melting point và phân tích phổ. Không tạo hiệu ứng màu riêng cho A/B/N để lộ đáp án. Nguồn hỗ trợ nguyên lý; số kiểm tra chương trình xác nhận triển khai theo mô hình, không xác nhận mô hình thực nghiệm.
+
+## Quy tắc thao tác từ release 0.2.0
+
+Các hệ số và mô hình số học ở trên giữ nguyên `teaching-equilibrium-1`. Release `acid-base-extraction@0.2.0` khóa profile/state/scoring phiên bản 2, projection phiên bản 1 và report schema 2. Thêm trạng thái cần trộn khi kết hợp/thêm dung dịch tạo hai pha; thu riêng một pha hoặc lọc khi chưa trộn được ghi nhận để đánh giá sau nộp. Trộn lại trước khi thu mẫu sửa được trạng thái hiện tại; trộn sau khi đã thu mẫu không xóa sự kiện thiếu thao tác trước đó.
+
+Không giả lập thất thoát bằng một hệ số tùy ý. Chỉ tiêu thu hồi/tinh khiết và yêu cầu thao tác được trình bày riêng; đạt số học nhưng thiếu trộn chưa được kết luận đạt toàn bộ bài. Không lộ đánh giá này trong projection đang làm. Thao tác trên bình trống hoặc lọc khi không có rắn bị từ chối; cân bình trống = 0 và pH khi không có pha nước = N/A vẫn được lưu đúng nghĩa.
+
+Release `0.1.0` giữ engine, trạng thái và quy tắc chấm ban đầu; lượt/báo cáo cũ không được nâng phiên bản hoặc chấm lại. Session phân giải theo release đã khóa của từng lượt. Lịch sử hiển thị dùng input canonical đã lưu của event, không thêm lượng cấu tử ẩn. Báo cáo mới lưu mô tả đầu vào và tham chiếu thao tác cùng snapshot cuối; báo cáo cũ có thể tra nhãn thao tác từ event mà không sửa snapshot.
