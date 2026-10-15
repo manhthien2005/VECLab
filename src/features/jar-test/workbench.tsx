@@ -17,7 +17,7 @@ import type {
 } from '@/application/simulation/jar-session.js'
 import type { JarReadingView, JarCupProjection } from '@/application/scenarios/jar-projection.js'
 import { createJarSessionForStorageMode } from '@/features/simulation-session.js'
-import { JarApparatus } from './apparatus.js'
+import { JarApparatus, type JarVisualCue } from './apparatus.js'
 import styles from './workbench.module.css'
 
 const JAR_PATH = '/simulate/jar-test'
@@ -137,6 +137,9 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
   const [doseIncrement, setDoseIncrement] = useState<number>(50)
   const [answerDrafts, setAnswerDrafts] = useState<Partial<Record<JarCupId, string>>>({})
   const [skipAnimation, setSkipAnimation] = useState(false)
+  const [visualCue, setVisualCue] = useState<JarVisualCue | null>(null)
+  const [tourOpen, setTourOpen] = useState(false)
+  const tourTrigger = useRef<HTMLButtonElement>(null)
   const [pane, setPane] = useState<WorkbenchPane>('simulation')
   const [group, setGroup] = useState<string | null>('prepare')
   const [notebookTab, setNotebookTab] = useState<'readings' | 'history'>('readings')
@@ -275,6 +278,11 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
           setUncertain(false)
           setView(result.state)
           setNotice('Đã lưu: ' + actionLabel(intent.actionType) + '.')
+          if (!result.feedback.idempotentReplay) setVisualCue({
+            id: intent.actionId,
+            actionType: intent.actionType,
+            cupId: JAR_CUP_IDS.find((id) => id === intent.parameters.cupId) ?? null,
+          })
           if (intent.actionType === 'prepare_cup') setGroup('dose')
           if (intent.actionType === 'run_phase') setGroup(result.state.projection.phase === 'settling' ? 'results' : 'program')
         } else {
@@ -358,7 +366,8 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
     </div>
     <div className={styles.shelfHelp}>
       <p className={styles.shelfNote}>Mẫu tổng hợp dùng để học tập. Lượt này chỉ lưu trong trình duyệt, kể cả khi đã đăng nhập.</p>
-      <details><summary><BookIcon />Hướng dẫn thao tác</summary>
+      <button ref={tourTrigger} type="button" className={styles.guideButton} onClick={() => setTourOpen(true)}><BookIcon />Hướng dẫn thao tác</button>
+      <details><summary><BookIcon />Cách làm bài</summary>
         <p>Chọn cốc, chuẩn bị mẫu và đo mẫu ban đầu. Cấp phèn cho từng cốc rồi chạy chương trình chung. Đo NTU cuối, tự tính và chọn phương án nộp.</p>
         <p>Hiệu suất = (NTU đầu − NTU cuối) / NTU đầu × 100%. N/A là phép đo không hợp lệ, không phải bằng 0.</p>
       </details>
@@ -387,7 +396,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
       </li>)}</ol>
     </div>
     {ready && projection ? <>
-      <JarApparatus projection={projection} selectedCupId={selectedCupId} onSelectCup={selectCup} disabled={busy} skipAnimation={skipAnimation} />
+      <JarApparatus projection={projection} selectedCupId={selectedCupId} onSelectCup={selectCup} disabled={busy} skipAnimation={skipAnimation} cue={visualCue} />
       <div className={styles.stageFooter}><span>Thời gian mô phỏng: {projection.elapsedSeconds} giây</span>
         <label><input type="checkbox" checked={skipAnimation} onChange={(e) => setSkipAnimation(e.target.checked)} />Bỏ qua hoạt ảnh minh họa</label>
       </div>
@@ -472,7 +481,12 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
     </>}
   </section>
 
-  return <WorkbenchFrame label="Bàn thí nghiệm Jar Test" header={header} notices={notices} shelf={shelf} simulation={simulation} controls={controls} notebook={notebook} pane={pane} onPaneChange={setPane} />
+  return <WorkbenchFrame label="Bàn thí nghiệm Jar Test" header={header} notices={notices} shelf={shelf} simulation={simulation} controls={controls} notebook={notebook} pane={pane} onPaneChange={setPane} tourOpen={tourOpen} onTourClose={() => {
+    setTourOpen(false)
+    // The shelf is temporarily hidden during the mobile tour. Restore focus
+    // after the original pane and shelf visibility have been committed.
+    requestAnimationFrame(() => tourTrigger.current?.focus({ preventScroll: true }))
+  }} />
 }
 
 function ControlGroup({ id, title, summary, open, onToggle, children }: {
