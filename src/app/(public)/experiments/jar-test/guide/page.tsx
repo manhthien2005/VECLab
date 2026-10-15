@@ -6,95 +6,53 @@ import { parseUUID } from '@/shared/ids.js'
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
 import { ScienceBackdrop } from '@/shared/ui/science-backdrop.js'
 import { JAR_SOURCES } from '@/content/evidence/jar-test.js'
-import { ControlIcon } from '@/features/workbench/icons.js'
+import { TargetIcon, ToolsIcon, ReportIcon } from '@/features/workbench/icons.js'
 import { ArrowRightIcon, BookIcon, FlaskIcon, CalculatorIcon, WarningIcon } from '@/features/landing/icons.js'
 import styles from './page.module.css'
 
 export const metadata: Metadata = {
   title: 'Jar Test: lý thuyết & cách làm bài',
-  description: 'Nguyên lý keo tụ, tạo bông, lắng và hướng dẫn thực hành Jar Test trên VECLab.',
+  description: 'Đầu vào, mục tiêu, thuật ngữ và từng bước thực hành Jar Test: đo mẫu đầu, thiết kế cốc, khuấy–lắng và phân tích kết quả.',
   robots: { index: false, follow: false },
 }
-
-/** Read-only teaching content. Visiting this page never creates or writes an attempt. */
-export default async function JarGuidePage({ searchParams }: {
-  searchParams: Promise<{ attempt?: string | string[] }>
-}) {
+export default async function JarGuidePage({ searchParams }: { searchParams: Promise<{ attempt?: string | string[] }> }) {
   const { attempt } = await searchParams
   const id = typeof attempt === 'string' ? parseUUID(attempt) : null
   const workbenchHref = '/simulate/jar-test' + (id ? '?attempt=' + encodeURIComponent(id) : '')
-  const phases = [
-    ['Khuấy nhanh', JAR_PROFILE.phases.rapid, 'Phân tán phèn trong mẫu.'],
-    ['Khuấy chậm', JAR_PROFILE.phases.slow, 'Minh họa sự kết hợp của các hạt thành bông.'],
-    ['Lắng', JAR_PROFILE.phases.settling, 'Dừng khuấy, minh họa bông lắng xuống.'],
-  ] as const
-
-  return <div className={'page ' + styles.guide}>
-    <ScienceBackdrop />
-    <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: 'Thí nghiệm', href: '/experiments' }, { label: 'Jar Test', href: '/experiments/jar-test' }, { label: 'Lý thuyết & cách làm bài' }]} />
-    <header className={styles.header}>
-      <div><h1>Jar Test: lý thuyết & cách làm bài</h1>
-        <p>Khảo sát ảnh hưởng của pH ban đầu và liều phèn đến độ đục. Bạn thiết kế các cốc thử, đo kết quả rồi chọn phương án xử lý dựa trên số liệu.</p>
-        <Link className={styles.returnLink} href={workbenchHref}>{id ? 'Quay lại lượt đang làm' : 'Mở workbench Jar Test'}<ArrowRightIcon /></Link>
-      </div>
-      <div className={styles.image}><Image src="/assets/experiments/jar.webp" alt="Minh họa dàn cốc trong thí nghiệm Jar Test" fill sizes="(max-width: 700px) 90vw, 320px" /></div>
-    </header>
-
+  const targetNtu = JAR_PROFILE.initialNtu * (1 - JAR_PROFILE.goalRemovalPercent / 100)
+  const steps = [
+    { title: 'Đo mẫu ban đầu', input: 'Mẫu kaolin chưa cấp phèn, dùng chung cho cả mẻ.', action: 'Mở Thao tác → Đo mẫu ban đầu, bấm Đo mẫu ban đầu.', output: 'Số đo NTU đầu được lưu vào sổ thực hành. Chỉ cần đo một lần.', why: 'Đây là mốc so sánh với NTU cuối. Thiếu mốc đầu thì chưa tính được hiệu suất từ số đo.' },
+    { title: 'Chuẩn bị các cốc muốn so sánh', input: 'Chọn 1–6 cốc A–F và pH ban đầu 5, 7 hoặc 9.', action: 'Chọn cốc → Chuẩn bị mẫu → chọn pH → Chuẩn bị cốc. Lặp lại cho các cốc khác.', output: 'Mỗi cốc có 0,5 L mẫu và pH đã chọn; chưa có phèn.', why: 'Khuyến nghị ít nhất ba cốc để so sánh. Giữ cùng pH khi khảo sát liều; giữ cùng liều khi khảo sát pH. pH được chọn là điều kiện đầu, không phải pH cuối.' },
+    { title: 'Cấp phèn cho từng cốc', input: 'Cốc đã chuẩn bị; tổng liều muốn khảo sát từ 50 đến 250 mg/L, bước 50 mg/L.', action: 'Chọn cốc → Cấp phèn → chọn liều tăng → Thêm phèn. Kiểm tra tổng liều rồi làm tiếp với các cốc khác.', output: 'Mọi cốc đã chuẩn bị đều có tổng liều ít nhất 50 mg/L trước khi chạy mẻ.', why: 'Liều tăng được cộng dồn. Thêm 50 rồi 100 mg/L tạo tổng 150 mg/L, không thay tổng liều thành 100 mg/L.' },
+    { title: 'Rà soát và chạy chung cả mẻ', input: 'Đã đo mẫu đầu và hoàn tất pH/liều của tất cả cốc muốn dùng.', action: 'Mở Khuấy & lắng → Chạy khuấy nhanh. Kiểm tra bảng các cốc, xác nhận Bắt đầu khuấy cả mẻ; tiếp tục Khuấy chậm rồi Lắng.', output: 'Tất cả cốc cùng hoàn tất ba pha. pH và liều khóa từ khi bắt đầu khuấy.', why: 'Dàn khuấy dùng một chương trình chung để các cốc có điều kiện so sánh tương đương. Chọn cốc A không làm chương trình chỉ chạy riêng A.' },
+    { title: 'Đo cuối từng cốc', input: 'Mẻ đã lắng xong; chọn cốc cần đọc kết quả.', action: 'Chọn cốc → Đo & ghi kết quả → Đo độ đục cuối cốc. Lần lượt đo các cốc còn lại.', output: 'NTU cuối và bước đo riêng của từng cốc xuất hiện trong sổ thực hành.', why: 'Đo A không đo hộ B/C và cũng không kết thúc lượt. Đo sớm được lưu là N/A; sau khi lắng có thể đo lại.' },
+    { title: 'Tự tính và ghi hiệu suất', input: 'NTU đầu và NTU cuối hợp lệ của đúng cốc đang tính.', action: 'Áp dụng công thức bên dưới, nhập Phần trăm giảm đục tự tính (%) và bấm Ghi đáp số cốc. Lặp lại cho từng cốc.', output: 'Đáp số đã ghi gắn với đúng cốc. Chữ còn trong ô nhập chưa tự trở thành dữ liệu đã nộp.', why: 'Tách phép đo và phép tính giúp phân biệt điều kiện xử lý chưa phù hợp với việc dùng sai số liệu hoặc tính toán sai.' },
+    { title: 'So sánh và chọn phương án', input: 'Sổ thực hành có số đo và đáp số của các cốc đã thử.', action: 'So sánh NTU cuối, pH và tổng liều. Chọn cốc rồi bấm Dùng cốc này để nộp.', output: 'Một cốc được đánh dấu là phương án nộp.', why: 'Mục tiêu chính đánh giá cốc đã chọn. Các cốc khác là bằng chứng so sánh; không bắt buộc mọi cốc đều đạt 80%.' },
+    { title: 'Nộp và đọc báo cáo', input: 'Phương án đã chọn; kiểm tra thông tin còn thiếu và đáp số chưa ghi.', action: 'Bấm Nộp bài → rà soát → Xác nhận nộp bài.', output: 'Báo cáo cố định: kết quả từng cốc, hiệu suất đối chiếu, sai lệch và những điểm cần xem lại.', why: 'Nộp bài mới khóa lượt. Bạn vẫn có thể nộp thiếu dữ liệu, nhưng phần thiếu sẽ không được coi là 0 hoặc tự bổ sung.' },
+  ]
+  const terms = [
+    ['Độ đục · NTU', 'Mức độ đục của mẫu, đọc bằng máy đo. NTU cuối thấp hơn NTU đầu cho thấy độ đục giảm; không đồng nghĩa đã loại hết chất ô nhiễm.'],
+    ['pH ban đầu', 'Điều kiện axit–bazơ của mẫu trước xử lý. Bài cho chọn 5, 7 hoặc 9; không mô phỏng tự pha axit/bazơ hay đo pH cuối.'],
+    ['Liều phèn · mg/L', 'Khối lượng phèn tính trên một lít mẫu. Mỗi cốc 0,5 L: liều 100 mg/L tương ứng 50 mg phèn, không phải 100 mg.'],
+    ['Keo tụ', 'Phèn hỗ trợ làm các hạt phân tán dễ kết hợp hơn; khuấy nhanh giúp phân tán hóa chất trong mẫu.'],
+    ['Tạo bông', 'Khuấy chậm tạo điều kiện để các hạt kết hợp thành bông. Hoạt ảnh chỉ minh họa, không là phép đo kích thước bông.'],
+    ['Lắng', 'Dừng khuấy để bông có thể lắng xuống. Chỉ đo kết quả cuối sau khi hoàn tất chương trình.'],
+    ['Hiệu suất giảm đục · %', 'Tỷ lệ giảm NTU so với mẫu đầu. Đây là chỉ tiêu xử lý cần tính, khác với liều phèn mg/L.'],
+    ['Độ lệch · điểm %', 'Chênh lệch tuyệt đối giữa đáp số tự tính và hiệu suất từ số đo. Ví dụ 80% và 78% lệch 2 điểm %, không gọi là sai số tương đối 2%.'],
+  ]
+  return <div className={'page ' + styles.guide}><ScienceBackdrop />
+    <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: 'Thí nghiệm', href: '/experiments' }, { label: 'Jar Test', href: '/experiments/jar-test' }, { label: 'Lý thuyết & cách làm' }]} />
+    <header className={styles.header}><div><span className={styles.kicker}>Keo tụ · Tạo bông · Lắng</span><h1>Jar Test: lý thuyết & cách làm bài</h1><p>Thiết kế các cốc so sánh, theo dõi độ đục và chọn phương án xử lý phù hợp trong mô hình.</p><Link className={styles.returnLink} href={workbenchHref}>{id ? 'Quay lại lượt đang làm' : 'Bắt đầu thực hành'}<ArrowRightIcon /></Link></div><div className={styles.image}><Image src="/assets/experiments/jar.webp" alt="Dàn khuấy Jar Test và các cốc mẫu" fill sizes="(max-width:600px) 100vw, 320px" /></div></header>
     <div className={styles.layout}>
-        <section className={styles.panel + ' ' + styles.principle} aria-labelledby="jar-principle">
-          <h2 id="jar-principle"><BookIcon />Hiểu thí nghiệm trước khi làm</h2>
-          <p>Mẫu chứa các hạt kaolin lơ lửng, làm nước bị đục. Trong bài Jar Test, phèn nhôm là chất keo tụ; dàn khuấy thực hiện lần lượt ba pha để minh họa quá trình keo tụ, tạo bông và lắng.</p>
-          <div className={styles.principles}>
-            <div><strong>Keo tụ</strong><p>Cấp phèn và khuấy nhanh để phân tán hóa chất trong mẫu.</p></div>
-            <div><strong>Tạo bông</strong><p>Khuấy chậm để minh họa các hạt kết hợp thành bông lớn hơn.</p></div>
-            <div><strong>Lắng</strong><p>Dừng khuấy để quan sát bông di chuyển xuống đáy.</p></div>
-          </div>
-          <p><strong>Độ đục được đọc bằng NTU.</strong> Với cùng mẫu và điều kiện đo, NTU cuối thấp hơn NTU ban đầu cho biết độ đục đã giảm. Không dùng số hạt hay màu nước trong hoạt ảnh để thay cho phép đo.</p>
-          <p>pH và liều phèn là hai điều kiện bạn được chọn. Muốn tìm hiểu ảnh hưởng của liều, hãy giữ cùng pH giữa các cốc; muốn so sánh pH, hãy giữ cùng liều. Bài không mặc định rằng càng thêm nhiều phèn thì kết quả càng tốt.</p>
-        </section>
-
-        <section className={styles.panel + ' ' + styles.profile} aria-labelledby="jar-profile">
-          <h2 id="jar-profile"><FlaskIcon />Hồ sơ bài thực hành</h2>
-          <dl><div><dt>Mẫu</dt><dd>Kaolin tổng hợp</dd></div><div><dt>Chất keo tụ</dt><dd>Phèn nhôm</dd></div><div><dt>Thể tích mỗi cốc</dt><dd>{JAR_PROFILE.aliquotVolumeL.toLocaleString('vi-VN')} L</dd></div><div><dt>pH ban đầu</dt><dd>{JAR_PROFILE.availableInitialPh.join(' / ')}</dd></div><div><dt>Tổng liều mỗi cốc</dt><dd>{JAR_PROFILE.minDoseMgL}–{JAR_PROFILE.maxDoseMgL} mg/L</dd></div><div><dt>Đầu ra cần ghi</dt><dd>NTU cuối, hiệu suất tự tính, cốc được chọn</dd></div></dl>
-          <p className={styles.goal}>Mục tiêu học tập: tìm phương án giảm độ đục ít nhất <strong>{JAR_PROFILE.goalRemovalPercent}%</strong> theo mô hình.</p>
-        </section>
-
-        <section className={styles.panel + ' ' + styles.procedure} aria-labelledby="jar-procedure">
-          <h2 id="jar-procedure"><FlaskIcon />Quy trình trên workbench</h2>
-          <p>Thực hiện một mẻ với tối đa sáu cốc A–F. Các cốc có thể khác pH và liều phèn, nhưng dùng chung chương trình khuấy và lắng.</p>
-          <ol className={styles.stageStrip} aria-label="Ba chặng thực hành">
-            <li><ControlIcon kind="prepare" /><div><strong>Chuẩn bị mẫu</strong><span>Chọn cốc · Đo đầu · Cấp phèn</span></div></li>
-            <li><ControlIcon kind="program" /><div><strong>Chạy xử lý</strong><span>Khuấy nhanh · Khuấy chậm · Lắng</span></div></li>
-            <li><ControlIcon kind="results" /><div><strong>Đo & nộp bài</strong><span>Đo cuối · Ghi đáp số · Chọn cốc</span></div></li>
-          </ol>
-          <ol className={styles.steps}>
-            <li><h3>Chọn cốc và chuẩn bị mẫu</h3><p>Bấm một cốc trên dàn. Mở <strong>Thao tác → Chuẩn bị mẫu</strong>, chọn pH rồi bấm <strong>Chuẩn bị cốc</strong>. Lặp lại với các cốc muốn so sánh.</p><details><summary>Thể tích và pH của mẫu</summary><p>Mỗi cốc chứa {JAR_PROFILE.aliquotVolumeL.toLocaleString('vi-VN')} L mẫu trong cốc {JAR_PROFILE.beakerCapacityL} L. Không bắt buộc dùng cả sáu cốc. pH được chọn là điều kiện ban đầu của mẫu đã chuẩn bị sẵn, không phải pH cuối sau xử lý.</p></details></li>
-            <li><h3>Đo mẫu ban đầu</h3><p>Mở <strong>Sổ đo</strong> và bấm <strong>Đo mẫu ban đầu</strong> trước khi chạy chương trình. Đây là số liệu chung để tính mức giảm đục của các cốc. Số đo chỉ xuất hiện sau khi bạn thực hiện phép đo.</p></li>
-            <li><h3>Cấp phèn cho từng cốc</h3><p>Mở <strong>Thao tác → Cấp phèn</strong>, chọn liều tăng và bấm thêm phèn. Liều được cộng dồn; kiểm tra <strong>Tổng liều hiện tại</strong> trước mỗi lần thêm.</p><p>Hoàn tất các cốc trước khi khuấy: mẫu và liều sẽ khóa khi chương trình bắt đầu.</p><details><summary>Liều và đơn vị sử dụng</summary><p>Tổng liều mỗi cốc từ {JAR_PROFILE.minDoseMgL} đến {JAR_PROFILE.maxDoseMgL} mg/L, theo bước {JAR_PROFILE.doseStepMgL} mg/L. mg/L là liều tính theo thể tích mẫu, không phải khối lượng mg.</p></details></li>
-            <li><h3>Chạy đủ ba pha</h3><p>Trong <strong>Thao tác → Khuấy & lắng</strong>, chạy lần lượt <strong>Khuấy nhanh → Khuấy chậm → Lắng</strong>. Mỗi nút áp dụng cho cả dàn cốc. Thời gian là thời gian mô phỏng; bạn không cần chờ hết số phút ngoài đời thực.</p>
-              <div className={styles.tableScroll}><table><caption>Chương trình chung cho các cốc</caption><thead><tr><th scope="col">Pha</th><th scope="col">Tốc độ</th><th scope="col">Thời gian</th></tr></thead><tbody>{phases.map(([name, phase, purpose]) => <tr key={name}><th scope="row" title={purpose}>{name}</th><td>{phase.rpm ? phase.rpm + ' rpm' : 'Dừng khuấy'}</td><td>{phase.durationSeconds < 120 ? phase.durationSeconds + ' giây' : phase.durationSeconds / 60 + ' phút'}</td></tr>)}</tbody></table></div>
-            </li>
-            <li><h3>Đo độ đục cuối của từng cốc</h3><p>Chọn cốc, mở <strong>Thao tác → Đo & ghi kết quả</strong>, bấm <strong>Đo độ đục cuối cốc</strong>. Đọc số đo trên máy và trong sổ đo, rồi đo các cốc còn lại.</p><details><summary>Nếu thực hiện phép đo quá sớm</summary><p>Đo trước khi chạy đủ ba pha được lưu với <strong>N/A</strong>. Sau khi hoàn tất chương trình, bạn có thể đo lại; lịch sử vẫn giữ phép đo sớm.</p></details></li>
-            <li><h3>Tự tính, ghi đáp số và chọn phương án</h3><p>Dùng NTU đầu và NTU cuối hợp lệ để tính phần trăm giảm đục theo công thức bên dưới. Nhập kết quả vào <strong>Phần trăm giảm đục tự tính (%)</strong>, bấm <strong>Ghi đáp số</strong> cho từng cốc. Sau đó chọn một cốc làm phương án nộp.</p></li>
-            <li><h3>Kiểm tra sổ đo rồi nộp bài</h3><p>Đối chiếu pH, tổng liều, số đo cuối và đáp số đã ghi. Bấm <strong>Nộp bài</strong>, kiểm tra thông tin trong bảng xác nhận rồi chọn <strong>Xác nhận nộp bài</strong>. Báo cáo sẽ đối chiếu đáp số và chỉ ra những điểm cần xem lại. Lượt đã nộp chỉ có thể xem lại; muốn thử phương án khác, bắt đầu một mẻ mới.</p></li>
-          </ol>
-        </section>
-
-        <section aria-labelledby="jar-calculation" className={styles.panel + ' ' + styles.calculation}>
-          <h2 id="jar-calculation"><CalculatorIcon />Tính phần trăm giảm đục</h2>
-          <p className={styles.formula}>Hiệu suất (%) = (NTU đầu − NTU cuối) / NTU đầu × 100</p>
-          <p>Dùng số đo hợp lệ của đúng cốc đang tính. Liều phèn có đơn vị mg/L; hiệu suất có đơn vị %, hai đại lượng này không thay thế nhau.</p>
-          <details><summary>Xem ví dụ phép tính</summary><p><strong>Ví dụ minh họa, không phải kết quả của bài:</strong> mẫu có NTU đầu = 100, NTU cuối = 40 thì hiệu suất = (100 − 40) / 100 × 100 = 60%.</p></details>
-          <p><strong>Chưa đo</strong> nghĩa là chưa có phép đo. <strong>N/A</strong> nghĩa là phép đo không hợp lệ. Cả hai đều không phải 0 NTU và không dùng để tính hiệu suất.</p>
-        </section>
-        <section className={styles.panel + ' ' + styles.limits} aria-labelledby="jar-limits">
-          <h2 id="jar-limits"><WarningIcon />Hiểu đúng phạm vi</h2>
-          <p>Đây là mẫu và chương trình đã khóa cho việc học. Bài không cho thay đổi tốc độ, thời gian, vị trí lấy mẫu hoặc thêm axit/bazơ tùy ý.</p>
-          <p>Hoạt ảnh hạt và bông chỉ minh họa. Mô hình không dự đoán liên tục độ đục, kích thước bông hay lượng bùn trong lúc khuấy.</p>
-          <p>Giảm NTU không chứng minh đã loại bỏ vi sinh hoặc chất ô nhiễm hòa tan. Mục tiêu {JAR_PROFILE.goalRemovalPercent}% không phải tiêu chuẩn nước uống hay nước thải.</p>
-          <p>Không dùng kết quả này để định liều cho mẫu nước thật. Khi làm ở phòng thí nghiệm, tuân theo quy trình, trang bị bảo hộ và hướng dẫn của giảng viên.</p>
-        </section>
-        <section className={styles.panel + ' ' + styles.sources} aria-labelledby="jar-sources"><h2 id="jar-sources"><BookIcon />Nguồn tham khảo</h2><p>Mô hình tính toán và quy trình thực hành có nguồn riêng. Mở danh sách khi cần đối chiếu.</p><details><summary>Xem {JAR_SOURCES.length} tài liệu đang sử dụng</summary><ul>{JAR_SOURCES.map(source => <li key={source.key}><a href={source.url} target="_blank" rel="noreferrer">{source.title}<ArrowRightIcon /></a><p>{source.author} · {source.kind}</p></li>)}</ul></details><Link href="/evidence">Cách sử dụng nguồn & giới hạn mô hình <ArrowRightIcon /></Link></section>
+      <section className={styles.panel + ' ' + styles.objective} aria-labelledby="jar-objective"><h2 id="jar-objective"><TargetIcon />Mục đích & kết quả cần đạt</h2><p>Tìm điều kiện pH và liều phèn giúp giảm độ đục, hiểu vì sao các cốc cho kết quả khác nhau.</p><ul><li>Cốc được chọn giảm đục ít nhất <strong>{JAR_PROFILE.goalRemovalPercent}%</strong>.</li><li>Từ mẫu đầu {JAR_PROFILE.initialNtu} NTU, tương đương NTU cuối <strong>không quá {targetNtu.toLocaleString('vi-VN')} NTU</strong>.</li><li>Đáp số cốc được chọn lệch không quá <strong>{JAR_PROFILE.answerTolerancePercentagePoints.toLocaleString('vi-VN')} điểm %</strong> so với hiệu suất từ số đo.</li></ul><p>Các cốc chưa đạt vẫn có giá trị so sánh. Mức 80% là mục tiêu bài học, không phải chuẩn chất lượng nước.</p></section>
+      <section className={styles.panel + ' ' + styles.profile} aria-labelledby="jar-profile"><h2 id="jar-profile"><FlaskIcon />Đầu vào của bài</h2><dl><div><dt>Mẫu chưa xử lý</dt><dd>Kaolin tổng hợp · {JAR_PROFILE.initialNtu} NTU</dd></div><div><dt>Thể tích</dt><dd>0,5 L/cốc · tối đa 6 cốc</dd></div><div><dt>Chất keo tụ</dt><dd>Phèn nhôm</dd></div><div><dt>pH được chọn</dt><dd>{JAR_PROFILE.availableInitialPh.join(' / ')}</dd></div><div><dt>Tổng liều mỗi cốc</dt><dd>50–250 mg/L · bước 50</dd></div><div><dt>Chương trình</dt><dd>Chung cho cả dàn cốc</dd></div></dl></section>
+      <section className={styles.panel + ' ' + styles.output} aria-labelledby="jar-output"><h2 id="jar-output"><ReportIcon />Đầu ra cần ghi</h2><p><strong>Cho cả mẻ:</strong> số đo mẫu ban đầu và một cốc làm phương án nộp.</p><p><strong>Cho từng cốc đã thử:</strong> pH đầu, tổng liều phèn, NTU cuối hợp lệ và phần trăm giảm đục bạn tự tính, đã bấm ghi.</p><p>Báo cáo so sánh đầy đủ cần số đo và đáp số của các cốc đã chuẩn bị. Việc còn thiếu dữ liệu ở cốc khác được trình bày riêng với kết quả đạt của phương án nộp.</p></section>
+      <section className={styles.panel + ' ' + styles.principle} aria-labelledby="jar-principle"><h2 id="jar-principle"><BookIcon />Vì sao cần ba pha?</h2><div className={styles.principles}><div><strong>Khuấy nhanh</strong><p>100 rpm · 60 giây. Phân tán phèn trong mẫu.</p></div><div><strong>Khuấy chậm</strong><p>40 rpm · 20 phút. Tạo điều kiện hình thành bông.</p></div><div><strong>Lắng</strong><p>Dừng khuấy · 30 phút. Để bông lắng trước khi đo.</p></div></div><p>Đây là thời gian mô phỏng; bạn không phải chờ đủ số phút ngoài đời. Hoạt ảnh không quyết định hiệu suất và không thay cho số đo.</p></section>
+      <section className={styles.panel + ' ' + styles.glossary} aria-labelledby="jar-terms"><h2 id="jar-terms"><BookIcon />Thuật ngữ cần biết</h2><dl className={styles.terms}>{terms.map(([term, definition]) => <div key={term}><dt>{term}</dt><dd>{definition}</dd></div>)}</dl></section>
+      <section className={styles.panel + ' ' + styles.procedure} aria-labelledby="jar-procedure"><h2 id="jar-procedure"><ToolsIcon />Quy trình trên workbench</h2><p>Một lượt là một mẻ dùng chung chương trình khuấy–lắng. Hoàn tất thiết kế tất cả cốc trước khi chạy; sau đó vẫn đo và ghi từng cốc riêng.</p><ol className={styles.steps}>{steps.map(step => <li key={step.title}><h3>{step.title}</h3><dl className={styles.stepDetails}><div><dt>Đầu vào</dt><dd>{step.input}</dd></div><div><dt>Thao tác</dt><dd>{step.action}</dd></div><div><dt>Đầu ra</dt><dd>{step.output}</dd></div></dl><details><summary>Vì sao cần bước này?</summary><p>{step.why}</p></details></li>)}</ol></section>
+      <section className={styles.panel + ' ' + styles.calculation} aria-labelledby="jar-calculation"><h2 id="jar-calculation"><CalculatorIcon />Tính hiệu suất từ số đo</h2><p className={styles.formula}>Hiệu suất (%) = (NTU đầu − NTU cuối) / NTU đầu × 100</p><p>Dùng NTU cuối của đúng cốc. Chưa đo là chưa có dữ liệu; N/A là phép đo không hợp lệ. Cả hai đều không phải 0 NTU và không dùng để tính.</p><details><summary>Xem ví dụ phép tính</summary><p>Ví dụ minh họa, không phải kết quả của bài: NTU đầu 100, NTU cuối 40 → hiệu suất 60%.</p></details></section>
+      <section className={styles.panel + ' ' + styles.limits} aria-labelledby="jar-limits"><h2 id="jar-limits"><WarningIcon />An toàn & phạm vi mô phỏng</h2><p>Chỉ khảo sát pH đầu và tổng liều trong khoảng đã cho. Không điều chỉnh tốc độ/thời gian, không mô phỏng độ đục liên tục hoặc lượng bùn.</p><p>Không dùng kết quả để định liều cho nước thật. Giảm NTU không chứng minh đã loại bỏ vi sinh hoặc chất ô nhiễm hòa tan.</p><p>Trong phòng thí nghiệm thật, dùng bảo hộ và tuân theo hướng dẫn giảng viên; không chạm vào cánh khuấy đang chạy.</p></section>
+      <section className={styles.panel + ' ' + styles.sources} aria-labelledby="jar-sources"><h2 id="jar-sources"><BookIcon />Nguồn & giới hạn kết quả</h2><p>Kết quả tái hiện phương trình của mô hình, chưa phải kiểm chứng thực nghiệm cho VECLab. Tài liệu quy trình không chứng nhận hệ số tính toán.</p><details><summary>Xem {JAR_SOURCES.length} tài liệu đang sử dụng</summary><ul>{JAR_SOURCES.map(source => <li key={source.key}><a href={source.url} target="_blank" rel="noreferrer">{source.title}<ArrowRightIcon /></a><p>{source.author} · {source.kind}</p></li>)}</ul></details><Link href="/evidence">Cách sử dụng nguồn & giới hạn mô hình <ArrowRightIcon /></Link></section>
     </div>
   </div>
 }

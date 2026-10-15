@@ -251,6 +251,11 @@
 @media (max-width:600px) { .goalTitle { font-size:.875rem; } .goalPanel { padding:16px; } .goalPanelGrid { grid-template-columns:1fr; gap:18px; } .goalPanelHeading button { width:40px; height:40px; } }
 @media (prefers-reduced-motion:reduce) { .goalDetails summary { transition:none; } }
 .notebook { scroll-margin-top:16px; }
+.batchNotice { padding:10px 12px; border-radius:8px; background:#fff3d9; color:#714a0b; font-size:.76rem; line-height:1.65; }
+.steps { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; }
+.steps button { width:100%; }
+.historyPagination { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:10px; }
+.historyPagination > span { font-size:.7rem; color:var(--ink-muted); }
 @media (max-width:600px) { .headerActions .reportButton { padding:8px; min-width:40px; } .reportButton span { display:none; } }
 
 @media (max-width:600px) { .brand strong, .title p { display:none; } .brand { gap:0; } .goalDetails summary { gap:6px; padding:8px; } .goalButtonCopy strong { font-size:.65rem; } .goalScopeCopy, .goalDivider { display:none; } .mobileScopeLabel { display:inline; } .goalButtonCopy > span { max-width:104px; white-space:normal; } .headerActions { margin-left:0; } .headerActions .primary { padding-inline:10px; } .headerActions .primary svg { display:none; } }

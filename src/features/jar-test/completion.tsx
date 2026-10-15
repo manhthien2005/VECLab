@@ -4,6 +4,17 @@ import type { JarCupId } from '@/domain/experiments/jar-test/model.js'
 import { CloseIcon, ReportIcon, SubmitIcon, InfoIcon } from '@/features/workbench/icons.js'
 import { CheckCircleIcon } from '@/features/landing/icons.js'
 import styles from './completion.module.css'
+import { JarReportCharts } from './report-charts.js'
+import { jarReportSummary } from './report-insights.js'
+
+export function JarProgramDialog({ projection, onClose, onConfirm }: { projection: JarProjection; onClose: () => void; onConfirm: () => void }) {
+  return <CompletionDialog title="Chạy chương trình chung" icon={<InfoIcon />} onClose={onClose}
+    footer={<><button type="button" className={styles.secondary} onClick={onClose} autoFocus>Tiếp tục chỉnh các cốc</button><button type="button" className={styles.primary} onClick={onConfirm}>Bắt đầu khuấy cả mẻ</button></>}>
+    <p>Chương trình áp dụng cho tất cả {projection.cups.length} cốc dưới đây. Sau khi bắt đầu, pH và liều của cả mẻ sẽ khóa; bạn vẫn đo và ghi kết quả riêng cho từng cốc.</p>
+    <div className={styles.tableScroll}><table aria-label="Các cốc trước khi chạy mẻ"><thead><tr><th>Cốc</th><th>pH ban đầu</th><th>Tổng liều phèn (mg/L)</th></tr></thead><tbody>{projection.cups.map(cup => <tr key={cup.id}><th scope="row">Cốc {cup.id}</th><td>{cup.initialPh}</td><td>{cup.doseMgL}</td></tr>)}</tbody></table></div>
+    <p className={styles.note}>Chưa đúng thiết kế so sánh? Quay lại chỉnh các cốc trước khi chạy.</p>
+  </CompletionDialog>
+}
 
 function number(value: number): string {
   return value.toLocaleString('vi-VN', { maximumFractionDigits: 4 })
@@ -87,11 +98,14 @@ export function JarReportDialog({ report, onClose, onNotebook }: {
   report: JarReportSnapshot; onClose: () => void; onNotebook: () => void
 }) {
   const chosen = report.cups.find(cup => cup.id === report.selectedCupId)
+  const summary = jarReportSummary(report)
   const status = !report.goalStatus.evaluable ? 'Chưa đủ dữ liệu đánh giá' : report.goalStatus.goalMet ? 'Đạt mục tiêu bài thực hành' : 'Chưa đạt mục tiêu bài thực hành'
   return <CompletionDialog title="Báo cáo Jar Test" icon={<ReportIcon />} onClose={onClose}
     footer={<><button type="button" className={styles.secondary} onClick={onNotebook}>Xem sổ đo</button><button type="button" className={styles.primary} onClick={onClose}>Về bàn thí nghiệm</button></>}>
     <section className={styles.outcome} data-met={report.goalStatus.goalMet} aria-label="Kết quả đánh giá">{report.goalStatus.goalMet ? <CheckCircleIcon /> : <InfoIcon />}<div><h3>{status}</h3><p>{chosen ? 'Phương án đã nộp: Cốc ' + chosen.id + ' · pH ' + chosen.initialPh + ' · ' + chosen.doseMgL + ' mg/L.' : 'Bạn chưa chọn cốc làm phương án nộp.'}</p><p>Mục tiêu: giảm độ đục ít nhất {report.reference.targetRemovalPercent}% và tính đúng hiệu suất của cốc đã chọn.</p></div></section>
     <dl className={styles.summary}><div><dt>Mẫu ban đầu</dt><dd>{ntu(report.initialMeasurement)} NTU</dd></div><div><dt>Hiệu suất cốc đã chọn</dt><dd>{chosen ? percent(chosen.measuredRemovalPercent) : 'N/A'}</dd></div><div><dt>Đáp số đã nộp</dt><dd>{chosen?.submittedRemovalPercent == null ? 'Chưa ghi' : percent(chosen.submittedRemovalPercent)}</dd></div></dl>
+    {summary.missing.length > 0 && <section className={styles.warning} aria-label="Thông tin còn thiếu trong báo cáo"><h3>Thông tin còn thiếu</h3><ul>{summary.missing.map(message => <li key={message}>{message}</li>)}</ul><p>Đây là dữ liệu còn thiếu để đối chiếu cả mẻ. Kết quả đạt của phương án đã chọn được đánh giá riêng; lượt đã nộp không thể bổ sung số liệu.</p></section>}
+    <JarReportCharts report={report} />
     <section><h3>Quy trình đã thực hiện</h3><ol className={styles.phases}>{(['rapid', 'slow', 'settling'] as const).map((phase, index, phases) => {
       const program = report.reference.phases[phase]
       const done = report.projection.elapsedSeconds >= phases.slice(0, index + 1).reduce((sum, key) => sum + report.reference.phases[key].durationSeconds, 0)
@@ -111,8 +125,16 @@ export function JarReportDialog({ report, onClose, onNotebook }: {
       {!report.diagnostics.length && report.goalStatus.goalMet && <p>Phương án đã chọn đạt mục tiêu và đáp số nằm trong sai số cho phép.</p>}
       {report.cups.map(cup => {
         const diagnostics = report.diagnostics.filter(item => item.cupId === cup.id)
-        if (!diagnostics.length) return null
-        return <article key={cup.id}><h4>Cốc {cup.id}</h4><ul>{diagnostics.map(item => <li key={item.code}><strong>{DIAGNOSTICS[item.code][0]}</strong><p>{DIAGNOSTICS[item.code][1]}</p></li>)}</ul></article>
+        const early = cup.measurements.filter(m => !m.valid)
+        const valid = cup.measurements.filter(m => m.valid && m.valueNtu !== null).at(-1)
+        if (!diagnostics.length && !(early.length && valid)) return null
+        return <article key={cup.id}><h4>Cốc {cup.id}</h4>{early.length > 0 && valid && <p>Đã đo lại hợp lệ ở thao tác #{valid.sequence}. Lần đo sớm {early.map(m => '#' + m.sequence).join(', ')} chưa đủ quy trình; báo cáo dùng số đo hợp lệ sau đó.</p>}<ul>{diagnostics.map(item => <li key={item.code}><strong>{DIAGNOSTICS[item.code][0]}</strong><p>{DIAGNOSTICS[item.code][1]}</p>
+          {item.code === 'INVALID_FINAL_READING' && <p>Ở bước 5 · Đo cuối: {cup.measurements.filter(m => !m.valid).map(m => 'thao tác #' + m.sequence).join(', ')} được thực hiện khi chưa đủ quy trình.</p>}
+          {item.code === 'NO_FINAL_READING' && <p>Bước 5 · Đo cuối: chưa có số đo để đối chiếu.</p>}
+          {item.code === 'MISSING_CALCULATION' && <p>Bước 6 · Tính và ghi: chưa lưu đáp số của cốc này.</p>}
+          {item.code === 'INCORRECT_CALCULATION' && cup.measuredRemovalPercent !== null && cup.submittedRemovalPercent !== null && <p>Bước 6 · Tính và ghi: bạn nộp {percent(cup.submittedRemovalPercent)}, đối chiếu từ số đo là {percent(cup.measuredRemovalPercent)}; lệch {number(Math.abs(cup.submittedRemovalPercent - cup.measuredRemovalPercent))} điểm %.</p>}
+          {item.code === 'BELOW_TARGET' && <p>Bước 2–3 · Chọn pH và liều: đây là kết quả của điều kiện đã thử, chưa đủ để khẳng định riêng liều phèn quá thấp hoặc quá cao.</p>}
+        </li>)}</ul></article>
       })}
       <p className={styles.note}>Sai số đáp số cho phép: ±{number(report.reference.answerTolerancePercentagePoints)} điểm %. Báo cáo không quy nguyên nhân cho một thao tác cụ thể khi dữ liệu chưa đủ để kết luận.</p>
     </section>
