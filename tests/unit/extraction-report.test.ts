@@ -46,10 +46,10 @@ it('shows conserved compound distribution and quantifies material outside the de
   report.products[0] = { ...report.products[0]!, vesselId: 'R1', recovery: 80, purity: 100 }
   report.distribution.forEach(row => { row.amountsMg.A = row.vesselId === 'R1' ? 80 : row.vesselId === 'W' ? 15 : row.vesselId === 'S' ? 5 : 0 })
   const html = render(report)
-  expect(html).toContain('Phân bố cấu tử A')
+  expect(html).toContain('Phân bố chất A')
   expect(html).toContain('R1: 80 mg; W: 15 mg; S: 5 mg')
   expect(html).toContain('20 mg ngoài bình sản phẩm R1, trong đó 15 mg ở bình thải W.')
-  expect(html).toContain('Chất còn trong dịch mẹ không tự chứng minh thao tác sai.')
+  expect(html).toContain('Chất còn hòa tan trong dịch không tự chứng minh thao tác sai.')
 })
 
 it('reads legacy reports without adding a new protocol verdict or mutating the saved snapshot', () => {
@@ -57,7 +57,11 @@ it('reads legacy reports without adding a new protocol verdict or mutating the s
   report.schemaVersion = 1
   delete report.actions
   delete report.protocol
+  report.diagnostics = [{ message: 'Có cấu tử mục tiêu đã được chuyển vào bình thải W.', actionIds: [] }]
   const original = structuredClone(report)
-  expect(render(report)).toContain('Lượt phiên bản cũ: giữ quy tắc đánh giá lúc tạo lượt, chưa có tiêu chí thao tác trộn.')
+  const html = render(report)
+  expect(html).toContain('Lượt phiên bản cũ: giữ quy tắc đánh giá lúc tạo lượt, chưa có tiêu chí thao tác trộn.')
+  expect(html).toContain('Có chất cần thu hồi đã được chuyển vào bình thải W.')
+  expect(html).not.toMatch(/cấu tử/i)
   expect(report).toEqual(original)
 })

@@ -11,4 +11,4 @@ const JAR_ENTRY: CatalogEntry = {
   summary: 'Khảo sát pH và liều phèn nhôm để giảm độ đục sau khuấy – lắng.',
 }
 
-export function listCatalog(): CatalogEntry[] { return [{ ...JAR_ENTRY }, { scenarioKey: 'acid-base-extraction', releaseId: EXTRACTION_PROFILE.releaseId, title: 'Chiết tách axit–bazơ', summary: 'Tách mẫu chuẩn A/B/N qua hai pha, thu sản phẩm và đối chiếu thu hồi, độ tinh khiết.' }] }
+export function listCatalog(): CatalogEntry[] { return [{ ...JAR_ENTRY }, { scenarioKey: 'acid-base-extraction', releaseId: EXTRACTION_PROFILE.releaseId, title: 'Chiết tách axit–bazơ', summary: 'Tách mẫu mô phỏng A/B/N qua hai pha, thu sản phẩm và đối chiếu thu hồi, độ tinh khiết.' }] }
