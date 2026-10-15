@@ -3,7 +3,7 @@ import { JAR_PROFILE } from '@/domain/experiments/jar-test/model.js'
 
 const PRESENTATION = {
   'acid-base-extraction': {
-    image: '/assets/experiments/extraction.svg',
+    image: '/assets/experiments/extraction.webp',
     imageAlt: 'Phễu chiết với pha hữu cơ phía trên, pha nước phía dưới và các bình thu',
     category: 'Chiết lỏng – lỏng',
     question: 'Thứ tự chiết và cách thu pha ảnh hưởng thế nào đến sản phẩm?',

@@ -78,3 +78,11 @@ Người dùng đã yêu cầu kích hoạt bài sau bản đầu: catalog, land
 - Đưa bài vào catalog/thẻ landing và thư viện, thay bài pH độc lập theo lựa chọn đã chốt. Hấp phụ vẫn chưa triển khai.
 - Kết nối lab với các lượt chiết tách thật; mở đúng URL tiếp tục/sổ đo/report và chỉ xóa đúng scenario. Thêm nguồn phương pháp vào trang evidence, không thay đổi ý nghĩa hoặc tính xác thực của mô hình quy ước.
 - Kiểm tra giới hạn ở các đường này: unit catalog/lab, browser desktop/mobile cho mở bài, thao tác, nộp và mở lại báo cáo từ lab; typecheck, lint và build.
+
+
+## Hiệu chỉnh theo Jar Test — yêu cầu tiếp theo
+
+- Bỏ màn giới thiệu trung gian: vào route thực hành sẽ tạo một lượt local và mở workbench trực tiếp. Promise mở lượt dùng lại trong Strict Mode để tránh tạo đôi; link có attempt vẫn tải đúng lượt đã lưu.
+- Kệ mẫu/dụng cụ, accordion thao tác, footer hướng dẫn và bảng mục tiêu/phạm vi theo đúng cấu trúc/kích thước CSS Jar. Chỉ thay nội dung và thao tác theo bài chiết tách; giữ Jar nguyên vẹn.
+- Ảnh đại diện dạng chụp được tạo bằng Imagegen. Panel từng dụng cụ có ảnh thực tế, thông số, cách dùng, nguồn và giấy phép; A/B/N trừu tượng được ghi rõ bằng minh họa, không gán ảnh hóa chất thật. Xem `public/assets/extraction-equipment/ATTRIBUTION.md`.
+- Kiểm tra tập trung desktop/mobile: mở trực tiếp, một lần vào chỉ tạo một lượt, ảnh/panel, đóng ngoài, mục tiêu/phạm vi, accordion, tour, workflow và báo cáo lưu. Không sửa engine, schema, cloud hoặc phát hành production.

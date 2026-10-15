@@ -21,7 +21,8 @@ test('offers the active extraction lesson and keeps adsorption planned', async (
   await expect(breadcrumb.locator('[aria-current="page"]')).toHaveText('Chiết tách axit–bazơ')
   await expect(page.getByRole('heading',{name:'Đích của lượt học',exact:true})).toBeVisible()
   await page.getByRole('link',{name:'Bắt đầu thực hành',exact:true}).click()
-  await expect(page.getByRole('button',{name:'Bắt đầu chiết tách',exact:true})).toBeVisible()
+  await expect(page).toHaveURL(/attempt=[0-9a-f-]{36}/)
+  await expect(page.getByRole('region',{name:'Bàn chiết tách axit–bazơ',exact:true})).toBeVisible()
 })
 
 test('library typography, tags and cards fit in both themes and enlarged text', async ({ page }) => {

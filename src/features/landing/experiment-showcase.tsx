@@ -5,7 +5,7 @@ import { FlaskIcon, LayersIcon, MoleculeIcon } from './icons.js'
 import { ShowcaseCarouselTrack } from './showcase-carousel-track.js'
 
 const CARD_ART = {
-  'acid-base-extraction': { Icon: FlaskIcon, image: '/assets/experiments/extraction.svg', alt: 'Phễu chiết hai pha và các bình thu mẫu' },
+  'acid-base-extraction': { Icon: FlaskIcon, image: '/assets/experiments/extraction.webp', alt: 'Phễu chiết hai pha và các bình thu mẫu' },
   'jar-test': { Icon: MoleculeIcon, image: '/assets/experiments/jar.webp', alt: 'Hai cốc Jar Test với cánh khuấy và bông cặn đang lắng' },
   'methylene-blue-adsorption': { Icon: LayersIcon, image: '/assets/experiments/adsorption.webp', alt: 'Dung dịch xanh methylene và than hoạt tính dùng trong hấp phụ theo mẻ' },
 } as const
