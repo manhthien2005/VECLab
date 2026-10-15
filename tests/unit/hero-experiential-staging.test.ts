@@ -7,7 +7,6 @@ const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 const PAGE_FILE = join(ROOT, 'src', 'app', '(public)', 'page.tsx')
 const HERO_PREVIEW_FILE = join(ROOT, 'src', 'features', 'landing', 'hero-preview.tsx')
 const HERO_POINTER_FILE = join(ROOT, 'src', 'features', 'landing', 'hero-pointer-stage.tsx')
-const LANDING_VISUALS_FILE = join(ROOT, 'src', 'features', 'landing', 'landing-visuals.tsx')
 const GLOBALS_CSS = join(ROOT, 'src', 'app', 'globals.css')
 
 describe('Hero Experiential Staging and Pointer Depth Architecture (R17.2)', () => {
@@ -71,19 +70,12 @@ describe('Hero Experiential Staging and Pointer Depth Architecture (R17.2)', () 
     }
   })
 
-  it('preserves scientific truth literals, pH values, equation and coordinates', () => {
+  it('presents the current Jar profile without fabricated measurements or progress', () => {
     const previewContent = readFileSync(HERO_PREVIEW_FILE, 'utf8')
-    const visualContent = readFileSync(LANDING_VISUALS_FILE, 'utf8')
-
-    // Fixed telemetry & equation
-    expect(previewContent).toContain('5,2')
-    expect(previewContent).toContain('25,0 °C')
-    expect(previewContent).toContain('HCl + NaOH → NaCl + H₂O')
-    expect(previewContent).toContain('ACID_INPUT_DOMAIN.benchmark')
-
-    // Illustrative curve data points locked
-    expect(visualContent).toContain('CURVE_POINTS')
-    expect(visualContent).toContain('[25, 6.995]')
+    expect(previewContent).toContain('JAR_PROFILE.initialNtu')
+    expect(previewContent).toContain('Minh họa giao diện')
+    expect(previewContent).not.toContain('HCl + NaOH')
+    expect(previewContent).not.toContain('role="progressbar"')
   })
 
   it('separates entrance transform ownership from pointer depth transform layer in CSS', () => {

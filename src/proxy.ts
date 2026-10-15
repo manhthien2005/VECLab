@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { requiresSession } from '@/features/auth/session-routes.js'
 
 /**
  * Session refresh and cache-guard Proxy.
@@ -18,20 +19,6 @@ import { NextResponse, type NextRequest } from 'next/server'
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 
-/**
- * Route groups that require a session. Everything else — the public catalog, the
- * evidence register, the auth screens themselves and the guest workbench — stays
- * reachable without signing in, because a guest must be able to complete all
- * three experiments before creating an account (web scope §14).
- */
-const LEARNER_PREFIXES = ['/lab', '/compare', '/account']
-
-function requiresSession(pathname: string): boolean {
-  return LEARNER_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  )
-}
-
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
 
@@ -49,20 +36,23 @@ export async function proxy(request: NextRequest) {
         return request.cookies.getAll()
       },
       setAll(cookiesToSet, headers) {
-        // Apply the cache-control headers BEFORE the cookies, so a response that
-        // ends up setting an auth cookie is never left cacheable.
-        if (headers) {
-          for (const [key, value] of Object.entries(headers)) {
-            response.headers.set(key, value)
-          }
-        }
-
         for (const { name, value } of cookiesToSet) {
           request.cookies.set(name, value)
         }
         // Rebuild the response from the mutated request so the refreshed cookies
         // travel onward to the route handler.
+        const previousResponse = response
         response = NextResponse.next({ request })
+        for (const cookie of previousResponse.cookies.getAll()) response.cookies.set(cookie)
+        for (const header of ['cache-control', 'expires', 'pragma']) {
+          const value = previousResponse.headers.get(header)
+          if (value !== null) response.headers.set(header, value)
+        }
+        // Rebuilding the response discards its old headers. Apply them to the
+        // outgoing response, together with the refreshed session cookies.
+        if (headers) {
+          for (const [key, value] of Object.entries(headers)) response.headers.set(key, value)
+        }
         for (const { name, value, options } of cookiesToSet) {
           response.cookies.set(name, value, options)
         }
@@ -77,13 +67,22 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Account settings need a session. Comparison reads local Jar reports.
+  // Catalog, evidence, workbench and lab stay public so a guest can finish a run
+  // (web scope §14).
   if (user === null && requiresSession(request.nextUrl.pathname)) {
     const signInUrl = request.nextUrl.clone()
     signInUrl.pathname = '/sign-in'
     // Carry the destination so sign-in can return the learner to where they were
     // heading instead of dropping them on the catalog (web scope §11.4).
     signInUrl.searchParams.set('next', request.nextUrl.pathname)
-    return NextResponse.redirect(signInUrl)
+    const redirectResponse = NextResponse.redirect(signInUrl)
+    for (const cookie of response.cookies.getAll()) redirectResponse.cookies.set(cookie)
+    for (const header of ['cache-control', 'expires', 'pragma']) {
+      const value = response.headers.get(header)
+      if (value !== null) redirectResponse.headers.set(header, value)
+    }
+    return redirectResponse
   }
 
   return response

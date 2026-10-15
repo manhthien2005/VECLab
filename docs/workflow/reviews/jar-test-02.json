@@ -1,0 +1,26 @@
+{
+  "v": 1,
+  "kind": "result",
+  "id": "JAR-02",
+  "coder": 1,
+  "repo": "manhthien2005/VECLab",
+  "branch": "chore/pre-refactor-cleanup",
+  "base": "f50158c128c0a18e7686b78c354c93dbdc82a75d",
+  "head": "7421c0c41b202c9f4bdb43b8afc0ff0ad9d8b3c8",
+  "status": "needs_changes",
+  "checks": { "unit": "pass", "types": "pass", "lint": "pass", "diff": "pass" },
+  "env": "Windows; Node v24.16.0; npm 11.13.0; existing dependencies",
+  "evidence": {
+    "unit": "Assigned command: 65 passed (6 Jar guest, 19 acid guest, 12 Jar engine, 28 Process Core).",
+    "types": "npm run typecheck: exit 0.",
+    "lint": "Assigned ESLint command on three files: exit 0.",
+    "diff": "git diff f50158c128c0a18e7686b78c354c93dbdc82a75d 7421c0c41b202c9f4bdb43b8afc0ff0ad9d8b3c8 --check: exit 0."
+  },
+  "issues": [
+    "[P2] jar-session.ts:133-138: requireAttempt reads attempt and events separately. Public-API probe captured attempt revision 2, committed a valid dose in another session, then read events: load falsely returned STATE_HASH_MISMATCH (expectedSequence 2, actualSequence 3). Reconcile changing snapshots with bounded retries or a coherent read; retain real corruption detection. Test load and read-after-write under deterministic interleavings.",
+    "[P2] jar-session.ts:245-248,328-331: duplicate lookup can discover an action committed after the loaded attempt, then returns the old view. Public-API probe: identical dose retry returned revision 2/dose 0 while storage held revision 3/dose 50. Identical concurrent completion returned STATE_HASH_MISMATCH although stored status was completed. Refresh after finding a duplicate and return the stored revision/report; add deterministic apply/complete regressions.",
+    "[P2] jar-projection.ts:70 and jar-guest-runtime.test.ts:271: measuredRemovalPercent publishes the student's exact expected answer before submission/completion. Public-API probe: in_progress, report null, submitted null, derived answer 86.79. Keep measured NTU visible; withhold derived expected removal until completion, including after record_result. Correct the existing visibility assertion and preserve completed reports."
+  ],
+  "limits": ["Three additional public-interface probes used real session/IndexedDB adapter via Vite SSR; wrappers controlled read ordering only. UI, cloud and empirical validation were not tested. Task 2 is not accepted."],
+  "next": "coder_1_fix_findings"
+}

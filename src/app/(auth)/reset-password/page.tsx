@@ -9,8 +9,8 @@ import { ResetPasswordForm } from '@/features/auth/reset-password-form.js'
  * exchanged the emailed code for a session. So there is no `useSearchParams` here and no
  * Suspense boundary needed: this route reads nothing from the URL.
  *
- * The session check lives inside the form, not in middleware. Middleware guards `/lab`,
- * `/compare` and `/account` because those are per-learner data; this route guards itself
+ * The session check lives inside the form, not in Proxy. Proxy guards `/compare`
+ * and `/account`; this route guards itself
  * because its failure mode is specific and worth explaining — an expired link should tell the
  * learner to request a new one, not bounce them to a sign-in screen that cannot help.
  */

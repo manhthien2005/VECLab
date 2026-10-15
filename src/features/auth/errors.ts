@@ -57,6 +57,8 @@ export function describeAuthError(cause: unknown): string {
   // `code` is the stable identifier: `message` is upstream English text that can change
   // between versions and carries detail that must not reach a learner.
   switch (failure.code) {
+    case 'email_address_invalid':
+      return errors.invalidEmail
     case 'email_exists':
     case 'user_already_exists':
     case 'identity_already_exists':
@@ -70,7 +72,7 @@ export function describeAuthError(cause: unknown): string {
     case 'email_not_confirmed':
       // Distinct from a credential failure: the fix is to confirm, not to retype. Telling
       // the learner their password is wrong here would have them change one that works.
-      return APP_STRINGS.auth.verifyFailedBody
+      return errors.emailUnconfirmed
 
     case 'session_expired':
     case 'session_not_found':
@@ -89,6 +91,7 @@ export function describeAuthError(cause: unknown): string {
       return errors.generic
 
     case 'too_many_requests':
+    case 'over_request_rate_limit':
     case 'over_email_send_rate_limit':
     case 'over_sms_send_rate_limit':
       return errors.tooManyRequests

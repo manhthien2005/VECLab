@@ -62,11 +62,11 @@ test.describe('Whole-Page Choreography, Navigation & Integrated QA (R17.5)', () 
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.goto('/')
 
-    const evidenceSection = page.locator('.evidence-section-wrap.reveal')
+    const evidenceSection = page.locator('.evidence-tree-section')
     await evidenceSection.scrollIntoViewIfNeeded()
 
     // Cards are immediately visible
-    const firstCard = page.locator('.evidence-card').first()
+    const firstCard = page.locator('.evidence-tree-node').first()
     await expect(firstCard).toBeVisible()
     await expect(firstCard).toHaveCSS('opacity', '1')
   })

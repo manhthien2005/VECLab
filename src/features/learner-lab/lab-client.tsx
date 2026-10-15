@@ -1,251 +1,187 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { APP_STRINGS } from '@/content/index.js'
 import type { UUID } from '@/domain/process/contracts.js'
-import type { AcidSession } from '@/application/simulation/acid-session.js'
-import { createSessionForStorageMode } from '@/features/simulation-session.js'
-import {
-  AttemptTable,
-  isInProgress,
-  toAttemptRow,
-  type AttemptRow,
-} from '@/features/attempts/attempt-table.js'
-import { WORKBENCH_SCENARIO_KEY } from '@/features/simulation-workbench/scenario.js'
+import { GuestAttemptRepository } from '@/application/attempts/guest-repository.js'
+import type { JarState } from '@/domain/experiments/jar-test/model.js'
+import { listJarLabRows, removeJarLabAttempt, type JarLabRow } from './jar-attempts.js'
+import { EXPERIMENT_OVERVIEWS } from '@/features/experiment-catalog/overviews.js'
+import { ArrowRightIcon, FlaskIcon, GuestIcon, ShieldCheckIcon, WarningIcon } from '@/features/landing/icons.js'
+import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
+import { formatRelativeDate } from '@/shared/ui/format.js'
 
-/**
- * My Lab (docs/web-application-scope.md §4.5).
- *
- * The learner's list of attempts, newest first, with a way back into each one. Required
- * contents, all present: in-progress runs, recently completed runs, and for each its status,
- * experiment, updated time and degree of completion; plus access to the report, access to
- * comparison, deletion, and starting a new attempt.
- *
- * §4.5 also states what NOT to build, and none of it is built here: no aggregate learning KPI,
- * no leaderboard, no class analytics. The screen is a way back into work, not a scoreboard.
- *
- * Client component, because a guest's attempts live in IndexedDB and only the browser can read
- * them. The storage mode decides which session lists them, so this one component serves both
- * modes.
- *
- * The route is `/lab`, which middleware redirects to `/sign-in` for a signed-out learner. That
- * redirect is NOT an auth boundary in the architectural sense — it is a convenience so a
- * signed-out visitor is not shown an empty list with no explanation. The screen itself reads
- * only what the session it is given can see, so a guest who reaches it directly sees their own
- * local attempts and nothing else. Route group names are never the guard.
- *
- * The rows render through the shared `AttemptTable`, which the account screen (§4.9) also
- * lists and deletes from: one table means the two cannot disagree about what a null pH* looks
- * like (§10.2).
- */
-
+type StorageMode = 'local' | 'cloud'
 type LoadState =
   | { kind: 'loading' }
-  | { kind: 'ready'; rows: readonly AttemptRow[] }
-  | { kind: 'error'; message: string }
+  | { kind: 'ready'; rows: readonly JarLabRow[] }
+  | { kind: 'error' }
+type AttemptFilter = 'all' | JarLabRow['status']
 
-/** How many completed attempts to show. §4.5 asks for "recent", not all of them. */
 const COMPLETED_LIMIT = 5
+const FILTERS = [
+  { key: 'all', label: 'Tất cả' },
+  { key: 'in_progress', label: 'Đang thực hành' },
+  { key: 'completed', label: 'Đã hoàn thành' },
+  { key: 'stopped', label: 'Đã dừng' },
+] as const
 
-export function LabClient({ storageMode }: { storageMode: 'local' | 'cloud' }) {
-  const strings = APP_STRINGS.lab
-
-  const session = useMemo<AcidSession>(
-    () => createSessionForStorageMode(storageMode),
-    [storageMode],
-  )
-
+/** Matches the current Jar workbench: browser storage, independent of sign-in status. */
+export function LabClient({ storageMode }: { storageMode: StorageMode }) {
+  const repository = useMemo(() => new GuestAttemptRepository<JarState>(), [])
   const [state, setState] = useState<LoadState>({ kind: 'loading' })
+  const [filter, setFilter] = useState<AttemptFilter>('all')
+  const [deleting, setDeleting] = useState<UUID | null>(null)
+  const [deleteError, setDeleteError] = useState(false)
+  const title = storageMode === 'local' ? APP_STRINGS.nav.labGuest : APP_STRINGS.lab.title
 
-  /**
-   * Read the list, turning a failure into a state rather than a throw.
-   *
-   * Returns the next `LoadState` instead of setting it, so ONE fetch and ONE error policy are
-   * shared by the initial load and the refresh after a delete. That sharing is the point: they
-   * used to be separate paths, and the refresh one did not catch, so a delete against a store
-   * that had become unreadable threw an unhandled rejection while the initial load showed a
-   * message for the same failure.
-   *
-   * Returning rather than setting also keeps every `setState` inside either the effect's own
-   * async body or an event handler.
-   */
   const readRows = useCallback(async (): Promise<LoadState> => {
     try {
-      const summaries = await session.list()
-      return { kind: 'ready', rows: summaries.map(toAttemptRow) }
-    } catch (error) {
-      // A failed list read is not an empty lab. Showing "no attempts" would tell a learner
-      // their history was gone when the truth is that it could not be read — and, for a guest
-      // whose IndexedDB is blocked, that distinction decides whether they retry or start over.
-      return {
-        kind: 'error',
-        message: error instanceof Error ? error.message : APP_STRINGS.errors.genericTitle,
-      }
+      return { kind: 'ready', rows: await listJarLabRows(repository) }
+    } catch {
+      // A failed read is not an empty lab. Keep a recoverable error state.
+      return { kind: 'error' }
     }
-  }, [session])
+  }, [repository])
 
   useEffect(() => {
     let cancelled = false
-
     void (async () => {
       const next = await readRows()
-      // Not after unmount, and not after the storage mode changed: both mean this result
-      // describes a document the learner is no longer looking at.
       if (!cancelled) setState(next)
     })()
-
-    return () => {
-      cancelled = true
+    const refreshOnReturn = () => {
+      if (document.visibilityState !== 'visible') return
+      void readRows().then(next => { if (!cancelled) setState(next) })
     }
+    window.addEventListener('focus', refreshOnReturn)
+    document.addEventListener('visibilitychange', refreshOnReturn)
+    return () => { cancelled = true; window.removeEventListener('focus', refreshOnReturn); document.removeEventListener('visibilitychange', refreshOnReturn) }
   }, [readRows])
 
-  /**
-   * Delete one attempt and reload.
-   *
-   * The confirmation is the browser's own dialog rather than a custom modal, because §4.5
-   * requires that deletion is not accidental and a native confirm cannot be dismissed by
-   * mis-clicking past it.
-   */
-  const remove = useCallback(
-    async (attemptId: UUID) => {
-      if (!globalThis.confirm(strings.confirmDelete)) return
-      await session.remove(attemptId)
-      setState(await readRows())
-    },
-    [readRows, session, strings.confirmDelete],
-  )
-
-  if (state.kind === 'error') {
-    return (
-      <div className="page-narrow stack">
-        <h1>{APP_STRINGS.errors.genericTitle}</h1>
-        <p className="alert alert-danger">{state.message}</p>
-        <p className="row">
-          <Link className="btn btn-primary" href="/experiments">
-            {strings.browseCatalog}
-          </Link>
-        </p>
-      </div>
-    )
+  const refresh = async () => {
+    setState({ kind: 'loading' })
+    setState(await readRows())
   }
 
-  const inProgress = state.kind === 'ready' ? state.rows.filter(isInProgress) : []
-  const completed =
-    state.kind === 'ready'
-      ? state.rows.filter((row) => row.status === 'completed').slice(0, COMPLETED_LIMIT)
-      : []
+  const remove = async (attemptId: UUID) => {
+    if (deleting !== null || !globalThis.confirm(APP_STRINGS.lab.confirmDelete)) return
+    setDeleting(attemptId)
+    setDeleteError(false)
+    try {
+      await removeJarLabAttempt(repository, attemptId)
+      setState(await readRows())
+    } catch {
+      setDeleteError(true)
+    } finally {
+      setDeleting(null)
+    }
+  }
+
+  const rows = state.kind === 'ready' ? state.rows : []
+  const groups = [
+    { status: 'in_progress', title: 'Đang thực hành', description: 'Mở lại và tiếp tục từ dữ liệu đã lưu.' },
+    { status: 'completed', title: filter === 'all' ? 'Hoàn thành gần đây' : 'Đã hoàn thành', description: 'Xem kết quả cuối cùng và báo cáo của từng lượt.' },
+    { status: 'stopped', title: 'Đã dừng', description: 'Các lượt đã kết thúc trước khi hoàn thành.' },
+  ] as const
 
   return (
-    <div className="page stack-loose">
-      <header className="row-between rise">
-        <div className="stack-tight">
-          <p className="eyebrow">{APP_STRINGS.brandTag}</p>
-          <h1>{strings.title}</h1>
-          <p className="lede">{strings.lede}</p>
-        </div>
-        <Link className="btn btn-primary btn-lg" href={`/simulate/${WORKBENCH_SCENARIO_KEY}`}>
-          {strings.startNew}
-        </Link>
+    <div className="page learner-lab">
+      <LabBackground />
+      <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: title }]} />
+      <header className="learner-lab-header">
+        <div><h1>{title}</h1><p>{APP_STRINGS.lab.lede}</p></div>
+        <div className="row"><Link className="btn" href="/compare">So sánh lượt đã nộp</Link><Link className="btn experiment-library-start" href="/experiments">Chọn thí nghiệm <ArrowRightIcon /></Link></div>
       </header>
+      <LabStorageNotice storageMode={storageMode} />
 
-      {state.kind === 'loading' ? (
-        <LabSkeleton />
-      ) : state.rows.length === 0 ? (
-        <EmptyLab />
+      {deleteError && <p className="learner-lab-error" role="alert">Chưa xóa được lượt thực hành. Dữ liệu vẫn hiển thị bên dưới; bạn có thể thử lại.</p>}
+
+      {state.kind === 'loading' ? <LabSkeleton /> : state.kind === 'error' ? (
+        <section className="learner-lab-empty" role="alert"><WarningIcon /><h2>Chưa đọc được các lượt đã lưu</h2><p>Không thể truy cập dữ liệu trên trình duyệt này. Kiểm tra quyền lưu dữ liệu rồi thử lại.</p><button className="btn experiment-library-start" type="button" onClick={() => void refresh()}>Thử lại</button></section>
+      ) : rows.length === 0 ? (
+        <section className="learner-lab-empty"><FlaskIcon /><h2>Chưa có lượt Jar Test</h2><p>Bắt đầu một mẻ để chuẩn bị mẫu, so sánh các cốc và ghi kết quả. Tiến độ được lưu trên trình duyệt này.</p><Link className="btn experiment-library-start" href="/simulate/jar-test">Bắt đầu Jar Test <ArrowRightIcon /></Link></section>
       ) : (
-        <div className="stack-loose">
-          {/*
-            A count strip, not a scoreboard.
-
-            §4.5 forbids aggregate learning KPIs, leaderboards and class analytics, so these
-            are three plain counts of what is in the list below — the same facts the tables
-            show, stated once so a learner can see at a glance whether they have anything
-            unfinished. No score, no average, no ranking.
-          */}
-          <div className="stat-grid">
-            <div className="stat">
-              <span className="stat-value">{inProgress.length}</span>
-              <span className="stat-label">{strings.groupInProgress}</span>
-            </div>
-            <div className="stat">
-              <span className="stat-value">
-                {state.rows.filter((row) => row.status === 'completed').length}
-              </span>
-              <span className="stat-label">Đã hoàn thành</span>
-            </div>
-            <div className="stat">
-              <span className="stat-value">{state.rows.length}</span>
-              <span className="stat-label">Tổng số lượt đã lưu</span>
-            </div>
+        <>
+          <div className="learner-lab-filters" role="group" aria-label="Lọc theo trạng thái thực hành">
+            {FILTERS.map(item => <button type="button" key={item.key} aria-pressed={filter === item.key} onClick={() => setFilter(item.key)}>{item.label}<span>{item.key === 'all' ? rows.length : rows.filter(row => row.status === item.key).length}</span></button>)}
           </div>
-
-          <div className="card">
-            <AttemptTable
-              heading={strings.groupInProgress}
-              onRemove={remove}
-              rows={inProgress}
-            />
-          </div>
-          <div className="card">
-            <AttemptTable
-              heading={strings.groupCompleted}
-              onRemove={remove}
-              rows={completed}
-            />
-          </div>
-
-          {/* §4.5 requires access to comparison from here, not only from the navigation. */}
-          <p className="row">
-            <Link className="btn" href="/compare">
-              {APP_STRINGS.nav.compare}
-            </Link>
-            <span className="hint">
-              Cần hai lượt đã hoàn thành cùng một phiên bản kịch bản.
-            </span>
-          </p>
-        </div>
+          {groups.filter(group => filter === 'all' || filter === group.status).map(group => {
+            const matching = rows.filter(row => row.status === group.status)
+            if (matching.length === 0) return null
+            const visible = filter === 'all' && group.status === 'completed' ? matching.slice(0, COMPLETED_LIMIT) : matching
+            return <section className="learner-lab-group" key={group.status} aria-labelledby={`lab-group-${group.status}`}>
+              <div className="learner-lab-group-heading"><div><h2 id={`lab-group-${group.status}`}>{group.title}<span>{matching.length}</span></h2><p>{group.description}</p></div>{visible.length < matching.length && <button type="button" onClick={() => setFilter('completed')}>Xem tất cả <ArrowRightIcon /></button>}</div>
+              <div className="learner-lab-attempts">{visible.map(row => <LabAttemptCard key={row.attemptId} row={row} onRemove={remove} deleting={deleting} />)}</div>
+            </section>
+          })}
+          {filter !== 'all' && !rows.some(row => row.status === filter) && <div className="learner-lab-filter-empty"><p>Chưa có lượt nào ở trạng thái này.</p><button type="button" onClick={() => setFilter('all')}>Xem tất cả lượt thực hành</button></div>}
+        </>
       )}
     </div>
   )
 }
 
-/** Matches the shape of the loaded lab, so the page does not jump when rows arrive. */
-function LabSkeleton() {
+/** Auth/storage context is always visible, including loading, empty and error states. */
+export function LabStorageNotice({ storageMode }: { storageMode: StorageMode }) {
+  const local = storageMode === 'local'
+  const Icon = local ? GuestIcon : ShieldCheckIcon
   return (
-    <div className="stack" aria-hidden="true">
-      <div className="stat-grid">
-        {[0, 1, 2].map((index) => (
-          <div className="stat" key={index}>
-            <div className="skeleton skeleton-line" style={{ width: '2.5rem', height: '1.25rem' }} />
-            <div className="skeleton skeleton-line" style={{ width: '70%' }} />
-          </div>
-        ))}
+    <section className={`learner-lab-storage ${local ? 'is-local' : 'is-cloud'}`} aria-label="Trạng thái tài khoản và lưu dữ liệu">
+      <Icon />
+      <div className="learner-lab-storage-copy">
+        <div className="learner-lab-storage-title"><h2>Lưu trên trình duyệt này</h2><span>{local ? 'Chưa đăng nhập' : 'Đã đăng nhập'}</span></div>
+        <p>Các lượt Jar Test bên dưới được lưu trên thiết bị này, kể cả khi đã đăng nhập. Dữ liệu không đồng bộ sang thiết bị khác và có thể mất khi xóa dữ liệu web hoặc đóng cửa sổ riêng tư.</p>
+        <p className="learner-lab-storage-hint">Jar Test hiện chưa hỗ trợ lưu vào tài khoản. Dùng cùng trình duyệt để tiếp tục lượt.</p>
       </div>
-      <div className="card">
-        <div className="skeleton skeleton-block" />
-      </div>
-    </div>
+      <Link href={local ? '/sign-in' : '/account'}>{local ? 'Đăng nhập' : 'Quản lý tài khoản'}<ArrowRightIcon /></Link>
+    </section>
   )
 }
 
-/** The empty state §4.5 expects, with the one action that resolves it. */
-function EmptyLab() {
-  const strings = APP_STRINGS.lab
+function LabAttemptCard({ row, onRemove, deleting }: { row: JarLabRow; onRemove: (id: UUID) => Promise<void>; deleting: UUID | null }) {
+  const experiment = EXPERIMENT_OVERVIEWS.find(item => item.scenarioKey === 'jar-test')!
+  const title = experiment.title
+  const completed = row.status === 'completed'
+  const active = row.status === 'in_progress'
+  const statusLabel = active ? 'Đang thực hành' : completed ? 'Đã hoàn thành' : 'Đã dừng'
+  const projection = row.projection
+  const chosen = projection?.cups.find(cup => cup.id === projection.selectedCupId)
+  const final = chosen?.measurements.filter(reading => reading.valid && reading.valueNtu !== null).at(-1)
+  const href = '/simulate/jar-test?attempt=' + encodeURIComponent(row.attemptId)
+  const phase = projection ? ({ setup: 'Chuẩn bị mẫu', rapid: 'Đã khuấy nhanh', slow: 'Đã khuấy chậm', settling: 'Đã lắng', completed: 'Đã nộp bài' } as const)[projection.phase] : 'Không đọc được dữ liệu'
+  const percent = (value: number | null | undefined) => value == null ? 'N/A' : value.toLocaleString('vi-VN', { maximumFractionDigits: 4 }) + '%'
 
   return (
-    <div className="empty-state rise rise-1">
-      <p className="eyebrow">{APP_STRINGS.nav.lab}</p>
-      <h2>{strings.emptyTitle}</h2>
-      <p>{strings.emptyBody}</p>
-      <div className="row">
-        <Link className="btn btn-primary" href={`/simulate/${WORKBENCH_SCENARIO_KEY}`}>
-          {strings.startNew}
-        </Link>
-        <Link className="btn" href="/experiments">
-          {strings.browseCatalog}
-        </Link>
+    <article className="learner-lab-attempt" aria-label={'Lượt Jar Test ' + row.attemptId}>
+      <div className="learner-lab-attempt-top">
+        <div className="learner-lab-attempt-image">{experiment ? <Image src={experiment.image} alt="" fill sizes="96px" /> : <FlaskIcon />}</div>
+        <div className="learner-lab-attempt-title"><span className={`learner-lab-status is-${row.status}`}>{statusLabel}</span><h3>{projection ? <Link href={href}>{title}</Link> : title}</h3><p>Cập nhật <time dateTime={Number.isNaN(row.updatedAt.getTime()) ? undefined : row.updatedAt.toISOString()}>{formatRelativeDate(row.updatedAt)}</time></p></div>
       </div>
-    </div>
+      <dl className="learner-lab-attempt-facts">
+        <div><dt>Số cốc đã chuẩn bị</dt><dd>{projection ? projection.cups.length + ' / 6 cốc' : 'N/A'}</dd></div>
+        <div><dt>Quy trình</dt><dd>{phase}</dd></div>
+        <div><dt>Phương án nộp</dt><dd>{chosen ? 'Cốc ' + chosen.id + ' · pH ' + chosen.initialPh + ' · ' + chosen.doseMgL + ' mg/L' : 'Chưa chọn'}</dd></div>
+        <div><dt>{completed ? 'NTU cuối phương án' : 'Thời gian mô phỏng'}</dt><dd>{completed ? final?.valueNtu == null ? 'N/A' : final.valueNtu.toLocaleString('vi-VN', { maximumFractionDigits: 4 }) + ' NTU' : projection ? projection.elapsedSeconds.toLocaleString('vi-VN') + ' giây' : 'N/A'}</dd></div>
+        {completed && <><div><dt>Hiệu suất từ số đo</dt><dd>{percent(chosen?.measuredRemovalPercent)}</dd></div><div><dt>Đáp số đã ghi</dt><dd>{percent(chosen?.submittedRemovalPercent)}</dd></div></>}
+      </dl>
+      <div className="learner-lab-attempt-version">Lưu trên trình duyệt · <span>{row.scenarioReleaseId}</span></div>
+      {!projection && <p role="alert">Phiên bản hoặc dữ liệu lượt này chưa được hỗ trợ. Dữ liệu đã lưu được giữ nguyên.</p>}
+      <div className="learner-lab-attempt-actions">
+        {projection && <Link className="btn experiment-library-start" href={href + (completed ? '&view=report' : '')}>{active ? 'Tiếp tục thực hành' : completed ? 'Xem báo cáo' : 'Xem lượt thực hành'}<ArrowRightIcon /></Link>}
+        {completed && projection && <Link className="learner-lab-view" href={href + '&view=notebook'}>Xem sổ đo</Link>}
+        <button className="learner-lab-delete" type="button" disabled={deleting !== null} onClick={() => void onRemove(row.attemptId)} aria-label={`Xóa lượt ${title}, cập nhật ${formatRelativeDate(row.updatedAt)}`}>{deleting === row.attemptId ? 'Đang xóa…' : 'Xóa'}</button>
+      </div>
+    </article>
   )
+}
+
+function LabSkeleton() {
+  return <div className="learner-lab-loading" role="status" aria-label="Đang tải lượt thực hành"><span className="visually-hidden">Đang tải lượt thực hành…</span><div className="learner-lab-attempts" aria-hidden="true">{[0, 1].map(index => <div className="learner-lab-attempt" key={index}><div className="skeleton skeleton-line" style={{ width: '65%', height: '1.5rem' }} /><div className="skeleton skeleton-block" style={{ height: '5rem', marginTop: '1.5rem' }} /><div className="skeleton skeleton-line" style={{ width: '45%', marginTop: '1.5rem' }} /></div>)}</div></div>
+}
+
+function LabBackground() {
+  return <svg className="learner-lab-background" aria-hidden="true" focusable="false" width="1400" height="1000" viewBox="0 0 1400 1000" preserveAspectRatio="xMidYMin slice" fill="none"><g stroke="currentColor" opacity="0.15"><path d="m1160 30 32-18 32 18v36l-32 18-32-18Zm64 0 32-18 32 18v36l-32 18-32-18Zm-32 54 32-18 32 18v36l-32 18-32-18ZM1285 160v90l-38 38h-96M75 430v100l32 32v80" /><circle cx="1151" cy="288" r="4" /><circle cx="107" cy="642" r="4" /></g></svg>
 }

@@ -15,10 +15,17 @@ export const APP_STRINGS = {
   brand: 'VECLab',
   brandTag: 'Mô phỏng quy trình',
 
+  footer: {
+    description: 'Mô phỏng thí nghiệm hóa học và xử lý nước.',
+    note: 'Mô phỏng phục vụ học tập, không thay thế phép đo hoặc quy trình xử lý thực tế.',
+  },
+
   nav: {
+    home: 'Trang chủ',
     experiments: 'Thí nghiệm',
     evidence: 'Nguồn khoa học',
     lab: 'Phòng lab của tôi',
+    labGuest: 'Lab dùng thử',
     compare: 'So sánh',
     account: 'Tài khoản',
     signIn: 'Đăng nhập',
@@ -35,10 +42,6 @@ export const APP_STRINGS = {
     lede: 'Mô phỏng hóa học và môi trường theo từng thao tác. Thay đổi thông số, quan sát trạng thái và hiểu cơ sở khoa học phía sau kết quả.',
     heroPrimaryCta: 'Bắt đầu trải nghiệm',
     heroSecondaryCta: 'Xem cách hoạt động',
-    /** §4.1 "Cảnh báo giới hạn mô hình" — must stay beside the hero CTA, not in a footer. */
-    modelWarning:
-      'Đây là công cụ học tập. Kết quả là pH* mô hình ở 25 °C và 0,1 MPa, không phải phép đo bench và không dùng để vận hành hay suy liều cho mẫu thật.',
-
     trustItems: [
       { label: 'An toàn, không rủi ro', hint: 'Không cần đăng ký, dùng thử an toàn ở chế độ khách' },
       { label: 'Học qua thực hành', hint: 'Thao tác từng bước, cân bằng hóa học xác thực' },
@@ -53,65 +56,61 @@ export const APP_STRINGS = {
       'Nguồn và giới hạn mô hình xuất hiện ngay trong lúc làm, không phải phụ lục.',
     ],
 
-    /** §4.1 "Ba thẻ thí nghiệm" — MVP scope names all three (docs/core-project-scope.md §1),
-     * but only acid neutralization has a registered engine today
-     * (src/application/scenarios/registry.ts). The other two are shown honestly as
-     * upcoming rather than linked to an attempt that cannot start (system-architecture §2.4). */
     showcaseEyebrow: 'Khám phá ngay',
     showcaseHeading: '3 thí nghiệm mô phỏng',
-    showcaseLede: 'Những chủ đề tiêu biểu, sát thực tế, giúp bạn vừa học vừa khám phá.',
+    showcaseLede: 'Jar Test đã mở thực hành. Hai bài còn lại chưa triển khai.',
     showcaseCtaLabel: 'Thử ngay',
     comingSoonBadge: 'Sắp ra mắt',
     comingSoonCta: 'Xem trước',
     showcaseCards: [
       {
-        scenarioKey: 'acid-neutralization',
-        title: 'Trung hòa axit',
-        summary: 'Khám phá quá trình trung hòa, theo dõi sự thay đổi pH theo thời gian.',
+        scenarioKey: 'jar-test',
+        title: 'Jar Test',
+        summary: 'So sánh liều keo tụ, khuấy và lắng để giảm độ đục.',
         available: true,
       },
       {
-        scenarioKey: 'copper-precipitation',
-        title: 'Kết tủa Cu²⁺',
-        summary: 'Quan sát quá trình tạo kết tủa, theo dõi nồng độ ion trong dung dịch.',
+        scenarioKey: 'acid-neutralization',
+        title: 'Điều chỉnh pH',
+        summary: 'Chọn lượng hóa chất và theo dõi pH của mẫu nước.',
         available: false,
       },
       {
-        scenarioKey: 'plastic-density-separation',
-        title: 'Phân loại nhựa',
-        summary: 'Tìm hiểu tính chất, tách và nhận diện các loại nhựa phổ biến.',
+        scenarioKey: 'methylene-blue-adsorption',
+        title: 'Hấp phụ xanh methylene',
+        summary: 'Khảo sát khả năng loại màu bằng than hoạt tính.',
         available: false,
       },
     ],
 
-    workbenchEyebrow: 'Trải nghiệm chi tiết',
-    workbenchHeading: 'Xem toàn bộ quá trình trên workbench',
+    workbenchEyebrow: 'Không gian thực hành',
+    workbenchHeading: 'Thực hành trên workbench',
     workbenchLede:
-      'Tương tác trực tiếp với mô phỏng, theo dõi trạng thái, xem kết quả và tìm hiểu giải thích khoa học.',
-    workbenchSteps: ['Chuẩn bị dung dịch', 'Thêm bazơ', 'Theo dõi biến đổi', 'Phân tích kết quả', 'Kết luận'],
+      'Chọn điều kiện, quan sát quá trình và đo kết quả. Cuối mỗi lượt, xem lại các bước để hiểu vì sao kết quả khác nhau.',
+    workbenchSteps: ['Chuẩn bị mẫu', 'Chọn điều kiện', 'Khuấy và lắng', 'Đo và ghi kết quả'],
 
-    evidenceEyebrow: 'Nền tảng vững chắc',
+    evidenceEyebrow: 'Cơ sở khoa học',
     evidenceSectionHeading: 'Mỗi kết quả đều có căn cứ',
     evidenceSectionLede:
-      'Các mô phỏng trong VECLab được xây dựng từ mô hình khoa học và tài liệu đáng tin cậy.',
+      'Xem cách mô hình tính kết quả, điều kiện áp dụng và tài liệu được sử dụng.',
     evidenceCards: [
       {
-        title: 'Mô hình tính toán',
-        body: 'Dựa trên cân bằng hóa học và các hằng số đã được kiểm chứng.',
+        title: 'Mô hình và giới hạn',
+        body: 'Xem điều kiện áp dụng và các giả định của mô hình.',
       },
       {
-        title: 'Công thức minh họa',
-        body: 'Cơ sở tính toán của quá trình, hiển thị ngay trong lúc làm.',
+        title: 'Cách tính kết quả',
+        body: 'Theo dõi công thức, đơn vị và các đại lượng trong phép tính.',
       },
       {
-        title: 'Nguồn tham khảo',
-        body: 'Tài liệu kỹ thuật và nghiên cứu khoa học có thể kiểm tra lại.',
+        title: 'Tài liệu tham khảo',
+        body: 'Tra cứu tài liệu gốc, phân biệt dữ liệu có nguồn với giả định.',
       },
     ],
 
     finalCtaHeading: 'Sẵn sàng vào lab?',
-    finalCtaLede: 'Khám phá thế giới hóa học và môi trường qua mô phỏng tương tác cùng VECLab.',
-    finalCtaButton: 'Bắt đầu ngay',
+    finalCtaLede: 'Bắt đầu với bài điều chỉnh pH. Tự chọn lượng hóa chất, đo và xem lại kết quả.',
+    finalCtaButton: 'Vào lab thực hành',
 
     catalogHeading: 'Thí nghiệm',
     catalogEmpty: 'Hiện chưa có thí nghiệm nào được khóa trong phiên bản triển khai này.',
@@ -127,6 +126,13 @@ export const APP_STRINGS = {
     startNewAttempt: 'Bắt đầu lượt mới',
     contextHeading: 'Bối cảnh và mục tiêu',
     initialStateHeading: 'Mẫu ban đầu',
+    processHeading: 'Quy trình trên workbench',
+    processLiveLead:
+      'Phiên bản này chuẩn độ HCl bằng NaOH trên workbench. Ca(OH)₂ và Na₂CO₃ nằm trong đặc tả mô hình, chưa mở để chọn.',
+    processLiveBadge: 'Trên workbench',
+    processSpecBadge: 'Trong mô hình, chưa mở',
+    naohLimitLabel: 'Giới hạn NaOH trên workbench',
+    specLimitLabel: 'Giới hạn trong đặc tả (chưa mở)',
     permittedHeading: 'Thao tác được phép',
     parametersHeading: 'Tham số chính',
     evaluatedHeading: 'Hệ thống đánh giá gì',
@@ -177,6 +183,23 @@ export const APP_STRINGS = {
     phenomenaHeading: 'Hiện tượng dự kiến',
     metricsHeading: 'Chỉ số khoa học',
     actionsHeading: 'Thao tác tiếp theo',
+    modeGuided: 'Từng bước',
+    modeGuidedHint: 'Làm đúng quy trình lab',
+    modeExplore: 'Thêm và đo',
+    modeExploreHint: 'Một lần bấm: thêm, khuấy, chờ, đo',
+    setupGoalHeading: 'Mục tiêu lần này',
+    setupGoalHint: 'Đưa pH* vào dải mục tiêu sau khi thêm NaOH, khuấy, chờ ổn định rồi đo.',
+    setupSampleHeading: 'Mẫu',
+    setupSampleStandard: 'Mẫu chuẩn',
+    setupCustomizeSample: 'Tùy chỉnh thể tích và nồng độ',
+    setupUseStandard: 'Dùng mẫu chuẩn',
+    setupModeLegend: 'Cách làm',
+    aliquotLegend: 'Thể tích mỗi lần thêm',
+    otherActions: 'Thao tác khác',
+    protocolHeading: 'Quy trình chuẩn độ',
+    exploreStatusHeading: 'Đang thêm và đo',
+    protocolRepeatHint: 'Có thể thêm NaOH nhiều lần. Bấm Thêm xong rồi khuấy, chờ, đo.',
+    finishDosing: 'Thêm xong',
     feedbackHeading: 'Phản hồi sau thao tác',
     formulasHeading: 'Công thức và dữ liệu trung gian',
     historyHeading: 'Lịch sử thao tác',
@@ -227,7 +250,7 @@ export const APP_STRINGS = {
 
   lab: {
     title: 'Phòng lab của tôi',
-    lede: 'Các lượt thử của bạn. Lượt ở chế độ khách chỉ tồn tại trên trình duyệt đã tạo ra nó.',
+    lede: 'Tiếp tục lượt đang làm hoặc xem lại kết quả thực hành.',
     emptyTitle: 'Chưa có lượt thử nào',
     emptyBody: 'Chọn một thí nghiệm từ danh mục để bắt đầu.',
     browseCatalog: 'Xem danh mục thí nghiệm',
@@ -260,8 +283,8 @@ export const APP_STRINGS = {
 
   account: {
     title: 'Tài khoản và dữ liệu',
-    lede: 'Dữ liệu của bạn được lưu theo từng thao tác. Xóa bất cứ lúc nào.',
-    signInPrompt: 'Đăng nhập để tiếp tục lượt thử trên thiết bị khác và mở lại báo cáo.',
+    lede: 'Cập nhật tên hiển thị, quản lý mật khẩu và xem các lượt đã lưu trên thiết bị.',
+    signInPrompt: 'Đăng nhập để quản lý thông tin tài khoản. Lượt Jar Test vẫn được lưu riêng trên trình duyệt này.',
     signIn: 'Đăng nhập',
     signOut: 'Đăng xuất',
     signingOut: 'Đang đăng xuất…',
@@ -289,7 +312,7 @@ export const APP_STRINGS = {
      * server actually enforces it: an active, confirmed session.
      */
     changePasswordHint:
-      'Đổi mật khẩu khi đang đăng nhập. Mật khẩu mới áp dụng cho các phiên sau; phiên hiện tại vẫn giữ nguyên.',
+      'Dùng ít nhất 8 ký tự. Bạn cần đăng nhập lại nếu phiên làm việc đã hết hạn.',
     messages: {
       profileSaved: 'Đã lưu tên hiển thị.',
       passwordChanged: 'Đã đổi mật khẩu.',
@@ -432,18 +455,19 @@ export const APP_STRINGS = {
     nextHint: 'Bạn sẽ được đưa trở lại trang vừa truy cập.',
     signedUpTitle: 'Đã gửi email xác minh',
     signedUpBody:
-      'Kiểm tra hộp thư và bấm liên kết xác minh để hoàn tất tạo tài khoản. Liên kết có hiệu lực trong 24 giờ.',
+      'Kiểm tra hộp thư và bấm liên kết xác minh để hoàn tất tạo tài khoản. Nếu liên kết hết hạn, hãy yêu cầu gửi lại.',
     resetSentTitle: 'Đã gửi liên kết đặt lại',
     resetSentBody:
       'Nếu email này có tài khoản, một liên kết đặt lại mật khẩu đã được gửi. Kiểm tra cả thư rác.',
     verifying: 'Đang xác minh liên kết…',
     verifyOkTitle: 'Đã xác minh email',
-    verifyOkBody: 'Bạn có thể đăng nhập bằng email và mật khẩu vừa tạo.',
+    verifyOkBody: 'Email đã được xác minh. Bạn có thể tiếp tục vào phòng lab.',
     verifyFailedTitle: 'Liên kết không hợp lệ',
     verifyFailedBody:
-      'Liên kết xác minh đã hết hạn hoặc đã được sử dụng. Yêu cầu gửi lại liên kết mới.',
+      'Liên kết không hợp lệ, đã hết hạn hoặc đã được sử dụng. Vui lòng yêu cầu một liên kết mới.',
     resendVerification: 'Gửi lại email xác minh',
     errors: {
+      emailUnconfirmed: 'Email chưa được xác minh. Mở email xác minh hoặc yêu cầu gửi lại để tiếp tục.',
       invalidCredentials: 'Email hoặc mật khẩu không đúng.',
       emailTaken: 'Email này đã có tài khoản. Hãy đăng nhập.',
       weakPassword: 'Mật khẩu quá yếu. Dùng tối thiểu 8 ký tự.',
@@ -451,7 +475,7 @@ export const APP_STRINGS = {
       invalidEmail: 'Email không hợp lệ.',
       tooManyRequests: 'Quá nhiều yêu cầu. Vui lòng chờ vài phút rồi thử lại.',
       notConfigured:
-        'Ứng dụng chưa cấu hình Supabase nên không thể đăng nhập hay tạo tài khoản. Chế độ khách vẫn hoạt động.',
+        'Chức năng tài khoản hiện chưa sẵn sàng. Bạn vẫn có thể thực hành ở chế độ khách và lưu tiến độ trên trình duyệt này.',
       generic: 'Không thực hiện được. Vui lòng thử lại.',
       signOutFailed: 'Không đăng xuất được. Thử lại hoặc đóng tab.',
     },

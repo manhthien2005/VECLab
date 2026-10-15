@@ -145,7 +145,6 @@ export function WorkbenchClient({ attemptId, storageMode }: WorkbenchClientProps
         saveStatus={controller.saveStatus}
         storageMode={storageMode}
         isPreStart={controller.isPreStart}
-        onModeChange={controller.setMode}
       />
 
       {/* Error / Conflict Banner */}
@@ -214,6 +213,7 @@ export function WorkbenchClient({ attemptId, storageMode }: WorkbenchClientProps
                 domain={controller.domain}
                 availableActions={controller.availableActions}
                 isPreStart={controller.isPreStart}
+                dosingFinished={controller.dosingFinished}
               />
               <div className="wb-active-run-meta card stack-tight">
                 <h4 className="wb-section-heading">Tác vụ lượt thử</h4>
@@ -291,6 +291,8 @@ export function WorkbenchClient({ attemptId, storageMode }: WorkbenchClientProps
             isExploreDispenseAvailable={controller.isExploreDispenseAvailable}
             isUndoAvailable={controller.isUndoAvailable}
             isCompleteAvailable={controller.isCompleteAvailable}
+            lastActionType={controller.lastSuccessfulInteraction?.actionType ?? null}
+            dosingFinished={controller.dosingFinished}
             onAliquotChange={controller.setSelectedAliquot}
             onSelectRoute={controller.selectNaohRoute}
             onCalibrate={controller.calibrateMeter}
@@ -302,6 +304,7 @@ export function WorkbenchClient({ attemptId, storageMode }: WorkbenchClientProps
             onDispenseAndMeasure={controller.dispenseAndMeasure}
             onUndo={controller.undoLastAction}
             onComplete={controller.completeRun}
+            onFinishDosing={controller.finishDosing}
           />
         </aside>
       </div>

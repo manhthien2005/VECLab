@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { APP_STRINGS } from '@/content/index.js'
 import { currentStorageMode, isSupabaseConfigured } from '@/features/auth/session.js'
 import { WORKBENCH_SCENARIO_KEY } from '@/features/simulation-workbench/scenario.js'
@@ -13,7 +13,7 @@ import { WorkbenchClient } from '@/features/simulation-workbench/workbench-clien
  *
  * NOT inside a route group. §4.6's guest flow requires that a learner can complete an
  * experiment without an account, so this route is public and the storage mode is derived
- * rather than gated. Middleware guards `/lab`, `/compare` and `/account`; it does not guard
+ * rather than gated. Proxy guards `/compare` and `/account`; it does not guard
  * this, and must not — gating it would make the guest path unreachable.
  *
  * Reads cookies (through `currentStorageMode`), so it renders per request. It cannot be
@@ -60,6 +60,8 @@ export default async function WorkbenchPage({
   // parameter was repeated, which is not a resolvable attempt, so it is treated as absent
   // rather than picking one arbitrarily and silently resuming the wrong run.
   const attemptId = typeof attempt === 'string' && attempt !== '' ? attempt : null
+  // Old saved runs remain readable, but this retired lesson cannot start new runs.
+  if (attemptId === null) redirect('/experiments')
 
   const storageMode = await currentStorageMode()
   const strings = APP_STRINGS.workbench

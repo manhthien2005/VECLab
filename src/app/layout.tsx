@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import Link from 'next/link'
 import { APP_STRINGS } from '@/content/index.js'
-import { FlaskIcon } from '@/features/landing/icons.js'
-import { AppNav } from './app-nav.js'
-import { ThemeToggle } from './theme-toggle.js'
+import { ArrowRightIcon, FlaskIcon } from '@/features/landing/icons.js'
+import { AppFooterNav, AppNav } from './app-nav.js'
 import { THEME_STORAGE_KEY } from './theme-storage.js'
 import { manrope } from './fonts.js'
 import './globals.css'
@@ -90,7 +89,6 @@ export default function RootLayout({
                 <span className="brand-tag">{APP_STRINGS.brandTag}</span>
               </Link>
               <AppNav />
-              <ThemeToggle />
             </div>
           </header>
 
@@ -107,20 +105,7 @@ export default function RootLayout({
   )
 }
 
-/**
- * Footer.
- *
- * Carries the three disclaimers that must be reachable from every screen (§11 of the
- * documentation index: the model is documentary, the conditions are fixed, and real lab
- * work is supervised), plus the navigation a learner looks for at the bottom of a page.
- *
- * The disclaimers are stated here rather than only on the pages that show numbers,
- * because §4.6 and §4.7 both require limitations to stay visible wherever the scenario
- * is used — and a learner can land on any route directly. They sit in `.footer-legal`,
- * below the brand/nav band, quieter than a marketing footer usually reads — this product
- * genuinely has more to disclose than most, and the fix for that is smaller type and one
- * narrow column, not fewer sentences.
- */
+/** Shared footer; scenario-specific assumptions stay in each lesson and its evidence. */
 function SiteFooter() {
   return (
     <footer className="app-footer">
@@ -133,36 +118,20 @@ function SiteFooter() {
               </span>
               <span className="brand-name">{APP_STRINGS.brand}</span>
             </Link>
-            <p className="footer-tagline">Khoa học hôm nay. Tương lai ngày mai.</p>
+            <p className="footer-description">{APP_STRINGS.footer.description}</p>
           </div>
 
-          <nav aria-label="Liên kết chân trang" className="footer-nav">
-            <Link href="/experiments">{APP_STRINGS.nav.experiments}</Link>
-            <Link href="/evidence">{APP_STRINGS.nav.evidence}</Link>
-            <Link href="/lab">{APP_STRINGS.nav.lab}</Link>
-            <Link href="/compare">{APP_STRINGS.nav.compare}</Link>
-            <Link href="/sign-in">{APP_STRINGS.nav.signIn}</Link>
-            <Link href="/account">{APP_STRINGS.nav.account}</Link>
-          </nav>
+          <AppFooterNav />
         </div>
 
         <div className="footer-legal">
-          <div className="footer-disclaimers">
-            <p>
-              Giá trị pH hiển thị là pH* — kết quả mô hình tính từ nồng độ H⁺ với hệ số hoạt
-              độ bằng 1, không phải phép đo bench. Mô hình áp dụng ở 25 °C và 0,1 MPa, hệ
-              carbon kín; không dùng để suy ra liều xử lý cho mẫu thật chưa biết thành phần.
-            </p>
-            <p>
-              Thí nghiệm thật chỉ thực hiện dưới sự giám sát của người phụ trách phòng thí
-              nghiệm, với trang bị bảo hộ phù hợp. Công cụ giáo dục — không thay thế phép đo,
-              jar test, thiết kế kỹ thuật, đánh giá an toàn, quản lý chất thải hoặc kết luận
-              tuân thủ pháp luật.
-            </p>
+          <div className="footer-note">
+            <p><strong>Lưu ý sử dụng</strong>{APP_STRINGS.footer.note}</p>
+            <Link href="/evidence">Nguồn và giới hạn <ArrowRightIcon aria-hidden="true" /></Link>
           </div>
           <div className="footer-legal-row">
-            <span>{APP_STRINGS.brand}. Đồ án học tập.</span>
             <span>© 2026 {APP_STRINGS.brand}</span>
+            <a className="footer-back-top" href="#main">Về đầu trang <ArrowRightIcon /></a>
           </div>
         </div>
       </div>

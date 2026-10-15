@@ -7,7 +7,7 @@ import { AccountClient } from '@/features/account/account-client.js'
 /**
  * `/account` — account and data (docs/web-application-scope.md §4.9).
  *
- * Middleware redirects a signed-out learner to `/sign-in?next=/account`, so this page
+ * Proxy redirects a signed-out learner to `/sign-in?next=/account`, so this page
  * normally renders for someone with a session. It still handles the guest case rather than
  * assuming, for two reasons: middleware falls through when Supabase is not configured at all
  * (a guest-only deployment is a supported state, §5.1), and a session can end while the page is
@@ -29,7 +29,6 @@ export default async function AccountPage() {
   // Supabase for a single answer. Deriving the mode from the learner already in hand is the
   // same decision the shared helper makes, without the second trip.
   const learner = await currentLearner()
-  const storageMode = learner === null ? 'local' : 'cloud'
 
   // A guest on a configured deployment: middleware should have redirected, but a redirect can
   // be bypassed by a direct fetch or by a session ending mid-request. The screen says what is
@@ -48,5 +47,5 @@ export default async function AccountPage() {
     )
   }
 
-  return <AccountClient storageMode={storageMode} />
+  return <AccountClient />
 }

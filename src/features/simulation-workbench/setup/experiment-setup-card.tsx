@@ -3,13 +3,19 @@
 import { useState, useId } from 'react'
 import type { AcidSetupParams } from '@/domain/experiments/acid-neutralization/setup.js'
 import {
+  benchmarkSetupParams,
   validateSetupParams,
 } from '@/domain/experiments/acid-neutralization/setup.js'
 import {
   EXPLORATION_RANGES,
   LOCKED_CONDITIONS,
 } from '@/domain/experiments/acid-neutralization/constants.js'
+import { ACID_INPUT_DOMAIN, APP_STRINGS } from '@/content/index.js'
+import { formatLitresAsMl, formatPh } from '@/shared/ui/format.js'
 import type { WorkbenchMode } from '../controller/types.js'
+import { workbenchModeLabel } from '../guidance/protocol.js'
+
+const STANDARD_SETUP = benchmarkSetupParams()
 
 export type ExperimentSetupCardProps = {
   readonly setupDraft: AcidSetupParams
@@ -87,6 +93,12 @@ export function ExperimentSetupCard({
     }
   }
 
+  const applyStandardSample = () => {
+    setVolumeMlStr((STANDARD_SETUP.acidVolumeL * 1000).toFixed(1))
+    setConcMStr(STANDARD_SETUP.acidConcentrationMolL.toFixed(3))
+    onSetupChange(STANDARD_SETUP)
+  }
+
   const minVolMl = EXPLORATION_RANGES.acidVolumeL.min * 1000
   const maxVolMl = EXPLORATION_RANGES.acidVolumeL.max * 1000
   const minConcM = EXPLORATION_RANGES.acidConcentrationMolL.min
@@ -113,9 +125,101 @@ export function ExperimentSetupCard({
             }
           }}
         >
-          {/* Mode Selector */}
+          <div className="wb-setup-goal">
+            <p className="wb-field-label">{APP_STRINGS.workbench.setupGoalHeading}</p>
+            <p className="wb-setup-goal-value">
+              {APP_STRINGS.workbench.target}{' '}
+              {formatPh(ACID_INPUT_DOMAIN.benchmark.targetPH)} ±{' '}
+              {formatPh(ACID_INPUT_DOMAIN.benchmark.targetTolerancePH)}
+            </p>
+            <p className="hint tiny">{APP_STRINGS.workbench.setupGoalHint}</p>
+          </div>
+
+          <div className="wb-setup-sample">
+            <p className="wb-field-label">{APP_STRINGS.workbench.setupSampleHeading}</p>
+            <p className="wb-setup-sample-line">
+              {APP_STRINGS.workbench.setupSampleStandard}: HCl{' '}
+              {formatLitresAsMl(STANDARD_SETUP.acidVolumeL)} ·{' '}
+              {STANDARD_SETUP.acidConcentrationMolL.toFixed(3)} M ·{' '}
+              {LOCKED_CONDITIONS.temperatureC.toFixed(1)} °C
+            </p>
+          </div>
+
+          <details className="disclosure wb-setup-customize">
+            <summary>{APP_STRINGS.workbench.setupCustomizeSample}</summary>
+            <div className="disclosure-body stack-tight">
+              <div className="field">
+                <label htmlFor={volumeId} className="wb-field-label">
+                  Thể tích dung dịch HCl ban đầu (mL)
+                </label>
+                <div className="input-group">
+                  <input
+                    id={volumeId}
+                    type="number"
+                    min={minVolMl}
+                    max={maxVolMl}
+                    step="0.5"
+                    value={volumeMlStr}
+                    disabled={busy}
+                    onChange={(e) => handleVolumeChange(e.target.value)}
+                    className={`input ${!isValid && (parsedVolumeL < EXPLORATION_RANGES.acidVolumeL.min || parsedVolumeL > EXPLORATION_RANGES.acidVolumeL.max) ? 'input-error' : ''}`}
+                    aria-describedby={`${volumeId}-hint`}
+                  />
+                  <span className="input-suffix">mL</span>
+                </div>
+                <p id={`${volumeId}-hint`} className="hint tiny">
+                  Phạm vi hợp lệ: {minVolMl.toFixed(1)} – {maxVolMl.toFixed(1)} mL (chuẩn hóa: {(currentSetup.acidVolumeL * 1000).toFixed(1)} mL)
+                </p>
+              </div>
+
+              <div className="field">
+                <label htmlFor={concId} className="wb-field-label">
+                  Nồng độ HCl ban đầu (M)
+                </label>
+                <div className="input-group">
+                  <input
+                    id={concId}
+                    type="number"
+                    min={minConcM}
+                    max={maxConcM}
+                    step="0.001"
+                    value={concMStr}
+                    disabled={busy}
+                    onChange={(e) => handleConcChange(e.target.value)}
+                    className={`input ${!isValid && (parsedConcM < minConcM || parsedConcM > maxConcM) ? 'input-error' : ''}`}
+                    aria-describedby={`${concId}-hint`}
+                  />
+                  <span className="input-suffix">M</span>
+                </div>
+                <p id={`${concId}-hint`} className="hint tiny">
+                  Phạm vi hợp lệ: {minConcM.toFixed(3)} – {maxConcM.toFixed(3)} M
+                </p>
+              </div>
+
+              <div className="wb-fixed-conditions">
+                <div className="wb-fixed-item">
+                  <span className="wb-fixed-label">Dung dịch chuẩn độ:</span>
+                  <span className="wb-fixed-value">NaOH {parsedConcM > 0 ? parsedConcM.toFixed(3) : '0.010'} M (cố định)</span>
+                </div>
+                <div className="wb-fixed-item">
+                  <span className="wb-fixed-label">Nhiệt độ môi trường:</span>
+                  <span className="wb-fixed-value">{LOCKED_CONDITIONS.temperatureC.toFixed(1)} °C (cố định)</span>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="btn btn-sm btn-ghost"
+                onClick={applyStandardSample}
+                disabled={busy}
+              >
+                {APP_STRINGS.workbench.setupUseStandard}
+              </button>
+            </div>
+          </details>
+
           <fieldset className="field wb-mode-fieldset" disabled={busy}>
-            <legend className="wb-field-label">Chế độ vận hành</legend>
+            <legend className="wb-field-label">{APP_STRINGS.workbench.setupModeLegend}</legend>
             <div className="wb-mode-segmented">
               <label
                 htmlFor={modeGuidedId}
@@ -130,8 +234,8 @@ export function ExperimentSetupCard({
                   onChange={() => onModeChange('GUIDED')}
                   className="visually-hidden"
                 />
-                <span className="wb-mode-pill-title">GUIDED</span>
-                <span className="wb-mode-pill-desc">Từng bước chuẩn xác</span>
+                <span className="wb-mode-pill-title">{APP_STRINGS.workbench.modeGuided}</span>
+                <span className="wb-mode-pill-desc">{APP_STRINGS.workbench.modeGuidedHint}</span>
               </label>
 
               <label
@@ -147,75 +251,11 @@ export function ExperimentSetupCard({
                   onChange={() => onModeChange('EXPLORE')}
                   className="visually-hidden"
                 />
-                <span className="wb-mode-pill-title">EXPLORE</span>
-                <span className="wb-mode-pill-desc">Thêm &amp; Đo nhanh</span>
+                <span className="wb-mode-pill-title">{APP_STRINGS.workbench.modeExplore}</span>
+                <span className="wb-mode-pill-desc">{APP_STRINGS.workbench.modeExploreHint}</span>
               </label>
             </div>
           </fieldset>
-
-          {/* HCl Initial Volume */}
-          <div className="field">
-            <label htmlFor={volumeId} className="wb-field-label">
-              Thể tích dung dịch HCl ban đầu (mL)
-            </label>
-            <div className="input-group">
-              <input
-                id={volumeId}
-                type="number"
-                min={minVolMl}
-                max={maxVolMl}
-                step="0.5"
-                value={volumeMlStr}
-                disabled={busy}
-                onChange={(e) => handleVolumeChange(e.target.value)}
-                className={`input ${!isValid && (parsedVolumeL < EXPLORATION_RANGES.acidVolumeL.min || parsedVolumeL > EXPLORATION_RANGES.acidVolumeL.max) ? 'input-error' : ''}`}
-                aria-describedby={`${volumeId}-hint`}
-                required
-              />
-              <span className="input-suffix">mL</span>
-            </div>
-            <p id={`${volumeId}-hint`} className="hint tiny">
-              Phạm vi hợp lệ: {minVolMl.toFixed(1)} – {maxVolMl.toFixed(1)} mL (chuẩn hóa: {(currentSetup.acidVolumeL * 1000).toFixed(1)} mL)
-            </p>
-          </div>
-
-          {/* HCl Concentration */}
-          <div className="field">
-            <label htmlFor={concId} className="wb-field-label">
-              Nồng độ HCl ban đầu (M)
-            </label>
-            <div className="input-group">
-              <input
-                id={concId}
-                type="number"
-                min={minConcM}
-                max={maxConcM}
-                step="0.001"
-                value={concMStr}
-                disabled={busy}
-                onChange={(e) => handleConcChange(e.target.value)}
-                className={`input ${!isValid && (parsedConcM < minConcM || parsedConcM > maxConcM) ? 'input-error' : ''}`}
-                aria-describedby={`${concId}-hint`}
-                required
-              />
-              <span className="input-suffix">M</span>
-            </div>
-            <p id={`${concId}-hint`} className="hint tiny">
-              Phạm vi hợp lệ: {minConcM.toFixed(3)} – {maxConcM.toFixed(3)} M
-            </p>
-          </div>
-
-          {/* Derived Fixed Conditions */}
-          <div className="wb-fixed-conditions">
-            <div className="wb-fixed-item">
-              <span className="wb-fixed-label">Dung dịch chuẩn độ:</span>
-              <span className="wb-fixed-value">NaOH {parsedConcM > 0 ? parsedConcM.toFixed(3) : '0.010'} M (cố định)</span>
-            </div>
-            <div className="wb-fixed-item">
-              <span className="wb-fixed-label">Nhiệt độ môi trường:</span>
-              <span className="wb-fixed-value">{LOCKED_CONDITIONS.temperatureC.toFixed(1)} °C (cố định)</span>
-            </div>
-          </div>
 
           {/* Start Action */}
           <div className="wb-setup-actions pt-2">
@@ -235,7 +275,7 @@ export function ExperimentSetupCard({
             <div className="wb-param-row">
               <dt>Chế độ:</dt>
               <dd>
-                <span className="badge badge-accent">{mode}</span>
+                <span className="badge badge-accent">{workbenchModeLabel(mode)}</span>
               </dd>
             </div>
             <div className="wb-param-row">

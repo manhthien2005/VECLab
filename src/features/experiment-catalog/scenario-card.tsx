@@ -1,64 +1,48 @@
+import Image from 'next/image'
 import Link from 'next/link'
-import { APP_STRINGS } from '@/content/index.js'
-import type { CatalogEntry } from '@/features/experiment-catalog/catalog.js'
+import type { CatalogEntry } from './catalog.js'
+import type { ExperimentOverview } from './overviews.js'
+import { ArrowRightIcon } from '@/features/landing/icons.js'
 
-/**
- * One experiment card, as §4.1 requires on both the home page and the catalog.
- *
- * The three counts are the card's real content. A learner choosing between scenarios
- * cannot judge chemistry from a summary paragraph, but "10 tuyên bố có bằng chứng, 15
- * nguồn, 5 giới hạn công bố" says how well evidenced the release is — which is the claim
- * this product makes about itself. They render as a stat strip rather than a definition
- * list so the numbers read at a glance.
- *
- * Server-renderable: props only, no hooks, no directive.
- */
-export function ScenarioCard({ entry }: { entry: CatalogEntry }) {
-  const detailHref = `/experiments/${entry.scenarioKey}`
-
+export function ScenarioCard({ overview, entry }: { overview: ExperimentOverview; entry: CatalogEntry | undefined }) {
+  const available = entry !== undefined
   return (
-    <article className="card card-interactive scenario-card">
-      <div className="stack-tight">
-        <div className="row">
-          <span className="badge badge-mono">{entry.releaseId}</span>
-          <span className="badge badge-mono">mô hình {entry.modelSpecVersion}</span>
-        </div>
-        {/*
-          The heading wraps the link rather than sitting beside one, so the accessible name
-          of the link is the experiment's own title. A card whose only link says "Xem chi
-          tiết" gives a screen-reader user a list of identical link names with no way to
-          tell the scenarios apart.
-        */}
-        <h3>
-          <Link href={detailHref}>{entry.title}</Link>
-        </h3>
+    <article className="experiment-library-card" aria-labelledby={`experiment-${overview.scenarioKey}`}>
+      <div className="experiment-library-image">
+        <Image src={overview.image} alt={overview.imageAlt} fill sizes="(max-width: 58rem) 92vw, 420px" loading={available ? 'eager' : 'lazy'} />
       </div>
-
-      <p className="summary">{entry.summary}</p>
-
-      <dl className="scenario-stats">
-        <div>
-          <dt>{APP_STRINGS.release.claims}</dt>
-          <dd>{entry.claimCount}</dd>
+      <div className="experiment-library-body">
+        <div className="experiment-library-tags">
+          <span className="experiment-topic">{overview.category}</span>
+          <span className={`experiment-availability${available ? ' is-available' : ''}`}><span aria-hidden="true" />{available ? 'Có thể thực hành · Lưu trên trình duyệt' : 'Chưa triển khai'}</span>
         </div>
-        <div>
-          <dt>{APP_STRINGS.release.sources}</dt>
-          <dd>{entry.sourceCount}</dd>
+        <h2 id={`experiment-${overview.scenarioKey}`}>{overview.title}</h2>
+        <p className="experiment-library-question">{overview.question}</p>
+        <p className="experiment-library-learning"><span>Bạn sẽ học</span>{overview.learning}</p>
+        <dl className="experiment-library-facts">
+          <div><dt>Mẫu và hóa chất</dt><dd>{overview.input}</dd></div>
+          <div><dt>Thông số khảo sát</dt><dd>{overview.parameters}</dd></div>
+          <div><dt>Kết quả theo dõi</dt><dd>{overview.outcome}</dd></div>
+        </dl>
+        <details className="experiment-library-plan">
+          <summary>{available ? 'Dụng cụ và kiến thức cần có' : 'Chuẩn bị và quy trình dự kiến'}<ArrowRightIcon /></summary>
+          <dl className="experiment-library-preparation">
+            <div><dt>{available ? 'Dụng cụ' : 'Dụng cụ dự kiến'}</dt><dd>{overview.tools}</dd></div>
+            <div><dt>Kiến thức cơ bản</dt><dd>{overview.prerequisites}</dd></div>
+          </dl>
+          {!available && <>
+            <p className="experiment-library-procedure-label">Quy trình dự kiến</p>
+            <ol>{overview.procedure.map(step => <li key={step}>{step}</li>)}</ol>
+          </>}
+        </details>
+        <div className="experiment-library-actions">
+          {available ? <>
+            <Link className="btn experiment-library-start" href={`/simulate/${entry.scenarioKey}`}>Bắt đầu thực hành<ArrowRightIcon /></Link>
+            <Link className="experiment-library-detail" href={`/experiments/${entry.scenarioKey}`}>Xem chi tiết<span className="sr-only"> — {overview.title}</span></Link>
+          </> : (
+            <p className="experiment-library-unavailable">Chưa triển khai bài thực hành.</p>
+          )}
         </div>
-        <div>
-          <dt>{APP_STRINGS.release.limitations}</dt>
-          <dd>{entry.limitationCount}</dd>
-        </div>
-      </dl>
-
-      <div className="row">
-        <Link className="btn btn-primary" href={`/simulate/${entry.scenarioKey}`}>
-          {APP_STRINGS.experimentDetail.startNewAttempt}
-        </Link>
-        <Link className="btn btn-ghost" href={detailHref}>
-          Xem chi tiết
-          <span className="visually-hidden"> — {entry.title}</span>
-        </Link>
       </div>
     </article>
   )

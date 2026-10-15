@@ -4,37 +4,18 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { APP_STRINGS } from '@/content/index.js'
 import type { UUID } from '@/domain/process/contracts.js'
-import type { AcidSession } from '@/application/simulation/acid-session.js'
-import { createSessionForStorageMode } from '@/features/simulation-session.js'
+import Link from 'next/link'
+import { GuestAttemptRepository } from '@/application/attempts/guest-repository.js'
+import type { JarState } from '@/domain/experiments/jar-test/model.js'
+import { listJarLabRows, removeJarLabAttempt, type JarLabRow } from '@/features/learner-lab/jar-attempts.js'
+import { ScienceBackdrop } from '@/shared/ui/science-backdrop.js'
+import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
+import { formatRelativeDate } from '@/shared/ui/format.js'
+import styles from './learner-pages.module.css'
 import { createSupabaseBrowserClient } from '@/infrastructure/supabase/browser.js'
 import { describeAuthError } from '@/features/auth/errors.js'
 import { isSupabaseConfigured } from '@/features/auth/is-configured.js'
-import {
-  AttemptTable,
-  toAttemptRow,
-  type AttemptRow,
-} from '@/features/attempts/attempt-table.js'
 import { DISPLAY_NAME_MAX_LENGTH } from '@/application/profiles/profile.js'
-
-/**
- * Account and data (docs/web-application-scope.md §4.9).
- *
- * The six things §4.9 requires, and nothing else: see the login email, change the display
- * name, change the password, sign out, list attempts, delete one of them. §4.9 also names
- * what is NOT built — no social profile, no uploaded avatar, no following other learners,
- * no public sharing — and none of it appears here.
- *
- * Two different backends are involved and deliberately kept separate:
- *
- *   * profile and password go to Supabase Auth and to `/api/profile`. The display name
- *     cannot be written from the browser at all: `authenticated` holds SELECT only on
- *     `profiles` (docs/data-and-state-model.md §17.1), so the route is the only writer.
- *   * attempts go through the session, which for an account is the BFF.
- *
- * The attempt list here uses the SAME `AttemptTable` as My Lab. That is not tidiness: pH*
- * and score are `number | null` where null means "not evaluable" and never zero (§10.2),
- * and one table is what keeps this screen from rendering a 0 where the lab renders a dash.
- */
 
 type ProfileState =
   | { kind: 'loading' }
@@ -43,24 +24,22 @@ type ProfileState =
 
 type AttemptsState =
   | { kind: 'loading' }
-  | { kind: 'ready'; rows: readonly AttemptRow[] }
+  | { kind: 'ready'; rows: readonly JarLabRow[] }
   | { kind: 'error'; message: string }
 
 /** Feedback for the two forms: which one, and whether it succeeded. */
 type FormNotice = {
-  field: 'profile' | 'password'
+  field: 'profile' | 'password' | 'attempt'
   tone: 'ok' | 'danger'
   text: string
 } | null
 
-export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' }) {
+export function AccountClient() {
   const router = useRouter()
   const strings = APP_STRINGS.account
 
-  const session = useMemo<AcidSession>(
-    () => createSessionForStorageMode(storageMode),
-    [storageMode],
-  )
+  const repository = useMemo(() => new GuestAttemptRepository<JarState>(), [])
+  const [deleting, setDeleting] = useState<UUID | null>(null)
 
   // A build-time constant: `NEXT_PUBLIC_` values are inlined at build, so this cannot change
   // for the life of the bundle. Deriving the initial profile state from it during render —
@@ -118,7 +97,7 @@ export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' 
             router.replace('/sign-in?next=%2Faccount')
             return
           }
-          setProfile({ kind: 'error', message: strings.errors.profileSaveFailed })
+          setProfile({ kind: 'error', message: 'Chưa đọc được hồ sơ. Hãy tải lại trang để thử lại.' })
           return
         }
 
@@ -134,7 +113,7 @@ export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' 
         setDisplayName(body.displayName)
       } catch {
         if (cancelled) return
-        setProfile({ kind: 'error', message: strings.errors.profileSaveFailed })
+        setProfile({ kind: 'error', message: 'Chưa đọc được hồ sơ. Hãy tải lại trang để thử lại.' })
       }
     })()
 
@@ -146,20 +125,19 @@ export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' 
   /**
    * Read the attempt list.
    *
-   * Same shape as the lab's loader, including turning a failure into a state: a list that
+   * Same local Jar repository as the lab, including a visible read-error state: a list that
    * cannot be read must not look like a learner with no attempts.
    */
   const readAttempts = useCallback(async (): Promise<AttemptsState> => {
     try {
-      const summaries = await session.list()
-      return { kind: 'ready', rows: summaries.map(toAttemptRow) }
+      return { kind: 'ready', rows: await listJarLabRows(repository) }
     } catch (error) {
       return {
         kind: 'error',
         message: error instanceof Error ? error.message : APP_STRINGS.errors.genericTitle,
       }
     }
-  }, [session])
+  }, [repository])
 
   useEffect(() => {
     let cancelled = false
@@ -204,6 +182,7 @@ export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' 
       const body = (await response.json().catch(() => null)) as { error?: string; displayName?: string } | null
 
       if (!response.ok) {
+        if (response.status === 401) { router.replace('/sign-in?next=%2Faccount'); return }
         setNotice({
           field: 'profile',
           tone: 'danger',
@@ -220,14 +199,17 @@ export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' 
 
       // The trimmed value the store actually saved, so the field stops showing padding the
       // learner typed and starts showing what is stored.
-      if (body?.displayName !== undefined) setDisplayName(body.displayName)
+      if (typeof body?.displayName !== 'string') throw new Error('Invalid saved profile')
+      const savedName = body.displayName
+      setDisplayName(savedName)
+      setProfile(current => current.kind === 'ready' ? { ...current, displayName: savedName } : current)
       setNotice({ field: 'profile', tone: 'ok', text: strings.messages.profileSaved })
     } catch {
       setNotice({ field: 'profile', tone: 'danger', text: strings.errors.profileSaveFailed })
     } finally {
       setSavingProfile(false)
     }
-  }, [displayName, strings])
+  }, [displayName, strings, router])
 
   /**
    * Change the password.
@@ -241,6 +223,11 @@ export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' 
     setSavingPassword(true)
     setNotice(null)
 
+    if (newPassword.length < 8) {
+      setNotice({ field: 'password', tone: 'danger', text: APP_STRINGS.auth.errors.weakPassword })
+      setSavingPassword(false)
+      return
+    }
     if (newPassword !== confirmPassword) {
       setNotice({ field: 'password', tone: 'danger', text: APP_STRINGS.auth.errors.passwordMismatch })
       setSavingPassword(false)
@@ -302,15 +289,23 @@ export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' 
   const removeAttempt = useCallback(
     async (attemptId: UUID) => {
       if (!globalThis.confirm(APP_STRINGS.lab.confirmDelete)) return
-      await session.remove(attemptId)
-      setAttempts(await readAttempts())
+      setDeleting(attemptId)
+      try {
+        await removeJarLabAttempt(repository, attemptId)
+        setAttempts(await readAttempts())
+        setNotice({ field: 'attempt', tone: 'ok', text: strings.messages.attemptDeleted })
+      } catch {
+        setNotice({ field: 'attempt', tone: 'danger', text: 'Chưa xóa được lượt thực hành. Hãy thử lại.' })
+      } finally { setDeleting(null) }
     },
-    [readAttempts, session],
+    [readAttempts, repository, strings.messages.attemptDeleted],
   )
 
   return (
-    <div className="page stack">
-      <header className="row">
+    <div className={`page stack ${styles.page}`}>
+      <ScienceBackdrop />
+      <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: 'Tài khoản' }]} />
+      <header className={styles.heading}>
         <div className="stack-tight">
           <h1>{strings.title}</h1>
           <p className="muted">{strings.lede}</p>
@@ -325,21 +320,23 @@ export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' 
         </button>
       </header>
 
-      {notice === null ? null : (
+      {notice?.field !== 'attempt' ? null : (
         <p className={`alert alert-${notice.tone}`} role="status">
           {notice.text}
         </p>
       )}
 
-      <section className="card stack-tight">
+      <div className={styles.grid}>
+        <section className={`${styles.panel} stack-tight`}>
         <h2>{strings.headings.profile}</h2>
+        {notice?.field === 'profile' && <p className={`alert alert-${notice.tone}`} role="status">{notice.text}</p>}
 
         {profile.kind === 'loading' ? (
           <p className="muted" role="status">
             {APP_STRINGS.workbench.loading}
           </p>
         ) : profile.kind === 'error' ? (
-          <p className="alert alert-danger">{profile.message}</p>
+          <div className="stack-tight"><p className="alert alert-danger" role="alert">{profile.message}</p><button type="button" className="btn" onClick={() => globalThis.location.reload()}>Tải lại hồ sơ</button></div>
         ) : (
           <form
             className="stack"
@@ -370,6 +367,9 @@ export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' 
               <input
                 aria-describedby="account-display-name-hint"
                 id="account-display-name"
+                autoComplete="nickname"
+                required
+                disabled={savingProfile}
                 maxLength={DISPLAY_NAME_MAX_LENGTH}
                 onChange={(event) => setDisplayName(event.target.value)}
                 type="text"
@@ -381,16 +381,17 @@ export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' 
             </div>
 
             <div className="row">
-              <button className="btn btn-primary" disabled={savingProfile} type="submit">
-                {strings.saveProfile}
+              <button className="btn btn-primary" disabled={savingProfile || displayName.trim() === (profile.kind === 'ready' ? profile.displayName : '')} type="submit">
+                {savingProfile ? 'Đang lưu…' : strings.saveProfile}
               </button>
             </div>
           </form>
         )}
       </section>
 
-      <section className="card stack-tight">
+      <section className={`${styles.panel} stack-tight`}>
         <h2>{strings.headings.password}</h2>
+        {notice?.field === 'password' && <p className={`alert alert-${notice.tone}`} role="status">{notice.text}</p>}
         <p className="hint">{strings.changePasswordHint}</p>
 
         <form
@@ -407,6 +408,8 @@ export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' 
               id="account-new-password"
               onChange={(event) => setNewPassword(event.target.value)}
               required
+              minLength={8}
+              disabled={savingPassword}
               type="password"
               value={newPassword}
             />
@@ -420,6 +423,8 @@ export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' 
               id="account-confirm-password"
               onChange={(event) => setConfirmPassword(event.target.value)}
               required
+              minLength={8}
+              disabled={savingPassword}
               type="password"
               value={confirmPassword}
             />
@@ -431,14 +436,16 @@ export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' 
               disabled={savingPassword || !configured}
               type="submit"
             >
-              {strings.changePassword}
+              {savingPassword ? 'Đang cập nhật…' : strings.changePassword}
             </button>
           </div>
         </form>
       </section>
 
-      <section className="stack-tight">
-        <h2>{strings.headings.attempts}</h2>
+      </div>
+      <section className={`${styles.panel} stack-tight`}>
+        <div className={styles.heading}><h2>Lượt Jar Test trên trình duyệt này</h2><Link href="/compare">So sánh lượt đã nộp</Link></div>
+        <p className="hint">Các lượt này được lưu trên thiết bị, chưa đồng bộ với tài khoản. Xóa dữ liệu trình duyệt sẽ làm mất lượt đã lưu.</p>
 
         {attempts.kind === 'loading' ? (
           <p className="muted" role="status">
@@ -449,14 +456,7 @@ export function AccountClient({ storageMode }: { storageMode: 'cloud' | 'local' 
         ) : attempts.rows.length === 0 ? (
           <p className="muted">{APP_STRINGS.lab.emptyBody}</p>
         ) : (
-          <AttemptTable
-            heading={strings.headings.attempts}
-            onRemove={removeAttempt}
-            rows={attempts.rows}
-            // The section above already renders this heading over all four states, so the
-            // table's visible one would repeat it. Its caption still names the table.
-            showHeading={false}
-          />
+          <div className={styles.tableWrap}><table className={styles.table}><caption className="sr-only">Các lượt Jar Test đã lưu</caption><thead><tr><th scope="col">Lượt thực hành</th><th scope="col">Trạng thái</th><th scope="col">Cập nhật</th><th scope="col">Thao tác</th></tr></thead><tbody>{attempts.rows.map(row => <tr key={row.attemptId}><th scope="row">Jar Test · {row.attemptId.slice(0, 8)}</th><td>{row.status === 'completed' ? 'Đã nộp' : row.status === 'stopped' ? 'Đã dừng' : 'Đang thực hành'}</td><td>{formatRelativeDate(row.updatedAt)}</td><td><div className={styles.actions}><Link href={`/simulate/jar-test?attempt=${row.attemptId}${row.status === 'completed' ? '&view=report' : ''}`}>{row.status === 'completed' ? 'Xem báo cáo' : 'Mở lượt'}</Link><button className="btn btn-sm btn-ghost" disabled={deleting !== null} onClick={() => void removeAttempt(row.attemptId)} aria-label={`Xóa lượt Jar Test ${row.attemptId}`} type="button">{deleting === row.attemptId ? 'Đang xóa…' : 'Xóa'}</button></div></td></tr>)}</tbody></table></div>
         )}
       </section>
     </div>

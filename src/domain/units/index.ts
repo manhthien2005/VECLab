@@ -10,6 +10,7 @@
  *   amount        -> mole (mol)
  *   concentration -> mol/L
  *   mass          -> gram (g)
+ *   mass_concentration -> milligram per litre (mg/L)
  *   density       -> g/mL  (as reported by polymer datasheets)
  *   temperature   -> degree Celsius (°C)
  *   pressure      -> megapascal (MPa)
@@ -20,6 +21,7 @@ export type CanonicalQuantity =
   | 'amount'
   | 'concentration'
   | 'mass'
+  | 'mass_concentration'
   | 'density'
   | 'temperature'
   | 'pressure'
@@ -42,6 +44,7 @@ export const CANONICAL_UNITS: Record<CanonicalQuantity, UnitId> = {
   amount: 'mol',
   concentration: 'mol/L',
   mass: 'g',
+  mass_concentration: 'mg/L',
   density: 'g/mL',
   temperature: 'C',
   pressure: 'MPa',
@@ -63,6 +66,7 @@ export const UNITS: Record<UnitId, UnitDefinition> = {
   g: { quantity: 'mass', toCanonical: 1 },
   kg: { quantity: 'mass', toCanonical: 1e3 },
   mg: { quantity: 'mass', toCanonical: MILLI },
+  'mg/L': { quantity: 'mass_concentration', toCanonical: 1 },
   'g/mL': { quantity: 'density', toCanonical: 1 },
   'g/L': { quantity: 'density', toCanonical: MILLI },
   'kg/m3': { quantity: 'density', toCanonical: MILLI },

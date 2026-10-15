@@ -61,6 +61,7 @@ export function useWorkbenchController({
   const [lastError, setLastError] = useState<ControllerError | null>(null)
   const [lastSuccessfulInteraction, setLastSuccessfulInteraction] =
     useState<InteractionAcknowledgement | null>(null)
+  const [dosingFinished, setDosingFinished] = useState(false)
 
   // Track mounted status to avoid setting state after unmount
   const isMountedRef = useRef(true)
@@ -220,6 +221,7 @@ export function useWorkbenchController({
       }
 
       const validSetup = validation.params
+      setDosingFinished(false)
 
       return runMutatingOperation('starting', async () => {
         if (activeMode === 'EXPLORE') {
@@ -241,6 +243,7 @@ export function useWorkbenchController({
 
   const loadRun = useCallback(
     async (attemptId: UUID): Promise<OrchestrationResult> => {
+      setDosingFinished(false)
       return runMutatingOperation('reloading', async () => {
         const loaded = await session.load(attemptId)
         if (loaded !== null && loaded.ok) {
@@ -306,6 +309,7 @@ export function useWorkbenchController({
       const check = requireActiveAttempt('dispensing')
       if (!check.ok) return check.result
       const volumeL = typeof aliquotL === 'number' ? aliquotL : selectedAliquotL
+      setDosingFinished(false)
 
       return runMutatingOperation('dispensing', () =>
         executeGuidedAction(session, check.attemptId, 'add_base', { volumeL }, 'dispensing'),
@@ -399,6 +403,11 @@ export function useWorkbenchController({
     setOperationStage('idle')
     setLastError(null)
     setLastSuccessfulInteraction(null)
+    setDosingFinished(false)
+  }, [])
+
+  const finishDosing = useCallback((): void => {
+    setDosingFinished(true)
   }, [])
 
   const setMode = useCallback((newMode: WorkbenchMode): void => {
@@ -468,6 +477,7 @@ export function useWorkbenchController({
     operationStage,
     lastError,
     lastSuccessfulInteraction,
+    dosingFinished,
 
     // Actions
     startRun,
@@ -489,5 +499,6 @@ export function useWorkbenchController({
     setSelectedAliquot,
     setStirrerRpm,
     clearError,
+    finishDosing,
   }
 }

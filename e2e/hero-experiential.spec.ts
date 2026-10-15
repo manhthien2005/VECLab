@@ -7,25 +7,15 @@ test.describe('Hero Experiential Staging and Pointer Depth (R17.2)', () => {
     await expect(hero).toBeVisible()
   })
 
-  test('Hero renders normally with static scientific literals and elements', async ({ page }) => {
+  test('Hero illustrates the current Jar lesson without fabricated readings', async ({ page }) => {
     const preview = page.locator('.hero-preview-wrapper')
     await expect(preview).toBeVisible()
 
-    // Fixed telemetry badge
-    await expect(preview.locator('.telemetry-badge-ph')).toContainText('5,2')
-    await expect(preview.locator('.telemetry-badge-temp-val')).toContainText('25,0 °C')
-
-    // Chemical equation & progress
-    await expect(preview.locator('.equation-text')).toContainText('HCl + NaOH → NaCl + H₂O')
-    await expect(preview.locator('.device-progress-pct')).toContainText('60%')
-
-    // Titration chart
-    const chart = preview.locator('.hero-chart-svg')
-    await expect(chart).toBeVisible()
-    await expect(preview.locator('.hero-chart-callout-text')).toContainText('pH = 7,0')
-
-    // Status card
-    await expect(preview.locator('.hero-status-state')).toContainText('Dung dịch gần trung tính')
+    await expect(preview.locator('.telemetry-badge-ph')).toContainText('125 NTU')
+    await expect(preview.locator('.device-mode-badge')).toContainText('Minh họa giao diện')
+    await expect(preview.locator('.hero-jar-conditions')).toContainText('50–250 mg/L')
+    await expect(preview.locator('.hero-status-state')).toContainText('Giảm độ đục ít nhất 80%')
+    await expect(preview.getByRole('progressbar')).toHaveCount(0)
   })
 
   test('Initial Hero entrance does not cause document-level horizontal page overflow', async ({ page }) => {
@@ -38,7 +28,7 @@ test.describe('Hero Experiential Staging and Pointer Depth (R17.2)', () => {
   test('Hero CTA remains immediately keyboard accessible and clickable', async ({ page }) => {
     const primaryCta = page.locator('.hero-btn-primary')
     await expect(primaryCta).toBeVisible()
-    await expect(primaryCta).toHaveAttribute('href', '/simulate/acid-neutralization')
+    await expect(primaryCta).toHaveAttribute('href', '/simulate/jar-test')
 
     // Verify keyboard focusability
     await primaryCta.focus()
@@ -131,10 +121,7 @@ test.describe('Hero Experiential Staging and Pointer Depth (R17.2)', () => {
         expect(Number(pointerX || '0')).toBe(0)
       }
 
-      // Chart curve stroke-dashoffset must be 0 immediately
-      const chartLine = page.locator('.hero-chart-line')
-      const dashOffset = await chartLine.evaluate((el) => getComputedStyle(el).strokeDashoffset)
-      expect(dashOffset === '0px' || dashOffset === '0').toBe(true)
+      await expect(page.locator('.hero-jar-conditions')).toBeVisible()
     })
   })
 })
