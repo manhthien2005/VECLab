@@ -1,0 +1,43 @@
+{
+  "v": 1,
+  "kind": "result",
+  "id": "TL2-JAR-04-REVIEW",
+  "coder": 2,
+  "repo": "manhthien2005/VECLab",
+  "branch": "fix/pr152-workbench-review",
+  "target": "chore/tl1-jar04-integration",
+  "base": "726fdc179511dbf02cd0204d97f732aa3bfa8d00",
+  "head": "6b8816e42873addc252bb117ee6542fa8edc2c82",
+  "status": "pending_review",
+  "changes": [
+    "P2 JAR04-UI1: Attempt/store prop changes reused drafts and pending action refs; remount the stateful session subtree on attemptId, storageMode or invalid-link changes. Same-context refreshes keep the pending retry identity.",
+    "P2 JAR04-UI2: Absolute selected-cup text had no reserved space beside the centered title; move it into normal flow and reserve equal label height for all six cups.",
+    "Replace commit/immutable-report jargon in two learner-facing messages. No domain, API, storage, catalog or report changes."
+  ],
+  "checks": {
+    "unit": "pass",
+    "types": "pass",
+    "lint": "pass",
+    "diff": "pass",
+    "build": "pass",
+    "ui_desktop": "not_run",
+    "ui_mobile": "not_run"
+  },
+  "evidence": {
+    "unit": "PR head: 37/37 across jar-engine, jar-guest-runtime, jar-remote-api and domain-boundaries. This is engine/session/API evidence, not verification of the new UI remount behavior.",
+    "types": "After fixes: npm run typecheck, exit 0.",
+    "lint": "After fixes: ESLint on Jar route, workbench, apparatus and existing Jar E2E spec, exit 0.",
+    "build": "After fixes: npm run build, exit 0; dynamic /simulate/jar-test included. Separate typecheck passed; build itself skips type validation.",
+    "diff": "PR range and local fix: git diff --check, exit 0.",
+    "design_detector": "Impeccable detect on three changed UI files: exit 0, no findings. This does not establish visual quality.",
+    "ci": "PR #152 at 726fdc1: App Quality, Database Contract and Vercel pass. These checks do not cover fix commit 6b8816e.",
+    "integration": "Dry merge-tree against accepted UI d6d8d2d: only AGENTS.md conflicts; no source conflicts. No integration checkout was built or promoted."
+  },
+  "env": "Windows, Node 24.16.0, npm 11.13.0; isolated worktree and dependencies; no hosted Supabase env copied or remote data changed.",
+  "limits": [
+    "Browser automation was denied by the tool policy; no alternative browser-access path used. Fresh desktop/mobile, navigation-reset and text-scaling checks remain pending. Label overlap was identified from layout rules, not a measured screenshot.",
+    "Task 4 only. Full Jar report, catalog registration and scenario-aware My Lab/resume routing remain Task 5; do not advertise Jar as a complete public lesson yet.",
+    "Keep accepted UI and persistent user decisions when resolving AGENTS.md during later integration. Neither PR #152 nor a target branch was merged or deployed."
+  ],
+  "next": "apply_review_fixes_then_verify_ui_and_required_ci"
+}
