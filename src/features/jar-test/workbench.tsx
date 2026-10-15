@@ -121,6 +121,14 @@ function refusalMessage(outcome: JarActionResult | JarCompletionResult): Issue {
 
 function JarLearningGoal() {
   const details = useRef<HTMLDetailsElement>(null)
+  useEffect(() => {
+    function dismissOutside(event: PointerEvent) {
+      const element = details.current
+      if (element?.open && event.target instanceof Node && !element.contains(event.target)) element.open = false
+    }
+    document.addEventListener('pointerdown', dismissOutside)
+    return () => document.removeEventListener('pointerdown', dismissOutside)
+  }, [])
   function closeScope() {
     if (!details.current) return
     details.current.open = false
