@@ -112,7 +112,16 @@ function JarLearningGoal() {
  * Local and cloud share the accepted JarSession contract. Only drafts and
  * qualitative motion live in UI state; all chemistry comes from a committed view.
  */
-export function JarWorkbench({ attemptId, invalidAttempt = false, storageMode }: Props) {
+export function JarWorkbench(props: Props) {
+  // A different run/store must not inherit drafts, pending retries or async
+  // responses from the previous session during client-side navigation.
+  const sessionKey = JSON.stringify([
+    props.storageMode, props.attemptId, props.invalidAttempt ?? false,
+  ])
+  return <JarWorkbenchSession key={sessionKey} {...props} />
+}
+
+function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }: Props) {
   const router = useRouter()
   const session: JarSession = useMemo(
     () => createJarSessionForStorageMode(storageMode), [storageMode],
@@ -243,7 +252,7 @@ export function JarWorkbench({ attemptId, invalidAttempt = false, storageMode }:
           pendingRef.current = null
           setUncertain(false)
           setView(result.state)
-          setNotice('Lượt đã hoàn thành và lưu báo cáo bất biến.')
+          setNotice('Đã lưu kết quả. Lượt này chỉ có thể xem lại.')
         } else {
           pendingRef.current = null
           setUncertain(false)
@@ -447,7 +456,7 @@ export function JarWorkbench({ attemptId, invalidAttempt = false, storageMode }:
                           <li key={phase.id}>{phase.name}: {phase.seconds} giây · {phase.rpm} rpm</li>
                         ))}
                       </ol>
-                      <p>Chỉ một pha được commit mỗi lần. Hoạt ảnh không tăng thời gian mô phỏng.</p>
+                      <p>Chạy lần lượt từng pha cho cả dàn cốc. Không cần chờ theo thời gian thực.</p>
                       {nextPhase && (
                         <button type="button" className="btn btn-primary"
                           disabled={locked} onClick={() => submit('run_phase', { phase: nextPhase })}>
