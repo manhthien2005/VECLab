@@ -1,0 +1,28 @@
+.page { position: relative; isolation: isolate; gap: 1.75rem; }
+.heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.heading h1 { font-size: 2.25rem; letter-spacing: -.025em; margin-bottom: .5rem; }
+.heading p { max-width: 65ch; color: var(--ink-muted); }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; align-items: start; }
+.panel { padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid var(--border); border-radius: 16px; background: var(--surface, white); min-width: 0; }
+.panel h2 { font-size: 1.2rem; margin: 0 0 1rem; }
+.panel form { gap: 1.25rem; }
+.notice { padding: 1rem 1.25rem; background: var(--accent-soft); border-radius: 12px; color: var(--ink); font-size: .9rem; }
+.notice a { margin-left: .5rem; }
+.tableWrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.table th, .table td { padding: .9rem 1rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+.table th { color: var(--ink-muted); font-weight: 600; }
+.table td { font-variant-numeric: tabular-nums; }
+.table a { white-space: nowrap; }
+.table caption { text-align: left; font-weight: 650; margin-bottom: 1rem; font-size: 1.15rem; }
+.result { padding: 1.25rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface, white); }
+.result h3 { margin-bottom: .75rem; }
+.result p { margin: .75rem 0; }
+.result dl { display: grid; grid-template-columns: 1fr auto; gap: .5rem 1rem; }
+.result dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.actions { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
+@media (max-width: 700px) {
+  .heading h1 { font-size: 1.85rem; }
+  .grid { grid-template-columns: 1fr; }
+  .table th, .table td { padding: .75rem .5rem; }
+}

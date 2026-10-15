@@ -74,6 +74,33 @@ async function complete(page: Page) {
 }
 
 test.describe('Jar Test — light workbench, persisted guest flow', () => {
+  test('comparison reads local Jar reports and preserves missing results', async ({ page }) => {
+    test.setTimeout(60_000)
+    await page.goto('/compare')
+    await expect(page.getByRole('heading', { name: 'Cần hai lượt đã nộp để so sánh' })).toBeVisible()
+    const emptyId = await begin(page)
+    await complete(page)
+    const validId = await begin(page)
+    await prepare(page, 'A', '9'); await initial(page); await dose(page, 'A', '150'); await phases(page); await measure(page, 'A')
+    await page.getByRole('button', { name: 'Chọn cốc A làm phương án nộp' }).click()
+    await complete(page)
+    await page.goto('/compare')
+    await page.getByLabel('Lượt A', { exact: true }).selectOption(validId)
+    await page.getByLabel('Lượt B', { exact: true }).selectOption(emptyId)
+    const comparison = page.getByRole('table', { name: 'Kết quả và điều kiện thực hành' })
+    await expect(comparison.getByRole('row', { name: /Độ đục cuối/ })).toContainText('16,5125 NTU')
+    await expect(comparison.getByRole('row', { name: /Độ đục cuối/ })).toContainText('N/A')
+    await expect(comparison.getByRole('row', { name: /Hiệu suất từ số đo/ })).toContainText('86,79 %')
+    await page.getByLabel('Lượt B', { exact: true }).selectOption(validId)
+    await expect(page.getByText('Hãy chọn hai lượt thực hành khác nhau.', { exact: true })).toBeVisible()
+    await expect(comparison).toHaveCount(0)
+    await page.getByLabel('Lượt B', { exact: true }).selectOption(emptyId)
+    await expect(comparison).toBeVisible()
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
+    await page.getByRole('link', { name: 'Xem báo cáo lượt A', exact: true }).click()
+    await expect(page.getByRole('dialog', { name: 'Báo cáo Jar Test', exact: true })).toBeVisible()
+  })
+
   test('Jar reading pages keep link icons bounded and guide blocks readable', async ({ page }) => {
     for (const route of ['/experiments/jar-test', '/evidence', '/experiments/jar-test/guide']) {
       await page.goto(route)

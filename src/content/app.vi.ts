@@ -283,8 +283,8 @@ export const APP_STRINGS = {
 
   account: {
     title: 'Tài khoản và dữ liệu',
-    lede: 'Dữ liệu của bạn được lưu theo từng thao tác. Xóa bất cứ lúc nào.',
-    signInPrompt: 'Đăng nhập để tiếp tục lượt thử trên thiết bị khác và mở lại báo cáo.',
+    lede: 'Cập nhật tên hiển thị, quản lý mật khẩu và xem các lượt đã lưu trên thiết bị.',
+    signInPrompt: 'Đăng nhập để quản lý thông tin tài khoản. Lượt Jar Test vẫn được lưu riêng trên trình duyệt này.',
     signIn: 'Đăng nhập',
     signOut: 'Đăng xuất',
     signingOut: 'Đang đăng xuất…',
@@ -312,7 +312,7 @@ export const APP_STRINGS = {
      * server actually enforces it: an active, confirmed session.
      */
     changePasswordHint:
-      'Đổi mật khẩu khi đang đăng nhập. Mật khẩu mới áp dụng cho các phiên sau; phiên hiện tại vẫn giữ nguyên.',
+      'Dùng ít nhất 8 ký tự. Bạn cần đăng nhập lại nếu phiên làm việc đã hết hạn.',
     messages: {
       profileSaved: 'Đã lưu tên hiển thị.',
       passwordChanged: 'Đã đổi mật khẩu.',

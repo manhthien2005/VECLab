@@ -10,27 +10,13 @@ import {
 } from '@/app/api/_lib/guard.js'
 import { guardedResponse, reject } from '@/app/api/_lib/respond.js'
 import { readLearnerProfile, updateDisplayName } from '@/application/profiles/profile-store.js'
+import { readAuthProfile, updateAuthDisplayName } from '@/application/profiles/auth-profile-store.js'
 
 /**
- * `/api/profile` — read and change the learner's own display name (§4.9, §17.1).
- *
- * §17.1 states plainly that profile mutation goes through the server, and the grants make that
- * non-negotiable: `authenticated` holds SELECT only on `profiles`
- * (supabase/migrations/20260909000400_grants.sql), so there is no browser-side write to allow
- * and no policy to get wrong here. This route is the only code that updates the table.
- *
- * The learner's identity comes from `requireLearner()`, never from the body. That matters more
- * than usual: the store uses the service role, which bypasses RLS, so `user_id` here is the
- * ONLY ownership check. A body field naming whose profile to change would let any signed-in
- * learner rename any other.
- *
- * `email` is returned but not accepted. §5.3 reads it from the auth identity and deliberately
- * does not duplicate it into `profiles`, so there is nothing to write and no way for the row to
- * disagree with the login it belongs to.
- *
- * There is no separate provisioning endpoint: `readLearnerProfile` creates the row on first
- * read if it is missing (§5.3's idempotent provisioning), so GET covers an account created
- * before this deployment, and POST updates through the same path.
+ * Own-profile API. Identity, CSRF and private/no-store guards apply to both stores.
+ * Deployments with a server secret retain their existing profiles table.
+ * With the two public auth variables only, presentation names are stored through
+ * the learner's authenticated Auth client; metadata never grants permissions.
  */
 
 /**
@@ -54,7 +40,9 @@ export async function GET(): Promise<NextResponse> {
     const auth = await requireLearner()
     if (!auth.ok) return reject(auth.failure, auth.authHeaders)
 
-    const profile = await readLearnerProfile(auth.userId, auth.email)
+    const profile = process.env.SUPABASE_SECRET_KEY
+      ? await readLearnerProfile(auth.userId, auth.email)
+      : await readAuthProfile(auth.userId, auth.authHeaders)
 
     return json(
       {
@@ -93,7 +81,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    const result = await updateDisplayName(auth.userId, validated.data.displayName)
+    const result = process.env.SUPABASE_SECRET_KEY
+      ? await updateDisplayName(auth.userId, validated.data.displayName)
+      : await updateAuthDisplayName(auth.userId, validated.data.displayName, auth.authHeaders)
 
     if (!result.ok) {
       // The two ways §5.3's constraint can fail, named separately because the learner's fix

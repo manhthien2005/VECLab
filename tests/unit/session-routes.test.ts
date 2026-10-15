@@ -10,9 +10,9 @@ describe('requiresSession', () => {
     expect(requiresSession('/attempts/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')).toBe(false)
   })
 
-  it('requires a session for compare and account', () => {
-    expect(requiresSession('/compare')).toBe(true)
-    expect(requiresSession('/compare/extra')).toBe(true)
+  it('requires a session only for account settings', () => {
+    expect(requiresSession('/compare')).toBe(false)
+    expect(requiresSession('/compare/extra')).toBe(false)
     expect(requiresSession('/account')).toBe(true)
     expect(requiresSession('/account/settings')).toBe(true)
   })

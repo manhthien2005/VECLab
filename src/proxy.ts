@@ -67,8 +67,8 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Compare and account need a session. Catalog, evidence, workbench, and My
-  // Lab stay public so a guest can finish a run without creating an account
+  // Account settings need a session. Comparison reads local Jar reports.
+  // Catalog, evidence, workbench and lab stay public so a guest can finish a run
   // (web scope §14).
   if (user === null && requiresSession(request.nextUrl.pathname)) {
     const signInUrl = request.nextUrl.clone()

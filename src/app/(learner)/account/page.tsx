@@ -29,7 +29,6 @@ export default async function AccountPage() {
   // Supabase for a single answer. Deriving the mode from the learner already in hand is the
   // same decision the shared helper makes, without the second trip.
   const learner = await currentLearner()
-  const storageMode = learner === null ? 'local' : 'cloud'
 
   // A guest on a configured deployment: middleware should have redirected, but a redirect can
   // be bypassed by a direct fetch or by a session ending mid-request. The screen says what is
@@ -48,5 +47,5 @@ export default async function AccountPage() {
     )
   }
 
-  return <AccountClient storageMode={storageMode} />
+  return <AccountClient />
 }

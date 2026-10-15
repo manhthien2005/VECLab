@@ -93,7 +93,7 @@ export function LabClient({ storageMode }: { storageMode: StorageMode }) {
       <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: title }]} />
       <header className="learner-lab-header">
         <div><h1>{title}</h1><p>{APP_STRINGS.lab.lede}</p></div>
-        <Link className="btn experiment-library-start" href="/experiments">Chọn thí nghiệm <ArrowRightIcon /></Link>
+        <div className="row"><Link className="btn" href="/compare">So sánh lượt đã nộp</Link><Link className="btn experiment-library-start" href="/experiments">Chọn thí nghiệm <ArrowRightIcon /></Link></div>
       </header>
       <LabStorageNotice storageMode={storageMode} />
 
