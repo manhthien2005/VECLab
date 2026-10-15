@@ -73,7 +73,9 @@ export function JarApparatus({
               <span className={styles.vesselMeta}>
                 {cup ? 'pH ban đầu ' + cup.initialPh + ' · ' + cup.doseMgL + ' mg/L' : 'Chưa chuẩn bị'}
               </span>
-              {selected && <span className={styles.vesselSelected}>Đang chọn</span>}
+              <span className={styles.vesselSelected} aria-hidden="true">
+                {selected ? 'Đang chọn' : '\u00a0'}
+              </span>
             </button>
           )
         })}
