@@ -129,7 +129,11 @@ function JarLearningGoal() {
   return <div className={styles.goal} data-testid="jar-public-goal">
     <details ref={details} className={styles.goalDetails} onKeyDown={(event) => {
       if (event.key === 'Escape' && details.current?.open) { event.stopPropagation(); closeScope() }
-    }}><summary aria-label="Mục tiêu"><TargetIcon /><span className={styles.goalButtonCopy}><strong>Mục tiêu</strong><span>Giảm độ đục ≥ {JAR_PROFILE.goalRemovalPercent}%</span></span></summary>
+    }}><summary aria-label="Mục tiêu & phạm vi"><TargetIcon />
+      <span className={styles.goalButtonCopy}><strong>Mục tiêu<span className={styles.mobileScopeLabel}> | Phạm vi</span></strong><span>Giảm độ đục ≥ {JAR_PROFILE.goalRemovalPercent}%</span></span>
+      <span className={styles.goalDivider} aria-hidden="true">|</span>
+      <span className={styles.goalScopeCopy}><strong>Phạm vi</strong><span>1–{JAR_CUP_IDS.length} cốc · pH {JAR_PROFILE.availableInitialPh.join(' / ')} · {JAR_PROFILE.minDoseMgL}–{JAR_PROFILE.maxDoseMgL} mg/L</span></span>
+    </summary>
       <section className={styles.goalPanel} aria-label="Mục tiêu và phạm vi Jar Test">
         <div className={styles.goalPanelHeading}><h2>Mục tiêu & phạm vi</h2>
           <button type="button" aria-label="Đóng mục tiêu & phạm vi" onClick={closeScope}><CloseIcon /></button>

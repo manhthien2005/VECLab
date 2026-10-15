@@ -17,9 +17,11 @@
 .goalDetails summary::-webkit-details-marker { display:none; }
 .goalDetails summary:hover, .goalDetails[open] summary { background:#cde8e9; }
 .goalDetails summary svg { width:19px; height:19px; }
-.goalButtonCopy { display:grid; gap:1px; text-align:left; line-height:1.35; }
-.goalButtonCopy strong { font-size:.8rem; }
-.goalButtonCopy > span { font-size:.7rem; font-weight:550; font-variant-numeric:tabular-nums; }
+.goalButtonCopy, .goalScopeCopy { display:grid; gap:1px; text-align:left; line-height:1.35; }
+.goalButtonCopy strong, .goalScopeCopy strong { font-size:.8rem; }
+.goalButtonCopy > span, .goalScopeCopy > span { font-size:.7rem; font-weight:550; font-variant-numeric:tabular-nums; }
+.goalDivider { margin-inline:5px; color:#608f93; font-size:1.5rem; font-weight:400; }
+.mobileScopeLabel { display:none; }
 .goalIntro { padding-top:16px; }
 .goalPanel { position:absolute; top:calc(100% + 12px); left:50%; transform:translateX(-50%); width:520px; max-width:calc(100vw - 32px); max-height:calc(100dvh - 120px); overflow:auto; z-index:40; padding:20px; background:#fff; border-radius:12px; box-shadow:0 12px 40px rgb(28 60 80 / 18%); color:var(--ink); }
 .goalPanelHeading { display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:14px; border-bottom:1px solid var(--border); }
@@ -249,4 +251,4 @@
 @media (max-width:600px) { .goalTitle { font-size:.875rem; } .goalPanel { padding:16px; } .goalPanelGrid { grid-template-columns:1fr; gap:18px; } .goalPanelHeading button { width:40px; height:40px; } }
 @media (prefers-reduced-motion:reduce) { .goalDetails summary { transition:none; } }
 
-@media (max-width:600px) { .brand strong, .title p { display:none; } .brand { gap:0; } .goalDetails summary { gap:6px; padding:8px; } .goalButtonCopy strong { display:none; } .goalButtonCopy > span { max-width:78px; white-space:normal; } .headerActions { margin-left:0; } .headerActions .primary { padding-inline:10px; } .headerActions .primary svg { display:none; } }
+@media (max-width:600px) { .brand strong, .title p { display:none; } .brand { gap:0; } .goalDetails summary { gap:6px; padding:8px; } .goalButtonCopy strong { font-size:.65rem; } .goalScopeCopy, .goalDivider { display:none; } .mobileScopeLabel { display:inline; } .goalButtonCopy > span { max-width:104px; white-space:normal; } .headerActions { margin-left:0; } .headerActions .primary { padding-inline:10px; } .headerActions .primary svg { display:none; } }

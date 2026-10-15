@@ -44,6 +44,7 @@ export function EquipmentPanel({ item, onItemChange, onClose }: {
   onClose: () => void
 }) {
   const dialog = useRef<HTMLDialogElement>(null)
+  const pressedOutside = useRef(false)
   const titleId = useId()
   const content = EQUIPMENT[item]
   useLayoutEffect(() => {
@@ -52,6 +53,15 @@ export function EquipmentPanel({ item, onItemChange, onClose }: {
     return () => element?.close()
   }, [])
   return <dialog ref={dialog} className={styles.panel} aria-labelledby={titleId}
+    onPointerDown={(event) => {
+      const bounds = event.currentTarget.getBoundingClientRect()
+      pressedOutside.current = event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom
+    }}
+    onClick={(event) => {
+      const bounds = event.currentTarget.getBoundingClientRect()
+      if (pressedOutside.current && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) onClose()
+      pressedOutside.current = false
+    }}
     onCancel={(event) => { event.preventDefault(); onClose() }}>
     <header className={styles.header}><h2 id={titleId}><ToolsIcon />Mẫu & dụng cụ</h2>
       <button type="button" aria-label="Đóng bảng mẫu & dụng cụ" onClick={onClose}><CloseIcon /></button></header>

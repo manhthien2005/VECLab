@@ -81,6 +81,7 @@ test.describe('Jar Test — light workbench, persisted guest flow', () => {
     expect(headerHeight).toBeLessThan(105)
     const summary = goal.locator('summary')
     await expect(summary).toContainText('Giảm độ đục ≥ 80%')
+    await expect(summary).toContainText('Phạm vi')
     const panel = page.getByRole('region', { name: 'Mục tiêu và phạm vi Jar Test' })
     await expect(panel).toBeHidden()
     await activate(summary, true)
@@ -112,6 +113,16 @@ test.describe('Jar Test — light workbench, persisted guest flow', () => {
     await trigger.click()
     const panel = page.getByRole('dialog', { name: 'Mẫu & dụng cụ', exact: true })
     await expect(panel).toBeVisible()
+    const bounds = (await panel.boundingBox())!
+    const viewport = page.viewportSize()!
+    expect(Math.abs(bounds.x + bounds.width / 2 - viewport.width / 2)).toBeLessThan(1)
+    expect(Math.abs(bounds.y + bounds.height / 2 - viewport.height / 2)).toBeLessThan(1)
+    await panel.getByRole('heading', { name: 'Mẫu & dụng cụ', exact: true }).click()
+    await expect(panel).toBeVisible()
+    await page.mouse.click(2, 2)
+    await expect(panel).toBeHidden()
+    await expect(trigger).toBeFocused()
+    await trigger.click()
     for (const title of ['Mẫu kaolin', 'Phèn nhôm', 'Máy đo độ đục']) {
       await panel.getByRole('button', { name: title, exact: true }).click()
       await expect(panel.getByRole('heading', { name: title, exact: true })).toBeVisible()
