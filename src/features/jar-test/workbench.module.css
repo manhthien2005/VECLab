@@ -23,7 +23,7 @@
 .button:active:not(:disabled), .primary:active:not(:disabled) { transform:translateY(1px); }
 .button:disabled, .primary:disabled { cursor:default; color:#607486; background:#edf2f5; border-color:#d8e1e8; transform:none; }
 .headerActions .primary { padding-inline:20px; }
-.shelfContent { display:flex; flex-direction:column; gap:30px; }
+.shelfContent { display:flex; flex-direction:column; flex:1; gap:30px; }
 .inventory { display:grid; gap:12px; }
 .equipment { display:flex; align-items:center; gap:10px; border:1px solid #e6edf2; padding:12px 8px; border-radius:10px; min-height:98px; }
 .equipment > svg { flex:0 0 54px; width:54px; height:68px; padding:3px; background:#f2f6f9; border-radius:8px; }
