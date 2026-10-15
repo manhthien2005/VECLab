@@ -118,10 +118,38 @@ function refusalMessage(outcome: JarActionResult | JarCompletionResult): Issue {
 }
 
 function JarLearningGoal() {
+  const details = useRef<HTMLDetailsElement>(null)
+  function closeScope() {
+    if (!details.current) return
+    details.current.open = false
+    details.current.querySelector('summary')?.focus()
+  }
   return <div className={styles.goal} data-testid="jar-public-goal">
-    <p><strong>Mục tiêu:</strong> tìm phương án giảm độ đục ít nhất {JAR_PROFILE.goalRemovalPercent}% theo mô hình.</p>
-    <details className={styles.goalDetails}><summary>Phạm vi mô phỏng</summary>
-      <p>Đây không phải ngưỡng chất lượng nước hoặc chứng nhận nước an toàn để uống hay xả thải.</p>
+    <p className={styles.goalTitle}><strong>Mục tiêu: giảm độ đục ít nhất {JAR_PROFILE.goalRemovalPercent}%</strong></p>
+    <p className={styles.goalSubtitle}>So sánh các cốc, đo NTU và chọn phương án xử lý.</p>
+    <details ref={details} className={styles.goalDetails} onKeyDown={(event) => {
+      if (event.key === 'Escape' && details.current?.open) { event.stopPropagation(); closeScope() }
+    }}><summary><BookIcon />Mục tiêu & phạm vi<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></summary>
+      <section className={styles.goalPanel} aria-label="Mục tiêu và phạm vi Jar Test">
+        <div className={styles.goalPanelHeading}><h2>Mục tiêu & phạm vi</h2>
+          <button type="button" aria-label="Đóng mục tiêu & phạm vi" onClick={closeScope}><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg></button>
+        </div>
+        <div className={styles.goalPanelGrid}>
+          <section><h3>Kết quả cần nộp</h3><ul><li>Số đo NTU ban đầu và cuối hợp lệ.</li><li>Hiệu suất giảm đục do bạn tự tính.</li><li>Một cốc được chọn làm phương án nộp.</li></ul></section>
+          <section><h3>Bạn được chọn</h3><dl>
+            <div><dt>pH ban đầu</dt><dd>{JAR_PROFILE.availableInitialPh.join(' / ')}</dd></div>
+            <div><dt>Tổng liều phèn</dt><dd>{JAR_PROFILE.minDoseMgL}–{JAR_PROFILE.maxDoseMgL} mg/L</dd></div>
+            <div><dt>Bước liều</dt><dd>{JAR_PROFILE.doseStepMgL} mg/L</dd></div>
+            <div><dt>Số cốc</dt><dd>1–{JAR_CUP_IDS.length} cốc</dd></div>
+          </dl></section>
+          <section><h3>Điều kiện cố định</h3><p>{JAR_PROFILE.aliquotVolumeL.toLocaleString('vi-VN')} L mẫu / cốc · Chương trình chung:</p><ul>
+            <li>Khuấy nhanh: {JAR_PROFILE.phases.rapid.rpm} rpm · {JAR_PROFILE.phases.rapid.durationSeconds} giây.</li>
+            <li>Khuấy chậm: {JAR_PROFILE.phases.slow.rpm} rpm · {JAR_PROFILE.phases.slow.durationSeconds / 60} phút.</li>
+            <li>Lắng: {JAR_PROFILE.phases.settling.durationSeconds / 60} phút · Dừng khuấy.</li>
+          </ul></section>
+          <section><h3>Giới hạn mô phỏng</h3><p>Mẫu kaolin tổng hợp với phèn nhôm. Hạt và chuyển động chỉ minh họa; độ đục được đọc qua phép đo NTU.</p><p>Mục tiêu {JAR_PROFILE.goalRemovalPercent}% không phải ngưỡng chất lượng nước hoặc chứng nhận nước an toàn để uống hay xả thải.</p></section>
+        </div>
+      </section>
     </details>
   </div>
 }

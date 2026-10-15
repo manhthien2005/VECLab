@@ -71,6 +71,33 @@ async function complete(page: Page) {
 }
 
 test.describe('Jar Test — light workbench, persisted guest flow', () => {
+  test('learning goal expands into readable scope and closes with keyboard or button', async ({ page }) => {
+    await page.goto(ROUTE)
+    const goal = page.getByTestId('jar-public-goal')
+    await expect(goal).toContainText('Mục tiêu: giảm độ đục ít nhất 80%')
+    await expect(goal.getByText('So sánh các cốc, đo NTU và chọn phương án xử lý.', { exact: true })).toBeVisible()
+    const summary = goal.locator('summary')
+    const panel = page.getByRole('region', { name: 'Mục tiêu và phạm vi Jar Test' })
+    await expect(panel).toBeHidden()
+    await activate(summary, true)
+    await expect(panel).toBeVisible()
+    await expect(panel).toContainText('Kết quả cần nộp')
+    await expect(panel).toContainText('50–250 mg/L')
+    await expect(panel).toContainText('100 rpm · 60 giây')
+    await expect(panel).toContainText('không phải ngưỡng chất lượng nước')
+    const bounds = await panel.boundingBox()
+    expect(bounds).not.toBeNull()
+    expect(bounds!.x).toBeGreaterThanOrEqual(0)
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(page.viewportSize()!.width + 1)
+    expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(page.viewportSize()!.height + 1)
+    await page.keyboard.press('Escape')
+    await expect(panel).toBeHidden()
+    await expect(summary).toBeFocused()
+    await summary.click()
+    await panel.getByRole('button', { name: 'Đóng mục tiêu & phạm vi', exact: true }).click()
+    await expect(panel).toBeHidden()
+    await expect(summary).toBeFocused()
+  })
   test('theory guide opens separately and returns to the same saved attempt', async ({ page }) => {
     const id = await begin(page)
     await prepare(page, 'A', '9')
