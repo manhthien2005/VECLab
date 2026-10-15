@@ -23,7 +23,7 @@
 .button:active:not(:disabled), .primary:active:not(:disabled) { transform:translateY(1px); }
 .button:disabled, .primary:disabled { cursor:default; color:#607486; background:#edf2f5; border-color:#d8e1e8; transform:none; }
 .headerActions .primary { padding-inline:20px; }
-.shelfContent { display:flex; flex-direction:column; min-height:calc(100dvh - 190px); gap:30px; }
+.shelfContent { display:flex; flex-direction:column; gap:30px; }
 .inventory { display:grid; gap:12px; }
 .equipment { display:flex; align-items:center; gap:10px; border:1px solid #e6edf2; padding:12px 8px; border-radius:10px; min-height:98px; }
 .equipment > svg { flex:0 0 54px; width:54px; height:68px; padding:3px; background:#f2f6f9; border-radius:8px; }
@@ -42,7 +42,6 @@
 .shelfHelp .theoryLink { display:flex; align-items:center; gap:8px; min-height:44px; margin:0; padding:12px 0; border-top:1px solid var(--border); text-decoration:none; font-weight:650; }
 .theoryLink span { flex:1; }
 .theoryLink:hover span { text-decoration:underline; text-underline-offset:4px; }
-.theoryLink > svg:last-child { width:14px; height:14px; }
 .stageHeader { display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding:18px 20px 0; }
 .stageHeader h2, .controlsHeading h2, .notebook h2 { margin:0; font-size:1.2rem; font-weight:750; color:var(--ink); letter-spacing:-.02em; }
 .stageHeader p { margin:4px 0 0; color:var(--ink-muted); font-size:.78rem; }
@@ -57,8 +56,8 @@
 .steps button:disabled { cursor:default; }
 .rack { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:center; padding-top:4px; background:linear-gradient(180deg,#fff 45%,#f1f6f9); }
 .rackScroll { overflow-x:auto; padding:4px 14px 10px; flex-shrink:0; }
-.vesselGrid { position:relative; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); align-items:end; min-width:600px; max-width:744px; margin-inline:auto; }
-.vessel { position:relative; min-width:0; padding:0; border:0; background:transparent; color:var(--ink); font:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:stretch; z-index:1; border-radius:6px; }
+.vesselGrid { position:relative; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); align-items:stretch; gap:12px; min-width:804px; max-width:936px; margin-inline:auto; }
+.vessel { position:relative; min-width:0; padding:0; border:0; background:transparent; color:var(--ink); font:inherit; cursor:pointer; display:grid; grid-template-rows:auto 1fr; z-index:1; border-radius:6px; }
 .vesselDrawing { width:100%; height:auto; aspect-ratio:144/310; display:block; overflow:visible; }
 .vesselLabel { display:grid; place-items:center; align-content:center; gap:4px; min-height:70px; margin-inline:4px; border:1px solid #dbe5ec; border-radius:8px; padding:7px 2px; background:#f8fafc; transition:background 220ms ease-out,border-color 220ms ease-out; }
 .vesselLabel strong { font-size:.82rem; display:flex; align-items:center; gap:6px; }

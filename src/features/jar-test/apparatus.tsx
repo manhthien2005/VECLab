@@ -68,9 +68,9 @@ export function JarApparatus({ projection, selectedCupId, onSelectCup, disabled 
               </defs>
               {index === 0 && <rect x="5" y="52" width="7" height="235" rx="3" fill={'url(#' + steel + ')'} />}
               {index === 5 && <rect x="132" y="52" width="7" height="235" rx="3" fill={'url(#' + steel + ')'} />}
-              <rect x="0" y="32" width="144" height="28" fill="#c0d0da"/>
-              <path d="M0 33h144M0 58h144" stroke="#809eaf" strokeWidth="1.5"/>
-              <path d="M0 36h144" stroke="#e9f1f5" strokeWidth="2"/>
+              <rect x="-8" y="32" width="160" height="28" fill="#c0d0da"/>
+              <path d="M-8 33h160M-8 58h160" stroke="#809eaf" strokeWidth="1.5"/>
+              <path d="M-8 36h160" stroke="#e9f1f5" strokeWidth="2"/>
               <rect x="59" y="7" width="26" height="28" rx="5" fill={'url(#' + steel + ')'} stroke="#8097a5"/>
               <path d="M64 12v16m5-16v16m6-16v16m5-16v16" stroke="#8299a7" strokeWidth="1"/>
               <rect x="64" y="60" width="16" height="10" rx="3" fill="#607e90"/>
@@ -109,8 +109,8 @@ export function JarApparatus({ projection, selectedCupId, onSelectCup, disabled 
               <path d="M26 104v154" stroke="#fff" strokeWidth="4" strokeOpacity=".85"/>
               <path d="M119 105v155" stroke="#afc9d4" strokeWidth="1.2" strokeOpacity=".5"/>
               {[['1 L',109],['500',184],['250',226]].map(([label,y]) => <g key={label} fill="#526f80" fontSize="8" fontFamily="sans-serif"><path d={'M105 ' + y + 'h12'} stroke="#7897a8"/><text x="101" y={Number(y)+3} textAnchor="end">{label}</text></g>)}
-              <rect x="0" y="284" width="144" height="14" fill="#c5d6df"/>
-              <path d="M0 285h144M0 298h144" stroke="#95b0c1"/>
+              <rect x="-8" y="284" width="160" height="14" fill="#c5d6df"/>
+              <path d="M-8 285h160M-8 298h160" stroke="#95b0c1"/>
               {selected && <rect x="48" y="287" width="48" height="8" rx="4" fill="#007b80"/>}
             </svg>
             <span className={styles.vesselLabel}><strong>Cốc {id}{selected && <span className={styles.selectedDot} aria-hidden="true"/>}</strong>
