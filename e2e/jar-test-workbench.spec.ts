@@ -71,6 +71,26 @@ async function complete(page: Page) {
 }
 
 test.describe('Jar Test — light workbench, persisted guest flow', () => {
+  test('theory guide opens separately and returns to the same saved attempt', async ({ page }) => {
+    const id = await begin(page)
+    await prepare(page, 'A', '9')
+    const nav = page.getByRole('navigation', { name: 'Khu vực workbench' })
+    if (await nav.isVisible()) await nav.getByRole('button', { name: 'Dụng cụ', exact: true }).click()
+    await page.getByRole('link', { name: 'Lý thuyết & cách làm bài', exact: true }).click()
+    await expect(page).toHaveURL(new RegExp('/experiments/jar-test/guide\\?attempt=' + id))
+    await expect(page.getByRole('heading', { name: 'Jar Test: lý thuyết & cách làm bài', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Quy trình trên workbench', exact: true })).toBeVisible()
+    await expect(page.getByRole('table', { name: 'Chương trình chung cho các cốc' })).toContainText('100 rpm')
+    await expect(page.getByRole('table', { name: 'Chương trình chung cho các cốc' })).toContainText('40 rpm')
+    await expect(page.getByRole('table', { name: 'Chương trình chung cho các cốc' })).toContainText('30 phút')
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
+    await page.getByRole('link', { name: 'Quay lại lượt đang làm', exact: true }).click()
+    await expect(page).toHaveURL(new RegExp('attempt=' + id))
+    await control(page, 'prepare')
+    await expect(page.getByLabel('pH ban đầu của cốc')).toHaveValue('9')
+    await pane(page, 'Sổ đo')
+    await expect(page.getByTestId('jar-revision')).toHaveText('Bản lưu 1')
+  })
   test('optional workbench tour explains regions without changing the attempt', async ({ page }) => {
     await begin(page)
     await pane(page, 'Thao tác')

@@ -367,10 +367,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode }:
     <div className={styles.shelfHelp}>
       <p className={styles.shelfNote}>Mẫu tổng hợp dùng để học tập. Lượt này chỉ lưu trong trình duyệt, kể cả khi đã đăng nhập.</p>
       <button ref={tourTrigger} type="button" className={styles.guideButton} onClick={() => setTourOpen(true)}><BookIcon />Hướng dẫn thao tác</button>
-      <details><summary><BookIcon />Cách làm bài</summary>
-        <p>Chọn cốc, chuẩn bị mẫu và đo mẫu ban đầu. Cấp phèn cho từng cốc rồi chạy chương trình chung. Đo NTU cuối, tự tính và chọn phương án nộp.</p>
-        <p>Hiệu suất = (NTU đầu − NTU cuối) / NTU đầu × 100%. N/A là phép đo không hợp lệ, không phải bằng 0.</p>
-      </details>
+      <Link className={styles.theoryLink} href={'/experiments/jar-test/guide' + (view?.attemptId ? '?attempt=' + encodeURIComponent(view.attemptId) : '')}><BookIcon /><span>Lý thuyết & cách làm bài</span><ArrowRightIcon /></Link>
       <details><summary><FlaskIcon />Nguồn & giới hạn</summary>
         <p>Chỉ áp dụng cho hồ sơ mẫu, pH, liều và chương trình đã khóa. Hình ảnh hạt không dùng để suy ra hiệu suất.</p>
         <a href={'https://doi.org/' + JAR_PROFILE.sourceDoi} target="_blank" rel="noreferrer">Nghiên cứu dùng xây dựng mô hình <ArrowRightIcon /></a>
