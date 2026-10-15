@@ -9,25 +9,18 @@
 }
 .root { min-height:100dvh; background:#eaf1f6; }
 .root :focus-visible, .modal :focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
-.stageHeading { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 16px; }
-.stageHeading h2, .notebook h2 { margin:0; font-size:1.15rem; line-height:1.35; letter-spacing:-.02em; }
-.stageHeading p { margin:5px 0 0; font-size:.78rem; color:var(--ink-muted); }
-.stageHeading > span { font-size:.72rem; color:var(--ink-muted); }
 .disclosure { margin:0 0 14px; padding:12px; border-radius:8px; background:#f1f6f9; color:var(--ink-muted); font-size:.75rem; line-height:1.7; }
-.notebook { padding:16px; min-width:0; }
 .tableScroll { width:100%; overflow-x:auto; margin:12px 0; }
 .tableScroll table { width:100%; font-size:.8rem; border-collapse:separate; border-spacing:0; font-variant-numeric:tabular-nums; }
 .tableScroll caption { text-align:left; margin-bottom:10px; color:var(--ink-muted); font-size:.75rem; }
 .tableScroll td, .tableScroll th { padding:9px; border-bottom:1px solid #e5edf3; text-align:left; font-weight:500; }
 .tableScroll thead th { background:#f8fafc; color:var(--ink-muted); font-weight:550; }
 .tableScroll td:not(:first-child) { white-space:nowrap; }
-.products { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:16px 0; }
-.products > div { padding:12px; border:1px solid #c7d8e1; border-radius:8px; background:#f7fafc; }
-.products strong { display:block; font-size:.8rem; }
-.products span { display:block; margin-top:5px; font-size:.72rem; color:var(--ink-muted); }
-.notebook details { font-size:.8rem; }
-.notebook summary { cursor:pointer; color:var(--accent-hover); padding:8px 0; }
-.history { margin-top:12px; border-top:1px solid var(--border); }
+.history { margin:0; }
+.history summary { cursor:pointer; color:#21495c; font-size:.95rem; font-weight:750; line-height:1.6; padding:0; }
+.history[open] summary { margin-bottom:12px; }
+.historyPreview { margin:9px 0 0; color:var(--ink-muted); font-size:.76rem; line-height:1.7; }
+.history[open] + .historyPreview { display:none; }
 .historyList { list-style:none; margin:0; padding:0; }
 .historyList li { display:grid; grid-template-columns:3.5rem minmax(0,1fr); align-items:baseline; gap:10px; padding:9px 0; border-bottom:1px solid #e5edf3; font-size:.78rem; }
 .historyList strong { font-weight:550; }
@@ -50,4 +43,11 @@
 .reportStatus p { margin:5px 0 0; color:var(--ink-muted); }
 @media(prefers-reduced-motion:reduce) { .root *, .root *::before, .root *::after, .modal * { animation:none!important; transition:none!important; } }
 
-@media(max-width:600px) { .notebook { padding:14px; } .products { grid-template-columns:1fr; } .modal { padding:16px; } }
+@media(max-width:600px) { .modal { padding:16px; } }
+
+/* The extraction notebook expands as distinct sections below the apparatus. */
+.root [data-workbench-area="notebook"] { background:transparent; box-shadow:none; border-radius:0; overflow:visible; }
+@media(min-width:1051px) {
+  .root [data-pane] { grid-template-rows:minmax(660px,auto) auto; }
+  .root [data-workbench-area="shelf"], .root [data-workbench-area="controls"] { align-self:start; }
+}

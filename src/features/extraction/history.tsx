@@ -13,8 +13,9 @@ export function ExtractionHistory({ history }: { history: readonly ExtractionAct
   const currentPage = Math.min(page, pages - 1)
   const end = history.length - currentPage * PAGE_SIZE
   const entries = history.slice(Math.max(0, end - PAGE_SIZE), end).reverse()
+  const latest=history.at(-1)
 
-  return <details className={styles.history} onToggle={event => {
+  return <div><details className={styles.history} onToggle={event => {
     if (!event.currentTarget.open) setPage(0)
   }}>
     <summary>Lịch sử thao tác ({history.length})</summary>
@@ -29,5 +30,5 @@ export function ExtractionHistory({ history }: { history: readonly ExtractionAct
       <span aria-live="polite">{currentPage * PAGE_SIZE + 1}–{Math.min(history.length, (currentPage + 1) * PAGE_SIZE)} / {history.length}</span>
       <button type="button" className={bench.button} disabled={currentPage === pages - 1} onClick={() => setPage(currentPage + 1)}>Cũ hơn</button>
     </nav>}
-  </details>
+  </details><p className={styles.historyPreview}>{latest?`Gần nhất: #${latest.sequence} · ${extractionActionLabel(latest)}`:'Chưa có thao tác.'}</p></div>
 }

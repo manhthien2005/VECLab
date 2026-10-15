@@ -4,17 +4,17 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { GuestAttemptRepository } from '@/application/attempts/guest-repository.js'
 import { createExtractionSession, type ExtractionSessionView } from '@/application/simulation/extraction-session.js'
-import { COMPONENTS, LEGACY_EXTRACTION_PROFILE, type ExtractionState, type VesselId } from '@/domain/experiments/acid-base-extraction/model.js'
+import { LEGACY_EXTRACTION_PROFILE, type ExtractionState, type VesselId } from '@/domain/experiments/acid-base-extraction/model.js'
 import { newUUID } from '@/shared/ids.js'
 import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.js'
 import { TheoryIcon, GuideIcon, SourcesIcon, ReportIcon, SubmitIcon, CloseIcon, InfoIcon } from '@/features/workbench/icons.js'
 import { ExtractionApparatus } from './apparatus.js'
-import { ExtractionReport, fmt } from './report.js'
+import { ExtractionReport } from './report.js'
 import { EXTRACTION_TOUR } from './tour.js'
 import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/icons.js'
 import { ExtractionEquipmentArt } from './equipment-art.js'
 import { ExtractionControls } from './controls.js'
-import { ExtractionHistory } from './history.js'
+import { ExtractionNotebook } from './notebook.js'
 import { ExtractionLearningGoal } from './panels.js'
 import { ExtractionEquipmentPanel, type ExtractionEquipmentKind } from './equipment-panel.js'
 import bench from './bench.module.css'
@@ -86,7 +86,7 @@ export function ExtractionWorkbench({ attemptId, openReport = false, initialPane
   const equipment=equipmentItem&&<ExtractionEquipmentPanel item={equipmentItem} onItemChange={setEquipmentItem} onClose={()=>setEquipmentItem(null)}/>
   if(!view)return <div className={styles.root}><WorkbenchFrame label="Bàn chiết tách axit–bazơ" header={header} shelf={shelf} simulation={<div className={bench.entry}>{loading?<p role="status">Đang mở bàn thực hành…</p>:<div role="alert"><h2>Chưa mở được lượt chiết tách</h2><p>{error}</p>{attemptId?<Link className={bench.primary} href="/simulate/acid-base-extraction">Bắt đầu lượt mới</Link>:<button className={bench.primary} type="button" disabled={busy} onClick={()=>void start()}>Thử lại</button>}</div>}</div>} controls={<p className={bench.empty}>Thao tác sẽ xuất hiện khi lượt sẵn sàng.</p>} notebook={<p className={bench.empty}>Chưa có phép đo.</p>} pane={pane} onPaneChange={setPane} onShelfInfo={()=>setEquipmentItem('sample')}/>{equipment}</div>
   const controls=<ExtractionControls projection={view.projection} selected={selected} onSelect={selectVessel} locked={busy||pendingType!==null} done={done} onRun={(type,params={},units={})=>void run(type,params,units)} onReport={()=>setReport(true)} onNotebook={()=>setPane('notebook')}/>
-  const notebook=<div className={styles.notebook}><div className={styles.stageHeading}><h2>Sổ đo & sản phẩm</h2><span>Bản lưu {view.revision}</span></div>{done&&<p className={styles.disclosure}>Lượt đã nộp. Dữ liệu được giữ nguyên; mở báo cáo để đối chiếu.</p>}<div className={styles.tableScroll}><table><caption>Các phép đo đã thực hiện</caption><thead><tr><th>Bước</th><th>Bình</th><th>Phép đo</th><th>Kết quả</th></tr></thead><tbody>{view.projection.readings.map(r=><tr key={r.sequence}><td>{r.sequence}</td><td>{r.vesselId}</td><td>{r.kind==='ph'?'pH':'Khối lượng mô hình'}</td><td>{fmt(r.value)}{r.value!==null&&r.kind==='mass'?' mg':''}{!r.valid?' · Không có pha nước':''}</td></tr>)}{!view.projection.readings.length&&<tr><td colSpan={4}>Chưa có phép đo. Chọn bình rồi đo pH hoặc cân mẫu.</td></tr>}</tbody></table></div><div className={styles.products}>{COMPONENTS.map(id=><div key={id}><strong>Sản phẩm {id}</strong><span>{view.projection.submissions[id]?`${view.projection.submissions[id]!.vesselId} · ${fmt(view.projection.submissions[id]!.answer)}%`:'Chưa khai báo'}</span></div>)}</div><ExtractionHistory history={view.actions}/></div>
+  const notebook=<ExtractionNotebook projection={view.projection} actions={view.actions} revision={view.revision} selected={selected}/>
 
   return <div className={styles.root}><WorkbenchFrame label="Bàn chiết tách axit–bazơ" header={header} shelf={shelf} simulation={<ExtractionApparatus projection={view.projection} selected={selected} onSelect={selectVessel} motion={motion} distribution={view.report?.distribution}/>} controls={controls} notebook={notebook} pane={pane} onPaneChange={setPane} tourSteps={EXTRACTION_TOUR} tourOpen={tour} onTourClose={()=>{setTour(false);requestAnimationFrame(()=>tourTrigger.current?.focus({preventScroll:true}))}} onShelfInfo={()=>setEquipmentItem('sample')} notices={error?<div role="alert" className={styles.error}>{error} {pendingType!==null&&<button className={bench.button} disabled={busy} onClick={()=>void run('',{}, {},true)}>Thử lại thao tác</button>}<button className={bench.button} onClick={()=>location.reload()}>Tải lại lượt</button></div>:undefined}/>
     {equipment}

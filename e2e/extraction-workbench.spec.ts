@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 test.use({screenshot:'off',trace:'off'})
 async function pane(page:Page,name:string){await expect(page.getByRole('region',{name:'Bàn chiết tách axit–bazơ',exact:true})).toBeVisible();const nav=page.getByRole('navigation',{name:'Khu vực workbench'});if(await nav.isVisible())await nav.getByRole('button',{name,exact:true}).click()}
+async function measurements(page:Page){await pane(page,'Sổ đo');const log=page.getByTestId('extraction-measurement-log');if(await log.getAttribute('open')===null)await log.locator('summary').click()}
 async function select(page:Page,id:string){await pane(page,'Thao tác');await page.getByLabel('Bình đang thao tác',{exact:true}).selectOption(id)}
 async function group(page:Page,id:string){await pane(page,'Thao tác');const details=page.getByTestId('extraction-control-'+id);if(await details.getAttribute('open')===null)await details.locator('summary').click()}
 async function transfer(page:Page,from:string,to:string,phase:string,amount:number){await select(page,from);await group(page,'transfer');await page.getByLabel('Bình nhận',{exact:true}).selectOption(to);await page.getByLabel('Phần dịch cần chuyển',{exact:true}).selectOption(phase);await page.getByLabel('Thể tích cần chuyển (mL)',{exact:true}).fill(String(amount));await page.getByRole('button',{name:`Chuyển ${amount} mL → ${to}`,exact:true}).click()}
@@ -15,12 +16,12 @@ for(const skipMix of [false,true])test(`extraction full workflow ${skipMix?'miss
  const url=page.url()
  await transfer(page,'S','F','all',40)
  async function extract(reagent:string,amount:number){await add(page,'F',reagent,amount);await group(page,'program');for(const name of (skipMix?['Xả áp','Để phân lớp']:['Trộn','Xả áp','Để phân lớp']))await page.getByRole('button',{name,exact:true}).click();await transfer(page,'F','S','aqueous',amount)}
- async function recover(reagent:string,to:string,component:string){await add(page,'S',reagent,30);await group(page,'transfer');await page.getByLabel('Bình nhận',{exact:true}).selectOption(to);await page.getByRole('button',{name:'Lọc chất rắn → '+to,exact:true}).click();await select(page,to);await page.getByRole('button',{name:'Làm khô',exact:true}).click();await group(page,'results');await page.getByRole('button',{name:'Cân mẫu',exact:true}).click();await pane(page,'Sổ đo');await expect(page.getByRole('table',{name:'Các phép đo đã thực hiện'}).getByRole('row').last().locator('td').nth(1)).toHaveText(to);const row=page.getByRole('table',{name:'Các phép đo đã thực hiện'}).getByRole('row').last();const mass=Number((await row.locator('td').last().innerText()).replace(' mg','').replace(',','.'));await pane(page,'Thao tác');await page.getByLabel('Sản phẩm cần khai báo',{exact:true}).selectOption(component);await page.getByLabel('Bình sản phẩm',{exact:true}).selectOption(to);await page.getByLabel('Thu hồi biểu kiến tự tính (%)',{exact:true}).fill(String(mass));await page.getByRole('button',{name:'Lưu sản phẩm '+component,exact:true}).click();await transfer(page,'S','W','all',component==='A'?49.5:59.5)}
+ async function recover(reagent:string,to:string,component:string){await add(page,'S',reagent,30);await group(page,'transfer');await page.getByLabel('Bình nhận',{exact:true}).selectOption(to);await page.getByRole('button',{name:'Lọc chất rắn → '+to,exact:true}).click();await select(page,to);await page.getByRole('button',{name:'Làm khô',exact:true}).click();await group(page,'results');await page.getByRole('button',{name:'Cân mẫu',exact:true}).click();await measurements(page);await expect(page.getByRole('table',{name:'Các phép đo đã thực hiện'}).getByRole('row').last().locator('td').nth(1)).toHaveText(to);const row=page.getByRole('table',{name:'Các phép đo đã thực hiện'}).getByRole('row').last();const mass=Number((await row.locator('td').last().innerText()).replace(' mg','').replace(',','.'));await pane(page,'Thao tác');await page.getByLabel('Sản phẩm cần khai báo',{exact:true}).selectOption(component);await page.getByLabel('Bình sản phẩm',{exact:true}).selectOption(to);await page.getByLabel('Thu hồi biểu kiến tự tính (%)',{exact:true}).fill(String(mass));await page.getByRole('button',{name:'Lưu sản phẩm '+component,exact:true}).click();await transfer(page,'S','W','all',component==='A'?49.5:59.5)}
  await extract('base',20);await recover('acid','R1','A')
  await page.reload();await select(page,'F');await expect(page.getByRole('button',{name:'Nộp bài',exact:true})).toBeVisible()
  await extract('acid',30);await recover('base','R2','B')
  await transfer(page,'F','R3','organic',40);await select(page,'R3');for(const name of ['Cô dung môi','Làm khô'])await page.getByRole('button',{name,exact:true}).click();await group(page,'results');await page.getByRole('button',{name:'Cân mẫu',exact:true}).click()
- await pane(page,'Sổ đo');await expect(page.getByRole('table',{name:'Các phép đo đã thực hiện'}).getByRole('row').last().locator('td').nth(1)).toHaveText('R3');const finalRow=page.getByRole('table',{name:'Các phép đo đã thực hiện'}).getByRole('row').last();const finalMass=Number((await finalRow.locator('td').last().innerText()).replace(' mg','').replace(',','.'))
+ await measurements(page);await expect(page.getByRole('table',{name:'Các phép đo đã thực hiện'}).getByRole('row').last().locator('td').nth(1)).toHaveText('R3');const finalRow=page.getByRole('table',{name:'Các phép đo đã thực hiện'}).getByRole('row').last();const finalMass=Number((await finalRow.locator('td').last().innerText()).replace(' mg','').replace(',','.'))
  await pane(page,'Thao tác');await page.getByLabel('Sản phẩm cần khai báo',{exact:true}).selectOption('N');await page.getByLabel('Bình sản phẩm',{exact:true}).selectOption('R3');await page.getByLabel('Thu hồi biểu kiến tự tính (%)',{exact:true}).fill(String(finalMass));await page.getByRole('button',{name:'Lưu sản phẩm N',exact:true}).click()
  await page.getByRole('button',{name:'Nộp bài',exact:true}).click();const confirm=page.getByRole('dialog',{name:'Xác nhận nộp bài chiết tách',exact:true});await expect(confirm).toContainText('3/3');await confirm.getByRole('button',{name:'Xác nhận nộp bài',exact:true}).click()
  const report=page.getByRole('dialog',{name:'Báo cáo chiết tách axit–bazơ',exact:true});await expect(report.getByRole('heading',{name:skipMix?'Đạt chỉ tiêu mẫu · Cần xem lại thao tác':'Đã đạt mục tiêu mẫu chuẩn',exact:true})).toBeVisible();if(skipMix){const issue=report.getByRole('listitem').filter({hasText:'khi chưa trộn'}).first();await issue.locator('summary').click();await expect(issue).toContainText('Chuyển pha nước 20 mL · F → S')}const snapshot=await report.getByRole('table',{name:'Sản phẩm đã khai báo',exact:true}).textContent()
@@ -34,7 +35,7 @@ for(const skipMix of [false,true])test(`extraction full workflow ${skipMix?'miss
  await expect(saved).toContainText('3 / 3')
  await saved.getByRole('link',{name:'Xem báo cáo',exact:true}).click()
  await expect(report.getByRole('table',{name:'Sản phẩm đã khai báo',exact:true})).toHaveText(snapshot!)
- if(!skipMix){await report.getByRole('link',{name:'Làm lượt mới',exact:true}).click();await expect(page).toHaveURL(/attempt=[0-9a-f-]{36}/);await expect(page).not.toHaveURL(url);await expect(page.getByText('Bản lưu 0',{exact:true})).toBeVisible()}
+ if(!skipMix){await report.getByRole('link',{name:'Làm lượt mới',exact:true}).click();await expect(page).toHaveURL(/attempt=[0-9a-f-]{36}/);await expect(page).not.toHaveURL(url);await pane(page,'Sổ đo');await expect(page.getByText('Bản lưu 0',{exact:true})).toBeVisible()}
 
 })
 
@@ -123,6 +124,17 @@ test('practice bench explains vessels on hover or tap and keeps readings truthfu
  await select(page,'F');await group(page,'program');await expect(page.getByRole('button',{name:'Trộn',exact:true})).toBeDisabled();await group(page,'transfer');await expect(page.getByRole('button',{name:'Lọc chất rắn → R1',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'Cô dung môi',exact:true})).toBeDisabled();await group(page,'results')
  await page.getByRole('button',{name:'Đo pH',exact:true}).click()
  await page.getByRole('button',{name:'Cân mẫu',exact:true}).click()
+ await pane(page,'Sổ đo')
+ const overview=page.getByRole('table',{name:'Số đo gần nhất của sáu bình',exact:true})
+ const emptyVessel=overview.getByRole('row').filter({has:page.getByRole('rowheader',{name:/^F /})})
+ await expect(emptyVessel).toContainText('N/A');await expect(emptyVessel).toContainText('0 mg')
+ await expect(overview.getByRole('row').filter({has:page.getByRole('rowheader',{name:/^S /})})).toContainText('Chưa đo')
+ await expect(page.getByRole('region',{name:'Sản phẩm đã khai báo',exact:true}).getByRole('article')).toHaveCount(3)
+ const measureBox=(await page.getByRole('region',{name:'Số đo theo bình',exact:true}).boundingBox())!,productBox=(await page.getByRole('region',{name:'Sản phẩm đã khai báo',exact:true}).boundingBox())!
+ if(isMobile)expect(productBox.y).toBeGreaterThanOrEqual(measureBox.y+measureBox.height);else expect(Math.abs(productBox.y-measureBox.y)).toBeLessThan(2)
+ expect(await page.locator('[data-workbench-area=notebook]').evaluate(node=>getComputedStyle(node).overflowY)).toBe('visible')
+ await pane(page,'Thao tác');await page.getByLabel('Thu hồi biểu kiến tự tính (%)',{exact:true}).fill('12.34');await page.getByRole('button',{name:'Lưu sản phẩm A',exact:true}).click()
+ await pane(page,'Sổ đo');await expect(page.getByRole('article',{name:'Sản phẩm A',exact:true})).toContainText('12,34 %');await expect(page.getByRole('article',{name:'Sản phẩm A',exact:true})).toContainText('Chưa đo')
  await pane(page,'Mô phỏng')
  await expect(page.getByTestId('extraction-current-ph')).toHaveText('N/A')
  await expect(page.getByTestId('extraction-current-mass')).toHaveText('0 mg')
