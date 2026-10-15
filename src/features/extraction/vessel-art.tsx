@@ -27,8 +27,8 @@ export function VesselArt({vessel,compact=false,motion='idle'}:{vessel:VisibleVe
       <path d={shape} fill={'url(#'+uid+'glass)'} stroke="#7398ab" strokeWidth="1.7"/>
       <g clipPath={'url(#'+uid+'clip)'}>
         {height>0&&((vessel.separated||vessel.waterMl===0||vessel.organicMl===0)?<>
-          {water>0&&<rect className={styles.liquid} x="25" y={bottom-water} width="130" height={water+2} fill={'url(#'+uid+'water)'}/>}
-          {organic>0&&<rect className={styles.liquid} x="25" y={bottom-height} width="130" height={organic} fill={'url(#'+uid+'organic)'}/>}
+          {water>0&&<rect className={styles.liquid+' '+styles.waterLayer} data-phase="aqueous" x="25" y={bottom-water} width="130" height={water+2} fill={'url(#'+uid+'water)'}/>}
+          {organic>0&&<rect className={styles.liquid+' '+styles.organicLayer} data-phase="organic" x="25" y={bottom-height} width="130" height={organic} fill={'url(#'+uid+'organic)'}/>}
           <path d={`M25 ${bottom-height}Q90 ${bottom-height+5}155 ${bottom-height}`} fill="none" stroke={organic>0?'#c0a16a':'#73a8b2'} strokeWidth="1"/>
           {water>0&&organic>0&&<path d={`M25 ${bottom-water}H155`} stroke="#829f9c" strokeWidth=".9"/>}
         </>:<rect x="25" y={bottom-height} width="130" height={height+2} fill="#b6d3d4"/>)}

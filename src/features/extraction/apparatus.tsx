@@ -1,9 +1,10 @@
 'use client'
 import { useEffect, useId, useState } from 'react'
-import type { ExtractionProjection, ExtractionReportSnapshot } from '@/application/scenarios/extraction-projection.js'
+import type { ExtractionActionSummary, ExtractionProjection, ExtractionReportSnapshot } from '@/application/scenarios/extraction-projection.js'
 import type { VesselId } from '@/domain/experiments/acid-base-extraction/model.js'
 import { VesselArt, liquidLayout, type VisibleVessel } from './vessel-art.js'
 import styles from './apparatus.module.css'
+import { extractionActionLabel } from './action-label.js'
 
 export const VESSEL_NAMES:Record<VesselId,string>={S:'Bình mẫu',F:'Phễu chiết',R1:'Bình thu 1',R2:'Bình thu 2',R3:'Bình thu 3',W:'Bình thải'}
 const ROLES:Record<VesselId,string>={S:'Giữ mẫu và xử lý dịch chiết',F:'Trộn và tách hai pha',R1:'Giữ riêng phần mẫu thu được',R2:'Giữ riêng phần mẫu thu được',R3:'Giữ riêng phần mẫu thu được',W:'Theo dõi phần dịch đã loại'}
@@ -23,9 +24,11 @@ export function VesselInfo({projection,id,distribution}:{projection:ExtractionPr
   const ph=projection.readings.filter(r=>r.vesselId===id&&r.kind==='ph').at(-1)
   const mass=projection.readings.filter(r=>r.vesselId===id&&r.kind==='mass').at(-1)
   const content=projection.phase==='completed'?distribution?.find(row=>row.vesselId===id):undefined
+  const change=projection.history.filter(h=>h.from===id||h.to===id).at(-1)?.sequence??0
   return <>
     <header><span>{id}</span><div><strong>{VESSEL_NAMES[id]}</strong><small>{vesselStatus(vessel)}</small></div></header>
     <dl><div><dt>Pha hữu cơ</dt><dd>{number(vessel.organicMl)} mL</dd></div><div><dt>Pha nước</dt><dd>{number(vessel.waterMl)} mL</dd></div><div><dt>Chất rắn</dt><dd>{vessel.solidPresent?vessel.dry?'Có · Đã làm khô':'Có · Minh họa':'Chưa thấy'}</dd></div><div><dt>pH đã đo</dt><dd>{readingText(ph)}</dd></div><div><dt>Khối lượng đã cân</dt><dd>{readingText(mass,'mg')}</dd></div></dl>
+    {((ph&&change>ph.sequence)||(mass&&change>mass.sequence))&&<p>Số đo lưu trước thao tác mới; đo lại để biết trạng thái hiện tại.</p>}
     {(vessel.organicMl>0||vessel.waterMl>0)&&<p>{vessel.organicMl>0&&<>Dung môi hữu cơ chuẩn.</>}{vessel.waterMl>0&&<> Pha nước gồm nước / thuốc thử đã cấp.</>}</p>}
     {content?<div className={styles.composition}><span>Theo báo cáo đã nộp</span><div>{(['A','B','N'] as const).map(key=><span key={key}><strong>{key}</strong>{number(content.amountsMg[key],2)} mg</span>)}</div></div>:<p className={styles.inspectionNote}>A: axit yếu · B: bazơ yếu · N: trung tính.<br/>Phân bố A/B/N xem sau nộp.</p>}
   </>
@@ -49,7 +52,7 @@ function FocusScene({projection,vessel,operation}:{projection:ExtractionProjecti
       <rect x="150" y="257" width="150" height="4" rx="2" fill="#668696"/>
     </g>}
     <svg x="192" y="-1" width="195" height="270"><VesselArt vessel={vessel} motion={operation}/></svg>
-    {(vessel.separated||vessel.waterMl===0||vessel.organicMl===0)&&total>0?<g strokeWidth="1" fill="none">
+    {(vessel.separated||vessel.waterMl===0||vessel.organicMl===0)&&total>0?<g className={operation==='settle'?styles.phaseLabels:undefined} strokeWidth="1" fill="none">
       {vessel.organicMl>0&&<><path d={`M289 ${organicY}H373L398 101h35`} stroke="#bfa46f"/><circle cx="289" cy={organicY} r="2.5" fill="#c7a975" stroke="none"/><text x="400" y="92" fill="#7c6744" stroke="none" fontSize="11">Pha hữu cơ</text></>}
       {vessel.waterMl>0&&<><path d={`M289 ${waterY}H373L398 185h35`} stroke="#7cabb4"/><circle cx="289" cy={waterY} r="2.5" fill="#7cabb4" stroke="none"/><text x="400" y="201" fill="#426e7e" stroke="none" fontSize="11">Pha nước</text></>}
     </g>:total>0?<text x="398" y="135" fill="#547989" fontSize="11">Chờ phân lớp</text>:!vessel.solidPresent?<g><path d="M347 140H390" stroke="#a2bac9"/><text x="401" y="144" fill="#617e90" fontSize="11">Chưa có mẫu</text></g>:null}
@@ -63,8 +66,8 @@ function FocusScene({projection,vessel,operation}:{projection:ExtractionProjecti
   </svg>
 }
 
-export function ExtractionApparatus({projection,selected,onSelect,motion,distribution}:{
-  projection:ExtractionProjection;selected:VesselId;onSelect:(id:VesselId)=>void;motion:string;distribution?:Distribution|undefined
+export function ExtractionApparatus({projection,selected,onSelect,motion,latestAction,distribution}:{
+  projection:ExtractionProjection;selected:VesselId;onSelect:(id:VesselId)=>void;motion:string;latestAction?:ExtractionActionSummary|undefined;distribution?:Distribution|undefined
 }) {
   const [inspect,setInspect]=useState<{id:VesselId;anchor:'card'|'scene'}|null>(null),uid=useId()
   const vessel=projection.vessels.find(v=>v.id===selected)!,parts=motion.split('-'),operation=parts[1]===selected?(parts[0]??'idle'):'idle'
@@ -80,10 +83,12 @@ export function ExtractionApparatus({projection,selected,onSelect,motion,distrib
   const tip=(id:VesselId,anchor:'card'|'scene')=>inspect?.id===id&&inspect.anchor===anchor?<div role="tooltip" aria-label={'Mẫu trong bình '+id} id={uid+'-'+id+'-'+anchor} className={styles.sampleTip+' '+(anchor==='scene'?styles.sceneTip:styles.cardTip)}><VesselInfo projection={projection} id={id} distribution={distribution}/></div>:null
   return <section className={styles.stage} aria-label="Khu vực thực hành chiết tách">
     <div className={styles.stageHeading}><div><h2>Khu vực thực hành</h2><p><strong>{selected} · {VESSEL_NAMES[selected]}</strong><span>{ROLES[selected]}</span></p></div><span className={styles.phaseTag} data-filled={vessel.waterMl+vessel.organicMl>0||vessel.solidPresent}>{vesselStatus(vessel)}</span></div>
-    <div className={styles.scene} data-vessel-inspect onPointerEnter={event=>{if(event.pointerType==='mouse')setInspect({id:selected,anchor:'scene'})}} onPointerLeave={event=>{if(event.pointerType==='mouse')setInspect(null)}}>
+    <div className={styles.scene} data-operation={operation} data-vessel-inspect onPointerEnter={event=>{if(event.pointerType==='mouse')setInspect({id:selected,anchor:'scene'})}} onPointerLeave={event=>{if(event.pointerType==='mouse')setInspect(null)}}>
       <button type="button" className={styles.sceneFocus} aria-label={'Xem mẫu trong bình '+selected} aria-describedby={inspect?.anchor==='scene'&&inspect.id===selected?uid+'-'+selected+'-scene':undefined} onClick={()=>setInspect({id:selected,anchor:'scene'})} onFocus={()=>setInspect({id:selected,anchor:'scene'})} onBlur={()=>setInspect(null)}><FocusScene key={motion} projection={projection} vessel={vessel} operation={operation}/></button>
       {tip(selected,'scene')}
     </div>
+    <div className={styles.sceneState}><span>{vessel.waterMl>0&&vessel.organicMl>0?<>{vessel.needsMix?'Cần trộn lại':vessel.needsMix===false?'Đã trộn':'Hai pha'} · {vessel.separated?'Hữu cơ ở trên · Nước ở dưới':'Hai pha chưa phân lớp'}</>:vessel.dry?'Mẫu đã làm khô':vessel.solidPresent?'Quan sát thấy chất rắn':vessel.waterMl>0?'Pha nước':vessel.organicMl>0?'Pha hữu cơ':'Bình chưa có mẫu'}</span><small>Màu và chuyển động minh họa trạng thái; không biểu thị thành phần hay tốc độ thực.</small></div>
+    <p className={styles.actionFeedback} role="status" aria-live="polite">{latestAction?`Đã lưu #${latestAction.sequence} · ${extractionActionLabel(latestAction)}`:'Bắt đầu từ S: 40 mL dung môi chứa A, B, N. Chọn F làm bình nhận để chuyển mẫu.'}</p>
     <div className={styles.readouts}>
       <div><span>Pha hữu cơ</span><strong>{number(vessel.organicMl)} <small>mL</small></strong></div>
       <div><span>Pha nước</span><strong>{number(vessel.waterMl)} <small>mL</small></strong></div>

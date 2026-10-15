@@ -1,5 +1,6 @@
 'use client'
 
+import { useId, useRef, useState } from 'react'
 import type { ExtractionActionSummary, ExtractionProjection } from '@/application/scenarios/extraction-projection.js'
 import { COMPONENTS, type VesselId } from '@/domain/experiments/acid-base-extraction/model.js'
 import { ControlIcon, SubmitIcon } from '@/features/workbench/icons.js'
@@ -22,9 +23,18 @@ function ReadingValue({reading,change,unit=''}:{reading:Reading|undefined;change
 }
 
 export function ExtractionNotebook({projection,actions,revision,selected}:{projection:ExtractionProjection;actions:readonly ExtractionActionSummary[];revision:number;selected:VesselId}) {
+  const [tab,setTab]=useState<'data'|'history'>('data'),uid=useId()
+  const tabs=useRef<(HTMLButtonElement|null)[]>([])
   const done=projection.phase==='completed',submitted=Object.keys(projection.submissions).length
   return <div className={styles.notebook}>
     <header className={styles.heading}><h2>Sổ thực hành</h2><span>Bản lưu {revision}{done?' · Đã nộp':''}</span></header>
+    <div className={styles.tabs} role="tablist" aria-label="Nội dung sổ thực hành" onKeyDown={event=>{
+      if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return
+      event.preventDefault()
+      const next=event.key==='Home'?0:event.key==='End'?1:tab==='data'?1:0
+      setTab(next===0?'data':'history');tabs.current[next]?.focus()
+    }}>{(['data','history'] as const).map((id,index)=><button key={id} ref={node=>{tabs.current[index]=node}} type="button" role="tab" id={uid+'-'+id} aria-controls={uid+'-'+id+'-panel'} aria-selected={tab===id} tabIndex={tab===id?0:-1} onClick={()=>setTab(id)}>{id==='data'?'Số đo & sản phẩm':`Lịch sử thao tác (${actions.length})`}</button>)}</div>
+    <div role="tabpanel" tabIndex={0} id={uid+'-data-panel'} aria-labelledby={uid+'-data'} hidden={tab!=='data'}>
     <div className={styles.bento}>
       <section className={styles.measurements} aria-label="Số đo theo bình">
         <header className={styles.cardHeading}><h3><ControlIcon kind="measure"/>Số đo theo bình</h3><span>{projection.readings.length} lần đo</span></header>
@@ -65,6 +75,9 @@ export function ExtractionNotebook({projection,actions,revision,selected}:{proje
         })}</div>
         <p className={styles.context}>{done?'Mở báo cáo để đối chiếu kết quả.':'Đáp số bên trên do bạn nhập; đối chiếu sau khi nộp.'}</p>
       </section>
+    </div>
+    </div>
+    <div role="tabpanel" tabIndex={0} id={uid+'-history-panel'} aria-labelledby={uid+'-history'} hidden={tab!=='history'}>
       <section className={styles.historyCard} aria-label="Lịch sử lượt thực hành"><ExtractionHistory history={actions}/></section>
     </div>
   </div>

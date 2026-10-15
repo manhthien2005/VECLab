@@ -16,7 +16,7 @@ export function projectExtraction(state: ExtractionState) {
     phase: state.phase,
     vessels: VESSEL_IDS.map(id => {
       const v = state.vessels[id], eq = equilibrate(v)
-      return { id, waterMl: v.waterMl, organicMl: v.organicMl, separated: v.separated, vented: v.vented, dry: v.dry, solidPresent: COMPONENTS.some(key => eq.solid[key] > 1e-8) }
+      return { id, waterMl: v.waterMl, organicMl: v.organicMl, separated: v.separated, vented: v.vented, dry: v.dry, solidPresent: COMPONENTS.some(key => eq.solid[key] > 1e-8), ...(profile.version==='2'?{needsMix:!!v.needsMix}:{}) }
     }),
     readings: state.readings.map(r => ({ ...r })), submissions: structuredClone(state.submissions),
     history: state.history.map(h => ({ sequence: h.sequence, actionType: h.actionType, from: h.from, to: h.to })),

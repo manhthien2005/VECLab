@@ -45,3 +45,7 @@
   .root [data-pane] { grid-template-rows:minmax(660px,auto) auto; }
   .root [data-workbench-area="shelf"], .root [data-workbench-area="controls"] { align-self:start; }
 }
+
+.submissionReview { list-style:none; padding:0; margin:20px 0; }
+.submissionReview li { display:grid; grid-template-columns:75px minmax(0,1fr); gap:12px; padding:12px 0; border-bottom:1px solid #d5e2e8; color:#365e70; font-size:.82rem; line-height:1.7; }
+.submissionReview strong { color:#00656a; }

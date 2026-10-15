@@ -11,6 +11,9 @@
 .scene { position:relative; display:flex; align-items:center; justify-content:center; flex:1; min-height:220px; border-radius:10px; background:#f7fafc; }
 .sceneFocus { display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; padding:0 10px 5px; border:0; border-radius:10px; background:transparent; font:inherit; cursor:help; }
 .sceneArt { display:block; width:100%; height:245px; max-height:270px; }
+.sceneState { display:grid; gap:3px; text-align:center; color:#28596b; font-size:.75rem; line-height:1.6; }
+.sceneState small { color:#4f6b7d; font-size:.65rem; }
+.actionFeedback { margin:0; padding:9px 12px; border-radius:7px; background:#e8f4f3; color:#245f63; font-size:.73rem; line-height:1.6; overflow-wrap:anywhere; }
 .vesselArt { display:block; width:100%; height:100%; }
 .readouts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; padding:10px 13px; border-radius:8px; background:#eaf2f6; }
 .readouts > div { min-width:0; }
@@ -53,10 +56,16 @@
 .swirl { opacity:0; }
 .vesselMotion[data-motion=mix] { animation:extractionRock 900ms ease-in-out; }
 .vesselMotion[data-motion=mix] .swirl { animation:extractionSwirl 900ms ease-out; }
+.vesselMotion[data-motion=settle] .waterLayer { animation:extractionWaterSettle 1100ms ease-out both; }
+.vesselMotion[data-motion=settle] .organicLayer { animation:extractionOrganicSettle 1100ms ease-out both; }
+.phaseLabels { animation:extractionLabelReveal 1100ms ease-out both; }
 .transferFlow { animation:extractionFlow 1s ease-out 2; }
 .vapour, .ventPuff { animation:extractionVapour 1s ease-out 2; }
 @keyframes extractionRock { 0%,100%{transform:rotate(0)}30%{transform:rotate(5deg)}65%{transform:rotate(-4deg)} }
 @keyframes extractionSwirl { 20%,80%{opacity:.85}50%{transform:translateY(-5px)}100%{opacity:0} }
+@keyframes extractionWaterSettle { from{opacity:.45;transform:translateY(-9px)}to{opacity:1;transform:translateY(0)} }
+@keyframes extractionOrganicSettle { from{opacity:.45;transform:translateY(9px)}to{opacity:1;transform:translateY(0)} }
+@keyframes extractionLabelReveal { from{opacity:0}to{opacity:1} }
 @keyframes extractionFlow { 0%{opacity:.15;stroke-dashoffset:12}45%{opacity:1}100%{opacity:.2;stroke-dashoffset:0} }
 @keyframes extractionVapour { 0%{opacity:.1;transform:translateY(3px)}50%{opacity:.75}100%{opacity:0;transform:translateY(-7px)} }
 @media(max-width:1250px) and (min-width:1051px) { .readouts{gap:7px;padding-inline:9px}.readouts>div+div{padding-left:9px}.readouts strong{font-size:.9rem}.vesselTitle>span{font-size:.6rem} }

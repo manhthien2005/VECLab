@@ -2,6 +2,10 @@
 .heading { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px 16px; padding:4px 2px 14px; }
 .heading h2 { margin:0; font-size:1.12rem; line-height:1.4; letter-spacing:-.02em; }
 .heading > span { font-size:.73rem; color:var(--ink-muted); }
+.tabs { display:flex; gap:8px; padding-bottom:14px; flex-wrap:wrap; }
+.tabs button { padding:10px 14px; min-height:44px; border:1px solid #c9d9e3; border-radius:8px; background:#fff; color:#405f71; font:inherit; font-size:.8rem; font-weight:650; cursor:pointer; }
+.tabs button[aria-selected=true] { color:#005e65; background:#dceff0; border-color:#428d96; }
+.tabs button:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
 .bento { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:stretch; }
 .measurements, .products, .historyCard { min-width:0; padding:18px; border:1px solid #c9d9e3; border-radius:12px; }
 .measurements { background:white; }

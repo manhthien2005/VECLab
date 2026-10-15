@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { GuestAttemptRepository } from '@/application/attempts/guest-repository.js'
 import { createExtractionSession, type ExtractionSessionView } from '@/application/simulation/extraction-session.js'
-import { LEGACY_EXTRACTION_PROFILE, type ExtractionState, type VesselId } from '@/domain/experiments/acid-base-extraction/model.js'
+import { COMPONENTS, LEGACY_EXTRACTION_PROFILE, type ExtractionState, type VesselId } from '@/domain/experiments/acid-base-extraction/model.js'
 import { newUUID } from '@/shared/ids.js'
 import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.js'
 import { TheoryIcon, GuideIcon, SourcesIcon, ReportIcon, SubmitIcon, CloseIcon, InfoIcon } from '@/features/workbench/icons.js'
@@ -33,6 +33,7 @@ export function ExtractionWorkbench({ attemptId, openReport = false, initialPane
   const [view,setView]=useState<ExtractionSessionView|null>(null), [busy,setBusy]=useState(false), [loading,setLoading]=useState(true), [error,setError]=useState('')
   const [selected,setSelected]=useState<VesselId>('S'), [pane,setPane]=useState<WorkbenchPane>(initialPane), [tour,setTour]=useState(false), [equipmentItem,setEquipmentItem]=useState<ExtractionEquipmentKind|null>(null), [confirm,setConfirm]=useState(false), [report,setReport]=useState(openReport)
   const [motion,setMotion]=useState('idle')
+  useEffect(()=>{if(motion==='idle')return;const timer=setTimeout(()=>setMotion('idle'),1600);return()=>clearTimeout(timer)},[motion])
   const lock=useRef(false), pending=useRef<{id:ReturnType<typeof newUUID>;type:string;parameters:Record<string,string|number|boolean>;units:Record<string,string>;revision:number}|null>(null)
   const opening=useRef<Promise<ExtractionSessionView>|null>(null)
   const tourTrigger=useRef<HTMLButtonElement>(null)
@@ -64,7 +65,7 @@ export function ExtractionWorkbench({ attemptId, openReport = false, initialPane
       else{pending.current=null;setPendingType(null);setError('error' in result ? ERRORS[result.error.code] ?? 'Thao tác chưa hợp lệ. Kiểm tra bình, thể tích và phương pháp đã chọn.' : 'outcome' in result && result.outcome==='revision_conflict'?'Lượt đã được thay đổi ở tab khác. Tải lại trước khi tiếp tục.':'Chưa lưu được thao tác. Hãy tải lại lượt.')}
     }catch{setError('Chưa nhận được xác nhận lưu. Bấm thử lại để gửi cùng thao tác, tránh ghi hai lần.')}finally{lock.current=false;setBusy(false)}
   }
-  const selectVessel=(id:VesselId)=>setSelected(id)
+  const selectVessel=(id:VesselId)=>{setSelected(id);setMotion('idle')}
   const done=view?.status==='completed'
   const header=<>
     <Link className={bench.brand} href="/" aria-label="Trang chủ VECLab"><span><FlaskIcon/></span><strong>VECLab</strong></Link>
@@ -87,10 +88,22 @@ export function ExtractionWorkbench({ attemptId, openReport = false, initialPane
   if(!view)return <div className={styles.root}><WorkbenchFrame label="Bàn chiết tách axit–bazơ" header={header} shelf={shelf} simulation={<div className={bench.entry}>{loading?<p role="status">Đang mở bàn thực hành…</p>:<div role="alert"><h2>Chưa mở được lượt chiết tách</h2><p>{error}</p>{attemptId?<Link className={bench.primary} href="/simulate/acid-base-extraction">Bắt đầu lượt mới</Link>:<button className={bench.primary} type="button" disabled={busy} onClick={()=>void start()}>Thử lại</button>}</div>}</div>} controls={<p className={bench.empty}>Thao tác sẽ xuất hiện khi lượt sẵn sàng.</p>} notebook={<p className={bench.empty}>Chưa có phép đo.</p>} pane={pane} onPaneChange={setPane} onShelfInfo={()=>setEquipmentItem('sample')}/>{equipment}</div>
   const controls=<ExtractionControls projection={view.projection} selected={selected} onSelect={selectVessel} locked={busy||pendingType!==null} done={done} onRun={(type,params={},units={})=>void run(type,params,units)} onReport={()=>setReport(true)} onNotebook={()=>setPane('notebook')}/>
   const notebook=<ExtractionNotebook projection={view.projection} actions={view.actions} revision={view.revision} selected={selected}/>
+  const submissionReview=COMPONENTS.map(component=>{
+    const submission=view.projection.submissions[component]
+    if(!submission)return {component,vessel:null,needs:['Chưa chọn bình và lưu đáp số.']}
+    const vessel=view.projection.vessels.find(v=>v.id===submission.vesselId)!
+    const mass=view.projection.readings.filter(r=>r.vesselId===vessel.id&&r.kind==='mass'&&r.valid).at(-1)
+    const change=view.projection.history.filter(h=>h.from===vessel.id||h.to===vessel.id).at(-1)?.sequence??0
+    const needs=[]
+    if(!vessel.dry)needs.push('Chưa làm khô.')
+    if(!mass)needs.push('Chưa cân mẫu.')
+    else if(mass.sequence<=change)needs.push('Cần cân lại sau thao tác cuối.')
+    return {component,vessel:vessel.id,needs}
+  })
 
-  return <div className={styles.root}><WorkbenchFrame label="Bàn chiết tách axit–bazơ" header={header} shelf={shelf} simulation={<ExtractionApparatus projection={view.projection} selected={selected} onSelect={selectVessel} motion={motion} distribution={view.report?.distribution}/>} controls={controls} notebook={notebook} pane={pane} onPaneChange={setPane} tourSteps={EXTRACTION_TOUR} tourOpen={tour} onTourClose={()=>{setTour(false);requestAnimationFrame(()=>tourTrigger.current?.focus({preventScroll:true}))}} onShelfInfo={()=>setEquipmentItem('sample')} notices={error?<div role="alert" className={styles.error}>{error} {pendingType!==null&&<button className={bench.button} disabled={busy} onClick={()=>void run('',{}, {},true)}>Thử lại thao tác</button>}<button className={bench.button} onClick={()=>location.reload()}>Tải lại lượt</button></div>:undefined}/>
+  return <div className={styles.root}><WorkbenchFrame label="Bàn chiết tách axit–bazơ" header={header} shelf={shelf} simulation={<ExtractionApparatus projection={view.projection} selected={selected} onSelect={selectVessel} motion={motion} latestAction={view.actions.at(-1)} distribution={view.report?.distribution}/>} controls={controls} notebook={notebook} pane={pane} onPaneChange={setPane} tourSteps={EXTRACTION_TOUR} tourOpen={tour} onTourClose={()=>{setTour(false);requestAnimationFrame(()=>tourTrigger.current?.focus({preventScroll:true}))}} onShelfInfo={()=>setEquipmentItem('sample')} notices={error?<div role="alert" className={styles.error}>{error} {pendingType!==null&&<button className={bench.button} disabled={busy} onClick={()=>void run('',{}, {},true)}>Thử lại thao tác</button>}<button className={bench.button} onClick={()=>location.reload()}>Tải lại lượt</button></div>:undefined}/>
     {equipment}
-    {confirm&&<Modal title="Xác nhận nộp bài chiết tách" onClose={()=>setConfirm(false)}><p>Đã lưu {view.projection.readings.length} phép đo, khai báo {Object.keys(view.projection.submissions).length}/3 sản phẩm. Sau nộp, lượt sẽ khóa và báo cáo hiện thành phần theo mô hình.</p>{Object.keys(view.projection.submissions).length<3&&<p className={styles.disclosure}>Còn sản phẩm chưa khai báo. Bạn có thể quay lại hoặc nộp lượt chưa hoàn chỉnh.</p>}{error&&<p role="alert">{error}</p>}{pendingType==='complete'&&<button className={bench.button} disabled={busy} type="button" onClick={()=>void run('',{}, {},true)}>Thử lại nộp bài</button>}<button className={bench.primary} disabled={busy||pendingType!==null} type="button" onClick={()=>void run('complete')}>{busy?'Đang lưu báo cáo…':'Xác nhận nộp bài'}</button></Modal>}
+    {confirm&&<Modal title="Xác nhận nộp bài chiết tách" onClose={()=>setConfirm(false)}><p>Đã lưu {view.projection.readings.length} phép đo, khai báo {Object.keys(view.projection.submissions).length}/3 sản phẩm. Sau nộp, lượt sẽ khóa và báo cáo hiện thành phần theo mô hình.</p><ul className={styles.submissionReview} aria-label="Dữ liệu chuẩn bị nộp">{submissionReview.map(item=><li key={item.component}><strong>{item.component}{item.vessel?' → '+item.vessel:''}</strong><span>{item.needs.length?item.needs.join(' '):'Đã khai báo, làm khô và cân sau thao tác cuối.'}</span></li>)}</ul>{submissionReview.some(item=>item.needs.length>0)&&<p className={styles.disclosure}>Còn dữ liệu cần bổ sung. Bạn có thể đóng bảng để tiếp tục hoặc nộp lượt chưa hoàn chỉnh.</p>}<p className={styles.disclosure}>Danh sách trên chỉ kiểm tra dữ liệu đã có. Thu hồi, tinh khiết và phép tính được đối chiếu trong báo cáo sau nộp.</p>{error&&<p role="alert">{error}</p>}{pendingType==='complete'&&<button className={bench.button} disabled={busy} type="button" onClick={()=>void run('',{}, {},true)}>Thử lại nộp bài</button>}<button className={bench.primary} disabled={busy||pendingType!==null} type="button" onClick={()=>void run('complete')}>{busy?'Đang lưu báo cáo…':'Xác nhận nộp bài'}</button></Modal>}
     {report&&view.report&&<Modal title="Báo cáo chiết tách axit–bazơ" onClose={()=>setReport(false)}><ExtractionReport report={view.report} actions={view.actions}/><div className={styles.links}><button className={bench.button} type="button" onClick={()=>{setReport(false);setPane('notebook')}}>Xem sổ đo</button><Link className={bench.primary} href="/simulate/acid-base-extraction">Làm lượt mới</Link></div></Modal>}
   </div>
 }
