@@ -74,6 +74,24 @@ async function complete(page: Page) {
 }
 
 test.describe('Jar Test — light workbench, persisted guest flow', () => {
+  test('Jar reading pages keep link icons bounded and guide blocks readable', async ({ page }) => {
+    for (const route of ['/experiments/jar-test', '/evidence', '/experiments/jar-test/guide']) {
+      await page.goto(route)
+      const icons = await page.locator('main a > svg').evaluateAll(elements => elements.map(element => {
+        const bounds = element.getBoundingClientRect()
+        return { width: bounds.width, height: bounds.height }
+      }))
+      expect(icons.length).toBeGreaterThan(0)
+      for (const icon of icons) { expect(icon.width).toBeLessThanOrEqual(24); expect(icon.height).toBeLessThanOrEqual(24) }
+      await expect(page.locator('svg[data-science-backdrop]')).toBeAttached()
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true)
+    }
+    const panels = page.locator('main section[aria-labelledby^="jar-"]')
+    await expect(panels).toHaveCount(6)
+    const colors = await panels.evaluateAll(elements => elements.map(element => getComputedStyle(element).backgroundColor))
+    expect(new Set(colors).size).toBeGreaterThanOrEqual(4)
+    await expect(page.getByRole('heading', { name: 'Quy trình trên workbench', exact: true })).toBeVisible()
+  })
   test('catalog and citations expose Jar Test and label future lessons honestly', async ({ page }) => {
     test.setTimeout(60_000) // Multiple routes may compile on their first dev-server visit.
     await page.goto('/')

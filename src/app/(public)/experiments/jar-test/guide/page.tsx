@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { JAR_PROFILE } from '@/domain/experiments/jar-test/model.js'
 import { parseUUID } from '@/shared/ids.js'
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
+import { ScienceBackdrop } from '@/shared/ui/science-backdrop.js'
+import { JAR_SOURCES } from '@/content/evidence/jar-test.js'
 import { ArrowRightIcon, BookIcon, FlaskIcon, CalculatorIcon, WarningIcon } from '@/features/landing/icons.js'
 import styles from './page.module.css'
 
@@ -27,7 +29,8 @@ export default async function JarGuidePage({ searchParams }: {
   ] as const
 
   return <div className={'page ' + styles.guide}>
-    <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: 'Thí nghiệm', href: '/experiments' }, { label: 'Jar Test', href: workbenchHref }, { label: 'Lý thuyết & cách làm bài' }]} />
+    <ScienceBackdrop />
+    <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: 'Thí nghiệm', href: '/experiments' }, { label: 'Jar Test', href: '/experiments/jar-test' }, { label: 'Lý thuyết & cách làm bài' }]} />
     <header className={styles.header}>
       <div><h1>Jar Test: lý thuyết & cách làm bài</h1>
         <p>Khảo sát ảnh hưởng của pH ban đầu và liều phèn đến độ đục. Bạn thiết kế các cốc thử, đo kết quả rồi chọn phương án xử lý dựa trên số liệu.</p>
@@ -37,8 +40,7 @@ export default async function JarGuidePage({ searchParams }: {
     </header>
 
     <div className={styles.layout}>
-      <article className={styles.article}>
-        <section aria-labelledby="jar-principle">
+        <section className={styles.panel + ' ' + styles.principle} aria-labelledby="jar-principle">
           <h2 id="jar-principle"><BookIcon />Hiểu thí nghiệm trước khi làm</h2>
           <p>Mẫu chứa các hạt kaolin lơ lửng, làm nước bị đục. Trong bài Jar Test, phèn nhôm là chất keo tụ; dàn khuấy thực hiện lần lượt ba pha để minh họa quá trình keo tụ, tạo bông và lắng.</p>
           <div className={styles.principles}>
@@ -50,7 +52,13 @@ export default async function JarGuidePage({ searchParams }: {
           <p>pH và liều phèn là hai điều kiện bạn được chọn. Muốn tìm hiểu ảnh hưởng của liều, hãy giữ cùng pH giữa các cốc; muốn so sánh pH, hãy giữ cùng liều. Bài không mặc định rằng càng thêm nhiều phèn thì kết quả càng tốt.</p>
         </section>
 
-        <section aria-labelledby="jar-procedure">
+        <section className={styles.panel + ' ' + styles.profile} aria-labelledby="jar-profile">
+          <h2 id="jar-profile"><FlaskIcon />Hồ sơ bài thực hành</h2>
+          <dl><div><dt>Mẫu</dt><dd>Kaolin tổng hợp</dd></div><div><dt>Chất keo tụ</dt><dd>Phèn nhôm</dd></div><div><dt>Thể tích mỗi cốc</dt><dd>{JAR_PROFILE.aliquotVolumeL.toLocaleString('vi-VN')} L</dd></div><div><dt>pH ban đầu</dt><dd>{JAR_PROFILE.availableInitialPh.join(' / ')}</dd></div><div><dt>Tổng liều mỗi cốc</dt><dd>{JAR_PROFILE.minDoseMgL}–{JAR_PROFILE.maxDoseMgL} mg/L</dd></div><div><dt>Đầu ra cần ghi</dt><dd>NTU cuối, hiệu suất tự tính, cốc được chọn</dd></div></dl>
+          <p className={styles.goal}>Mục tiêu học tập: tìm phương án giảm độ đục ít nhất <strong>{JAR_PROFILE.goalRemovalPercent}%</strong> theo mô hình.</p>
+        </section>
+
+        <section className={styles.panel + ' ' + styles.procedure} aria-labelledby="jar-procedure">
           <h2 id="jar-procedure"><FlaskIcon />Quy trình trên workbench</h2>
           <p>Thực hiện một mẻ với tối đa sáu cốc A–F. Các cốc có thể khác pH và liều phèn, nhưng dùng chung chương trình khuấy và lắng.</p>
           <ol className={styles.steps}>
@@ -66,30 +74,21 @@ export default async function JarGuidePage({ searchParams }: {
           </ol>
         </section>
 
-        <section aria-labelledby="jar-calculation" className={styles.calculation}>
+        <section aria-labelledby="jar-calculation" className={styles.panel + ' ' + styles.calculation}>
           <h2 id="jar-calculation"><CalculatorIcon />Tính phần trăm giảm đục</h2>
           <p className={styles.formula}>Hiệu suất (%) = (NTU đầu − NTU cuối) / NTU đầu × 100</p>
           <p>Dùng số đo hợp lệ của đúng cốc đang tính. Liều phèn có đơn vị mg/L; hiệu suất có đơn vị %, hai đại lượng này không thay thế nhau.</p>
           <details><summary>Xem ví dụ phép tính</summary><p><strong>Ví dụ minh họa, không phải kết quả của bài:</strong> mẫu có NTU đầu = 100, NTU cuối = 40 thì hiệu suất = (100 − 40) / 100 × 100 = 60%.</p></details>
           <p><strong>Chưa đo</strong> nghĩa là chưa có phép đo. <strong>N/A</strong> nghĩa là phép đo không hợp lệ. Cả hai đều không phải 0 NTU và không dùng để tính hiệu suất.</p>
         </section>
-      </article>
-
-      <aside className={styles.sidebar} aria-label="Hồ sơ bài thực hành">
-        <section className={styles.profile}>
-          <h2>Hồ sơ bài thực hành</h2>
-          <dl><div><dt>Mẫu</dt><dd>Kaolin tổng hợp</dd></div><div><dt>Chất keo tụ</dt><dd>Phèn nhôm</dd></div><div><dt>Thể tích mỗi cốc</dt><dd>{JAR_PROFILE.aliquotVolumeL.toLocaleString('vi-VN')} L</dd></div><div><dt>pH ban đầu</dt><dd>{JAR_PROFILE.availableInitialPh.join(' / ')}</dd></div><div><dt>Tổng liều mỗi cốc</dt><dd>{JAR_PROFILE.minDoseMgL}–{JAR_PROFILE.maxDoseMgL} mg/L</dd></div><div><dt>Đầu ra cần ghi</dt><dd>NTU cuối, hiệu suất tự tính, cốc được chọn</dd></div></dl>
-          <p className={styles.goal}>Mục tiêu học tập: tìm phương án giảm độ đục ít nhất <strong>{JAR_PROFILE.goalRemovalPercent}%</strong> theo mô hình.</p>
-        </section>
-        <section className={styles.limits}>
-          <h2><WarningIcon />Hiểu đúng phạm vi</h2>
+        <section className={styles.panel + ' ' + styles.limits} aria-labelledby="jar-limits">
+          <h2 id="jar-limits"><WarningIcon />Hiểu đúng phạm vi</h2>
           <p>Đây là mẫu và chương trình đã khóa cho việc học. Bài không cho thay đổi tốc độ, thời gian, vị trí lấy mẫu hoặc thêm axit/bazơ tùy ý.</p>
           <p>Hoạt ảnh hạt và bông chỉ minh họa. Mô hình không dự đoán liên tục độ đục, kích thước bông hay lượng bùn trong lúc khuấy.</p>
           <p>Giảm NTU không chứng minh đã loại bỏ vi sinh hoặc chất ô nhiễm hòa tan. Mục tiêu {JAR_PROFILE.goalRemovalPercent}% không phải tiêu chuẩn nước uống hay nước thải.</p>
           <p>Không dùng kết quả này để định liều cho mẫu nước thật. Khi làm ở phòng thí nghiệm, tuân theo quy trình, trang bị bảo hộ và hướng dẫn của giảng viên.</p>
         </section>
-        <details className={styles.sources}><summary>Nguồn của mô hình</summary><p>Mô hình cuối pha sử dụng Equation 3 với hệ số in trong nghiên cứu Alateef và cộng sự (2024), trong phạm vi hồ sơ mẫu đã khóa. Việc tái hiện công thức không thay thế kiểm chứng thực nghiệm ngoài mẫu.</p><a href={'https://doi.org/' + JAR_PROFILE.sourceDoi} target="_blank" rel="noreferrer">Đọc nghiên cứu gốc <ArrowRightIcon /></a></details>
-      </aside>
+        <section className={styles.panel + ' ' + styles.sources} aria-labelledby="jar-sources"><h2 id="jar-sources"><BookIcon />Nguồn tham khảo</h2><p>Mô hình tính toán và quy trình thực hành có nguồn riêng. Mở danh sách khi cần đối chiếu.</p><details><summary>Xem {JAR_SOURCES.length} tài liệu đang sử dụng</summary><ul>{JAR_SOURCES.map(source => <li key={source.key}><a href={source.url} target="_blank" rel="noreferrer">{source.title}<ArrowRightIcon /></a><p>{source.author} · {source.kind}</p></li>)}</ul></details><Link href="/evidence">Cách sử dụng nguồn & giới hạn mô hình <ArrowRightIcon /></Link></section>
     </div>
   </div>
 }

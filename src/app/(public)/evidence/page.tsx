@@ -6,6 +6,7 @@ import { EXPERIMENT_OVERVIEWS } from '@/features/experiment-catalog/overviews.js
 import { EvidenceExperimentBrowser } from '@/features/scientific-evidence/experiment-browser.js'
 import { ArrowRightIcon, BookIcon, CalculatorIcon } from '@/features/landing/icons.js'
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
+import { ScienceBackdrop } from '@/shared/ui/science-backdrop.js'
 
 export const metadata: Metadata = {
   title: 'Nguồn khoa học',
@@ -16,7 +17,7 @@ export default function EvidencePage() {
   const experiments = [...EXPERIMENT_OVERVIEWS].sort((a, b) => Number(b.scenarioKey === 'jar-test') - Number(a.scenarioKey === 'jar-test'))
     .map(item => ({ key: item.scenarioKey, title: item.title, category: item.category, sourceCount: item.scenarioKey === 'jar-test' ? JAR_SOURCES.length : null }))
   return <div className="page evidence-library">
-    <svg className="evidence-library-background" viewBox="0 0 1400 1000" fill="none" aria-hidden="true"><g stroke="currentColor" opacity=".15"><path d="m1100 35 35-20 35 20v40l-35 20-35-20Zm70 0 35-20 35 20v40l-35 20-35-20ZM1270 90v100l-45 45h-160M95 500v85l-35 35v115"/><circle cx="1065" cy="235" r="4"/></g></svg>
+    <ScienceBackdrop />
     <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: 'Nguồn khoa học' }]} />
     <header className="evidence-library-header"><h1>Nguồn khoa học</h1><p>Tài liệu được sử dụng cho từng bài, cách áp dụng và những giới hạn cần biết.</p></header>
     <EvidenceExperimentBrowser experiments={experiments}>

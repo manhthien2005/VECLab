@@ -7608,3 +7608,7 @@ td[data-numeric],
 .hero-jar-conditions dd { margin: 0; font-size: .8rem; font-weight: 650; color: var(--ink); }
 .experiment-detail-sources { grid-column: 1 / -1; }
 .showcase-card-state { display: inline-block; margin-top: .4rem; font-size: .75rem; font-weight: 650; color: var(--ink-muted); }
+
+/* Reading-page links keep decorative icons bounded and aligned with their labels. */
+.experiment-detail-process > a, .evidence-model-details > a { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; font-size: .875rem; text-underline-offset: .25em; }
+.experiment-detail a > svg, .evidence-library a > svg { width: 1rem; height: 1rem; flex: 0 0 1rem; }
