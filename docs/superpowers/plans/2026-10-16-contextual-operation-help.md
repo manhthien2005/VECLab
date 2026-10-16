@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16.3.4, React 19.2.8, TypeScript, CSS Modules và Playwright hiện có. Không thêm dependency.
 
-**Spec:** Phạm vi người dùng đồng ý trong chat ngày 16/10/2026: tra hướng dẫn đúng thao tác; vòng này chưa code. Giữ các yêu cầu học tập của [thiết kế mô phỏng v1](../specs/2026-10-13-simulation-v1-design.md), và hành vi đang có của hai bài trên develop.
+**Spec:** Phạm vi người dùng đồng ý trong chat ngày 16/10/2026: tra hướng dẫn đúng thao tác; vòng này chưa code. Giữ các yêu cầu học tập của [Phạm vi hiện hành](../../ui/current-experiments.md), và hành vi đang có của hai bài trên develop.
 
 **Baseline khảo sát:** develop tại cb43af20a9dcdd91f522477e70b5813378f459f5. Đây là nền đã kiểm tra; vòng code sau kiểm tra lại HEAD và chỉ điều chỉnh các điểm bị thay đổi. Không dùng nhận xét về checkout chore/pre-refactor-cleanup cũ.
 

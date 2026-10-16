@@ -1,5 +1,7 @@
 # VECLab Backend Threat Model
 
+> Historical review at the pinned commit below. As of 2026-10-16, the old simulation BFF/cloud adapter has been removed; Jar Test and extraction persist locally. Auth/profile guards and the database migration/RPC history remain relevant. This document is audit context, not a current endpoint inventory or an open implementation task. See [current scope](../ui/current-experiments.md) and current source/tests for active boundaries.
+
 ## Scope and authority
 - **Scope**: Backend, database, BFF, and data persistence boundaries of VECLab at commit `7a8c330ee54d03f5f3b6a07acb4290af1159d62c`.
 - **Precedence and conflict resolution** ([Documentation index](../../docs/README.md)):

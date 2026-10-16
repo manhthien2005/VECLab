@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-/** Temporary UI integration: keep Jar runs local until its BFF is integrated. */
+/** Jar attempts are persisted in this browser, including while signed in. */
 export default async function JarTestPage({ searchParams }: JarPageProps) {
   const { attempt, view } = await searchParams
   // Missing attempt is a new-run entry, while malformed/repeated values are

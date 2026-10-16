@@ -13,7 +13,7 @@ beforeEach(async () => {
 })
 async function unrelatedRecord() {
   return new GuestAttemptRepository<object>().createAttempt({
-    attemptId: newUUID(), scenarioKey: 'acid-neutralization', scenarioReleaseId: 'acid-neutralization@1.0.0',
+    attemptId: newUUID(), scenarioKey: 'acid-base-extraction', scenarioReleaseId: 'acid-base-extraction@0.2.0',
     contentLocale: 'vi', initialState: { legacyFixture: true }, initialProjection: { phStar: 7 }, projectionVersion: 1,
   })
 }

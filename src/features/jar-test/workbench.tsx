@@ -22,12 +22,14 @@ import type {
   JarSessionView, JarSession, JarActionResult, JarCompletionResult,
 } from '@/application/simulation/jar-session.js'
 import type { JarReadingView, JarCupProjection, JarProjection } from '@/application/scenarios/jar-projection.js'
-import { createJarSessionForStorageMode } from '@/features/simulation-session.js'
+import { GuestAttemptRepository } from '@/application/attempts/guest-repository.js'
+import { createJarSession } from '@/application/simulation/jar-session.js'
+import type { JarState } from '@/domain/experiments/jar-test/model.js'
 import { JarApparatus, type JarVisualCue } from './apparatus.js'
 import styles from './workbench.module.css'
 
 const JAR_PATH = '/simulate/jar-test'
-type Mode = 'local' | 'cloud'
+type Mode = 'local'
 type Props = {
   attemptId: string | null
   invalidAttempt?: boolean
@@ -168,7 +170,7 @@ function JarLearningGoal() {
 }
 
 /**
- * Local and cloud share the accepted JarSession contract. Only drafts and
+ * Browser-local JarSession owns the saved attempt. Only drafts and
  * qualitative motion live in UI state; all chemistry comes from a committed view.
  */
 export function JarWorkbench(props: Props) {
@@ -180,10 +182,10 @@ export function JarWorkbench(props: Props) {
   return <JarWorkbenchSession key={sessionKey} {...props} />
 }
 
-function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, openReport = false, initialPane = 'simulation' }: Props) {
+function JarWorkbenchSession({ attemptId, invalidAttempt = false, openReport = false, initialPane = 'simulation' }: Props) {
   const router = useRouter()
   const session: JarSession = useMemo(
-    () => createJarSessionForStorageMode(storageMode), [storageMode],
+    () => createJarSession(new GuestAttemptRepository<JarState>()), [],
   )
   const [loadState, setLoadState] = useState<LoadState>(attemptId === null ? 'idle' : 'loading')
   const [view, setView] = useState<JarSessionView | null>(null)
@@ -451,7 +453,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
     <JarLearningGoal />
     <div className={styles.headerActions}>
       <span className={styles.saveState} role="status" aria-live="polite"><CheckCircleIcon />
-        {busy ? 'Đang lưu…' : uncertain ? 'Chưa xác nhận lưu' : ready ? (storageMode === 'local' ? 'Đã lưu trên thiết bị' : 'Đã lưu trong tài khoản') : 'Lưu trên thiết bị'}
+        {busy ? 'Đang lưu…' : uncertain ? 'Chưa xác nhận lưu' : ready ? 'Đã lưu trên thiết bị' : 'Lưu trên thiết bị'}
         {notice && <span className={styles.srOnly}>{notice}</span>}
       </span>
       <button type="button" className={styles.button + ' ' + styles.reportButton} disabled={!view?.report || busy} aria-label="Báo cáo Jar Test" title={view?.report ? 'Xem kết quả và đối chiếu đáp số đã nộp' : 'Báo cáo xuất hiện sau khi nộp bài'} onClick={() => setReportOpen(true)}><ReportIcon /><span>Báo cáo</span></button>
@@ -471,7 +473,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
         </button>)}
     </div>
     <div className={styles.shelfHelp}>
-      <p className={styles.shelfNote}>Mẫu tổng hợp dùng để học tập. {storageMode === 'local' ? 'Lượt này lưu trên trình duyệt.' : 'Lượt này lưu trong tài khoản.'}</p>
+      <p className={styles.shelfNote}>Mẫu tổng hợp dùng để học tập. Lượt này lưu trên trình duyệt.</p>
       <button ref={tourTrigger} type="button" className={styles.guideButton} onClick={() => setTourOpen(true)}><GuideIcon />Hướng dẫn thao tác</button>
       <Link className={styles.theoryLink} href={guideBaseHref} target="_blank" rel="noopener noreferrer"><TheoryIcon /><span>Lý thuyết & cách làm bài</span></Link>
       <details><summary><SourcesIcon />Nguồn & giới hạn</summary>

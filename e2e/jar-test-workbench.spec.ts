@@ -155,10 +155,8 @@ test.describe('Jar Test — light workbench, persisted guest flow', () => {
     await expect(page.getByRole('link', { name: 'Tài liệu gốc', exact: true }).first()).toHaveAttribute('href', /10\.6703\/IJASE/)
     await page.getByRole('button', { name: /Hấp phụ xanh methylene/ }).click()
     await expect(page.locator('#evidence-panel-methylene-blue-adsorption').getByText('Chưa triển khai bài thực hành. Danh mục nguồn cho bài này chưa được công bố.', { exact: true })).toBeVisible()
-    await page.goto('/simulate/plastic-density-separation')
-    await expect(page).toHaveURL(/\/experiments$/)
-    await page.goto('/simulate/acid-neutralization')
-    await expect(page).toHaveURL(/\/experiments$/)
+    expect((await page.goto('/simulate/plastic-density-separation'))?.status()).toBe(404)
+    expect((await page.goto('/simulate/acid-neutralization'))?.status()).toBe(404)
   })
   test('submission review cancels safely and incomplete reports preserve missing readings', async ({ page }) => {
     await begin(page); await prepare(page, 'A', '9'); await measure(page, 'A')

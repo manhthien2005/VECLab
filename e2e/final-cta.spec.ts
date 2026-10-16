@@ -8,7 +8,7 @@ test('offers a readable, keyboard-accessible entrance to the actual lab', async 
   await section.scrollIntoViewIfNeeded()
   await expect(section.getByRole('heading', { name: 'Sẵn sàng vào lab?', exact: true })).toBeVisible()
   const cta = section.getByRole('link', { name: 'Vào lab thực hành', exact: true })
-  await expect(cta).toHaveAttribute('href', '/simulate/acid-neutralization')
+  await expect(cta).toHaveAttribute('href', '/simulate/jar-test')
   for (const mode of ['light', 'dark']) {
     if (mode === 'dark') await page.getByRole('button', { name: 'Chuyển sang giao diện tối', exact: true }).click()
     await section.scrollIntoViewIfNeeded()
@@ -30,5 +30,5 @@ test('offers a readable, keyboard-accessible entrance to the actual lab', async 
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await expect(image).toHaveCSS('transition-duration', '0s')
   await cta.press('Enter')
-  await expect(page).toHaveURL(/\/simulate\/acid-neutralization$/, { timeout: 15000 })
+  await expect(page).toHaveURL(/\/simulate\/jar-test$/, { timeout: 15000 })
 })

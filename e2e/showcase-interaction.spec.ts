@@ -2,11 +2,15 @@ import { test, expect } from '@playwright/test'
 
 test.use({ screenshot: 'off', trace: 'off' })
 
-test.beforeEach(async ({ page }) => { await page.goto('/#showcase') })
+test.beforeEach(async ({ page }) => {
+  await page.goto('/#showcase')
+  // Wait for the landing's client effects before the first carousel interaction.
+  await expect(page.locator('.final-cta-section')).toHaveClass(/is-(pending|revealed)/)
+})
 
 test('shows the agreed experiments with loaded illustrations and no status or CTA footers', async ({ page }) => {
   const cards = page.locator('.showcase-card')
-  await expect(cards.locator('h3')).toHaveText(['Điều chỉnh pH', 'Jar Test', 'Hấp phụ xanh methylene'])
+  await expect(cards.locator('h3')).toHaveText(['Jar Test', 'Chiết tách axit–bazơ', 'Hấp phụ xanh methylene'])
   await expect(page.locator('.showcase-status-badge, .showcase-card-footer')).toHaveCount(0)
   for (const dot of await page.locator('.showcase-dot').all()) {
     await dot.click()
@@ -41,7 +45,7 @@ test('centers cards using next, previous and keyboard without moving the page ve
     await page.getByRole('button', { name: 'Thí nghiệm trước đó', exact: true }).click()
     await expect(cards.nth(((1 - step - 1) % 3 + 3) % 3)).toHaveAttribute('data-active', 'true')
   }
-  await cards.nth(1).locator('summary').focus()
+  await cards.nth(1).locator('a').focus()
   const top = await page.evaluate(() => scrollY)
   await page.keyboard.press('ArrowLeft')
   await expect(cards.nth(0)).toHaveAttribute('data-active', 'true')
@@ -49,11 +53,17 @@ test('centers cards using next, previous and keyboard without moving the page ve
   expect(await page.evaluate(() => scrollY)).toBe(top)
 })
 
-test('whole cards open planned introductions or the current Jar simulator', async ({ page }) => {
+test('whole cards keep adsorption planned and open the two current simulators', async ({ page }) => {
+  await page.getByRole('button', { name: 'Chuyển đến thí nghiệm 3', exact: true }).click()
+  await expect(page.locator('.showcase-card').nth(2)).toHaveAttribute('data-active', 'true')
+  await page.locator('.showcase-card').nth(2).locator('summary').click()
+  await expect(page.locator('.showcase-card').nth(2).locator('details')).toHaveAttribute('open', '')
+  await expect(page.locator('.showcase-card').nth(2).getByText('Chưa triển khai bài thực hành.', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Chuyển đến thí nghiệm 2', exact: true }).click()
-  await page.locator('.showcase-card').nth(1).locator('summary').click()
-  await expect(page.locator('.showcase-card').nth(1).locator('details')).toHaveAttribute('open', '')
-  await expect(page.locator('.showcase-card').nth(1).getByText('Chưa triển khai bài thực hành.', { exact: true })).toBeVisible()
+  await expect(page.locator('.showcase-card').nth(1)).toHaveAttribute('data-active', 'true')
+  await page.getByRole('link', { name: 'Mở thí nghiệm Chiết tách axit–bazơ', exact: true }).click()
+  await expect(page).toHaveURL(/\/simulate\/acid-base-extraction/, { timeout: 15000 })
+  await page.goto('/#showcase')
   await page.getByRole('button', { name: 'Chuyển đến thí nghiệm 1', exact: true }).click()
   await page.getByRole('link', { name: 'Mở thí nghiệm Jar Test', exact: true }).click()
   await expect(page).toHaveURL(/\/simulate\/jar-test/, { timeout: 15000 })
@@ -67,7 +77,8 @@ test('selects a side card before opening it and supports a horizontal swipe', as
   const visibleRight = Math.min(box.x + box.width, page.viewportSize()!.width)
   await page.mouse.click(visibleRight - 12, box.y + box.height / 2)
   await expect(side).toHaveAttribute('data-active', 'true')
-  await expect(side.locator('details')).not.toHaveAttribute('open', '')
+  await expect(side.locator('a')).toHaveAttribute('href', '/simulate/acid-base-extraction')
+  await expect(side.locator('details')).toHaveCount(0)
   await expect.poll(() => side.evaluate((el) => {
     const rect = el.getBoundingClientRect()
     const track = el.parentElement!.getBoundingClientRect()
