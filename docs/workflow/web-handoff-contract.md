@@ -6,15 +6,15 @@ Ngày: 13/10/2026. Phạm vi: Codex local làm Tech Lead/review; ChatGPT web th�
 
 Yêu cầu sản phẩm → audit/đặc tả → skill dự án và contract giao việc → gói triển khai cụ thể → web thực hiện → local review/kiểm chứng → người dùng thử UI → tích hợp theo AGENTS.
 
-Hiện đã có thiết kế, audit và plan Jar Test. Bộ skill/contract là phần chuẩn bị phải hoàn tất trước khi coi gói đầu tiên sẵn sàng giao. Viết xong plan không tự chứng minh đã chuẩn bị đủ workflow, web đọc được source, hoặc tính năng đã chạy.
+Jar Test và chiết tách axit–bazơ đã có source và kiểm thử. Bộ skill/contract áp dụng cho task mới; các handoff chuẩn bị đã hoàn tất được tra trong Git. Viết plan không tự chứng minh web đọc được source hoặc thay đổi đã chạy đúng.
 
-“Contract web” ở đây là hợp đồng giao việc cho tác nhân trên web. Contract kỹ thuật FE ↔ BE là phần riêng: các ranh giới hiện nằm trong thiết kế/plan; cấu trúc `JarState`, action và đơn vị khóa ở Task 1, `JarProjection`/report/session ở Task 2, DTO/API ở Task 3. Một chữ ký đề xuất trong plan chưa phải API đã triển khai hoặc đã kiểm thử.
+“Contract web” là hợp đồng giao việc cho tác nhân trên web. Contract kỹ thuật là phần riêng, đọc từ source tại base SHA của task; không coi API đề xuất trong plan lịch sử là API đã triển khai. Hai bài hiện hành lưu browser-local, không còn BFF trung hòa axit.
 
 ## 2. Nguồn quyết định
 
 - [AGENTS.md](../../AGENTS.md): Git, môi trường và phạm vi quyền.
-- [Thiết kế hiện hành](../superpowers/specs/2026-10-13-simulation-v1-design.md): mục tiêu học tập, phản hồi và 2D.
-- [Jar Test](../experiments/jar-test-design.md), [audit](../research/simulation-refactor-audit.md), [plan](../superpowers/plans/2026-10-13-jar-test-first-slice.md): phạm vi khoa học, giả định và gói thực hiện.
+- [Phạm vi hiện hành](../ui/current-experiments.md): mục tiêu học tập, phản hồi và 2D.
+- [Jar Test](../experiments/jar-test-design.md), [profile chiết tách](../experiments/acid-base-extraction-profile.md): phạm vi khoa học và giả định.
 - Code/tests tại base commit được giao: hiện trạng chạy thật. Nếu khác đặc tả, nêu khác biệt; không âm thầm sửa đặc tả để hợp code.
 
 Local dùng các skill dự án trong `.agents/skills`. Web phải được yêu cầu đọc các file cần thiết qua repo hoặc nhận nguyên nội dung nếu công cụ không truy cập được. Không giả định ChatGPT web tự tải skill, plugin hoặc file chỉ có trên máy local. Cách đặt repo skill đối chiếu [tài liệu OpenAI](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills).

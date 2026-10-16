@@ -14,9 +14,6 @@ import type { CanonicalQuantity } from '@/domain/units/index.js'
 export type UUID = string & { readonly __brand: 'UUID' }
 
 export const SCENARIO_KEYS = [
-  'acid-neutralization',
-  'copper-precipitation',
-  'plastic-separation',
   'jar-test',
   'acid-base-extraction',
 ] as const
@@ -25,7 +22,7 @@ export type ScenarioKey = (typeof SCENARIO_KEYS)[number]
 
 export type ScenarioRef = {
   key: ScenarioKey
-  /** Immutable release bundle id, e.g. `acid-neutralization@1.0.0`. */
+  /** Immutable release bundle id, e.g. `jar-test@0.1.0`. */
   releaseId: string
 }
 

@@ -6,7 +6,7 @@ describe('requiresSession', () => {
     expect(requiresSession('/lab')).toBe(false)
     expect(requiresSession('/experiments')).toBe(false)
     expect(requiresSession('/evidence')).toBe(false)
-    expect(requiresSession('/simulate/acid-neutralization')).toBe(false)
+    expect(requiresSession('/simulate/acid-base-extraction')).toBe(false)
     expect(requiresSession('/attempts/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa')).toBe(false)
   })
 

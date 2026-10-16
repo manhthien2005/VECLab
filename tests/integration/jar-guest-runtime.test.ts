@@ -4,8 +4,8 @@ import type { SimulationAction, UUID } from '@/domain/process/contracts.js'
 import type { StoredEvent } from '@/domain/process/lifecycle.js'
 import type { AttemptRepository } from '@/application/attempts/repository.js'
 import { GuestAttemptRepository } from '@/application/attempts/guest-repository.js'
-import { createAcidSession } from '@/application/simulation/acid-session.js'
-import type { AcidNeutralizationState } from '@/domain/experiments/acid-neutralization/state.js'
+import { createExtractionSession } from '@/application/simulation/extraction-session.js'
+import type { ExtractionState } from '@/domain/experiments/acid-base-extraction/model.js'
 import { JAR_PROFILE, createInitialJarState, type JarState } from '@/domain/experiments/jar-test/model.js'
 import { createJarSession, type JarSession } from '@/application/simulation/jar-session.js'
 import { newUUID } from '@/shared/ids.js'
@@ -409,8 +409,8 @@ describe('Jar Task 2 guest session through IndexedDB', () => {
   })
 
   it('wrong_release_is_not_cast_to_jar before projection, replay or writing', async () => {
-    const acid = createAcidSession(new GuestAttemptRepository<AcidNeutralizationState>())
-    const foreign = await acid.start()
+    const extraction = createExtractionSession(new GuestAttemptRepository<ExtractionState>())
+    const foreign = await extraction.start()
     const jar = session()
     const refused = await jar.load(foreign.attemptId)
     expect(refused).toMatchObject({
@@ -421,9 +421,9 @@ describe('Jar Task 2 guest session through IndexedDB', () => {
     expect(applyRefused).toMatchObject({
       ok: false, error: { code: 'UNSUPPORTED_SCENARIO_RELEASE' },
     })
-    const storedAcid = await new GuestAttemptRepository<AcidNeutralizationState>()
+    const storedExtraction = await new GuestAttemptRepository<ExtractionState>()
       .getAttempt(foreign.attemptId)
-    expect(storedAcid?.lastSequence).toBe(0)
+    expect(storedExtraction?.lastSequence).toBe(0)
 
     const id = newUUID()
     await repository().createAttempt({
@@ -441,7 +441,7 @@ describe('Jar Task 2 guest session through IndexedDB', () => {
     })
     expect(await repository().getAttemptEvents(id)).toHaveLength(0)
     await repository().deleteAttempt(id)
-    await new GuestAttemptRepository<AcidNeutralizationState>().deleteAttempt(foreign.attemptId)
+    await new GuestAttemptRepository<ExtractionState>().deleteAttempt(foreign.attemptId)
   })
 
   it('hides future outcomes, correctness, reference and raw domain until completion', async () => {

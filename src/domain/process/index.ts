@@ -3,7 +3,7 @@
  *
  * This is the ONLY module the application layer and route handlers import for
  * process concerns (docs/system-architecture.md §4.2). Reaching into
- * `lifecycle.js` or `scenario-registry.js` directly from `src/app/**` or
+ * `lifecycle.js` directly from `src/app/**` or
  * `src/infrastructure/**` bypasses the boundary that keeps the domain free of
  * Next and Supabase imports, and is rejected by
  * tests/unit/domain-boundaries.test.ts.
@@ -65,14 +65,3 @@ export type {
   StoredEvent,
   UndoOutcome,
 } from './lifecycle.js'
-
-export {
-  registerRelease,
-  canServeRelease,
-  getRegisteredRelease,
-  registeredReleasesFor,
-  registeredReleaseIds,
-  clearRegistry,
-  isResumable,
-} from './scenario-registry.js'
-export type { RegisteredRelease } from './scenario-registry.js'

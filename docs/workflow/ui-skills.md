@@ -15,7 +15,7 @@ Không nạp cả bốn skill cho mọi task. Chọn skill chính theo màn và 
 
 ## Quy tắc dự án được ưu tiên
 
-- Đọc [AGENTS](../../AGENTS.md), brief và [yêu cầu sản phẩm đã chốt](../superpowers/specs/2026-10-13-simulation-v1-design.md) trước. Người học chính là sinh viên không chuyên hóa, đã biết hóa học và dụng cụ cơ bản; giá trị cốt lõi là thao tác, quan sát và hiểu nguyên nhân kết quả.
+- Đọc [AGENTS](../../AGENTS.md), brief và [Phạm vi hiện hành](../ui/current-experiments.md) trước. Người học chính là sinh viên không chuyên hóa, đã biết hóa học và dụng cụ cơ bản; giá trị cốt lõi là thao tác, quan sát và hiểu nguyên nhân kết quả.
 - **Chưa chốt hướng UI ngoài.** Ba ảnh concept đã tạo chưa được chấp nhận. Coder 2 hiện chỉ có scope audit/đề xuất theo task đã giao; bước tiếp theo cần mẫu để người dùng lựa chọn. Cài skill không xác nhận màu, font, bố cục hay mở quyền triển khai.
 - Với màn ứng dụng, ưu tiên tìm bài, tiếp tục lượt học, đọc hướng dẫn và hiểu thao tác. Chỉ dùng hero, ảnh trang trí hay animation khi chúng phục vụ mục tiêu của màn.
 - House rules của hai bộ có thể khác nhau (gradient, borders, font, motion). Không gộp thành danh sách cấm chung. Brief được chấp nhận, khả dụng và khoa học quyết định; chọn hướng nhất quán theo từng màn. Bảng số liệu, nhãn dụng cụ, bước quy trình, màu chỉ thị pH và số liệu cần thiết phải giữ ý nghĩa chuyên môn.

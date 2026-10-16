@@ -1,8 +1,8 @@
 # Jar Test — thiết kế học tập, tương tác 2D và hồ sơ mô hình
 
-Ngày: 13/10/2026. Trạng thái: thiết kế mục tiêu; numerical release chưa được khóa. Đọc cùng [thiết kế v1](../superpowers/specs/2026-10-13-simulation-v1-design.md).
+Ngày: 13/10/2026. Trạng thái: thiết kế mục tiêu; numerical release chưa được khóa. Đọc cùng [Phạm vi hiện hành](../ui/current-experiments.md).
 
-**Phạm vi khởi đầu sau audit:** theo yêu cầu giữ giải pháp vừa đủ, dùng pH ban đầu và liều làm hai biến; khuấy/lắng theo chương trình cố định. Đã tái hiện số học của một mô hình cuối pha; chưa có prototype/engine sản phẩm. Chi tiết và quyết định nội dung ở [audit](../research/simulation-refactor-audit.md) và [plan thực hiện](../superpowers/plans/2026-10-13-jar-test-first-slice.md). Các khả năng thay đổi thời gian/lấy mẫu giữa pha bên dưới là hướng mở rộng có điều kiện, không phải tính năng phải làm ngay.
+**Phạm vi khởi đầu sau audit:** theo yêu cầu giữ giải pháp vừa đủ, dùng pH ban đầu và liều làm hai biến; khuấy/lắng theo chương trình cố định. Đã tái hiện số học của một mô hình cuối pha; chưa có prototype/engine sản phẩm. Chi tiết và quyết định nội dung ở [Phạm vi hiện hành](../ui/current-experiments.md) và [Phạm vi hiện hành](../ui/current-experiments.md). Các khả năng thay đổi thời gian/lấy mẫu giữa pha bên dưới là hướng mở rộng có điều kiện, không phải tính năng phải làm ngay.
 
 ## 1. Nhiệm vụ học tập
 
@@ -66,7 +66,7 @@ Nguồn này mở hướng cho quyết định lấy mẫu sớm/muộn có dữ
 
 ### Ứng viên response surface
 
-[Nghiên cứu RSM năm 2024](https://www.gigvvy.com/journals/ijase/articles/ijase-202403-21-1-010) được lưu trong [rà soát trước](../research/scenario-selection-review.md). Truy cập lại trang ngày 13/10/2026 trả 403; không lấy đoạn tóm tắt làm mô hình đã thẩm định. Nếu chọn nguồn này phải lấy và kiểm tra đầy đủ phương trình, điều kiện thử và dữ liệu xác minh.
+[Nghiên cứu RSM năm 2024](https://www.gigvvy.com/journals/ijase/articles/ijase-202403-21-1-010) được lưu trong [Phạm vi hiện hành](../ui/current-experiments.md). Truy cập lại trang ngày 13/10/2026 trả 403; không lấy đoạn tóm tắt làm mô hình đã thẩm định. Nếu chọn nguồn này phải lấy và kiểm tra đầy đủ phương trình, điều kiện thử và dữ liệu xác minh.
 
 Cập nhật cùng ngày: đọc được toàn văn do tác giả đăng, đối chiếu công thức với bảng số và chạy [kiểm tra số học tái lập](../../tools/research/check-jar-candidate.mjs). Chọn làm ứng viên mô hình dạy học cuối pha có giới hạn; việc tính lại trên dữ liệu xây mô hình không phải validation ngoài mẫu. Chưa đăng ký release sản phẩm.
 
