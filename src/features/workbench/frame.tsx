@@ -9,7 +9,7 @@ export type WorkbenchPane = 'simulation' | 'controls' | 'notebook'
 
 /** Presentation slots only. Each experiment owns its apparatus, actions and data. */
 export function WorkbenchFrame({ label, header, notices, shelf, simulation, controls, notebook,
-  pane, onPaneChange, tourOpen = false, onTourClose, onShelfInfo, tourSteps }: {
+  pane, onPaneChange, tourOpen = false, onTourClose, onShelfInfo, tourSteps, contentSized = false }: {
   label: string
   header: ReactNode
   notices?: ReactNode
@@ -20,6 +20,7 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
   pane: WorkbenchPane
   onPaneChange: (pane: WorkbenchPane) => void
   tourSteps?: readonly WorkbenchTourStep[]
+  contentSized?: boolean
   tourOpen?: boolean
   onTourClose?: () => void
   onShelfInfo?: () => void
@@ -33,6 +34,8 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
   const displayedShelf = tourOpen ? tourArea === 'shelf' : mobileShelf
   const displayedCollapsed = tourOpen ? false : collapsed
   const shelfId = useId()
+  const simulationArea = <div className={styles.simulation} data-workbench-area="simulation">{simulation}</div>
+  const notebookArea = <div className={styles.notebook} data-workbench-area="notebook">{notebook}</div>
   return (
     <section ref={root} className={styles.frame} aria-label={label}>
       <header className={styles.header} data-workbench-area="header">{header}</header>
@@ -44,7 +47,7 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
         <button type="button" aria-expanded={displayedShelf} aria-controls={shelfId}
           onClick={() => setMobileShelf(!mobileShelf)}>Dụng cụ</button>
       </nav>
-      <div className={styles.body} data-collapsed={displayedCollapsed} data-pane={displayedPane}>
+      <div className={styles.body} data-collapsed={displayedCollapsed} data-pane={displayedPane} data-content-sized={contentSized}>
         <aside className={styles.shelf} data-mobile-open={displayedShelf} data-workbench-area="shelf">
           <div className={styles.shelfHeading}>
           {onShelfInfo ? <button type="button" className={styles.shelfTitle} onClick={onShelfInfo} aria-haspopup="dialog" aria-label="Tìm hiểu mẫu & dụng cụ"><ToolsIcon /><span>Mẫu & dụng cụ</span></button> : <span className={styles.shelfTitle}><ToolsIcon /><span>Mẫu & dụng cụ</span></span>}
@@ -56,9 +59,9 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
           </div>
           <div className={styles.shelfBody} id={shelfId} hidden={displayedCollapsed && !displayedShelf}>{shelf}</div>
         </aside>
-        <div className={styles.simulation} data-workbench-area="simulation">{simulation}</div>
+        {contentSized ? <div className={styles.mainColumn}>{simulationArea}{notebookArea}</div> : simulationArea}
         <aside className={styles.controls} aria-label="Thao tác thí nghiệm" data-workbench-area="controls">{controls}</aside>
-        <div className={styles.notebook} data-workbench-area="notebook">{notebook}</div>
+        {!contentSized && notebookArea}
       </div>
       {tourOpen && <WorkbenchTour steps={tourSteps ?? WORKBENCH_TOUR} root={root} step={tourStep} onStepChange={setTourStep}
         onClose={() => { setTourStep(0); onTourClose?.() }} />}

@@ -1,4 +1,12 @@
 .page { position:relative; isolation:isolate; padding-bottom:48px; }
+.contents { margin:0 0 24px; padding:18px 20px; border-block:1px solid var(--border); }
+.contents h2 { margin:0 0 8px; color:var(--ink); font-size:1rem; line-height:1.5; }
+.contents ol { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 32px; margin:0; padding-left:22px; }
+.contents li { min-width:0; color:var(--ink-muted); font-size:.875rem; }
+.contents a { display:flex; align-items:center; min-height:44px; padding-block:6px; color:var(--accent-hover); line-height:1.6; text-underline-offset:3px; overflow-wrap:anywhere; }
+.contents a:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
+.steps h3 { scroll-margin-top:100px; }
+@media(max-width:600px) { .contents { padding-inline:12px; }.contents ol { grid-template-columns:minmax(0,1fr); } }
 .heading { display:flex; align-items:center; justify-content:space-between; gap:24px; margin:28px 0; }
 .heading h1 { margin:12px 0 10px; color:var(--ink); font-size:2rem; line-height:1.3; letter-spacing:-.025em; }
 .heading p { max-width:65ch; margin:0; color:var(--ink-muted); font-size:.95rem; line-height:1.75; }

@@ -10,7 +10,7 @@
 .phaseTag[data-filled=true]::before { background:#007b80; }
 .scene { position:relative; display:flex; align-items:center; justify-content:center; flex:1; min-height:220px; border-radius:10px; background:#f7fafc; }
 .sceneFocus { display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; padding:0 10px 5px; border:0; border-radius:10px; background:transparent; font:inherit; cursor:help; }
-.sceneArt { display:block; width:100%; height:245px; max-height:270px; }
+.sceneArt { display:block; width:100%; height:320px; max-height:340px; }
 .sceneState { display:grid; gap:3px; text-align:center; color:#28596b; font-size:.75rem; line-height:1.6; }
 .sceneState small { color:#4f6b7d; font-size:.65rem; }
 .actionFeedback { margin:0; padding:9px 12px; border-radius:7px; background:#e8f4f3; color:#245f63; font-size:.73rem; line-height:1.6; overflow-wrap:anywhere; }
@@ -52,23 +52,100 @@
 .composition > span { color:#526f80; font-size:.65rem; }
 .composition > div { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:8px; font-size:.7rem; font-variant-numeric:tabular-nums; }
 .composition strong { display:block; color:#00656a; margin-bottom:3px; }
+/* All resting geometry is the committed state, even without animation support. */
+.graduations { fill:#3d6173; stroke:#678896; stroke-width:.75; font-size:8px; font-variant-numeric:tabular-nums; }
+.graduations text { stroke:none; }
+.phaseLegend { display:flex; flex-wrap:wrap; justify-content:center; gap:8px 18px; color:#456274; font-size:.68rem; }
+.phaseLegend > span { display:inline-flex; align-items:center; gap:6px; }
+.phaseLegend i { display:block; width:11px; height:8px; border-radius:2px; }
+.organicSwatch { background:#caa35d; }
+.waterSwatch { background:#6da8b5; }
+.solidSwatch { background:#c9bda2; border:1px solid #8e8266; }
+.actionFeedback { display:flex; align-items:center; justify-content:space-between; gap:8px 14px; }
+.actionFeedback > div { display:grid; gap:4px; min-width:0; }
+.actionFeedback strong { font-weight:650; }
+.actionFeedback > div > span { color:#3e666c; font-size:.69rem; line-height:1.65; }
+.volumeChanges { display:flex; flex-wrap:wrap; gap:4px 16px; font-variant-numeric:tabular-nums; font-weight:650; }
+.skipMotion { flex:none; min-height:44px; padding:7px 9px; border:1px solid #93b9bc; border-radius:6px; background:#f5fbfa; color:#245f63; font:inherit; font-size:.67rem; cursor:pointer; }
+.skipMotion:focus-visible, .sceneFocus:focus-visible, .vesselCard:focus-visible { outline:3px solid #007b80; outline-offset:3px; }
 .vesselMotion { transform-origin:90px 120px; }
-.swirl { opacity:0; }
-.vesselMotion[data-motion=mix] { animation:extractionRock 900ms ease-in-out; }
-.vesselMotion[data-motion=mix] .swirl { animation:extractionSwirl 900ms ease-out; }
-.vesselMotion[data-motion=settle] .waterLayer { animation:extractionWaterSettle 1100ms ease-out both; }
-.vesselMotion[data-motion=settle] .organicLayer { animation:extractionOrganicSettle 1100ms ease-out both; }
-.phaseLabels { animation:extractionLabelReveal 1100ms ease-out both; }
-.transferFlow { animation:extractionFlow 1s ease-out 2; }
-.vapour, .ventPuff { animation:extractionVapour 1s ease-out 2; }
-@keyframes extractionRock { 0%,100%{transform:rotate(0)}30%{transform:rotate(5deg)}65%{transform:rotate(-4deg)} }
-@keyframes extractionSwirl { 20%,80%{opacity:.85}50%{transform:translateY(-5px)}100%{opacity:0} }
-@keyframes extractionWaterSettle { from{opacity:.45;transform:translateY(-9px)}to{opacity:1;transform:translateY(0)} }
-@keyframes extractionOrganicSettle { from{opacity:.45;transform:translateY(9px)}to{opacity:1;transform:translateY(0)} }
-@keyframes extractionLabelReveal { from{opacity:0}to{opacity:1} }
-@keyframes extractionFlow { 0%{opacity:.15;stroke-dashoffset:12}45%{opacity:1}100%{opacity:.2;stroke-dashoffset:0} }
-@keyframes extractionVapour { 0%{opacity:.1;transform:translateY(3px)}50%{opacity:.75}100%{opacity:0;transform:translateY(-7px)} }
+.swirl, .liquidStream, .flowHighlights, .receiverRipple, .mixingEddies, .mixedVeil, .vapour, .ventPuff { opacity:0; }
+.transferArt { height:340px; max-height:360px; }
+.sceneLabels { fill:#486a7d; font-size:12px; }
+.diagramTitle { fill:#24596b; font-size:14px; font-weight:650; }
+.liquidStream { stroke-dasharray:1; stroke-dashoffset:0; }
+.flowHighlights { stroke-dasharray:.035 .09; }
+.layerChanging { transform:translateY(0) scaleY(var(--phase-end-scale)); }
+.surfaceChanging { transform:translateY(0); }
+.stopper { transform-origin:90px 26px; }
+.stopcock { transform-origin:90px 206px; }
+.reagentBottle { transform-origin:390px 29px; }
+.doseLiquid { transform-origin:390px 102px; transform:scaleY(0); }
+.receiverRipple { transform-box:fill-box; transform-origin:center; }
+
+@media (prefers-reduced-motion:no-preference) {
+  .pouringVessel { animation:extractionPour 2200ms var(--ease-out) both; }
+  .gravityLiquid { animation:extractionGravity 2200ms var(--ease-out) both; }
+  .liquidStream { animation:extractionStream 2200ms var(--ease-out) both; }
+  .flowHighlights { animation:extractionFlowHighlights 2200ms linear both; }
+  .receiverRipple { animation:extractionRipple 2200ms var(--ease-out) both; }
+  .layerChanging { animation:extractionLevel 2200ms var(--ease-out) both; }
+  .surfaceChanging { animation:extractionSurface 2200ms var(--ease-out) both; }
+  .vesselMotion[data-motion=mix] { animation:extractionRock 2100ms ease-in-out; }
+  .vesselMotion[data-motion=mix] .swirl { animation:extractionSwirl 2100ms var(--ease-out); }
+  .mixingEddies { opacity:1; }
+  .mixingEddies ellipse { transform-origin:90px 150px; animation:extractionEddy 1800ms ease-in-out both; }
+  .mixedVeil { animation:extractionSeparate 2200ms var(--ease-out) both; }
+  .phaseLabels { animation:extractionLabelReveal 2200ms var(--ease-out) both; }
+  .vesselMotion[data-motion=vent] .stopper,
+  .vesselMotion[data-motion=add_reagent] .stopper,
+  .vesselMotion[data-motion=receiving] .stopper,
+  .vesselMotion[data-motion=pouring] .stopper,
+  .vesselMotion[data-motion=transfer] .stopper { animation:extractionUncap 2200ms var(--ease-out) both; }
+  .vesselMotion[data-motion=transfer] .stopcock { animation:extractionTap 2200ms var(--ease-out) both; }
+  .reagentBottle { animation:extractionBottlePour 2200ms var(--ease-out) both; }
+  .doseLiquid { animation:extractionDose 2200ms var(--ease-out) both; }
+  .vapour, .ventPuff { animation:extractionVapour 1800ms var(--ease-out) both; }
+  .phProbe { animation:extractionProbe 2100ms var(--ease-out) both; }
+  .balanceCue, .instrument { animation:extractionRead var(--motion-state) var(--ease-out) both; }
+  .vesselMotion[data-motion=receiving] .solidBed,
+  .vesselMotion[data-motion=dry] .solidBed,
+  .vesselMotion[data-motion=evaporate] .solidBed,
+  .vesselMotion[data-motion=add_reagent] .solidBed { animation:extractionSolid 2100ms var(--ease-out) both; }
+  .solidTransfer { animation:extractionSolidTransfer 2200ms linear both; }
+}
+@keyframes extractionLevel { 0%,14% { transform:translateY(var(--phase-start-shift)) scaleY(var(--phase-start-scale)); } 84%,100% { transform:translateY(0) scaleY(var(--phase-end-scale)); } }
+@keyframes extractionSurface { 0%,14% { transform:translateY(var(--surface-start-shift)); } 84%,100% { transform:translateY(0); } }
+@keyframes extractionDose { 0%,14% { transform:scaleY(1); } 84%,100% { transform:scaleY(0); } }
+@keyframes extractionPour { 0%,100% { transform:rotate(0); } 18%,78% { transform:rotate(105deg); } }
+@keyframes extractionGravity { 0%,100% { transform:rotate(0) translateY(0); } 18%,78% { transform:rotate(-105deg) translateY(var(--gravity-level-shift)); } }
+@keyframes extractionStream { 0%,12% { opacity:0; stroke-dashoffset:1; } 25%,78% { opacity:.9; stroke-dashoffset:0; } 100% { opacity:0; stroke-dashoffset:0; } }
+@keyframes extractionFlowHighlights { 0%,12% { opacity:0; stroke-dashoffset:.45; } 25%,78% { opacity:.8; } 100% { opacity:0; stroke-dashoffset:0; } }
+@keyframes extractionRipple { 0%,12% { opacity:0; transform:scale(.5); } 35%,65% { opacity:.75; } 100% { opacity:0; transform:scale(1.15); } }
+@keyframes extractionRock { 0%,100% { transform:rotate(0); } 15%,55% { transform:rotate(9deg); } 35%,75% { transform:rotate(-8deg); } }
+@keyframes extractionSwirl { 10%,85% { opacity:.85; } 30%,65% { transform:translateY(-5px); } 100% { opacity:0; } }
+@keyframes extractionEddy { 0%,100% { opacity:0; } 20%,70% { opacity:.7; } 35% { transform:translateX(-8px) scaleX(.8); } 60% { transform:translateX(8px) scaleX(1.1); } }
+@keyframes extractionSeparate { 0% { opacity:1; } 85%,100% { opacity:0; } }
+@keyframes extractionLabelReveal { 0%,25% { opacity:0; } 100% { opacity:1; } }
+@keyframes extractionUncap { 0%,100% { transform:none; } 20%,75% { transform:translate(12px,-18px) rotate(15deg); } }
+@keyframes extractionTap { 0%,100% { transform:rotate(0); } 15%,80% { transform:rotate(90deg); } }
+@keyframes extractionBottlePour { 0%,100% { transform:none; } 16%,75% { transform:rotate(-55deg); } }
+@keyframes extractionVapour { 0% { opacity:0; transform:translateY(8px); } 35% { opacity:.85; } 100% { opacity:0; transform:translateY(-18px); } }
+@keyframes extractionProbe { 0%,100% { opacity:0; transform:translateY(-35px); } 25%,80% { opacity:1; transform:none; } }
+@keyframes extractionRead { from { opacity:.3; } to { opacity:1; } }
+@keyframes extractionSolid { from { opacity:.2; } to { opacity:1; } }
+@keyframes extractionSolidTransfer { from { opacity:.3; stroke-dashoffset:44; } to { opacity:1; stroke-dashoffset:0; } }
+
 @media(max-width:1250px) and (min-width:1051px) { .readouts{gap:7px;padding-inline:9px}.readouts>div+div{padding-left:9px}.readouts strong{font-size:.9rem}.vesselTitle>span{font-size:.6rem} }
-@media(max-width:1050px) { .vesselPicker{grid-template-columns:repeat(3,minmax(0,1fr))}.sceneArt{height:260px}.vesselSlot:nth-child(n) .cardTip{left:50%;right:auto;transform:translateX(-50%)}.vesselSlot:nth-child(3n+1) .cardTip{left:0;transform:none}.vesselSlot:nth-child(3n) .cardTip{left:auto;right:0;transform:none} }
-@media(max-width:600px) { .stage{padding:14px;gap:10px}.stageHeading{flex-wrap:wrap;gap:8px}.stageHeading h2{font-size:1.05rem}.stageHeading p{font-size:.7rem}.scene{min-height:210px}.sceneFocus{padding-inline:0}.sceneArt{height:220px}.sceneTip{left:50%;right:auto;transform:translateX(-50%);top:0}.readouts{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.readouts>div:nth-child(3){border-left:0;padding-left:0}.readouts strong{font-size:1rem}.vesselTitle>span{font-size:.63rem} }
-@media(prefers-reduced-motion:reduce) { .stage * { animation:none!important;transition:none!important; } }
+@media(max-width:1050px) { .vesselPicker{grid-template-columns:repeat(3,minmax(0,1fr))}.sceneArt{height:280px}.vesselSlot:nth-child(n) .cardTip{left:50%;right:auto;transform:translateX(-50%)}.vesselSlot:nth-child(3n+1) .cardTip{left:0;transform:none}.vesselSlot:nth-child(3n) .cardTip{left:auto;right:0;transform:none} }
+@media(max-width:600px) {
+  .stage{padding:14px;gap:10px}.stageHeading{flex-wrap:wrap;gap:8px}.stageHeading h2{font-size:1.05rem}.stageHeading p{font-size:.7rem}
+  .scene{min-height:210px}.sceneFocus{padding-inline:0}.sceneArt{height:300px}.transferArt{height:320px}
+  .sceneTip{left:50%;right:auto;transform:translateX(-50%);top:0}.readouts{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .readouts>div:nth-child(3){border-left:0;padding-left:0}.readouts strong{font-size:1rem}.vesselTitle>span{font-size:.63rem}
+  .actionFeedback{flex-wrap:wrap}.skipMotion{margin-left:auto}.diagramTitle{font-size:15px}.sceneLabels{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .stage * { animation:none!important;transition:none!important; }
+}
+.stage[data-paused=true] * { animation-play-state:paused!important; }

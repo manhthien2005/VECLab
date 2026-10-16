@@ -1,9 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.js'
+import { OperationHelp } from '@/features/workbench/operation-help.js'
+import { ActionButton } from '@/features/workbench/action-button.js'
+import { JAR_OPERATION_HELP } from '@/content/operation-help.vi.js'
 import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/icons.js'
 import { TargetIcon, GuideIcon, TheoryIcon, SourcesIcon, ReportIcon, SubmitIcon, CloseIcon, InfoIcon, ControlIcon } from '@/features/workbench/icons.js'
 import { EquipmentPanel, type EquipmentKind } from './equipment-panel.js'
@@ -24,14 +27,6 @@ import { JarApparatus, type JarVisualCue } from './apparatus.js'
 import styles from './workbench.module.css'
 
 const JAR_PATH = '/simulate/jar-test'
-const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
-function subscribeReducedMotion(onChange: () => void) {
-  const media = window.matchMedia(REDUCED_MOTION_QUERY)
-  media.addEventListener('change', onChange)
-  return () => media.removeEventListener('change', onChange)
-}
-function reducedMotionSnapshot() { return window.matchMedia(REDUCED_MOTION_QUERY).matches }
-function reducedMotionServerSnapshot() { return true }
 type Mode = 'local' | 'cloud'
 type Props = {
   attemptId: string | null
@@ -196,11 +191,11 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
   const [initialPh, setInitialPh] = useState<number>(7)
   const [doseIncrement, setDoseIncrement] = useState<number>(50)
   const [answerDrafts, setAnswerDrafts] = useState<Partial<Record<JarCupId, string>>>({})
-  const [skipAnimation, setSkipAnimation] = useState(false)
-  const [motionOptIn, setMotionOptIn] = useState(false)
-  const reducedMotion = useSyncExternalStore(subscribeReducedMotion, reducedMotionSnapshot, reducedMotionServerSnapshot)
-  const animationSkipped = skipAnimation || (reducedMotion && !motionOptIn)
+
   const [visualCue, setVisualCue] = useState<JarVisualCue | null>(null)
+  const finishVisualCue = useCallback((id: string) => {
+    setVisualCue((current) => current?.id === id ? null : current)
+  }, [])
   const [tourOpen, setTourOpen] = useState(false)
   const [equipmentItem, setEquipmentItem] = useState<EquipmentKind | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -276,6 +271,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
     if (!id || busyRef.current) return
     busyRef.current = true
     setBusy(true)
+    setVisualCue(null)
     try {
       const loaded = await session.load(id)
       if (loaded === null) {
@@ -341,6 +337,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
           setUncertain(false)
           setView(result.state)
           setReportOpen(true)
+          setVisualCue(null)
           setNotice('Đã lưu kết quả. Lượt này chỉ có thể xem lại.')
         } else {
           pendingRef.current = null
@@ -357,11 +354,14 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
           setUncertain(false)
           setView(result.state)
           setNotice('Đã lưu: ' + actionLabel(intent.actionType) + '.')
-          if (!result.feedback.idempotentReplay) setVisualCue({
-            id: intent.actionId,
-            actionType: intent.actionType,
-            cupId: JAR_CUP_IDS.find((id) => id === intent.parameters.cupId) ?? null,
-          })
+          if (!result.feedback.idempotentReplay) {
+            const hasScene = ['prepare_cup', 'add_coagulant', 'run_phase', 'measure_initial', 'measure_final'].includes(intent.actionType)
+            setVisualCue(hasScene ? {
+              id: intent.actionId,
+              actionType: intent.actionType,
+              cupId: JAR_CUP_IDS.find((id) => id === intent.parameters.cupId) ?? null,
+            } : null)
+          }
           if (intent.actionType === 'prepare_cup') setGroup('dose')
           if (intent.actionType === 'measure_initial') setGroup(result.state.projection.cups.some(c => c.id === selectedCupId) ? 'dose' : 'prepare')
           if (intent.actionType === 'run_phase') setGroup(result.state.projection.phase === 'settling' ? 'results' : 'program')
@@ -412,6 +412,11 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
   const nextPhase = projection?.phase === 'setup' ? 'rapid' : projection?.phase === 'rapid' ? 'slow' : projection?.phase === 'slow' ? 'settling' : null
   const ready = loadState === 'ready' && !!view && !!projection
   const batchReady = !!projection?.initialMeasurement?.valid && projection.cups.length > 0 && projection.cups.every(c => c.doseMgL >= JAR_PROFILE.minDoseMgL)
+  const lockReason = busy ? 'Đang lưu thao tác. Chờ xác nhận trước khi tiếp tục.' : uncertain ? 'Chưa xác nhận được thao tác đã lưu. Gửi lại đúng thao tác hoặc tải lại trạng thái đã lưu.' : issue?.conflict ? 'Dữ liệu lượt đã thay đổi. Tải lại dữ liệu mới nhất trước khi tiếp tục.' : !active ? 'Lượt đã kết thúc nên không thể ghi thêm thao tác.' : null
+  const missingCupReason = !cup ? 'Chuẩn bị cốc ' + selectedCupId + ' trước khi thao tác.' + (projection?.phase !== 'setup' ? ' Mẻ đã chạy; chọn cốc đã chuẩn bị hoặc bắt đầu mẻ mới.' : '') : null
+  const prepareReason = lockReason ?? (projection?.phase !== 'setup' ? 'Mẻ đã bắt đầu khuấy nên đã khóa chuẩn bị. Chọn cốc đã có để đo, hoặc bắt đầu mẻ mới để đổi pH/thêm cốc.' : cup ? 'Cốc ' + selectedCupId + ' đã được chuẩn bị. Chọn cốc khác nếu muốn thử pH khác.' : null)
+  const doseReason = lockReason ?? (projection?.phase !== 'setup' ? 'Mẻ đã bắt đầu khuấy nên đã khóa liều phèn. Bắt đầu mẻ mới nếu muốn thử liều khác.' : missingCupReason ?? (!increments.length ? 'Cốc đã đạt liều tối đa 250 mg/L. Chọn cốc khác hoặc tiếp tục Khuấy & lắng.' : null))
+  const batchReason = lockReason ?? (!projection?.initialMeasurement?.valid ? 'Cần đo mẫu ban đầu trước khi chạy khuấy.' : !projection.cups.length ? 'Chuẩn bị ít nhất một cốc trước khi chạy khuấy.' : !batchReady ? 'Cần cấp ít nhất 50 mg/L cho cốc ' + projection.cups.filter(c => c.doseMgL < JAR_PROFILE.minDoseMgL).map(c => c.id).join(', ') + '.' : null)
   const currentStep = !projection?.initialMeasurement?.valid ? 0 : projection.phase === 'setup' ? (cup ? 2 : 1) : projection.phase === 'rapid' || projection.phase === 'slow' ? 3 : 4
   const steps = [['baseline', 'Đo mẫu đầu'], ['prepare', 'Chuẩn bị cốc'], ['dose', 'Cấp phèn'], ['program', 'Khuấy & lắng'], ['results', 'Đo & ghi kết quả']] as const
 
@@ -457,9 +462,10 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
     </div>
   </>
 
+  const guideBaseHref = '/experiments/jar-test/guide' + (view?.attemptId ? '?attempt=' + encodeURIComponent(view.attemptId) : '')
   const shelf = <div className={styles.shelfContent}>
     <div className={styles.inventory}>
-      {([['sample', 'Mẫu kaolin', '0,5 L / cốc'], ['coagulant', 'Phèn nhôm', '50–250 mg/L'], ['meter', 'Máy đo độ đục', 'NTU']] as const)
+      {([['sample', 'Mẫu kaolin', 'Nước đục · ' + JAR_PROFILE.aliquotVolumeL * 1000 + ' mL / cốc'], ['coagulant', 'Phèn nhôm', '50–250 mg/L'], ['meter', 'Máy đo độ đục', 'NTU']] as const)
         .map(([kind, title, description]) => <button type="button" className={styles.equipment} key={kind} aria-haspopup="dialog" aria-label={'Tìm hiểu ' + title} onClick={() => setEquipmentItem(kind)}>
           <EquipmentArt kind={kind} /><span className={styles.equipmentText}><strong>{title}</strong><span>{description}</span></span><span className={styles.equipmentInfo}><InfoIcon /></span>
         </button>)}
@@ -467,10 +473,10 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
     <div className={styles.shelfHelp}>
       <p className={styles.shelfNote}>Mẫu tổng hợp dùng để học tập. {storageMode === 'local' ? 'Lượt này lưu trên trình duyệt.' : 'Lượt này lưu trong tài khoản.'}</p>
       <button ref={tourTrigger} type="button" className={styles.guideButton} onClick={() => setTourOpen(true)}><GuideIcon />Hướng dẫn thao tác</button>
-      <Link className={styles.theoryLink} href={'/experiments/jar-test/guide' + (view?.attemptId ? '?attempt=' + encodeURIComponent(view.attemptId) : '')}><TheoryIcon /><span>Lý thuyết & cách làm bài</span></Link>
+      <Link className={styles.theoryLink} href={guideBaseHref} target="_blank" rel="noopener noreferrer"><TheoryIcon /><span>Lý thuyết & cách làm bài</span></Link>
       <details><summary><SourcesIcon />Nguồn & giới hạn</summary>
         <p>Chỉ áp dụng cho hồ sơ mẫu, pH, liều và chương trình đã khóa. Hình ảnh hạt không dùng để suy ra hiệu suất.</p>
-        <a href={'https://doi.org/' + JAR_PROFILE.sourceDoi} target="_blank" rel="noreferrer">Nghiên cứu dùng xây dựng mô hình <ArrowRightIcon /></a>
+        <a href={'https://doi.org/' + JAR_PROFILE.sourceDoi} target="_blank" rel="noopener noreferrer">Nghiên cứu dùng xây dựng mô hình — mở tab mới <ArrowRightIcon /></a>
         <p>Không suy liều cho mẫu nước thật từ kết quả này.</p>
       </details>
     </div>
@@ -493,10 +499,9 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
       </li>)}</ol>
     </div>
     {ready && projection ? <>
-      <JarApparatus projection={projection} selectedCupId={selectedCupId} onSelectCup={selectCup} disabled={busy} skipAnimation={animationSkipped} motionOptIn={motionOptIn} cue={visualCue} />
+      <JarApparatus projection={projection} selectedCupId={selectedCupId} onSelectCup={selectCup} disabled={busy} cue={visualCue} onCueFinished={finishVisualCue} />
       <div className={styles.stageFooter}><span>Thời gian mô phỏng: {projection.elapsedSeconds} giây</span>
-        <div className={styles.motionControl}><label><input type="checkbox" checked={animationSkipped} onChange={(e) => { setSkipAnimation(e.target.checked); setMotionOptIn(!e.target.checked) }} />Bỏ qua hoạt ảnh minh họa</label>
-          {reducedMotion && !motionOptIn && <span>Theo cài đặt giảm chuyển động</span>}</div>
+        <span>Các pha khuấy–lắng chạy bằng thời gian mô phỏng, không cần chờ thực.</span>
       </div>
     </> : <div className={styles.entry}>
       {loadState === 'idle' && <><EquipmentArt kind="sample" /><h2>Khảo sát keo tụ — tạo bông — lắng</h2>
@@ -526,30 +531,34 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
       <a className={styles.button} href={JAR_PATH}>Bắt đầu mẻ Jar Test mới</a>
     </div> : <>
       <ControlGroup id="baseline" title="Đo mẫu ban đầu" summary={projection.initialMeasurement?.valid ? 'Đã đo · Chung cho cả mẻ' : 'Bước đầu tiên · Mẫu chưa xử lý'} open={group === 'baseline'} onToggle={() => setGroup(group === 'baseline' ? null : 'baseline')}>
+        <OperationHelp topic={JAR_OPERATION_HELP.baseline} guideBaseHref={guideBaseHref} />
         <div className={styles.measurement}><span className={styles.measurementLabel}>Độ đục mẫu chưa xử lý</span><strong data-testid="jar-baseline-value">{projection.initialMeasurement ? readingLabel(projection.initialMeasurement) : 'Chưa đo'}</strong></div>
         <p className={styles.limit}>Đo một lần để làm mốc tính hiệu suất cho tất cả cốc.</p>
-        <button type="button" className={styles.primary} disabled={locked || !!projection.initialMeasurement || projection.phase !== 'setup'} onClick={() => submit('measure_initial')}>Đo mẫu ban đầu</button>
+        <ActionButton className={styles.primary} reason={lockReason ?? (projection.initialMeasurement ? 'Mẫu ban đầu đã được đo. Số đo này dùng chung cho cả mẻ.' : projection.phase !== 'setup' ? 'Mẻ đã chạy nên đã khóa phép đo ban đầu. Bắt đầu mẻ mới để đo lại.' : null)} reasonClassName={styles.actionReason} onClick={() => submit('measure_initial')}>Đo mẫu ban đầu</ActionButton>
       </ControlGroup>
       <ControlGroup id="prepare" title="Chuẩn bị mẫu" summary={cup ? '0,5 L · pH đầu ' + cup.initialPh + ' · Đã chuẩn bị' : '0,5 L · Chọn pH ban đầu'} open={group === 'prepare'} onToggle={() => setGroup(group === 'prepare' ? null : 'prepare')}>
+        <OperationHelp topic={JAR_OPERATION_HELP.prepare} guideBaseHref={guideBaseHref} />
         <label className={styles.inputField} htmlFor="jar-ph">pH ban đầu của cốc
           <select id="jar-ph" value={cup?.initialPh ?? initialPh} disabled={locked || !!cup || projection.phase !== 'setup'} onChange={(e) => setInitialPh(Number(e.target.value))}>
             {JAR_PROFILE.availableInitialPh.map((ph) => <option key={ph} value={ph}>{ph}</option>)}
           </select></label>
         <div className={styles.sampleVolume}><span>Mẫu / dung tích cốc</span><strong>0,5 L / 1 L</strong></div>
-        <button className={styles.primary} disabled={locked || !!cup || projection.phase !== 'setup'} onClick={() => submit('prepare_cup', { cupId: selectedCupId, initialPh })}>Chuẩn bị cốc {selectedCupId}</button>
+        <ActionButton className={styles.primary} reason={prepareReason} reasonClassName={styles.actionReason} onClick={() => submit('prepare_cup', { cupId: selectedCupId, initialPh })}>Chuẩn bị cốc {selectedCupId}</ActionButton>
         {projection.phase !== 'setup' && <p className={styles.limit}>Mẻ đã chạy: không thêm cốc hoặc đổi pH. Chọn cốc đã chuẩn bị để đo và ghi kết quả.</p>}
       </ControlGroup>
       <ControlGroup id="dose" title="Cấp phèn" summary={cup ? 'Tổng liều ' + cup.doseMgL + ' mg/L' : 'Chuẩn bị cốc trước khi cấp'} open={group === 'dose'} onToggle={() => setGroup(group === 'dose' ? null : 'dose')}>
+        <OperationHelp topic={JAR_OPERATION_HELP.dose} guideBaseHref={guideBaseHref} />
         <div className={styles.doseTotal}><span>Tổng liều hiện tại</span><strong data-testid="jar-dose">{cup ? cup.doseMgL + ' mg/L' : 'N/A'}</strong></div>
         <label className={styles.inputField} htmlFor="jar-dose-increment">Liều tăng (mg/L)
           <select id="jar-dose-increment" value={increment} disabled={locked || !cup || projection.phase !== 'setup' || !increments.length} onChange={(e) => setDoseIncrement(Number(e.target.value))}>
             {increments.map((n) => <option key={n} value={n}>{n}</option>)}
           </select></label>
         {cup && increments.length > 0 && <p className={styles.dosePreview}><span>Sau khi thêm</span><strong>{cup.doseMgL + increment} mg/L</strong></p>}
-        <button className={styles.primary} disabled={locked || !cup || projection.phase !== 'setup' || !increments.length} onClick={() => submit('add_coagulant', { cupId: selectedCupId, incrementMgL: increment }, { incrementMgL: 'mg/L' })}>Thêm {increment} mg/L vào cốc {selectedCupId}</button>
+        <ActionButton className={styles.primary} reason={doseReason} reasonClassName={styles.actionReason} onClick={() => submit('add_coagulant', { cupId: selectedCupId, incrementMgL: increment }, { incrementMgL: 'mg/L' })}>Thêm {increment} mg/L vào cốc {selectedCupId}</ActionButton>
         <p className={styles.limit}>{projection.phase !== 'setup' ? 'Đã khóa liều khi bắt đầu khuấy' : increments.length ? 'Tổng liều tối đa 250 mg/L' : 'Đã đạt liều tối đa'}</p>
       </ControlGroup>
       <ControlGroup id="program" title="Khuấy & lắng" summary={projection.phase === 'setup' ? 'Ba pha cố định · Chung cho dàn cốc' : PHASE_NAME[projection.phase]} open={group === 'program'} onToggle={() => setGroup(group === 'program' ? null : 'program')}>
+        <OperationHelp topic={JAR_OPERATION_HELP.program} guideBaseHref={guideBaseHref} />
         <ol className={styles.program}>{PHASES.map((phase, index) => {
           const done = projection.elapsedSeconds >= PHASES.slice(0, index + 1).reduce((total, entry) => total + entry.seconds, 0)
           return <li key={phase.id} data-done={done} data-next={nextPhase === phase.id}>
@@ -559,18 +568,24 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
           </li>
         })}</ol>
         <p className={styles.limit}>Chạy chung {projection.cups.length} cốc{projection.cups.length > 0 && ': ' + projection.cups.map(c => c.id).join(', ')} · Thời gian mô phỏng</p>
-        {projection.phase === 'setup' && !batchReady && <p className={styles.batchNotice}>{!projection.initialMeasurement?.valid ? 'Cần đo mẫu ban đầu. ' : ''}{!projection.cups.length ? 'Chuẩn bị ít nhất một cốc.' : projection.cups.some(c => c.doseMgL < JAR_PROFILE.minDoseMgL) ? 'Cần cấp ít nhất 50 mg/L cho cốc ' + projection.cups.filter(c => c.doseMgL < JAR_PROFILE.minDoseMgL).map(c => c.id).join(', ') + '.' : ''}</p>}
-        {nextPhase ? <button className={styles.primary} disabled={locked || (projection.phase === 'setup' && !batchReady)} aria-label={'Chạy pha ' + PHASE_NAME[nextPhase] + ' (' + JAR_PROFILE.phases[nextPhase].durationSeconds + ' giây mô phỏng)'} onClick={() => projection.phase === 'setup' ? setProgramConfirmOpen(true) : submit('run_phase', { phase: nextPhase })}>Chạy {PHASE_NAME[nextPhase].toLowerCase()} <ArrowRightIcon /></button> : <p>Đã lắng xong cả mẻ. Chọn từng cốc để đo; đo một cốc không khóa các cốc khác.</p>}
+        {projection.phase === 'setup' && !batchReady && <div className={styles.recoveryActions}>
+          {!projection.initialMeasurement?.valid&&<button type="button" className={styles.button} onClick={()=>setGroup('baseline')}>Đi tới Đo mẫu ban đầu</button>}
+          {!projection.cups.length&&<button type="button" className={styles.button} onClick={()=>setGroup('prepare')}>Đi tới Chuẩn bị mẫu</button>}
+          {projection.cups.filter(c=>c.doseMgL<JAR_PROFILE.minDoseMgL).map(c=><button key={c.id} type="button" className={styles.button} onClick={()=>{selectCup(c.id);setGroup('dose')}}>Cấp phèn cho cốc {c.id}</button>)}
+        </div>}
+        {nextPhase ? <ActionButton className={styles.primary} reason={projection.phase==='setup'?batchReason:lockReason} reasonClassName={styles.actionReason} aria-label={'Chạy pha ' + PHASE_NAME[nextPhase] + ' (' + JAR_PROFILE.phases[nextPhase].durationSeconds + ' giây mô phỏng)'} onClick={() => projection.phase === 'setup' ? setProgramConfirmOpen(true) : submit('run_phase', { phase: nextPhase })}>Chạy {PHASE_NAME[nextPhase].toLowerCase()} <ArrowRightIcon /></ActionButton> : <p>Đã lắng xong cả mẻ. Chọn từng cốc để đo; đo một cốc không khóa các cốc khác.</p>}
       </ControlGroup>
       <ControlGroup id="results" title="Đo & ghi kết quả" summary="NTU cuối · Đáp số · Phương án nộp" open={group === 'results'} onToggle={() => setGroup(group === 'results' ? null : 'results')}>
+        <OperationHelp topic={JAR_OPERATION_HELP.results} guideBaseHref={guideBaseHref} />
         <div className={styles.measurement} data-testid="jar-selected-reading"><span className={styles.measurementLabel}>Độ đục cuối · Cốc {selectedCupId}</span><strong>{recent ? readingLabel(recent) : 'Chưa đo'}</strong>{recent && <span>{readingNote(recent)}</span>}</div>
-        <button className={styles.button} disabled={locked || !cup} onClick={() => submit('measure_final', { cupId: selectedCupId })}>Đo độ đục cuối cốc {selectedCupId}</button>
+        <ActionButton className={styles.button} reason={lockReason??missingCupReason} reasonClassName={styles.actionReason} onClick={() => submit('measure_final', { cupId: selectedCupId })}>Đo độ đục cuối cốc {selectedCupId}</ActionButton>
+        {cup&&projection.phase!=='settling'&&<p className={styles.actionReason}>Đo lúc này sẽ được lưu là N/A vì chưa hoàn tất khuấy nhanh → khuấy chậm → lắng. Bạn có thể tiếp tục quy trình rồi đo lại.</p>}
         <div className={styles.resultDivider} />
         <label className={styles.inputField} htmlFor="jar-removal">Phần trăm giảm đục tự tính (%)
           <input id="jar-removal" type="number" inputMode="decimal" step="any" placeholder="Nhập đáp số của bạn" value={answerInput} disabled={locked || !cup} onChange={(e) => setAnswerDrafts((old) => ({ ...old, [selectedCupId]: e.target.value }))} /></label>
-        <button className={styles.button} disabled={locked || !cup || answerInput.trim() === '' || !Number.isFinite(Number(answerInput))} onClick={() => submit('record_result', { cupId: selectedCupId, removalPercent: Number(answerInput) })}>Ghi đáp số cốc {selectedCupId}</button>
+        <ActionButton className={styles.button} reason={lockReason??missingCupReason??(!answerInput.trim()||!Number.isFinite(Number(answerInput))?'Nhập đáp số tự tính là một số trước khi ghi kết quả.':null)} reasonClassName={styles.actionReason} onClick={() => submit('record_result', { cupId: selectedCupId, removalPercent: Number(answerInput) })}>Ghi đáp số cốc {selectedCupId}</ActionButton>
         <p>Đáp số đã lưu: {cup?.submittedRemovalPercent === null || !cup ? 'N/A' : cup.submittedRemovalPercent + ' %'}</p>
-        <button className={styles.primary} disabled={locked || !cup} aria-label={'Chọn cốc ' + selectedCupId + ' làm phương án nộp'} aria-pressed={projection.selectedCupId === selectedCupId} onClick={() => submit('select_result', { cupId: selectedCupId })}>{projection.selectedCupId === selectedCupId ? <><CheckCircleIcon />Đã chọn cốc {selectedCupId}</> : 'Dùng cốc ' + selectedCupId + ' để nộp'}</button>
+        <ActionButton className={styles.primary} reason={lockReason??missingCupReason} reasonClassName={styles.actionReason} aria-label={'Chọn cốc ' + selectedCupId + ' làm phương án nộp'} aria-pressed={projection.selectedCupId === selectedCupId} onClick={() => submit('select_result', { cupId: selectedCupId })}>{projection.selectedCupId === selectedCupId ? <><CheckCircleIcon />Đã chọn cốc {selectedCupId}</> : 'Dùng cốc ' + selectedCupId + ' để nộp'}</ActionButton>
         <p className={styles.selectionSummary}><span>Phương án nộp</span><strong data-testid="jar-submitted-cup">{projection.selectedCupId ? 'Cốc ' + projection.selectedCupId : 'Chưa chọn'}</strong></p>
       </ControlGroup>
       <p className={styles.submissionHint}>Nộp bài sẽ khóa lượt, kể cả khi thiếu dữ liệu.</p>
@@ -581,7 +596,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
     {ready && view && projection ? <JarNotebook view={view} selected={selectedCupId} drafts={answerDrafts} busy={busy} onSelect={selectCup} onBaseline={() => { setGroup('baseline'); setPane('controls') }} onReport={() => setReportOpen(true)} /> : <p className={styles.empty}>Sổ thực hành sẽ hiển thị số đo sau khi bắt đầu lượt.</p>}
   </section>
 
-  return <><WorkbenchFrame label="Bàn thí nghiệm Jar Test" header={header} notices={notices} shelf={shelf} simulation={simulation} controls={controls} notebook={notebook} pane={pane} onPaneChange={setPane} onShelfInfo={() => setEquipmentItem('sample')} tourOpen={tourOpen} onTourClose={() => {
+  return <><WorkbenchFrame contentSized label="Bàn thí nghiệm Jar Test" header={header} notices={notices} shelf={shelf} simulation={simulation} controls={controls} notebook={notebook} pane={pane} onPaneChange={setPane} onShelfInfo={() => setEquipmentItem('sample')} tourOpen={tourOpen} onTourClose={() => {
     setTourOpen(false)
     // The shelf is temporarily hidden during the mobile tour. Restore focus
     // after the original pane and shelf visibility have been committed.

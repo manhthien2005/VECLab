@@ -92,6 +92,7 @@
 .controlGroup summary small { font-size:.7rem; display:block; color:var(--ink-muted); margin-top:3px; font-weight:400; }
 .groupBody { display:grid; gap:14px; padding:0 12px 14px; }
 .groupBody p { margin:0; color:var(--ink-muted); font-size:.75rem; }
+.groupBody .actionReason, .actionReason { margin:0; color:#77552d; font-size:.75rem; line-height:1.65; overflow-wrap:anywhere; }
 .groupBody strong { color:var(--ink); }
 .operationTitle { margin:8px 0 0; padding-top:12px; border-top:1px solid #d5e2e8; color:#28596b; font-size:.8rem; font-weight:750; }
 .operationState { display:grid; gap:5px; padding:11px 12px; border-radius:8px; background:#eaf4f5; color:#305e6b; font-size:.75rem; line-height:1.65; }
