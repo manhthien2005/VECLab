@@ -1,9 +1,11 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.js'
+import { OperationHelp } from '@/features/workbench/operation-help.js'
+import { JAR_OPERATION_HELP } from '@/content/operation-help.vi.js'
 import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/icons.js'
 import { TargetIcon, GuideIcon, TheoryIcon, SourcesIcon, ReportIcon, SubmitIcon, CloseIcon, InfoIcon, ControlIcon } from '@/features/workbench/icons.js'
 import { EquipmentPanel, type EquipmentKind } from './equipment-panel.js'
@@ -24,14 +26,6 @@ import { JarApparatus, type JarVisualCue } from './apparatus.js'
 import styles from './workbench.module.css'
 
 const JAR_PATH = '/simulate/jar-test'
-const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
-function subscribeReducedMotion(onChange: () => void) {
-  const media = window.matchMedia(REDUCED_MOTION_QUERY)
-  media.addEventListener('change', onChange)
-  return () => media.removeEventListener('change', onChange)
-}
-function reducedMotionSnapshot() { return window.matchMedia(REDUCED_MOTION_QUERY).matches }
-function reducedMotionServerSnapshot() { return true }
 type Mode = 'local' | 'cloud'
 type Props = {
   attemptId: string | null
@@ -196,10 +190,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
   const [initialPh, setInitialPh] = useState<number>(7)
   const [doseIncrement, setDoseIncrement] = useState<number>(50)
   const [answerDrafts, setAnswerDrafts] = useState<Partial<Record<JarCupId, string>>>({})
-  const [skipAnimation, setSkipAnimation] = useState(false)
-  const [motionOptIn, setMotionOptIn] = useState(false)
-  const reducedMotion = useSyncExternalStore(subscribeReducedMotion, reducedMotionSnapshot, reducedMotionServerSnapshot)
-  const animationSkipped = skipAnimation || (reducedMotion && !motionOptIn)
+
   const [visualCue, setVisualCue] = useState<JarVisualCue | null>(null)
   const [tourOpen, setTourOpen] = useState(false)
   const [equipmentItem, setEquipmentItem] = useState<EquipmentKind | null>(null)
@@ -457,6 +448,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
     </div>
   </>
 
+  const guideBaseHref = '/experiments/jar-test/guide' + (view?.attemptId ? '?attempt=' + encodeURIComponent(view.attemptId) : '')
   const shelf = <div className={styles.shelfContent}>
     <div className={styles.inventory}>
       {([['sample', 'Mẫu kaolin', '0,5 L / cốc'], ['coagulant', 'Phèn nhôm', '50–250 mg/L'], ['meter', 'Máy đo độ đục', 'NTU']] as const)
@@ -467,10 +459,10 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
     <div className={styles.shelfHelp}>
       <p className={styles.shelfNote}>Mẫu tổng hợp dùng để học tập. {storageMode === 'local' ? 'Lượt này lưu trên trình duyệt.' : 'Lượt này lưu trong tài khoản.'}</p>
       <button ref={tourTrigger} type="button" className={styles.guideButton} onClick={() => setTourOpen(true)}><GuideIcon />Hướng dẫn thao tác</button>
-      <Link className={styles.theoryLink} href={'/experiments/jar-test/guide' + (view?.attemptId ? '?attempt=' + encodeURIComponent(view.attemptId) : '')}><TheoryIcon /><span>Lý thuyết & cách làm bài</span></Link>
+      <Link className={styles.theoryLink} href={guideBaseHref} target="_blank" rel="noopener noreferrer"><TheoryIcon /><span>Lý thuyết & cách làm bài — mở tab mới</span></Link>
       <details><summary><SourcesIcon />Nguồn & giới hạn</summary>
         <p>Chỉ áp dụng cho hồ sơ mẫu, pH, liều và chương trình đã khóa. Hình ảnh hạt không dùng để suy ra hiệu suất.</p>
-        <a href={'https://doi.org/' + JAR_PROFILE.sourceDoi} target="_blank" rel="noreferrer">Nghiên cứu dùng xây dựng mô hình <ArrowRightIcon /></a>
+        <a href={'https://doi.org/' + JAR_PROFILE.sourceDoi} target="_blank" rel="noopener noreferrer">Nghiên cứu dùng xây dựng mô hình — mở tab mới <ArrowRightIcon /></a>
         <p>Không suy liều cho mẫu nước thật từ kết quả này.</p>
       </details>
     </div>
@@ -493,10 +485,9 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
       </li>)}</ol>
     </div>
     {ready && projection ? <>
-      <JarApparatus projection={projection} selectedCupId={selectedCupId} onSelectCup={selectCup} disabled={busy} skipAnimation={animationSkipped} motionOptIn={motionOptIn} cue={visualCue} />
+      <JarApparatus projection={projection} selectedCupId={selectedCupId} onSelectCup={selectCup} disabled={busy} cue={visualCue} />
       <div className={styles.stageFooter}><span>Thời gian mô phỏng: {projection.elapsedSeconds} giây</span>
-        <div className={styles.motionControl}><label><input type="checkbox" checked={animationSkipped} onChange={(e) => { setSkipAnimation(e.target.checked); setMotionOptIn(!e.target.checked) }} />Bỏ qua hoạt ảnh minh họa</label>
-          {reducedMotion && !motionOptIn && <span>Theo cài đặt giảm chuyển động</span>}</div>
+        <span>Các pha khuấy–lắng chạy bằng thời gian mô phỏng, không cần chờ thực.</span>
       </div>
     </> : <div className={styles.entry}>
       {loadState === 'idle' && <><EquipmentArt kind="sample" /><h2>Khảo sát keo tụ — tạo bông — lắng</h2>
@@ -526,11 +517,13 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
       <a className={styles.button} href={JAR_PATH}>Bắt đầu mẻ Jar Test mới</a>
     </div> : <>
       <ControlGroup id="baseline" title="Đo mẫu ban đầu" summary={projection.initialMeasurement?.valid ? 'Đã đo · Chung cho cả mẻ' : 'Bước đầu tiên · Mẫu chưa xử lý'} open={group === 'baseline'} onToggle={() => setGroup(group === 'baseline' ? null : 'baseline')}>
+        <OperationHelp topic={JAR_OPERATION_HELP.baseline} guideBaseHref={guideBaseHref} />
         <div className={styles.measurement}><span className={styles.measurementLabel}>Độ đục mẫu chưa xử lý</span><strong data-testid="jar-baseline-value">{projection.initialMeasurement ? readingLabel(projection.initialMeasurement) : 'Chưa đo'}</strong></div>
         <p className={styles.limit}>Đo một lần để làm mốc tính hiệu suất cho tất cả cốc.</p>
         <button type="button" className={styles.primary} disabled={locked || !!projection.initialMeasurement || projection.phase !== 'setup'} onClick={() => submit('measure_initial')}>Đo mẫu ban đầu</button>
       </ControlGroup>
       <ControlGroup id="prepare" title="Chuẩn bị mẫu" summary={cup ? '0,5 L · pH đầu ' + cup.initialPh + ' · Đã chuẩn bị' : '0,5 L · Chọn pH ban đầu'} open={group === 'prepare'} onToggle={() => setGroup(group === 'prepare' ? null : 'prepare')}>
+        <OperationHelp topic={JAR_OPERATION_HELP.prepare} guideBaseHref={guideBaseHref} />
         <label className={styles.inputField} htmlFor="jar-ph">pH ban đầu của cốc
           <select id="jar-ph" value={cup?.initialPh ?? initialPh} disabled={locked || !!cup || projection.phase !== 'setup'} onChange={(e) => setInitialPh(Number(e.target.value))}>
             {JAR_PROFILE.availableInitialPh.map((ph) => <option key={ph} value={ph}>{ph}</option>)}
@@ -540,6 +533,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
         {projection.phase !== 'setup' && <p className={styles.limit}>Mẻ đã chạy: không thêm cốc hoặc đổi pH. Chọn cốc đã chuẩn bị để đo và ghi kết quả.</p>}
       </ControlGroup>
       <ControlGroup id="dose" title="Cấp phèn" summary={cup ? 'Tổng liều ' + cup.doseMgL + ' mg/L' : 'Chuẩn bị cốc trước khi cấp'} open={group === 'dose'} onToggle={() => setGroup(group === 'dose' ? null : 'dose')}>
+        <OperationHelp topic={JAR_OPERATION_HELP.dose} guideBaseHref={guideBaseHref} />
         <div className={styles.doseTotal}><span>Tổng liều hiện tại</span><strong data-testid="jar-dose">{cup ? cup.doseMgL + ' mg/L' : 'N/A'}</strong></div>
         <label className={styles.inputField} htmlFor="jar-dose-increment">Liều tăng (mg/L)
           <select id="jar-dose-increment" value={increment} disabled={locked || !cup || projection.phase !== 'setup' || !increments.length} onChange={(e) => setDoseIncrement(Number(e.target.value))}>
@@ -550,6 +544,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
         <p className={styles.limit}>{projection.phase !== 'setup' ? 'Đã khóa liều khi bắt đầu khuấy' : increments.length ? 'Tổng liều tối đa 250 mg/L' : 'Đã đạt liều tối đa'}</p>
       </ControlGroup>
       <ControlGroup id="program" title="Khuấy & lắng" summary={projection.phase === 'setup' ? 'Ba pha cố định · Chung cho dàn cốc' : PHASE_NAME[projection.phase]} open={group === 'program'} onToggle={() => setGroup(group === 'program' ? null : 'program')}>
+        <OperationHelp topic={JAR_OPERATION_HELP.program} guideBaseHref={guideBaseHref} />
         <ol className={styles.program}>{PHASES.map((phase, index) => {
           const done = projection.elapsedSeconds >= PHASES.slice(0, index + 1).reduce((total, entry) => total + entry.seconds, 0)
           return <li key={phase.id} data-done={done} data-next={nextPhase === phase.id}>
@@ -563,6 +558,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
         {nextPhase ? <button className={styles.primary} disabled={locked || (projection.phase === 'setup' && !batchReady)} aria-label={'Chạy pha ' + PHASE_NAME[nextPhase] + ' (' + JAR_PROFILE.phases[nextPhase].durationSeconds + ' giây mô phỏng)'} onClick={() => projection.phase === 'setup' ? setProgramConfirmOpen(true) : submit('run_phase', { phase: nextPhase })}>Chạy {PHASE_NAME[nextPhase].toLowerCase()} <ArrowRightIcon /></button> : <p>Đã lắng xong cả mẻ. Chọn từng cốc để đo; đo một cốc không khóa các cốc khác.</p>}
       </ControlGroup>
       <ControlGroup id="results" title="Đo & ghi kết quả" summary="NTU cuối · Đáp số · Phương án nộp" open={group === 'results'} onToggle={() => setGroup(group === 'results' ? null : 'results')}>
+        <OperationHelp topic={JAR_OPERATION_HELP.results} guideBaseHref={guideBaseHref} />
         <div className={styles.measurement} data-testid="jar-selected-reading"><span className={styles.measurementLabel}>Độ đục cuối · Cốc {selectedCupId}</span><strong>{recent ? readingLabel(recent) : 'Chưa đo'}</strong>{recent && <span>{readingNote(recent)}</span>}</div>
         <button className={styles.button} disabled={locked || !cup} onClick={() => submit('measure_final', { cupId: selectedCupId })}>Đo độ đục cuối cốc {selectedCupId}</button>
         <div className={styles.resultDivider} />
@@ -581,7 +577,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
     {ready && view && projection ? <JarNotebook view={view} selected={selectedCupId} drafts={answerDrafts} busy={busy} onSelect={selectCup} onBaseline={() => { setGroup('baseline'); setPane('controls') }} onReport={() => setReportOpen(true)} /> : <p className={styles.empty}>Sổ thực hành sẽ hiển thị số đo sau khi bắt đầu lượt.</p>}
   </section>
 
-  return <><WorkbenchFrame label="Bàn thí nghiệm Jar Test" header={header} notices={notices} shelf={shelf} simulation={simulation} controls={controls} notebook={notebook} pane={pane} onPaneChange={setPane} onShelfInfo={() => setEquipmentItem('sample')} tourOpen={tourOpen} onTourClose={() => {
+  return <><WorkbenchFrame contentSized label="Bàn thí nghiệm Jar Test" header={header} notices={notices} shelf={shelf} simulation={simulation} controls={controls} notebook={notebook} pane={pane} onPaneChange={setPane} onShelfInfo={() => setEquipmentItem('sample')} tourOpen={tourOpen} onTourClose={() => {
     setTourOpen(false)
     // The shelf is temporarily hidden during the mobile tour. Restore focus
     // after the original pane and shelf visibility have been committed.

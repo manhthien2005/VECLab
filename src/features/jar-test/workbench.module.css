@@ -82,7 +82,7 @@
 .steps [aria-current='step'] button { color:var(--accent-hover); font-weight:700; }
 .steps [aria-current='step'] button > span { color:white; background:var(--accent); border-color:var(--accent); }
 .steps button:disabled { cursor:default; }
-.rack { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:center; padding-top:4px; background:linear-gradient(180deg,#fff 45%,#f1f6f9); }
+.rack { flex:0 0 auto; min-height:0; display:flex; flex-direction:column; justify-content:flex-start; padding-top:4px; background:linear-gradient(180deg,#fff 45%,#f1f6f9); }
 .rackScroll { overflow-x:auto; padding:4px 14px 10px; flex-shrink:0; }
 .vesselGrid { position:relative; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); align-items:stretch; gap:12px; min-width:804px; max-width:936px; margin-inline:auto; }
 .vessel { position:relative; min-width:0; padding:0; border:0; background:transparent; color:var(--ink); font:inherit; cursor:pointer; display:grid; grid-template-rows:auto 1fr; z-index:1; border-radius:6px; }
@@ -132,7 +132,6 @@
 .meterReadings strong { display:block; color:#234a5c; font-size:1.08rem; line-height:1.4; margin-top:3px; font-variant-numeric:tabular-nums; white-space:nowrap; }
 .meterNote { margin:0 0 0 auto; max-width:22ch; color:var(--ink-muted); font-size:.68rem; line-height:1.6; }
 .rack[data-paused='true'] * { animation-play-state:paused !important; }
-.rack[data-animation='off'] * { animation:none !important; }
 @keyframes jarFill { from { transform:scaleY(0); } to { transform:scaleY(1); } }
 @keyframes jarPour { 0% { opacity:0; } 15%,65% { opacity:.8; } 100% { opacity:0; } }
 @keyframes jarDose { 0% { opacity:0; transform:translateY(-6px); } 15%,80% { opacity:1; transform:translateY(0); } 100% { opacity:0; } }
@@ -143,10 +142,6 @@
 @keyframes jarMeter { 0%,35%,70% { opacity:.25; } 18%,53%,100% { opacity:1; } }
 .stageNote { font-size:.65rem; line-height:1.5; text-align:center; color:var(--ink-muted); padding:7px 12px; margin:0; }
 .stageFooter { display:flex; gap:12px; justify-content:space-between; align-items:center; flex-wrap:wrap; padding:9px 18px; border-top:1px solid #e9eff3; color:var(--ink-muted); font-size:.68rem; }
-.stageFooter label { display:flex; align-items:center; gap:6px; cursor:pointer; min-height:28px; }
-.stageFooter input { accent-color:var(--accent); width:15px; height:15px; }
-.motionControl { display:grid; }
-.motionControl > span { padding-left:21px; font-size:.65rem; }
 .controlsHeading { display:flex; align-items:center; gap:12px; justify-content:space-between; margin-bottom:10px; }
 .cupSelect { min-height:40px; max-width:124px; border:1px solid #bdd7dc; border-radius:8px; padding:7px 9px; font:inherit; font-weight:650; color:var(--accent-hover); background:#edf7f7; cursor:pointer; }
 .cupContext { display:flex; align-items:center; gap:8px; margin:0 0 18px; font-size:.75rem; color:var(--ink-muted); font-variant-numeric:tabular-nums; }
@@ -228,7 +223,7 @@
 .error { display:flex; align-items:center; flex-wrap:wrap; gap:10px; background:var(--danger-soft); color:#82272e; border:1px solid #e2b8bd; border-radius:9px; padding:10px 14px; font-size:.8rem; }
 .error p { margin:0; }
 .actionRow { display:flex; flex-wrap:wrap; gap:8px; }
-.entry { flex:1; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:12px; padding:25px; text-align:center; }
+.entry { display:flex; justify-content:flex-start; align-items:center; flex-direction:column; gap:12px; padding:16px 24px 24px; text-align:center; }
 .entry > svg { width:70px; height:80px; }
 .entry h2 { margin:0; font-size:1.25rem; }
 .entry p { max-width:58ch; margin:0; font-size:.85rem; }
@@ -242,10 +237,21 @@
 @media (max-width:600px) { .brand { font-size:1rem; gap:7px; } .brand > span { width:30px; height:30px; } .brand svg { width:22px; height:22px; } .title { min-width:0; flex:1; } .title h1 { font-size:1.1rem; } .title p { font-size:.65rem; } .headerActions { margin-left:0; } .saveState { display:none; } .goal { font-size:.75rem; min-width:0; } .stageHeader h2 { font-size:1.05rem; } .steps { flex-basis:100%; margin:0; } .inventory { grid-template-columns:1fr; } .shelfHelp { display:block; } .equipment { min-height:80px; } .stageFooter { font-size:.65rem; padding-inline:12px; } .notebookHeading { gap:8px 14px; } .initialReading { margin:0; width:100%; justify-content:space-between; } .notebookTabs { gap:14px; } .table { font-size:.72rem; } .notebookFooter { font-size:.65rem; } }
 @media (max-width:1300px) { .meterPanel { gap:10px; flex-wrap:wrap; } .meterNote { flex-basis:100%; max-width:none; margin:0; } }
 @media (max-width:600px) { .processStatus { margin-inline:14px; } .sampleCount { display:none; } .meterPanel { margin-inline:12px; padding:10px; } .meterReadings { flex:1; gap:14px; justify-content:space-between; } .meterReadings strong { font-size:.95rem; } .meterArt, .meterMeasuring { flex-basis:44px; } .meterArt svg, .meterMeasuring svg { width:44px; } }
-@media (prefers-reduced-motion:reduce) { .rack:not([data-motion-opt-in='true']) * { animation:none !important; } .vesselLabel, .button, .primary, .controlGroup { transition:none; } }
-/* Explicit opt-in is local to the apparatus, overriding the global reduced-motion
-   duration cap without changing the OS preference or other interface motion. */
-@media (prefers-reduced-motion:reduce) { .rack[data-motion-opt-in='true'] * { animation-duration:var(--motion-duration,0s) !important; animation-iteration-count:var(--motion-repeat,1) !important; } }
+/* Preserve the scientific feedback with slower, smaller motion when requested. */
+@media (prefers-reduced-motion:reduce) {
+  .rack * { animation:none!important; }
+  .rack[data-phase='rapid'] .paddleMoving, .rack[data-phase='slow'] .paddleMoving { animation-name:jarRotate!important; animation-duration:2400ms!important; animation-timing-function:linear!important; animation-iteration-count:infinite!important; }
+  .rack[data-phase='slow'] .paddleMoving { animation-duration:3600ms!important; }
+  .rack .fillWindow, .rack .shaftLowering, .rack .pourCue, .rack .doseCue, .rack .doseDrop, .rack .meterSignal { animation-duration:600ms!important; animation-timing-function:ease-out!important; animation-iteration-count:1!important; animation-fill-mode:both!important; }
+  .rack .fillWindow { animation-name:jarFill!important; }
+  .rack .shaftLowering { animation-name:jarLower!important; }
+  .rack .pourCue { animation-name:jarPour!important; }
+  .rack .doseCue { animation-name:jarDose!important; }
+  .rack .doseDrop { animation-name:jarDrop!important; }
+  .rack .meterSignal { animation-name:jarMeter!important; }
+  .vesselLabel, .button, .primary, .controlGroup { transition:none; }
+}
+
 
 @media (max-width:1050px) { .goal { flex:0 0 auto; margin-left:auto; } .goalPanel { position:fixed; inset:80px 12px auto; transform:none; width:520px; max-width:calc(100vw - 24px); max-height:calc(100dvh - 96px); margin-inline:auto; } }
 @media (max-width:600px) { .goalTitle { font-size:.875rem; } .goalPanel { padding:16px; } .goalPanelGrid { grid-template-columns:1fr; gap:18px; } .goalPanelHeading button { width:40px; height:40px; } }

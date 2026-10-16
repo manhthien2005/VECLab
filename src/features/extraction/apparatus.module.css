@@ -10,7 +10,7 @@
 .phaseTag[data-filled=true]::before { background:#007b80; }
 .scene { position:relative; display:flex; align-items:center; justify-content:center; flex:1; min-height:220px; border-radius:10px; background:#f7fafc; }
 .sceneFocus { display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; padding:0 10px 5px; border:0; border-radius:10px; background:transparent; font:inherit; cursor:help; }
-.sceneArt { display:block; width:100%; height:245px; max-height:270px; }
+.sceneArt { display:block; width:100%; height:320px; max-height:340px; }
 .sceneState { display:grid; gap:3px; text-align:center; color:#28596b; font-size:.75rem; line-height:1.6; }
 .sceneState small { color:#4f6b7d; font-size:.65rem; }
 .actionFeedback { margin:0; padding:9px 12px; border-radius:7px; background:#e8f4f3; color:#245f63; font-size:.73rem; line-height:1.6; overflow-wrap:anywhere; }
@@ -52,23 +52,68 @@
 .composition > span { color:#526f80; font-size:.65rem; }
 .composition > div { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:8px; font-size:.7rem; font-variant-numeric:tabular-nums; }
 .composition strong { display:block; color:#00656a; margin-bottom:3px; }
+/* Each operation is a finite explanation; the saved data updates immediately. */
 .vesselMotion { transform-origin:90px 120px; }
 .swirl { opacity:0; }
-.vesselMotion[data-motion=mix] { animation:extractionRock 900ms ease-in-out; }
-.vesselMotion[data-motion=mix] .swirl { animation:extractionSwirl 900ms ease-out; }
-.vesselMotion[data-motion=settle] .waterLayer { animation:extractionWaterSettle 1100ms ease-out both; }
-.vesselMotion[data-motion=settle] .organicLayer { animation:extractionOrganicSettle 1100ms ease-out both; }
-.phaseLabels { animation:extractionLabelReveal 1100ms ease-out both; }
-.transferFlow { animation:extractionFlow 1s ease-out 2; }
-.vapour, .ventPuff { animation:extractionVapour 1s ease-out 2; }
-@keyframes extractionRock { 0%,100%{transform:rotate(0)}30%{transform:rotate(5deg)}65%{transform:rotate(-4deg)} }
-@keyframes extractionSwirl { 20%,80%{opacity:.85}50%{transform:translateY(-5px)}100%{opacity:0} }
-@keyframes extractionWaterSettle { from{opacity:.45;transform:translateY(-9px)}to{opacity:1;transform:translateY(0)} }
-@keyframes extractionOrganicSettle { from{opacity:.45;transform:translateY(9px)}to{opacity:1;transform:translateY(0)} }
-@keyframes extractionLabelReveal { from{opacity:0}to{opacity:1} }
-@keyframes extractionFlow { 0%{opacity:.15;stroke-dashoffset:12}45%{opacity:1}100%{opacity:.2;stroke-dashoffset:0} }
-@keyframes extractionVapour { 0%{opacity:.1;transform:translateY(3px)}50%{opacity:.75}100%{opacity:0;transform:translateY(-7px)} }
+.transferArt { height:320px; max-height:340px; }
+.sceneLabels { fill:#486a7d; font-size:12px; }
+.diagramTitle { fill:#24596b; font-size:14px; font-weight:650; }
+.pouringVessel { transform-origin:195px 140px; animation:extractionPour 2200ms cubic-bezier(.16,1,.3,1) both; }
+.liquidStream { stroke-dasharray:1; animation:extractionStream 2200ms ease-out both; }
+.flowHighlights { stroke-dasharray:.035 .09; animation:extractionFlowHighlights 2200ms linear both; }
+.receiverRipple { transform-box:fill-box; transform-origin:center; animation:extractionRipple 2200ms ease-out both; }
+.layerChanging { transform:translateY(0) scaleY(var(--phase-end-scale)); animation:extractionLevel 2000ms cubic-bezier(.16,1,.3,1) both; }
+.vesselMotion[data-motion=receiving] .layerChanging { animation-delay:140ms; }
+.vesselMotion[data-motion=mix] { animation:extractionRock 2100ms ease-in-out; }
+.vesselMotion[data-motion=mix] .swirl { animation:extractionSwirl 2100ms ease-out; }
+.mixingEddies ellipse { transform-origin:90px 150px; animation:extractionEddy 1800ms ease-in-out both; }
+.vesselMotion[data-motion=settle] .waterLayer { transform-origin:90px 200px; animation:extractionWaterSettle 1900ms cubic-bezier(.16,1,.3,1) both; }
+.vesselMotion[data-motion=settle] .organicLayer { animation:extractionOrganicSettle 1900ms cubic-bezier(.16,1,.3,1) both; }
+.mixedVeil { opacity:0; animation:extractionSeparate 1900ms ease-out both; }
+.phaseLabels { animation:extractionLabelReveal 2000ms ease-out both; }
+.stopper { transform-origin:90px 26px; }
+.vesselMotion[data-motion=vent] .stopper { animation:extractionUncap 1800ms ease-out both; }
+.vesselMotion[data-motion=add_reagent] .stopper, .vesselMotion[data-motion=receiving] .stopper, .vesselMotion[data-motion=transfer] .stopper { animation:extractionUncap 2300ms ease-out both; }
+.stopcock { transform-origin:90px 206px; }
+.vesselMotion[data-motion=transfer] .stopcock { animation:extractionTap 2200ms ease-out both; }
+.reagentBottle { transform-origin:389px 60px; animation:extractionBottlePour 2200ms cubic-bezier(.16,1,.3,1) both; }
+.vapour, .ventPuff { opacity:0; animation:extractionVapour 1800ms ease-out both; }
+.phProbe { animation:extractionProbe 2100ms cubic-bezier(.16,1,.3,1) both; }
+.balanceCue { animation:extractionRead 2100ms ease-out both; }
+.vesselMotion[data-motion=receiving] .solidBed, .vesselMotion[data-motion=dry] .solidBed, .vesselMotion[data-motion=evaporate] .solidBed, .vesselMotion[data-motion=add_reagent] .solidBed { animation:extractionSolid 2100ms ease-out both; }
+.filterCone { animation:extractionRead 2200ms ease-out both; }
+.separationLine { animation:extractionLabelReveal 2000ms ease-out both; }
+@keyframes extractionLevel { from { transform:translateY(var(--phase-start-shift)) scaleY(var(--phase-start-scale)); } to { transform:translateY(0) scaleY(var(--phase-end-scale)); } }
+@keyframes extractionPour { 0%,100% { transform:rotate(0); } 18%,78% { transform:rotate(25deg); } }
+@keyframes extractionStream { 0%,5% { opacity:0; stroke-dashoffset:1; } 20%,78% { opacity:.9; stroke-dashoffset:0; } 100% { opacity:0; stroke-dashoffset:0; } }
+@keyframes extractionFlowHighlights { 0%,8% { opacity:0; stroke-dashoffset:.45; } 25%,78% { opacity:.8; } 100% { opacity:0; stroke-dashoffset:0; } }
+@keyframes extractionRipple { 0%,12% { opacity:0; transform:scale(.5); } 35%,65% { opacity:.75; } 100% { opacity:0; transform:scale(1.15); } }
+@keyframes extractionRock { 0%,100% { transform:rotate(0); } 15%,55% { transform:rotate(9deg); } 35%,75% { transform:rotate(-8deg); } }
+@keyframes extractionSwirl { 10%,85% { opacity:.85; } 30%,65% { transform:translateY(-5px); } 100% { opacity:0; } }
+@keyframes extractionEddy { 0%,100% { opacity:0; } 20%,70% { opacity:.7; } 35% { transform:translateX(-8px) scaleX(.8); } 60% { transform:translateX(8px) scaleX(1.1); } }
+@keyframes extractionWaterSettle { from { opacity:.5; transform:translateY(-12px) scaleY(.85); } to { opacity:1; transform:none; } }
+@keyframes extractionOrganicSettle { from { opacity:.5; transform:translateY(12px); } to { opacity:1; transform:none; } }
+@keyframes extractionSeparate { 0% { opacity:1; } 75%,100% { opacity:0; } }
+@keyframes extractionLabelReveal { 0%,30% { opacity:0; } 100% { opacity:1; } }
+@keyframes extractionUncap { 0%,100% { transform:none; } 20%,75% { transform:translate(12px,-18px) rotate(15deg); } }
+@keyframes extractionTap { 0%,100% { transform:rotate(0); } 15%,80% { transform:rotate(90deg); } }
+@keyframes extractionBottlePour { 0%,100% { transform:none; } 16%,75% { transform:rotate(-45deg); } }
+@keyframes extractionVapour { 0% { opacity:0; transform:translateY(8px); } 35% { opacity:.85; } 100% { opacity:0; transform:translateY(-18px); } }
+@keyframes extractionProbe { 0%,100% { opacity:0; transform:translateY(-35px); } 25%,80% { opacity:1; transform:none; } }
+@keyframes extractionRead { 0% { opacity:.3; } 25%,80% { opacity:1; } 100% { opacity:.5; } }
+@keyframes extractionSolid { from { opacity:.2; } to { opacity:1; } }
 @media(max-width:1250px) and (min-width:1051px) { .readouts{gap:7px;padding-inline:9px}.readouts>div+div{padding-left:9px}.readouts strong{font-size:.9rem}.vesselTitle>span{font-size:.6rem} }
 @media(max-width:1050px) { .vesselPicker{grid-template-columns:repeat(3,minmax(0,1fr))}.sceneArt{height:260px}.vesselSlot:nth-child(n) .cardTip{left:50%;right:auto;transform:translateX(-50%)}.vesselSlot:nth-child(3n+1) .cardTip{left:0;transform:none}.vesselSlot:nth-child(3n) .cardTip{left:auto;right:0;transform:none} }
 @media(max-width:600px) { .stage{padding:14px;gap:10px}.stageHeading{flex-wrap:wrap;gap:8px}.stageHeading h2{font-size:1.05rem}.stageHeading p{font-size:.7rem}.scene{min-height:210px}.sceneFocus{padding-inline:0}.sceneArt{height:220px}.sceneTip{left:50%;right:auto;transform:translateX(-50%);top:0}.readouts{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.readouts>div:nth-child(3){border-left:0;padding-left:0}.readouts strong{font-size:1rem}.vesselTitle>span{font-size:.63rem} }
-@media(prefers-reduced-motion:reduce) { .stage * { animation:none!important;transition:none!important; } }
+@media(max-width:600px) { .sceneArt { height:300px; }.diagramTitle { font-size:16px; }.sceneLabels { font-size:14px; } }
+@media(prefers-reduced-motion:reduce) {
+  .stage * { animation:none!important;transition:none!important; }
+  .stage .liquidStream { animation:extractionReducedFlow 1800ms ease-out both!important; stroke-dashoffset:0; }
+  .flowHighlights { opacity:0; }
+  .stage .layerChanging { animation:extractionLevel 1800ms ease-out both!important; }
+  .mixedVeil, .swirl, .mixingEddies, .vapour, .ventPuff, .receiverRipple, .separationLine { opacity:0; }
+  .layerChanging { transform:translateY(0) scaleY(var(--phase-end-scale)); }
+}
+
+@keyframes extractionReducedFlow { 0%,100% { opacity:0; } 20%,80% { opacity:.65; } }
+.stage[data-paused=true] * { animation-play-state:paused!important; }

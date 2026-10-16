@@ -5,7 +5,7 @@ import styles from './workbench.module.css'
 
 export type JarVisualCue = { id: string; actionType: string; cupId: JarCupId | null }
 type Props = { projection: JarProjection; selectedCupId: JarCupId
-  onSelectCup: (id: JarCupId) => void; disabled?: boolean; skipAnimation?: boolean; motionOptIn?: boolean; cue?: JarVisualCue | null }
+  onSelectCup: (id: JarCupId) => void; disabled?: boolean; cue?: JarVisualCue | null }
 
 const PHASE_COPY = {
   setup: ['Chuẩn bị dàn cốc', 'Mẫu 0,5 L / cốc'],
@@ -20,7 +20,7 @@ function formatNtu(value: number | null | undefined) {
 }
 
 /** Geometry and motion are qualitative. Only committed inputs determine labels. */
-export function JarApparatus({ projection, selectedCupId, onSelectCup, disabled = false, skipAnimation = false, motionOptIn = false, cue }: Props) {
+export function JarApparatus({ projection, selectedCupId, onSelectCup, disabled = false, cue }: Props) {
   const uid = useId().replaceAll(':', '')
   const root = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(true)
@@ -41,7 +41,7 @@ export function JarApparatus({ projection, selectedCupId, onSelectCup, disabled 
   const reading = selectedCup?.measurements.at(-1)
   const measuring = cue?.actionType === 'measure_initial' || (cue?.actionType === 'measure_final' && cue.cupId === selectedCupId)
   const [phaseTitle, phaseDescription] = PHASE_COPY[projection.phase]
-  return <div ref={root} className={styles.rack} data-phase={projection.phase} data-settled={projection.elapsedSeconds >= 3060} data-animation={skipAnimation ? 'off' : 'on'} data-motion-opt-in={motionOptIn} data-paused={!visible || !documentVisible}>
+  return <div ref={root} className={styles.rack} data-phase={projection.phase} data-settled={projection.elapsedSeconds >= 3060} data-animation="on" data-paused={!visible || !documentVisible}>
     <div className={styles.processStatus}><span className={styles.machineIndicator} aria-hidden="true"/>
       <div><strong>{phaseTitle}</strong><span>{phaseDescription}</span></div>
       <span className={styles.sampleCount}>{projection.cups.length} / 6 cốc</span>

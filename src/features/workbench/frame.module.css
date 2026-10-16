@@ -40,6 +40,11 @@
 .notebook { grid-column: 2; grid-row: 2; }
 .controls { grid-column: 3; grid-row: 1 / 3; padding: 18px 14px; }
 .mobileNav { display: none; }
+/* The center stack follows its own content, independent of the sidebars. */
+.body[data-content-sized='true'] { grid-template-rows:auto; min-height:0; align-items:start; }
+.body[data-content-sized='true'] .shelf, .body[data-content-sized='true'] .controls { grid-row:1; }
+.mainColumn { grid-column:2; grid-row:1; min-width:0; display:flex; flex-direction:column; gap:14px; }
+.mainColumn .simulation { min-height:0; }
 @media (min-width: 1600px) {
   .body { grid-template-columns: 232px minmax(0,1fr) 330px; }
   .body[data-collapsed='true'] { grid-template-columns: 48px minmax(0,1fr) 330px; }
@@ -63,5 +68,8 @@
   .mobileNav button { flex: 1; font: inherit; font-weight: 650; border: 1px solid var(--border); border-radius: 8px; padding: 10px 4px; background: white; color: var(--ink-muted); cursor: pointer; min-height: 44px; }
   .mobileNav button[aria-pressed='true'], .mobileNav button[aria-expanded='true'] { background: var(--accent-softer); border-color: var(--accent); color: var(--accent); }
   .controls, .notebook { overflow: visible; }
+  .mainColumn { grid-column:1; grid-row:auto; }
+  .body[data-content-sized='true'] .shelf, .body[data-content-sized='true'] .controls { grid-row:auto; }
+  .body[data-pane='controls'] .mainColumn { display:none; }
 }
 @media (max-width:600px) { .header { gap:8px; padding:12px; } }
