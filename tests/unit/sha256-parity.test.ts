@@ -107,7 +107,7 @@ describe('domain hashes are stable across implementations', () => {
   it('requestFingerprint equals node:crypto over the canonical payload', () => {
     const payload: RequestFingerprintPayload = {
       attemptId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa' as UUID,
-      scenarioReleaseId: 'acid-neutralization@1.0.0',
+      scenarioReleaseId: 'jar-test@0.1.0',
       actionType: 'add_base',
       normalizedParameters: { volumeL: 0.001 },
       // The unit the learner picked is part of the fingerprint, so a retry that changes

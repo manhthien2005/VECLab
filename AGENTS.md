@@ -23,6 +23,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## VECLab Shared Agent Workflow
 
+- **Persistent user decision — retire old experiments, 2026-10-16:** Keep runnable source only for Jar Test and acid–base extraction; preserve the methylene-blue adsorption introduction/card. Remove retired acid-neutralization/titration and plastic prototype engines, UI, API, fixtures and obsolete task/spec files. This supersedes earlier requirements to retain those runtime releases. Do not delete saved user data or rewrite historical database migrations; saved links to retired lessons explain the retirement. Extraction v1 remains needed by the current lesson and its stored attempts. [Current scope](docs/ui/current-experiments.md) supersedes older experiment lists.
+
 ### Motion and SVG skills
 
 - Before changing VECLab motion, SVG apparatus or chart transitions, read [veclab-motion](.agents/skills/veclab-motion/SKILL.md). Current user decisions, task scope and repository contracts govern third-party suggestions.

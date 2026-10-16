@@ -1,13 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import {
-  applyActionSchema,
-  completeActionSchema,
-  parseBody,
-  startAttemptSchema,
-  toCommitIdentity,
-  undoActionSchema,
-} from '@/app/api/simulation/schemas.js'
-import {
   assertSameOrigin,
   readJson,
   MAX_ACTION_BODY_BYTES,
@@ -38,118 +30,11 @@ function validActionBody() {
   }
 }
 
-describe('request schemas', () => {
-  it('accepts exactly the fields §9 lets a client send', () => {
-    const parsed = parseBody(applyActionSchema, validActionBody())
-
-    expect(parsed.ok).toBe(true)
-    if (!parsed.ok) throw new Error('a valid body was rejected')
-    expect(parsed.value.actionType).toBe('add_base')
-    expect(parsed.value.parameters).toEqual({ volume: 0.5 })
-    expect(parsed.value.unitSelections).toEqual({ volume: 'mL' })
-  })
-
-  it('rejects a body that smuggles server-computed output', () => {
-    // The point of `.strict()`. Each of these is a trusted column: written only by the
-    // server's own engine through RPC columns revoked from browser roles. If any were
-    // parsed away silently, a handler added later could read it and the client would be
-    // supplying chemistry the report vouches for.
-    const trusted = [
-      'resultPayload',
-      'stateAfter',
-      'stateAfterHash',
-      'stateBeforeHash',
-      'resourceDelta',
-      'calculationTrace',
-      'requestFingerprint',
-      'scenarioReleaseId',
-    ] as const
-
-    for (const field of trusted) {
-      const parsed = parseBody(applyActionSchema, { ...validActionBody(), [field]: 'invented' })
-      expect(parsed.ok, `${field} was accepted`).toBe(false)
-    }
-  })
-
-  it('rejects a start body that tries to choose the scenario', () => {
-    // §17: scenario config comes only from build or the internal registry, never from a
-    // user payload. A client that believes it can pick the release must be refused rather
-    // than ignored, or the belief stays in the code that sent it.
-    for (const body of [
-      { scenarioKey: 'copper-precipitation' },
-      { scenarioReleaseId: 'acid-neutralization@2.0.0' },
-      { initialState: { pH: 1 } },
-    ]) {
-      expect(parseBody(startAttemptSchema, body).ok).toBe(false)
-    }
-    // An empty body is the only valid one.
-    expect(parseBody(startAttemptSchema, {}).ok).toBe(true)
-  })
-
-  it('rejects a malformed id, revision, action type and parameter value', () => {
-    const cases = [
-      { attemptId: 'not-a-uuid' },
-      { actionId: ATTEMPT_ID.replace('-', '') },
-      { expectedRevision: -1 },
-      { expectedRevision: 1.5 },
-      { expectedRevision: '3' },
-      { actionType: '' },
-      { actionType: 7 },
-      // A nested object where a scalar is expected: the engine declares parameter
-      // quantities as numbers, so this cannot be validated by it and must stop here.
-      { parameters: { volume: { $gt: 0 } } },
-      // A numeric unit is a malformed body, not an unknown unit; accepting it would
-      // report "unknown unit" and send a learner to look at their own input.
-      { unitSelections: { volume: 5 } },
-    ] as const
-
-    for (const patch of cases) {
-      const parsed = parseBody(applyActionSchema, { ...validActionBody(), ...patch })
-      expect(parsed.ok, `${JSON.stringify(patch)} was accepted`).toBe(false)
-    }
-  })
-
-  it('names the offending field so a broken client is diagnosable', () => {
-    const parsed = parseBody(applyActionSchema, { ...validActionBody(), actionType: 7 })
-
-    expect(parsed.ok).toBe(false)
-    if (parsed.ok) throw new Error('a malformed body was accepted')
-    // The field NAME is the client's own, so returning it is safe and is what turns an
-    // opaque 400 into something a developer can act on. Values are not echoed.
-    expect(parsed.failure.body.field).toBe('actionType')
-    expect(parsed.failure.status).toBe(400)
-  })
-
-  it('carries the same commit fields on undo and complete', () => {
-    const commit = { attemptId: ATTEMPT_ID, actionId: ACTION_ID, expectedRevision: 2 }
-
-    expect(parseBody(undoActionSchema, commit).ok).toBe(true)
-    expect(parseBody(completeActionSchema, commit).ok).toBe(true)
-    // Neither takes an action type or parameters: undo reverts the last event and
-    // complete is a lifecycle transition, so there is nothing to dose.
-    expect(parseBody(undoActionSchema, { ...commit, actionType: 'add_base' }).ok).toBe(false)
-    expect(parseBody(completeActionSchema, { ...commit, parameters: { volume: 1 } }).ok).toBe(false)
-  })
-
-  it('turns a null revision into an absent key', () => {
-    // `CommitIdentity` marks it optional and `exactOptionalPropertyTypes` rejects an
-    // explicit undefined, so null has to become a missing property. Passing null through
-    // would compare `null === 3` in the store and refuse every write from a caller that
-    // legitimately has not seen a revision yet.
-    expect(toCommitIdentity({ actionId: ACTION_ID as never, expectedRevision: null })).toEqual({
-      actionId: ACTION_ID,
-    })
-    expect(
-      toCommitIdentity({ actionId: ACTION_ID as never, expectedRevision: 3 }),
-    ).toEqual({ actionId: ACTION_ID, expectedRevision: 3 })
-  })
-})
-
 describe('origin check', () => {
   const HOST = 'http://localhost:3000'
 
   function requestWith(headers: Record<string, string>): Request {
-    return new Request(`${HOST}/api/simulation/attempts/${ATTEMPT_ID}/actions`, {
+    return new Request(`${HOST}/api/profile/${ATTEMPT_ID}/actions`, {
       method: 'POST',
       headers,
     })
@@ -182,7 +67,7 @@ describe('origin check', () => {
   })
 
   it('falls back to referer when origin is absent', () => {
-    expect(assertSameOrigin(requestWith({ referer: `${HOST}/simulate/acid-neutralization` }))).toBeNull()
+    expect(assertSameOrigin(requestWith({ referer: `${HOST}/simulate/jar-test` }))).toBeNull()
     expect(assertSameOrigin(requestWith({ referer: 'https://evil.example/x' }))).toEqual({
       status: 403,
       body: { error: 'origin_not_allowed' },
@@ -207,7 +92,7 @@ describe('origin check', () => {
 
 describe('body limits', () => {
   function post(body: string, headers: Record<string, string> = {}): Request {
-    return new Request('http://localhost:3000/api/simulation/attempts', {
+    return new Request('http://localhost:3000/api/profile', {
       method: 'POST',
       body,
       headers: { 'content-type': 'application/json', ...headers },

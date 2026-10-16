@@ -1,19 +1,19 @@
 # Danh sách bài đang phục vụ
 
-Cập nhật ngày 15/10/2026 theo quyết định của người dùng.
+Cập nhật ngày 16/10/2026 theo quyết định người dùng. Tài liệu này thay thế danh sách ba bài và các kế hoạch MVP cũ.
 
-- **Jar Test**: mở thực hành tại `/simulate/jar-test`, hồ sơ `jar-test@0.1.0`.
-- **Điều chỉnh pH** và **Hấp phụ xanh methylene**: giữ thẻ giới thiệu, ghi **Chưa triển khai**. Không mở bài axit cũ thay cho bài pH dự kiến.
-- Prototype phân loại nhựa đã rời luồng công khai. Đường dẫn cũ đưa về danh sách thí nghiệm.
+| Bài | Route thực hành | Release |
+| --- | --- | --- |
+| Jar Test | `/simulate/jar-test` | `jar-test@0.1.0` |
+| Chiết tách axit–bazơ | `/simulate/acid-base-extraction` | `acid-base-extraction@0.2.0` |
+| Hấp phụ xanh methylene | Chỉ thẻ giới thiệu, chưa triển khai | Chưa có |
 
-Jar Test và `/lab` cùng đọc IndexedDB, kể cả khi đăng nhập. Lab chỉ liệt kê lượt Jar Test; không xóa dữ liệu bài cũ hoặc hứa đồng bộ tài khoản. Báo cáo mở từ chính workbench bằng `view=report`; sổ đo bằng `view=notebook`.
+Source hiện hành không còn engine/giao diện/endpoint cho trung hòa axit–chuẩn độ, phân loại nhựa hoặc kết tủa đồng. URL simulator đã bỏ trả 404 có đường về danh mục. Không mở bài khác dưới tên bài cũ.
 
-Nguồn hiện hành được khai báo tại `src/content/evidence/jar-test.ts`: phương trình RSM của Alateef và cộng sự (2024), và tài liệu thực hành của Qatar University. `/evidence`, chi tiết bài và hướng dẫn giữ riêng nguồn tính toán, quy trình và giới hạn. Tái hiện số học không đồng nghĩa với kiểm chứng thực nghiệm ngoài mẫu.
+Hai bài chạy thật cùng lưu IndexedDB, kể cả khi đăng nhập. Lab/account chỉ liệt kê lượt đúng bài; báo cáo và sổ đo mở từ workbench bằng `view=report` và `view=notebook`. `/attempts/[id]` và `/reports/[id]` đọc metadata local rồi chuyển đến đúng bài. Lượt đã nghỉ có thông báo; dữ liệu không bị xóa hoặc đổi nhãn.
 
-Engine, hợp đồng dữ liệu và tài liệu nghiên cứu lịch sử của bài axit vẫn được giữ để không phá các lượt đã lưu; chúng không còn quyết định danh sách bài đang mở thực hành.
+Extraction v1 vẫn được đọc bằng engine/profile khóa đúng phiên bản. `legacy-engine.ts` thuộc **bài chiết tách hiện hành**, không phải bộ trung hòa axit đã bỏ; v2 còn dùng phần cân bằng của nó. Không xóa chỉ theo tên “legacy”.
 
-## Comparison and account settings
+So sánh hiện dành cho báo cáo Jar hoàn tất, cùng release/profile/schema/model/scoring/content/evidence/projection. Giá trị thiếu là N/A. Auth/profile là chức năng tài khoản riêng, không hứa đồng bộ lượt.
 
-- `/compare` reads only completed local Jar Test attempts, including for guests. It replays the stored event chain and compares immutable reports with matching release/schema/profile/model/scoring/content/evidence/projection versions. Missing data is N/A. Lab and account link to the same report view.
-- Account attempt management uses the same local Jar repository as the workbench, even while signed in. These records belong to the browser, not a cloud account; deletion must confirm and guard the scenario.
-- `/api/profile` retains table-backed profile storage when `SUPABASE_SECRET_KEY` is configured. Public-key-only deployments use the authenticated user's `display_name` presentation metadata instead. Both paths keep verified identity, strict input, same-origin writes and private/no-store responses. Metadata is never an authorization source. Changing server storage configuration is not a profile migration; migrate names deliberately if switching stores later.
+Migration và SQL fixture là lịch sử hợp đồng dữ liệu; giữ nguyên, không chỉnh sửa remote Supabase trong task dọn source. Nguồn khoa học: `src/content/evidence/jar-test.ts` và `acid-base-extraction.ts`. Kiểm tra số học không phải kiểm chứng thực nghiệm.

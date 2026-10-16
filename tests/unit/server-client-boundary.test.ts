@@ -6,20 +6,9 @@ import { describe, expect, it } from 'vitest'
 /**
  * React Server Component boundary guard.
  *
- * THE BUG THIS EXISTS FOR. `src/app/simulate/[scenarioKey]/page.tsx` is a Server
- * Component. It imported `WORKBENCH_SCENARIO_KEY` — a plain string constant — from
- * `workbench-client.tsx`, which carries `'use client'`. Under RSC every export of a
- * `'use client'` module is replaced by a CLIENT REFERENCE on the server: the page did not
- * receive `'acid-neutralization'`, it received a function. Its own route guard,
- *
- *     if (scenarioKey !== WORKBENCH_SCENARIO_KEY) notFound()
- *
- * was therefore true for every request, and the workbench — the central screen of the
- * product — answered 404 on its own valid URL.
- *
- * Nothing caught it. It type-checks (TypeScript sees the declared `string`), it lints, and
- * all 207 unit tests passed, because the failure only exists at the RSC serialization
- * boundary at runtime. Only opening the page in a browser revealed it.
+ * Under RSC, a value exported by a 'use client' module becomes a CLIENT REFERENCE
+ * on the server. Shared constants/helpers must live in plain modules, otherwise
+ * route guards may receive a function instead of the value TypeScript declares.
  *
  * THE RULE. A Server Component may import a client COMPONENT — that is what a client
  * reference is for — but never a plain value from a `'use client'` module. Shared
@@ -168,17 +157,4 @@ describe('server/client module boundary', () => {
     ).toEqual([])
   })
 
-  it('serves the workbench scenario key as a real string', () => {
-    // The concrete regression: the constant the simulate route compares its segment
-    // against must be a plain module, so the page reads the value rather than a reference.
-    const scenarioModule = join(
-      SRC_DIR,
-      'features',
-      'simulation-workbench',
-      'scenario.ts',
-    )
-
-    expect(existsSync(scenarioModule)).toBe(true)
-    expect(isClientModule(scenarioModule)).toBe(false)
-  })
 })

@@ -13,10 +13,9 @@ import { describe, expect, it } from 'vitest'
  * one, and it is not what these RPCs rely on (they are SECURITY DEFINER precisely because
  * the service role carries no user claim).
  *
- * So the invariant is: NOTHING in a client bundle may reach that module. The workbench
- * reaches the cloud store through `RemoteAcidSession`, which posts to same-origin BFF
- * routes; `SupabaseAttemptRepository` — the only importer of `admin.ts` — is reachable
- * only from route handlers, which Next never bundles for the client.
+ * Nothing in a client bundle may reach that module. Only authenticated server profile
+ * operations use this adapter; both simulations persist in the browser. Route handlers
+ * stay server-only and verify ownership before reaching the profile store.
  *
  * This is a disk scan rather than a runtime import, for the same reason as
  * domain-boundaries.test.ts: importing `admin.ts` here would only prove the test process
@@ -233,7 +232,7 @@ describe('service-role containment', () => {
     // The mirror image of the assertion above. A reachability test that finds nothing
     // anywhere would pass both ways, so this confirms the walk resolves `@/…` aliases and
     // `.js`→`.ts` rewrites correctly — the two things most likely to silently break it.
-    const reachable = reachableFrom(['src/app/api/simulation/server-session.ts'])
+    const reachable = reachableFrom(['src/app/api/profile/route.ts'])
     expect(reachable.has(ADMIN_MODULE)).toBe(true)
   })
 })
