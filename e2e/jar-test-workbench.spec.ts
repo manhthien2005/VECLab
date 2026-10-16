@@ -492,10 +492,8 @@ test.describe('Jar Test — light workbench, persisted guest flow', () => {
     await expect.poll(() => paddle.evaluate(el => getComputedStyle(el).transform)).not.toBe(firstPosition)
     expect(await shaft.evaluate(el => getComputedStyle(el).transform)).toBe(shaftTransform)
     await expect(page.getByTestId('jar-stage-final-ntu')).toHaveText('Chưa đo')
-    const normalDuration=await paddle.evaluate(el=>parseFloat(getComputedStyle(el).animationDuration))
     await page.emulateMedia({ reducedMotion: 'reduce' })
-    await expect.poll(()=>paddle.evaluate(el=>parseFloat(getComputedStyle(el).animationDuration))).toBeGreaterThan(normalDuration)
-    await expect.poll(()=>paddle.evaluate(el=>getComputedStyle(el).animationName)).not.toBe('none')
+    await expect.poll(()=>paddle.evaluate(el=>getComputedStyle(el).animationName)).toBe('none')
     await expect(page.getByTestId('jar-revision')).toHaveText(revision ?? 'missing revision')
   })
   test('rapid double click never duplicates attempt or dose', async ({ page }) => {

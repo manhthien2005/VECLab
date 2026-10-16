@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.js'
@@ -192,6 +192,9 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
   const [answerDrafts, setAnswerDrafts] = useState<Partial<Record<JarCupId, string>>>({})
 
   const [visualCue, setVisualCue] = useState<JarVisualCue | null>(null)
+  const finishVisualCue = useCallback((id: string) => {
+    setVisualCue((current) => current?.id === id ? null : current)
+  }, [])
   const [tourOpen, setTourOpen] = useState(false)
   const [equipmentItem, setEquipmentItem] = useState<EquipmentKind | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -267,6 +270,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
     if (!id || busyRef.current) return
     busyRef.current = true
     setBusy(true)
+    setVisualCue(null)
     try {
       const loaded = await session.load(id)
       if (loaded === null) {
@@ -332,6 +336,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
           setUncertain(false)
           setView(result.state)
           setReportOpen(true)
+          setVisualCue(null)
           setNotice('Đã lưu kết quả. Lượt này chỉ có thể xem lại.')
         } else {
           pendingRef.current = null
@@ -348,11 +353,14 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
           setUncertain(false)
           setView(result.state)
           setNotice('Đã lưu: ' + actionLabel(intent.actionType) + '.')
-          if (!result.feedback.idempotentReplay) setVisualCue({
-            id: intent.actionId,
-            actionType: intent.actionType,
-            cupId: JAR_CUP_IDS.find((id) => id === intent.parameters.cupId) ?? null,
-          })
+          if (!result.feedback.idempotentReplay) {
+            const hasScene = ['prepare_cup', 'add_coagulant', 'run_phase', 'measure_initial', 'measure_final'].includes(intent.actionType)
+            setVisualCue(hasScene ? {
+              id: intent.actionId,
+              actionType: intent.actionType,
+              cupId: JAR_CUP_IDS.find((id) => id === intent.parameters.cupId) ?? null,
+            } : null)
+          }
           if (intent.actionType === 'prepare_cup') setGroup('dose')
           if (intent.actionType === 'measure_initial') setGroup(result.state.projection.cups.some(c => c.id === selectedCupId) ? 'dose' : 'prepare')
           if (intent.actionType === 'run_phase') setGroup(result.state.projection.phase === 'settling' ? 'results' : 'program')
@@ -451,7 +459,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
   const guideBaseHref = '/experiments/jar-test/guide' + (view?.attemptId ? '?attempt=' + encodeURIComponent(view.attemptId) : '')
   const shelf = <div className={styles.shelfContent}>
     <div className={styles.inventory}>
-      {([['sample', 'Mẫu kaolin', '0,5 L / cốc'], ['coagulant', 'Phèn nhôm', '50–250 mg/L'], ['meter', 'Máy đo độ đục', 'NTU']] as const)
+      {([['sample', 'Mẫu kaolin', 'Nước đục · ' + JAR_PROFILE.aliquotVolumeL * 1000 + ' mL / cốc'], ['coagulant', 'Phèn nhôm', '50–250 mg/L'], ['meter', 'Máy đo độ đục', 'NTU']] as const)
         .map(([kind, title, description]) => <button type="button" className={styles.equipment} key={kind} aria-haspopup="dialog" aria-label={'Tìm hiểu ' + title} onClick={() => setEquipmentItem(kind)}>
           <EquipmentArt kind={kind} /><span className={styles.equipmentText}><strong>{title}</strong><span>{description}</span></span><span className={styles.equipmentInfo}><InfoIcon /></span>
         </button>)}
@@ -485,7 +493,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
       </li>)}</ol>
     </div>
     {ready && projection ? <>
-      <JarApparatus projection={projection} selectedCupId={selectedCupId} onSelectCup={selectCup} disabled={busy} cue={visualCue} />
+      <JarApparatus projection={projection} selectedCupId={selectedCupId} onSelectCup={selectCup} disabled={busy} cue={visualCue} onCueFinished={finishVisualCue} />
       <div className={styles.stageFooter}><span>Thời gian mô phỏng: {projection.elapsedSeconds} giây</span>
         <span>Các pha khuấy–lắng chạy bằng thời gian mô phỏng, không cần chờ thực.</span>
       </div>
