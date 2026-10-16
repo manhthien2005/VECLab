@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.js'
 import { OperationHelp } from '@/features/workbench/operation-help.js'
+import { ActionButton } from '@/features/workbench/action-button.js'
 import { JAR_OPERATION_HELP } from '@/content/operation-help.vi.js'
 import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/icons.js'
 import { TargetIcon, GuideIcon, TheoryIcon, SourcesIcon, ReportIcon, SubmitIcon, CloseIcon, InfoIcon, ControlIcon } from '@/features/workbench/icons.js'
@@ -411,6 +412,11 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
   const nextPhase = projection?.phase === 'setup' ? 'rapid' : projection?.phase === 'rapid' ? 'slow' : projection?.phase === 'slow' ? 'settling' : null
   const ready = loadState === 'ready' && !!view && !!projection
   const batchReady = !!projection?.initialMeasurement?.valid && projection.cups.length > 0 && projection.cups.every(c => c.doseMgL >= JAR_PROFILE.minDoseMgL)
+  const lockReason = busy ? 'Đang lưu thao tác. Chờ xác nhận trước khi tiếp tục.' : uncertain ? 'Chưa xác nhận được thao tác đã lưu. Gửi lại đúng thao tác hoặc tải lại trạng thái đã lưu.' : issue?.conflict ? 'Dữ liệu lượt đã thay đổi. Tải lại dữ liệu mới nhất trước khi tiếp tục.' : !active ? 'Lượt đã kết thúc nên không thể ghi thêm thao tác.' : null
+  const missingCupReason = !cup ? 'Chuẩn bị cốc ' + selectedCupId + ' trước khi thao tác.' + (projection?.phase !== 'setup' ? ' Mẻ đã chạy; chọn cốc đã chuẩn bị hoặc bắt đầu mẻ mới.' : '') : null
+  const prepareReason = lockReason ?? (projection?.phase !== 'setup' ? 'Mẻ đã bắt đầu khuấy nên đã khóa chuẩn bị. Chọn cốc đã có để đo, hoặc bắt đầu mẻ mới để đổi pH/thêm cốc.' : cup ? 'Cốc ' + selectedCupId + ' đã được chuẩn bị. Chọn cốc khác nếu muốn thử pH khác.' : null)
+  const doseReason = lockReason ?? (projection?.phase !== 'setup' ? 'Mẻ đã bắt đầu khuấy nên đã khóa liều phèn. Bắt đầu mẻ mới nếu muốn thử liều khác.' : missingCupReason ?? (!increments.length ? 'Cốc đã đạt liều tối đa 250 mg/L. Chọn cốc khác hoặc tiếp tục Khuấy & lắng.' : null))
+  const batchReason = lockReason ?? (!projection?.initialMeasurement?.valid ? 'Cần đo mẫu ban đầu trước khi chạy khuấy.' : !projection.cups.length ? 'Chuẩn bị ít nhất một cốc trước khi chạy khuấy.' : !batchReady ? 'Cần cấp ít nhất 50 mg/L cho cốc ' + projection.cups.filter(c => c.doseMgL < JAR_PROFILE.minDoseMgL).map(c => c.id).join(', ') + '.' : null)
   const currentStep = !projection?.initialMeasurement?.valid ? 0 : projection.phase === 'setup' ? (cup ? 2 : 1) : projection.phase === 'rapid' || projection.phase === 'slow' ? 3 : 4
   const steps = [['baseline', 'Đo mẫu đầu'], ['prepare', 'Chuẩn bị cốc'], ['dose', 'Cấp phèn'], ['program', 'Khuấy & lắng'], ['results', 'Đo & ghi kết quả']] as const
 
@@ -467,7 +473,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
     <div className={styles.shelfHelp}>
       <p className={styles.shelfNote}>Mẫu tổng hợp dùng để học tập. {storageMode === 'local' ? 'Lượt này lưu trên trình duyệt.' : 'Lượt này lưu trong tài khoản.'}</p>
       <button ref={tourTrigger} type="button" className={styles.guideButton} onClick={() => setTourOpen(true)}><GuideIcon />Hướng dẫn thao tác</button>
-      <Link className={styles.theoryLink} href={guideBaseHref} target="_blank" rel="noopener noreferrer"><TheoryIcon /><span>Lý thuyết & cách làm bài — mở tab mới</span></Link>
+      <Link className={styles.theoryLink} href={guideBaseHref} target="_blank" rel="noopener noreferrer"><TheoryIcon /><span>Lý thuyết & cách làm bài</span></Link>
       <details><summary><SourcesIcon />Nguồn & giới hạn</summary>
         <p>Chỉ áp dụng cho hồ sơ mẫu, pH, liều và chương trình đã khóa. Hình ảnh hạt không dùng để suy ra hiệu suất.</p>
         <a href={'https://doi.org/' + JAR_PROFILE.sourceDoi} target="_blank" rel="noopener noreferrer">Nghiên cứu dùng xây dựng mô hình — mở tab mới <ArrowRightIcon /></a>
@@ -528,7 +534,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
         <OperationHelp topic={JAR_OPERATION_HELP.baseline} guideBaseHref={guideBaseHref} />
         <div className={styles.measurement}><span className={styles.measurementLabel}>Độ đục mẫu chưa xử lý</span><strong data-testid="jar-baseline-value">{projection.initialMeasurement ? readingLabel(projection.initialMeasurement) : 'Chưa đo'}</strong></div>
         <p className={styles.limit}>Đo một lần để làm mốc tính hiệu suất cho tất cả cốc.</p>
-        <button type="button" className={styles.primary} disabled={locked || !!projection.initialMeasurement || projection.phase !== 'setup'} onClick={() => submit('measure_initial')}>Đo mẫu ban đầu</button>
+        <ActionButton className={styles.primary} reason={lockReason ?? (projection.initialMeasurement ? 'Mẫu ban đầu đã được đo. Số đo này dùng chung cho cả mẻ.' : projection.phase !== 'setup' ? 'Mẻ đã chạy nên đã khóa phép đo ban đầu. Bắt đầu mẻ mới để đo lại.' : null)} reasonClassName={styles.actionReason} onClick={() => submit('measure_initial')}>Đo mẫu ban đầu</ActionButton>
       </ControlGroup>
       <ControlGroup id="prepare" title="Chuẩn bị mẫu" summary={cup ? '0,5 L · pH đầu ' + cup.initialPh + ' · Đã chuẩn bị' : '0,5 L · Chọn pH ban đầu'} open={group === 'prepare'} onToggle={() => setGroup(group === 'prepare' ? null : 'prepare')}>
         <OperationHelp topic={JAR_OPERATION_HELP.prepare} guideBaseHref={guideBaseHref} />
@@ -537,7 +543,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
             {JAR_PROFILE.availableInitialPh.map((ph) => <option key={ph} value={ph}>{ph}</option>)}
           </select></label>
         <div className={styles.sampleVolume}><span>Mẫu / dung tích cốc</span><strong>0,5 L / 1 L</strong></div>
-        <button className={styles.primary} disabled={locked || !!cup || projection.phase !== 'setup'} onClick={() => submit('prepare_cup', { cupId: selectedCupId, initialPh })}>Chuẩn bị cốc {selectedCupId}</button>
+        <ActionButton className={styles.primary} reason={prepareReason} reasonClassName={styles.actionReason} onClick={() => submit('prepare_cup', { cupId: selectedCupId, initialPh })}>Chuẩn bị cốc {selectedCupId}</ActionButton>
         {projection.phase !== 'setup' && <p className={styles.limit}>Mẻ đã chạy: không thêm cốc hoặc đổi pH. Chọn cốc đã chuẩn bị để đo và ghi kết quả.</p>}
       </ControlGroup>
       <ControlGroup id="dose" title="Cấp phèn" summary={cup ? 'Tổng liều ' + cup.doseMgL + ' mg/L' : 'Chuẩn bị cốc trước khi cấp'} open={group === 'dose'} onToggle={() => setGroup(group === 'dose' ? null : 'dose')}>
@@ -548,7 +554,7 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
             {increments.map((n) => <option key={n} value={n}>{n}</option>)}
           </select></label>
         {cup && increments.length > 0 && <p className={styles.dosePreview}><span>Sau khi thêm</span><strong>{cup.doseMgL + increment} mg/L</strong></p>}
-        <button className={styles.primary} disabled={locked || !cup || projection.phase !== 'setup' || !increments.length} onClick={() => submit('add_coagulant', { cupId: selectedCupId, incrementMgL: increment }, { incrementMgL: 'mg/L' })}>Thêm {increment} mg/L vào cốc {selectedCupId}</button>
+        <ActionButton className={styles.primary} reason={doseReason} reasonClassName={styles.actionReason} onClick={() => submit('add_coagulant', { cupId: selectedCupId, incrementMgL: increment }, { incrementMgL: 'mg/L' })}>Thêm {increment} mg/L vào cốc {selectedCupId}</ActionButton>
         <p className={styles.limit}>{projection.phase !== 'setup' ? 'Đã khóa liều khi bắt đầu khuấy' : increments.length ? 'Tổng liều tối đa 250 mg/L' : 'Đã đạt liều tối đa'}</p>
       </ControlGroup>
       <ControlGroup id="program" title="Khuấy & lắng" summary={projection.phase === 'setup' ? 'Ba pha cố định · Chung cho dàn cốc' : PHASE_NAME[projection.phase]} open={group === 'program'} onToggle={() => setGroup(group === 'program' ? null : 'program')}>
@@ -562,19 +568,24 @@ function JarWorkbenchSession({ attemptId, invalidAttempt = false, storageMode, o
           </li>
         })}</ol>
         <p className={styles.limit}>Chạy chung {projection.cups.length} cốc{projection.cups.length > 0 && ': ' + projection.cups.map(c => c.id).join(', ')} · Thời gian mô phỏng</p>
-        {projection.phase === 'setup' && !batchReady && <p className={styles.batchNotice}>{!projection.initialMeasurement?.valid ? 'Cần đo mẫu ban đầu. ' : ''}{!projection.cups.length ? 'Chuẩn bị ít nhất một cốc.' : projection.cups.some(c => c.doseMgL < JAR_PROFILE.minDoseMgL) ? 'Cần cấp ít nhất 50 mg/L cho cốc ' + projection.cups.filter(c => c.doseMgL < JAR_PROFILE.minDoseMgL).map(c => c.id).join(', ') + '.' : ''}</p>}
-        {nextPhase ? <button className={styles.primary} disabled={locked || (projection.phase === 'setup' && !batchReady)} aria-label={'Chạy pha ' + PHASE_NAME[nextPhase] + ' (' + JAR_PROFILE.phases[nextPhase].durationSeconds + ' giây mô phỏng)'} onClick={() => projection.phase === 'setup' ? setProgramConfirmOpen(true) : submit('run_phase', { phase: nextPhase })}>Chạy {PHASE_NAME[nextPhase].toLowerCase()} <ArrowRightIcon /></button> : <p>Đã lắng xong cả mẻ. Chọn từng cốc để đo; đo một cốc không khóa các cốc khác.</p>}
+        {projection.phase === 'setup' && !batchReady && <div className={styles.recoveryActions}>
+          {!projection.initialMeasurement?.valid&&<button type="button" className={styles.button} onClick={()=>setGroup('baseline')}>Đi tới Đo mẫu ban đầu</button>}
+          {!projection.cups.length&&<button type="button" className={styles.button} onClick={()=>setGroup('prepare')}>Đi tới Chuẩn bị mẫu</button>}
+          {projection.cups.filter(c=>c.doseMgL<JAR_PROFILE.minDoseMgL).map(c=><button key={c.id} type="button" className={styles.button} onClick={()=>{selectCup(c.id);setGroup('dose')}}>Cấp phèn cho cốc {c.id}</button>)}
+        </div>}
+        {nextPhase ? <ActionButton className={styles.primary} reason={projection.phase==='setup'?batchReason:lockReason} reasonClassName={styles.actionReason} aria-label={'Chạy pha ' + PHASE_NAME[nextPhase] + ' (' + JAR_PROFILE.phases[nextPhase].durationSeconds + ' giây mô phỏng)'} onClick={() => projection.phase === 'setup' ? setProgramConfirmOpen(true) : submit('run_phase', { phase: nextPhase })}>Chạy {PHASE_NAME[nextPhase].toLowerCase()} <ArrowRightIcon /></ActionButton> : <p>Đã lắng xong cả mẻ. Chọn từng cốc để đo; đo một cốc không khóa các cốc khác.</p>}
       </ControlGroup>
       <ControlGroup id="results" title="Đo & ghi kết quả" summary="NTU cuối · Đáp số · Phương án nộp" open={group === 'results'} onToggle={() => setGroup(group === 'results' ? null : 'results')}>
         <OperationHelp topic={JAR_OPERATION_HELP.results} guideBaseHref={guideBaseHref} />
         <div className={styles.measurement} data-testid="jar-selected-reading"><span className={styles.measurementLabel}>Độ đục cuối · Cốc {selectedCupId}</span><strong>{recent ? readingLabel(recent) : 'Chưa đo'}</strong>{recent && <span>{readingNote(recent)}</span>}</div>
-        <button className={styles.button} disabled={locked || !cup} onClick={() => submit('measure_final', { cupId: selectedCupId })}>Đo độ đục cuối cốc {selectedCupId}</button>
+        <ActionButton className={styles.button} reason={lockReason??missingCupReason} reasonClassName={styles.actionReason} onClick={() => submit('measure_final', { cupId: selectedCupId })}>Đo độ đục cuối cốc {selectedCupId}</ActionButton>
+        {cup&&projection.phase!=='settling'&&<p className={styles.actionReason}>Đo lúc này sẽ được lưu là N/A vì chưa hoàn tất khuấy nhanh → khuấy chậm → lắng. Bạn có thể tiếp tục quy trình rồi đo lại.</p>}
         <div className={styles.resultDivider} />
         <label className={styles.inputField} htmlFor="jar-removal">Phần trăm giảm đục tự tính (%)
           <input id="jar-removal" type="number" inputMode="decimal" step="any" placeholder="Nhập đáp số của bạn" value={answerInput} disabled={locked || !cup} onChange={(e) => setAnswerDrafts((old) => ({ ...old, [selectedCupId]: e.target.value }))} /></label>
-        <button className={styles.button} disabled={locked || !cup || answerInput.trim() === '' || !Number.isFinite(Number(answerInput))} onClick={() => submit('record_result', { cupId: selectedCupId, removalPercent: Number(answerInput) })}>Ghi đáp số cốc {selectedCupId}</button>
+        <ActionButton className={styles.button} reason={lockReason??missingCupReason??(!answerInput.trim()||!Number.isFinite(Number(answerInput))?'Nhập đáp số tự tính là một số trước khi ghi kết quả.':null)} reasonClassName={styles.actionReason} onClick={() => submit('record_result', { cupId: selectedCupId, removalPercent: Number(answerInput) })}>Ghi đáp số cốc {selectedCupId}</ActionButton>
         <p>Đáp số đã lưu: {cup?.submittedRemovalPercent === null || !cup ? 'N/A' : cup.submittedRemovalPercent + ' %'}</p>
-        <button className={styles.primary} disabled={locked || !cup} aria-label={'Chọn cốc ' + selectedCupId + ' làm phương án nộp'} aria-pressed={projection.selectedCupId === selectedCupId} onClick={() => submit('select_result', { cupId: selectedCupId })}>{projection.selectedCupId === selectedCupId ? <><CheckCircleIcon />Đã chọn cốc {selectedCupId}</> : 'Dùng cốc ' + selectedCupId + ' để nộp'}</button>
+        <ActionButton className={styles.primary} reason={lockReason??missingCupReason} reasonClassName={styles.actionReason} aria-label={'Chọn cốc ' + selectedCupId + ' làm phương án nộp'} aria-pressed={projection.selectedCupId === selectedCupId} onClick={() => submit('select_result', { cupId: selectedCupId })}>{projection.selectedCupId === selectedCupId ? <><CheckCircleIcon />Đã chọn cốc {selectedCupId}</> : 'Dùng cốc ' + selectedCupId + ' để nộp'}</ActionButton>
         <p className={styles.selectionSummary}><span>Phương án nộp</span><strong data-testid="jar-submitted-cup">{projection.selectedCupId ? 'Cốc ' + projection.selectedCupId : 'Chưa chọn'}</strong></p>
       </ControlGroup>
       <p className={styles.submissionHint}>Nộp bài sẽ khóa lượt, kể cả khi thiếu dữ liệu.</p>

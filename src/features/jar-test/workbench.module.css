@@ -258,6 +258,8 @@
 .historyList time { margin-left:auto; color:var(--ink-muted); font-size:.7rem; }
 .historyIndex { display:grid; place-items:center; background:#edf4f7; min-width:25px; height:25px; border-radius:5px; color:var(--ink-muted); }
 .readonly, .completed { background:#f0f7f8; border:1px solid #d7e6e9; border-radius:10px; padding:16px; }
+.groupBody .actionReason { margin:0; color:#77552d; font-size:.75rem; line-height:1.65; overflow-wrap:anywhere; }
+.recoveryActions { display:grid; gap:8px; }
 .readonly h3 { margin:0 0 8px; font-size:1rem; }
 .readonly p, .completed p { font-size:.8rem; color:var(--ink-muted); }
 .readonly .button { margin:4px 0; width:100%; }

@@ -53,3 +53,7 @@ Nguồn/đích cùng cập nhật dù cue bị ngắt; không mất cue khi thao
 Verdict: passes assigned local UI scope, tự review theo quy định không subagent. Phần source/target bị cắt đã có RED→GREEN; không còn finding chặn bản local. SVG stroke/clip có thể repaint; không tuyên bố 60fps trên thiết bị thật. Không kiểm chứng thực nghiệm mô hình hóa học. Không sửa engine/session/projection/API/database, legacy release, báo cáo, Jar Test, landing hoặc dependency. Không chạy full suite/production build/CI vì chưa merge hay phát hành.
 
 Đã giữ commit Jar Test được người dùng duyệt tại `94ac2b0`; patch extraction hiện ở nhánh riêng, chưa commit/push/merge/deploy, chờ người dùng xem bản local: `http://localhost:3004/simulate/acid-base-extraction`.
+
+## Mốc tiếp theo
+
+Người dùng đã duyệt animation; đã commit thành `3b60dcf`. Nhiệm vụ workflow và yêu cầu tích hợp develop/main tiếp theo được ghi tại `2026-10-16-lab-workflow-clarity.md`.

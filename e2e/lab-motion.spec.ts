@@ -60,13 +60,17 @@ for (const reduced of [false, true]) test('extraction transfer explains both ves
   if (isMobile) await page.waitForTimeout(3000) // The explanation must survive time spent in controls.
   await pane(page, 'Mô phỏng')
   const scene = page.getByTestId('extraction-transfer-scene')
-  await expect(scene).toBeVisible()
-  await expect(scene.locator('[data-vessel="S"]')).toHaveCount(1)
-  await expect(scene.locator('[data-vessel="F"]')).toHaveCount(1)
   await expect(page.getByTestId('extraction-current-mass')).toHaveText('Chưa đo')
   const stream = page.getByTestId('extraction-liquid-stream')
-  if (reduced) expect(await scene.locator('[data-vessel="S"]').evaluate(el => getComputedStyle(el).animationName)).toBe('none')
-  {
+  if (reduced) {
+    await expect(page.getByTestId('extraction-vessel-F')).toContainText('40 mL')
+    await expect(page.getByTestId('extraction-scene')).toHaveAttribute('data-operation', 'idle')
+    await expect(scene).toHaveCount(0)
+    expect(await page.getByTestId('extraction-scene').evaluate(node => node.getAnimations({ subtree: true }).filter(animation => animation.playState === 'running').length)).toBe(0)
+  } else {
+    await expect(scene).toBeVisible()
+    await expect(scene.locator('[data-vessel="S"]')).toHaveCount(1)
+    await expect(scene.locator('[data-vessel="F"]')).toHaveCount(1)
     await scene.scrollIntoViewIfNeeded()
     await expect.poll(() => stream.evaluate(el => getComputedStyle(el).animationName)).not.toBe('none')
     const levels = await scene.evaluate(element => {
@@ -92,14 +96,24 @@ for (const reduced of [false, true]) test('extraction transfer explains both ves
   await page.getByLabel('Thể tích dung dịch (mL)', { exact: true }).fill('20')
   await page.getByRole('button', { name: 'Thêm 20 mL vào F', exact: true }).click()
   await pane(page, 'Mô phỏng')
-  await expect(page.getByTestId('extraction-add-stream')).toBeVisible()
+  if (reduced) {
+    await expect(page.getByTestId('extraction-vessel-F')).toContainText('60 mL')
+    await expect(page.getByTestId('extraction-scene')).toHaveAttribute('data-operation', 'idle')
+    await expect(page.getByTestId('extraction-add-stream')).toHaveCount(0)
+  } else await expect(page.getByTestId('extraction-add-stream')).toBeVisible()
   await expect(scene).toHaveCount(0)
   await group(page, 'program')
   for (const label of ['Trộn', 'Xả áp', 'Để phân lớp']) await page.getByRole('button', { name: label, exact: true }).click()
   await transfer(page, 'F', 'S', 'aqueous', '10')
   await pane(page, 'Mô phỏng')
-  await expect(scene).toBeVisible()
-  await expect(scene).toContainText('F → S')
+  if (reduced) {
+    await expect(page.getByTestId('extraction-vessel-F')).toContainText('50 mL')
+    await expect(page.getByTestId('extraction-vessel-S')).toContainText('10 mL')
+    await expect(page.getByTestId('extraction-scene')).toHaveAttribute('data-operation', 'idle')
+  } else {
+    await expect(scene).toBeVisible()
+    await expect(scene).toContainText('F → S')
+  }
   await pane(page, 'Sổ đo')
   await expect(page.getByText('Bản lưu 6', { exact: true })).toBeVisible()
   await page.reload(); await pane(page, 'Mô phỏng')
