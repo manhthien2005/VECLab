@@ -1,0 +1,10 @@
+.help { min-width:0; }
+.trigger { display:flex; align-items:center; gap:8px; max-width:100%; min-height:44px; padding:6px 0; border:0; background:transparent; color:var(--accent-hover); font:inherit; font-size:.8rem; font-weight:650; line-height:1.5; text-align:left; cursor:pointer; }
+.trigger svg { flex:0 0 17px; width:17px; height:17px; }
+.trigger:hover, .link:hover { text-decoration:underline; text-underline-offset:3px; }
+.content { padding:12px 14px 4px; border:1px solid var(--border); border-radius:8px; background:var(--surface-2); color:var(--ink); font-size:.8rem; line-height:1.75; overflow-wrap:anywhere; }
+.content[hidden] { display:none; }
+.content ol { margin:0; padding-left:18px; }
+.content li + li { margin-top:8px; }
+.link { display:inline-flex; align-items:center; min-height:44px; margin-top:4px; color:var(--accent-hover); font-size:.8rem; font-weight:600; text-underline-offset:3px; }
+.trigger:focus-visible, .link:focus-visible { outline:3px solid var(--accent); outline-offset:3px; border-radius:3px; }

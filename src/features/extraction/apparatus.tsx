@@ -1,9 +1,10 @@
 'use client'
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { ExtractionActionSummary, ExtractionProjection, ExtractionReportSnapshot } from '@/application/scenarios/extraction-projection.js'
 import type { VesselId } from '@/domain/experiments/acid-base-extraction/model.js'
-import { VesselArt, liquidLayout, type VisibleVessel } from './vessel-art.js'
+import { VesselArt, type VisibleVessel } from './vessel-art.js'
 import styles from './apparatus.module.css'
+import { MotionScene, EXTRACTION_MOTION_MS, type ExtractionMotion } from './motion-scene.js'
 import { extractionActionLabel } from './action-label.js'
 
 export const VESSEL_NAMES:Record<VesselId,string>={S:'Bình mẫu',F:'Phễu chiết',R1:'Bình thu 1',R2:'Bình thu 2',R3:'Bình thu 3',W:'Bình thải'}
@@ -11,6 +12,19 @@ const ROLES:Record<VesselId,string>={S:'Giữ mẫu và xử lý dịch chiết'
 type Distribution=ExtractionReportSnapshot['distribution']
 type Reading=ExtractionProjection['readings'][number]
 const number=(value:number,digits=1)=>value.toLocaleString('vi-VN',{maximumFractionDigits:digits})
+const EXPLANATIONS:Record<string,string>={
+  add_reagent:'Dung dịch được cấp vào bình; mực dịch tăng theo thể tích đã thêm. Nếu xuất hiện chất rắn, đó là quan sát định tính của mẫu.',
+  mix:'Hai pha được trộn để tiếp xúc. Chưa thu dịch khi chưa xả áp và để phân lớp.',
+  vent:'Đã ghi nhận thao tác xả áp. Tiếp tục để phân lớp để quan sát hai lớp riêng.',
+  settle:'Trong hồ sơ này, hữu cơ nằm trên và nước nằm dưới. Đường ranh giới ứng với thể tích của từng pha.',
+  transfer:'Bình nguồn vơi và bình nhận dâng theo lượng dịch đã chuyển. Phần không được chọn vẫn giữ ở nguồn.',
+  filter:'Thu chất rắn sang bình nhận cùng tối đa 0,5 mL dịch lưu. Phần lớn dịch lọc giữ ở bình nguồn theo quy ước bài này.',
+  evaporate:'Dung môi hữu cơ được loại khỏi bình và ghi vào phần dung môi thu hồi. Chất rắn chỉ hiện khi mẫu có rắn theo mô hình.',
+  dry:'Dịch lưu trên mẫu được loại; trạng thái đã làm khô không thay thế phép cân.',
+  measure:'Màn hình chỉ hiện số đo vừa được lưu. pH không có pha nước hiển thị N/A; kết quả cân có thể gồm cả dịch còn lưu.',
+  record_product:'Đã lưu khai báo của bạn. Thu hồi và độ tinh khiết được đối chiếu sau khi nộp bài.',
+  complete:'Lượt đã khóa; số đo và thao tác được giữ trong báo cáo đã nộp.',
+}
 function readingText(reading:Reading|undefined,unit=''){return !reading?'Chưa đo':reading.value===null?'N/A':number(reading.value,2)+(unit?' '+unit:'')}
 function vesselStatus(v:VisibleVessel){
   if(v.waterMl+v.organicMl===0)return v.solidPresent?v.dry?'Mẫu rắn đã làm khô':'Có chất rắn':'Bình trống'
@@ -34,46 +48,51 @@ export function VesselInfo({projection,id,distribution}:{projection:ExtractionPr
   </>
 }
 
-function FocusScene({projection,vessel,operation}:{projection:ExtractionProjection;vessel:VisibleVessel;operation:string}) {
-  const uid=useId(),last=projection.history.at(-1),receiver=projection.vessels.find(v=>v.id===last?.to&&v.id!==vessel.id)
-  const total=vessel.waterMl+vessel.organicMl
-  const liquid=liquidLayout(vessel)
-  const organicY=-1+(liquid.bottom-liquid.height+liquid.organic/2)*270/250
-  const waterY=-1+(liquid.bottom-liquid.water/2)*270/250
-  return <svg viewBox="0 0 560 280" aria-hidden="true" className={styles.sceneArt}>
-    <defs><linearGradient id={uid+'steel'} x1="0" x2="1"><stop stopColor="#8ba5b4"/><stop offset=".35" stopColor="#dce8ef"/><stop offset=".7" stopColor="#a5bbc8"/><stop offset="1" stopColor="#7c99aa"/></linearGradient></defs>
-    <ellipse cx="285" cy="260" rx="158" ry="11" fill="#dce7ee" opacity=".55"/>
-    <path d="M82 268H478" stroke="#c7d8e3" strokeWidth="2"/>
-    {vessel.id==='F'&&<g>
-      <rect x="169" y="15" width="9" height="234" rx="3" fill={'url(#'+uid+'steel)'}/>
-      <path d="M176 74H251" stroke="#8ca6b5" strokeWidth="7"/>
-      <rect x="224" y="66" width="56" height="15" rx="5" fill="#698b9e"/>
-      <rect x="143" y="246" width="165" height="13" rx="5" fill={'url(#'+uid+'steel)'}/>
-      <rect x="150" y="257" width="150" height="4" rx="2" fill="#668696"/>
-    </g>}
-    <svg x="192" y="-1" width="195" height="270"><VesselArt vessel={vessel} motion={operation}/></svg>
-    {(vessel.separated||vessel.waterMl===0||vessel.organicMl===0)&&total>0?<g className={operation==='settle'?styles.phaseLabels:undefined} strokeWidth="1" fill="none">
-      {vessel.organicMl>0&&<><path d={`M289 ${organicY}H373L398 101h35`} stroke="#bfa46f"/><circle cx="289" cy={organicY} r="2.5" fill="#c7a975" stroke="none"/><text x="400" y="92" fill="#7c6744" stroke="none" fontSize="11">Pha hữu cơ</text></>}
-      {vessel.waterMl>0&&<><path d={`M289 ${waterY}H373L398 185h35`} stroke="#7cabb4"/><circle cx="289" cy={waterY} r="2.5" fill="#7cabb4" stroke="none"/><text x="400" y="201" fill="#426e7e" stroke="none" fontSize="11">Pha nước</text></>}
-    </g>:total>0?<text x="398" y="135" fill="#547989" fontSize="11">Chờ phân lớp</text>:!vessel.solidPresent?<g><path d="M347 140H390" stroke="#a2bac9"/><text x="401" y="144" fill="#617e90" fontSize="11">Chưa có mẫu</text></g>:null}
-    {(operation==='transfer'||operation==='filter')&&receiver&&<g>
-      <svg x="420" y="194" width="58" height="80"><VesselArt vessel={receiver} compact/></svg>
-      <path className={styles.transferFlow} d="M330 222q60-55 108-8" fill="none" stroke="#3f9da6" strokeWidth="2" strokeDasharray="4 5"/>
-      <text x="450" y="184" textAnchor="middle" fill="#00656a" fontSize="11">Thu vào {receiver.id}</text>
-    </g>}
-    {(operation==='evaporate'||operation==='dry')&&<path className={styles.vapour} d="M278 27q-8-10 0-19m20 19q8-10 0-19" fill="none" stroke="#9bb7c4" strokeWidth="2"/>}
-    {operation==='vent'&&<path className={styles.ventPuff} d="M289 8q-12-12-22-5m23 2q9-13 20-10" fill="none" stroke="#94b4c1" strokeWidth="2"/>}
-  </svg>
-}
-
-export function ExtractionApparatus({projection,selected,onSelect,motion,latestAction,distribution}:{
-  projection:ExtractionProjection;selected:VesselId;onSelect:(id:VesselId)=>void;motion:string;latestAction?:ExtractionActionSummary|undefined;distribution?:Distribution|undefined
+export function ExtractionApparatus({projection,selected,onSelect,motion,onMotionEnd,latestAction,distribution}:{
+  projection:ExtractionProjection;selected:VesselId;onSelect:(id:VesselId)=>void;motion:ExtractionMotion|null;onMotionEnd:(key:string)=>void;latestAction?:ExtractionActionSummary|undefined;distribution?:Distribution|undefined
 }) {
   const [inspect,setInspect]=useState<{id:VesselId;anchor:'card'|'scene'}|null>(null),uid=useId()
-  const vessel=projection.vessels.find(v=>v.id===selected)!,parts=motion.split('-'),operation=parts[1]===selected?(parts[0]??'idle'):'idle'
+  const sceneRef=useRef<HTMLDivElement>(null)
+  const [visible,setVisible]=useState(true),[documentVisible,setDocumentVisible]=useState(true)
+  const clock=useRef({key:'',remaining:EXTRACTION_MOTION_MS})
+  const vessel=projection.vessels.find(v=>v.id===selected)!
+  const cue=motion?.from===selected?motion:null,operation=cue?.type??'idle'
+  useEffect(()=>{
+    const observer=typeof IntersectionObserver==='undefined'?null:new IntersectionObserver(([entry])=>setVisible(!!entry?.isIntersecting))
+    if(sceneRef.current)observer?.observe(sceneRef.current)
+    const update=()=>setDocumentVisible(document.visibilityState!=='hidden')
+    update();document.addEventListener('visibilitychange',update)
+    return()=>{observer?.disconnect();document.removeEventListener('visibilitychange',update)}
+  },[])
+  const cueKey=cue?.key
+  useEffect(()=>{
+    if(!cueKey)return
+    const preference=matchMedia('(prefers-reduced-motion: reduce)')
+    const settle=()=>{if(preference.matches)onMotionEnd(cueKey)}
+    preference.addEventListener('change',settle)
+    if(clock.current.key!==cueKey)clock.current={key:cueKey,remaining:EXTRACTION_MOTION_MS}
+    const current=clock.current
+    settle()
+    const started=performance.now(),playing=visible&&documentVisible&&!preference.matches
+    const timer=playing?setTimeout(()=>onMotionEnd(cueKey),current.remaining):undefined
+    return()=>{
+      clearTimeout(timer);preference.removeEventListener('change',settle)
+      if(playing)current.remaining=Math.max(0,current.remaining-(performance.now()-started))
+    }
+  },[cueKey,visible,documentVisible,onMotionEnd])
   const ph=projection.readings.filter(r=>r.vesselId===selected&&r.kind==='ph').at(-1)
   const mass=projection.readings.filter(r=>r.vesselId===selected&&r.kind==='mass').at(-1)
   const lastChange=projection.history.filter(h=>h.from===selected||h.to===selected).at(-1)?.sequence??0
+  const volumeChanges=cue?projection.vessels.flatMap(current=>{
+    const previous=cue.previous.find(item=>item.id===current.id)
+    const before=previous?previous.waterMl+previous.organicMl:0,after=current.waterMl+current.organicMl
+    return Math.abs(before-after)>1e-8?[{id:current.id,before,after}]:[]
+  }):[]
+  const actedVessel=projection.vessels.find(item=>item.id===(latestAction?.parameters.vesselId??latestAction?.parameters.from))
+  const onePhase=actedVessel&&!(actedVessel.waterMl>0&&actedVessel.organicMl>0)
+  const explanation=latestAction&&(onePhase&&['mix','settle'].includes(latestAction.actionType)
+    ?'Bình hiện chỉ có một pha. Hai lớp riêng chỉ xuất hiện khi có cả nước và dung môi hữu cơ.'
+    :EXPLANATIONS[latestAction.actionType])
   useEffect(()=>{
     const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')setInspect(null)}
     const outside=(event:PointerEvent)=>{if(event.target instanceof Element&&!event.target.closest('[data-vessel-inspect]'))setInspect(null)}
@@ -81,14 +100,20 @@ export function ExtractionApparatus({projection,selected,onSelect,motion,latestA
     return()=>{document.removeEventListener('keydown',escape);document.removeEventListener('pointerdown',outside)}
   },[])
   const tip=(id:VesselId,anchor:'card'|'scene')=>inspect?.id===id&&inspect.anchor===anchor?<div role="tooltip" aria-label={'Mẫu trong bình '+id} id={uid+'-'+id+'-'+anchor} className={styles.sampleTip+' '+(anchor==='scene'?styles.sceneTip:styles.cardTip)}><VesselInfo projection={projection} id={id} distribution={distribution}/></div>:null
-  return <section className={styles.stage} aria-label="Khu vực thực hành chiết tách">
+  return <section className={styles.stage} data-paused={!visible||!documentVisible} aria-label="Khu vực thực hành chiết tách">
     <div className={styles.stageHeading}><div><h2>Khu vực thực hành</h2><p><strong>{selected} · {VESSEL_NAMES[selected]}</strong><span>{ROLES[selected]}</span></p></div><span className={styles.phaseTag} data-filled={vessel.waterMl+vessel.organicMl>0||vessel.solidPresent}>{vesselStatus(vessel)}</span></div>
-    <div className={styles.scene} data-operation={operation} data-vessel-inspect onPointerEnter={event=>{if(event.pointerType==='mouse')setInspect({id:selected,anchor:'scene'})}} onPointerLeave={event=>{if(event.pointerType==='mouse')setInspect(null)}}>
-      <button type="button" className={styles.sceneFocus} aria-label={'Xem mẫu trong bình '+selected} aria-describedby={inspect?.anchor==='scene'&&inspect.id===selected?uid+'-'+selected+'-scene':undefined} onClick={()=>setInspect({id:selected,anchor:'scene'})} onFocus={()=>setInspect({id:selected,anchor:'scene'})} onBlur={()=>setInspect(null)}><FocusScene key={motion} projection={projection} vessel={vessel} operation={operation}/></button>
+    <div ref={sceneRef} className={styles.scene} data-testid="extraction-scene" data-operation={operation} data-cue-key={cueKey??''} data-vessel-inspect onPointerEnter={event=>{if(event.pointerType==='mouse')setInspect({id:selected,anchor:'scene'})}} onPointerLeave={event=>{if(event.pointerType==='mouse')setInspect(null)}}>
+      <button type="button" className={styles.sceneFocus} aria-label={'Xem mẫu trong bình '+selected} aria-describedby={inspect?.anchor==='scene'&&inspect.id===selected?uid+'-'+selected+'-scene':undefined} onClick={()=>setInspect({id:selected,anchor:'scene'})} onFocus={()=>setInspect({id:selected,anchor:'scene'})} onBlur={()=>setInspect(null)}><MotionScene key={cue?.key??selected} vessel={vessel} vessels={projection.vessels} motion={cue} reading={cue?.kind==='mass'?mass:ph}/></button>
       {tip(selected,'scene')}
     </div>
     <div className={styles.sceneState}><span>{vessel.waterMl>0&&vessel.organicMl>0?<>{vessel.needsMix?'Cần trộn lại':vessel.needsMix===false?'Đã trộn':'Hai pha'} · {vessel.separated?'Hữu cơ ở trên · Nước ở dưới':'Hai pha chưa phân lớp'}</>:vessel.dry?'Mẫu đã làm khô':vessel.solidPresent?'Quan sát thấy chất rắn':vessel.waterMl>0?'Pha nước':vessel.organicMl>0?'Pha hữu cơ':'Bình chưa có mẫu'}</span><small>Màu và chuyển động minh họa trạng thái; không biểu thị thành phần hay tốc độ thực.</small></div>
-    <p className={styles.actionFeedback} role="status" aria-live="polite">{latestAction?`Đã lưu #${latestAction.sequence} · ${extractionActionLabel(latestAction)}`:'Bắt đầu từ S: 40 mL dung môi chứa A, B, N. Chọn F làm bình nhận để chuyển mẫu.'}</p>
+    <div className={styles.phaseLegend} aria-label="Chú giải pha"><span><i className={styles.organicSwatch} aria-hidden="true"/>Pha hữu cơ</span><span><i className={styles.waterSwatch} aria-hidden="true"/>Pha nước</span><span><i className={styles.solidSwatch} aria-hidden="true"/>Chất rắn</span></div>
+    <div className={styles.actionFeedback} role="status" aria-live="polite">
+      <div><strong>{latestAction?`Đã lưu #${latestAction.sequence} · ${extractionActionLabel(latestAction)}`:'S có sẵn 40 mL dung môi chứa mẫu A, B, N'}</strong>
+      <span>{latestAction?explanation:'Mẫu ban đầu là dung dịch hữu cơ. Chọn F làm bình nhận để chuyển mẫu vào phễu chiết.'}</span>
+      {volumeChanges.length>0&&<div className={styles.volumeChanges} data-testid="extraction-volume-change">{volumeChanges.map(change=><span key={change.id}>{change.id}: {number(change.before,2)} → {number(change.after,2)} mL</span>)}</div>}</div>
+      {cue&&<button type="button" className={styles.skipMotion} onClick={()=>onMotionEnd(cue.key)}>Xem trạng thái cuối</button>}
+    </div>
     <div className={styles.readouts}>
       <div><span>Pha hữu cơ</span><strong>{number(vessel.organicMl)} <small>mL</small></strong></div>
       <div><span>Pha nước</span><strong>{number(vessel.waterMl)} <small>mL</small></strong></div>

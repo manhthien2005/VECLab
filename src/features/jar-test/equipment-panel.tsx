@@ -13,7 +13,7 @@ const EQUIPMENT = {
     source: 'https://commons.wikimedia.org/wiki/File:Kaolin.jpg', licenseUrl: 'https://commons.wikimedia.org/wiki/File:Kaolin.jpg#Licensing',
     purpose: 'Mẫu nước đục là đối tượng cần khảo sát. Mỗi cốc nhận cùng thể tích mẫu, còn pH ban đầu được chọn theo các điều kiện có sẵn.',
     facts: [['Thể tích mẫu', JAR_PROFILE.aliquotVolumeL.toLocaleString('vi-VN') + ' L / cốc'], ['Dung tích cốc', JAR_PROFILE.beakerCapacityL + ' L'], ['pH ban đầu', JAR_PROFILE.availableInitialPh.join(' / ')]],
-    steps: ['Chọn một cốc trên dàn hoặc trong bảng Thao tác.', 'Mở Chuẩn bị mẫu, chọn pH rồi bấm Chuẩn bị cốc.', 'Đo mẫu ban đầu trong Sổ đo trước khi chạy chương trình.'],
+    steps: ['Chọn một cốc trên dàn hoặc trong bảng Thao tác.', 'Mở Chuẩn bị mẫu, chọn pH rồi bấm Chuẩn bị cốc.', 'Mở Thao tác → Đo mẫu ban đầu trước khi chạy chương trình.'],
     note: 'pH là điều kiện ban đầu của mẫu đã chuẩn bị sẵn, không phải pH cuối sau xử lý. Không suy độ đục từ ảnh hoặc màu nước.',
   },
   coagulant: {
@@ -33,7 +33,7 @@ const EQUIPMENT = {
     source: 'https://commons.wikimedia.org/wiki/File:Turbidimeters.JPG', licenseUrl: 'https://creativecommons.org/licenses/by-sa/3.0/',
     purpose: 'Đọc độ đục bằng NTU để đối chiếu mẫu ban đầu với từng cốc sau xử lý. Chỉ phép đo đã thực hiện mới có số liệu trong sổ đo.',
     facts: [['Đại lượng đọc', 'Độ đục · NTU'], ['Đo ban đầu', 'Trước khi chạy chương trình'], ['Đo cuối hợp lệ', 'Sau khuấy nhanh, khuấy chậm và lắng']],
-    steps: ['Trong Sổ đo, bấm Đo mẫu ban đầu để lấy số liệu nền.', 'Sau khi chạy đủ ba pha, chọn cốc và mở Đo & ghi kết quả.', 'Bấm Đo độ đục cuối cốc; dùng NTU đầu và cuối hợp lệ để tự tính hiệu suất.'],
+    steps: ['Mở Thao tác → Đo mẫu ban đầu, bấm đo để lấy số liệu nền.', 'Sau khi chạy đủ ba pha, chọn cốc và mở Đo & ghi kết quả.', 'Bấm Đo độ đục cuối cốc; dùng NTU đầu và cuối hợp lệ để tự tính hiệu suất.'],
     note: 'Đo sớm được lưu với N/A, không phải 0 NTU. Bạn có thể đo lại sau khi hoàn tất chương trình; lịch sử vẫn giữ phép đo trước đó.',
   },
 } as const
