@@ -43,7 +43,7 @@ export function ExtractionWorkbench({ attemptId, openReport = false, initialPane
     if(attemptId) {
       void session.load(attemptId as Parameters<typeof session.load>[0]).then(result=>{
         if(cancelled)return
-        if(result?.ok)setView(result.state)
+        if(result?.ok){setView(result.state);setMotion(null)}
         else setError('Không mở được lượt này: dữ liệu không tồn tại hoặc không thuộc hồ sơ chiết tách hiện tại.')
         setLoading(false)
       }).catch(()=>{if(!cancelled){setError('Chưa đọc được dữ liệu lưu trên trình duyệt.');setLoading(false)}})
@@ -54,7 +54,7 @@ export function ExtractionWorkbench({ attemptId, openReport = false, initialPane
     }
     return()=>{cancelled=true}
   },[attemptId,session,router])
-  async function start(){if(lock.current)return;lock.current=true;setBusy(true);setError('');try{const next=await session.start();setLoading(true);router.replace('/simulate/acid-base-extraction?attempt='+next.attemptId)}catch{setError('Chưa tạo được lượt. Kiểm tra quyền lưu dữ liệu trình duyệt rồi thử lại.')}finally{lock.current=false;setBusy(false)}}
+  async function start(){if(lock.current)return;lock.current=true;setBusy(true);setError('');setMotion(null);try{const next=await session.start();setLoading(true);router.replace('/simulate/acid-base-extraction?attempt='+next.attemptId)}catch{setError('Chưa tạo được lượt. Kiểm tra quyền lưu dữ liệu trình duyệt rồi thử lại.')}finally{lock.current=false;setBusy(false)}}
   async function run(type:string,parameters:Record<string,string|number|boolean>={},units:Record<string,string>={},retry=false){
     if(!view || lock.current)return
     const request=retry?pending.current:{id:newUUID(),type,parameters,units,revision:view.revision}
