@@ -2,7 +2,32 @@
 
 import { useCallback, useReducer } from 'react'
 
-import { runWaterTreatmentAction, type WaterTreatmentResult } from '@/app/simulate/water-treatment/actions.js'
+import type {
+  WaterTreatmentAction,
+  WaterTreatmentResult,
+} from '@/app/simulate/water-treatment/actions.js'
+
+/**
+ * WT-10: hook gọi POST /api/water-treatment/run thay vì server action trực tiếp.
+ *
+ * Lý do transport swap: chemistry solver từ `runWaterTreatmentAction` được wrap qua
+ * BFF route (`src/app/api/water-treatment/run/route.ts`) để áp dụng cùng BFF hygiene
+ * (zod.strict body validation, `MAX_ACTION_BODY_BYTES` size guard, `guardedResponse`
+ * turning solver throws thành 500 + không leak message) mà các route khác đã dùng.
+ * Chemistry solver vẫn chạy end-to-end (không mock) — chỉ là cách gọi thay đổi.
+ *
+ * Hợp đồng public của hook (signature + state shape + error message) được giữ nguyên
+ * để workbench UI không cần thay đổi; chỉ swap transport layer.
+ *
+ * Lỗi giờ phân biệt hai dạng:
+ *   - HTTP transport failure (`fetch` reject) → message "Lỗi không xác định" (giữ nguyên
+ *     behavior cũ: caller chỉ thấy string error qua `state.error`).
+ *   - HTTP status không phải 200 → response.json() parse body lấy `error` field (ví dụ
+ *     `body_invalid`, `body_too_large`, `internal_error`) làm message. Solver-bug
+ *     message không bao giờ tới client vì `guardedResponse` đã filter ở server side.
+ */
+
+const RUN_ENDPOINT = '/api/water-treatment/run'
 
 /** Composition mẫu Fe/Zn/Pb (mg/L). */
 export type Composition = { Fe: number; Zn: number; Pb: number }
@@ -72,18 +97,39 @@ export function useWaterTreatmentAttempt() {
 
   const run = useCallback(
     async (
-      action: Parameters<typeof runWaterTreatmentAction>[0]['action'],
+      action: WaterTreatmentAction,
       options?: { dose_mL?: number; volume_mL?: number },
     ): Promise<WaterTreatmentResult | null> => {
       dispatch({ type: 'start-run' })
       try {
-        const result = await runWaterTreatmentAction({
-          action,
-          composition: state.composition,
-          pH: state.pH,
-          dose_mL: options?.dose_mL ?? 0,
-          volume_mL: options?.volume_mL ?? 1000,
+        const response = await fetch(RUN_ENDPOINT, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            action,
+            composition: state.composition,
+            pH: state.pH,
+            dose_mL: options?.dose_mL ?? 0,
+            volume_mL: options?.volume_mL ?? 1000,
+          }),
         })
+
+        if (!response.ok) {
+          // Server side đã giới hạn body chỉ chứa `{ error: <code> }` cho mọi
+          // non-200 (body_invalid / body_not_json / body_too_large / internal_error).
+          // Parse lấy `error` để message hữu ích; fallback nếu body không phải JSON.
+          let message = `HTTP ${response.status}`
+          try {
+            const errBody = (await response.json()) as { error?: unknown }
+            if (typeof errBody.error === 'string') message = errBody.error
+          } catch {
+            // ignore — body parse failed, giữ HTTP status làm message
+          }
+          dispatch({ type: 'run-error', error: message })
+          return null
+        }
+
+        const result = (await response.json()) as WaterTreatmentResult
         dispatch({ type: 'run-complete', result })
         return result
       } catch (err) {

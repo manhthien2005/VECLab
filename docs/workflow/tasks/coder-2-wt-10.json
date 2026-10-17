@@ -1,0 +1,54 @@
+{
+  "v": 1,
+  "kind": "task",
+  "id": "WT-10",
+  "coder": 2,
+  "repo": "manhthien2005/VECLab",
+  "branch": "feature/coder-2-wt-10-api-and-ui-wire",
+  "target": "Manh-water-treatment",
+  "base": "5ef51c198c5f9bb880cad7ece8d0b43e86444ad9",
+  "goal": "Add POST /api/water-treatment/run that wraps the existing runWaterTreatmentAction server action, with zod.strict input validation, no auth (chemistry pure, public per guest mode §10.1), and JSON response matching the WaterTreatmentResult shape. Refactor useWaterTreatmentAttempt to fetch the API instead of calling the server action directly. Keep workbench UI unchanged; only swap the transport layer.",
+  "read": [
+    "AGENTS.md",
+    ".agents/skills/veclab-implement/SKILL.md",
+    "docs/workflow/web-handoff-contract.md",
+    "docs/experiments/water-treatment-spec.md",
+    "src/app/api/profile/route.ts",
+    "src/app/api/_lib/guard.ts",
+    "src/app/api/_lib/respond.ts",
+    "src/app/simulate/water-treatment/actions.ts",
+    "src/features/water-treatment/constants.ts",
+    "src/features/water-treatment/use-water-treatment-attempt.ts",
+    "tests/unit/bff-guards.test.ts"
+  ],
+  "files": [
+    "docs/workflow/tasks/coder-2-wt-10.json",
+    "src/app/api/water-treatment/run/route.ts",
+    "tests/unit/api-water-treatment-run.test.ts",
+    "src/features/water-treatment/use-water-treatment-attempt.ts"
+  ],
+  "accept": [
+    "POST /api/water-treatment/run with valid WaterTreatmentActionInput returns 200 + WaterTreatmentResult JSON",
+    "Returns 400 body_invalid for missing/invalid fields (zod .strict)",
+    "Returns 413 body_too_large if body exceeds MAX_ACTION_BODY_BYTES",
+    "Returns 500 internal_error if solver throws (no detail leak via guardedResponse)",
+    "No chemistry duplication — reuses runWaterTreatmentAction",
+    "No auth required (anonymous callable, public per guest mode §10.1)",
+    "useWaterTreatmentAttempt fetches /api/water-treatment/run instead of importing server action; UI workbench unchanged",
+    "Vitest unit test covers happy path + invalid body path",
+    "typecheck + lint pass; no regression in existing tests"
+  ],
+  "checks": {
+    "unit": "npm test -- tests/unit/api-water-treatment-run.test.ts",
+    "types": "npm run typecheck",
+    "lint": "npx eslint src/app/api/water-treatment src/features/water-treatment/use-water-treatment-attempt.ts tests/unit/api-water-treatment-run.test.ts",
+    "diff": "git diff 5ef51c198c5f9bb880cad7ece8d0b43e86444ad9 --stat"
+  },
+  "notes": [
+    "Out-of-scope: existing pre-existing workbench.tsx unused-var warnings (Composition, SampleRow) — not touched.",
+    "Out-of-scope: tools/research/phreeqc-pin/ untracked dir + no-console warnings.",
+    "Refactor of useWaterTreatmentAttempt is a minimal swap: replace server action call with fetch(). Behavior + state shape + error messages unchanged.",
+    "No new dependency, no new skill, no subagent, no merge to other branch.",
+    "API route mirrors profile/route.ts pattern (guardedResponse + readJson + zod.strict + json). No auth/CSRF because chemistry is pure and anonymous per guest mode §10.1."
+  ]
+}
