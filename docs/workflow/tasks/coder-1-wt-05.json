@@ -1,0 +1,55 @@
+{
+  "v": 1,
+  "kind": "task",
+  "id": "WT-05",
+  "coder": 1,
+  "repo": "manhthien2005/VECLab",
+  "branch": "feature/coder-1-wt-05-replay-and-guard-tests",
+  "target": "Manh-water-treatment",
+  "base": "8c6d747adeba6357f117f6080a8dc67524508a8e",
+  "goal": "Test reinforcement: replay idempotency cho settle/filter (gọi 2 lần trên cùng state phải cho kết quả giống nhau) + pH guard edge cases (pH = 1 → PH_GUARD_BELOW_MIN, pH = 14 → PH_GUARD_ABOVE_MAX) + ensure toàn bộ tests water-treatment hiện có đều PASS.",
+  "read": [
+    "AGENTS.md",
+    "docs/workflow/web-handoff-contract.md",
+    "docs/workflow/parallel-work.md",
+    ".agents/skills/veclab-implement/SKILL.md",
+    "docs/experiments/water-treatment-spec.md",
+    "docs/superpowers/plans/2026-10-17-water-treatment-build-plan.md",
+    "src/app/simulate/water-treatment/actions.ts",
+    "src/features/water-treatment/capacity.ts",
+    "src/features/water-treatment/constants.ts",
+    "src/features/water-treatment/use-water-treatment-attempt.ts",
+    "tests/unit/water-treatment-golden-cases.test.ts",
+    "tests/unit/water-treatment-capacity.test.ts"
+  ],
+  "files": [
+    "tests/unit/water-treatment-replay-and-guard.test.ts",
+    "src/app/simulate/water-treatment/actions.ts"
+  ],
+  "accept": [
+    "File mới tests/unit/water-treatment-replay-and-guard.test.ts với 4 test case độc lập, dùng describe/it của vitest.",
+    "Test 1 (settle idempotent): composition {Fe:5, Zn:5, Pb:0.5} + pH 9.5; gọi runWaterTreatmentAction('settle', ...) lần 1 lấy result A; gọi tiếp lần 2 trên cùng input (composition + pH) lấy result B; expect A.filtrate_mgPerL ≈ B.filtrate_mgPerL (toBeCloseTo 1e-6 cho từng Fe/Zn/Pb) và A.precipitated_mgPerL ≈ B.precipitated_mgPerL. KHÔNG phụ thuộc WT-01 stir/settle/filter impl (chỉ test pure hành vi hiện có).",
+    "Test 2 (filter idempotent): sau khi filter, composition = filtrate của lần trước; gọi filter lần nữa với composition mới này → filtrate mới ≈ composition mới (vì capacity << input), precipitated mới = 0; expect không tăng precipitated cộng dồn.",
+    "Test 3 (pH guard dưới): gọi runWaterTreatmentAction với input.pH = 1.0 (dưới PH_GUARD_MIN=2), action bất kỳ; expect result.pHGuardHit === 'min', result.invalidReasonCodes chứa 'PH_GUARD_BELOW_MIN', result.goalStatus === 'invalid'.",
+    "Test 4 (pH guard trên): gọi runWaterTreatmentAction với input.pH = 14.0 (trên PH_GUARD_MAX=13), action bất kỳ; expect result.pHGuardHit === 'max', result.invalidReasonCodes chứa 'PH_GUARD_ABOVE_MAX', result.goalStatus === 'invalid'.",
+    "Test 5 (pH guard biên dưới pH=2): pH = 2.0 KHÔNG trigger guard (pH nằm trong [2; 13]); expect result.pHGuardHit === null, invalidReasonCodes không chứa PH_GUARD_*, goalStatus không phải 'invalid' (do guard).",
+    "Test 6 (pH guard biên trên pH=13): pH = 13.0 tương tự biên dưới; expect không trigger guard.",
+    "actions.ts: chỉ được sửa nếu test 3-6 lộ bug; nếu không có test fail thì KHÔNG đụng actions.ts (WT-01 đã handle stir/settle/filter).",
+    "Tất cả test file water-treatment hiện có (capacity, golden-cases) + test mới đều PASS với npm run test -- tests/unit/water-treatment-*.test.ts."
+  ],
+  "checks": {
+    "unit": "npm run test -- tests/unit/water-treatment-{capacity,golden-cases,replay-and-guard}.test.ts",
+    "types": "npm run typecheck",
+    "lint": "npm run lint -- tests/unit/water-treatment-replay-and-guard.test.ts src/app/simulate/water-treatment/",
+    "diff": "git diff 8c6d747adeba6357f117f6080a8dc67524508a8e -- tests/unit/water-treatment-replay-and-guard.test.ts src/app/simulate/water-treatment/actions.ts --check"
+  },
+  "notes": [
+    "Base 8c6d747 đã có 2 test file: water-treatment-capacity.test.ts (3-KL cross-check) và water-treatment-golden-cases.test.ts (G1/G2/G3 end-to-end).",
+    "Test mới file water-treatment-replay-and-guard.test.ts (KHÔNG dùng tên water-treatment-mass-balance.test.ts — file đó thuộc WT-01 để tránh trùng tên).",
+    "Không đụng scoring, UI, workbench, scoring.ts.",
+    "Nếu test 3-6 fail do logic guard chưa đúng, fix actions.ts theo cách nhỏ nhất; KHÔNG refactor.",
+    "Test 1-2 idempotency dùng cách gọi hàm 2 lần với cùng input (deterministic) — không cần mock Date.now() hay time.",
+    "Tolerance toBeCloseTo: 1e-6 cho mg/L; goalStatus so sánh trực tiếp (===).",
+    "Result JSON v1 theo docs/workflow/templates/result.json; status chỉ 'pending_review' hoặc 'blocked'."
+  ]
+}
