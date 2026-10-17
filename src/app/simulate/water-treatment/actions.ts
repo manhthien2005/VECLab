@@ -14,7 +14,7 @@
  */
 
 import { capacityAtSaturation } from '@/features/water-treatment/capacity.js'
-import { WT_QCVN_COLUMN_A } from '@/features/water-treatment/constants.js'
+import { WT_MASS_BALANCE_TOLERANCE_PCT, WT_QCVN_COLUMN_A } from '@/features/water-treatment/constants.js'
 
 /** pH guard [2; 13] theo spec §6.4 (ngoài khoảng này solver không đáng tin). */
 const PH_GUARD_MIN = 2
@@ -143,6 +143,31 @@ function deriveGoalStatus(
   return 'failed'
 }
 
+/** Tính mass-balance % theo công thức P0-J (`WT_MASS_BALANCE_TOLERANCE_PCT`).
+ *
+ * `pct = |input - filtrate - precipitated| / max(input, 1e-9) × 100`
+ * cho mỗi nguyên tố Fe/Zn/Pb. Với baseline hydroxide-only hiện hành
+ * (`precipitated = max(0, input - filtrate)`) → pct = 0 cho mọi metal;
+ * check vẫn được wire để guard chống chemistry bug trong tương lai.
+ *
+ * @param input  Composition đầu vào (mg/L).
+ * @param filtrate  Filtrate từ SOLVER (mg/L) — dùng giá trị chemistry, không
+ *   dùng `result.precipitated_mgPerL` (vì filter reset về 0 cho lượt sau,
+ *   không phải giá trị chemistry).
+ * @param precipitated  Precipitated từ SOLVER (mg/L) — luôn `max(0, input - filtrate)`.
+ */
+function computeMassBalancePct(
+  input: { Fe: number; Zn: number; Pb: number },
+  filtrate: { Fe: number; Zn: number; Pb: number },
+  precipitated: { Fe: number; Zn: number; Pb: number },
+): { Fe: number; Zn: number; Pb: number } {
+  return {
+    Fe: (Math.abs(input.Fe - filtrate.Fe - precipitated.Fe) / Math.max(input.Fe, 1e-9)) * 100,
+    Zn: (Math.abs(input.Zn - filtrate.Zn - precipitated.Zn) / Math.max(input.Zn, 1e-9)) * 100,
+    Pb: (Math.abs(input.Pb - filtrate.Pb - precipitated.Pb) / Math.max(input.Pb, 1e-9)) * 100,
+  }
+}
+
 export async function runWaterTreatmentAction(
   input: WaterTreatmentActionInput,
 ): Promise<WaterTreatmentResult> {
@@ -179,41 +204,90 @@ export async function runWaterTreatmentAction(
     invalidReasonCodes.push('PH_GUARD_ABOVE_MAX')
   }
 
-  // Step 3: capacity + filtrate
+  // Step 3: capacity + filtrate (chemistry values, dùng cho mass balance)
   const capacity = capacityAtSaturation(pH)
-  const { capacity_mgPerL, filtrate_mgPerL, precipitated_mgPerL } = computeFiltrate(
-    input.composition,
-    pH,
-  )
+  const {
+    capacity_mgPerL,
+    filtrate_mgPerL,
+    precipitated_mgPerL: chemPrecipitated,
+  } = computeFiltrate(input.composition, pH)
 
-  // Step 4: goal status
+  // Step 4: action-specific composition / precipitated / goalStatus.
+  // - measure-initial-ph / add-acid / add-base / stir:
+  //     composition chưa đổi, chưa tách pha → goalStatus = 'pending'.
+  //     (stir là khuấy đơn thuần; chưa có lắng/lọc nên không có filtrate thật.)
+  // - settle: composition nguồn giữ nguyên; precipitated = chem.precipitated
+  //     (= max(0, input - filtrate) khi input > capacity, ngược lại 0).
+  // - filter: composition mới = filtrate_mgPerL (lấy pha lỏng); precipitated
+  //     reset về 0 cho lượt khuấy/lắng/lọc tiếp theo.
+  // - measure-final: ghi nhận pH cuối; chemistry status theo composition hiện tại.
+  let returnComposition = input.composition
+  let returnPrecipitated = chemPrecipitated
   let goalStatus: WaterTreatmentResult['goalStatus']
   let expectedOutcome: WaterTreatmentResult['expectedOutcome']
+
+  switch (input.action) {
+    case 'measure-initial-ph':
+    case 'add-acid':
+    case 'add-base':
+    case 'stir':
+      returnComposition = input.composition
+      returnPrecipitated = { Fe: 0, Zn: 0, Pb: 0 }
+      goalStatus = 'pending'
+      expectedOutcome = 'success'
+      break
+    case 'settle':
+      returnComposition = input.composition
+      returnPrecipitated = chemPrecipitated
+      goalStatus = deriveGoalStatus(filtrate_mgPerL)
+      expectedOutcome = goalStatus
+      break
+    case 'filter':
+      returnComposition = filtrate_mgPerL
+      returnPrecipitated = { Fe: 0, Zn: 0, Pb: 0 }
+      goalStatus = deriveGoalStatus(filtrate_mgPerL)
+      expectedOutcome = goalStatus
+      break
+    case 'measure-final':
+      returnComposition = input.composition
+      returnPrecipitated = chemPrecipitated
+      goalStatus = deriveGoalStatus(filtrate_mgPerL)
+      expectedOutcome = goalStatus
+      break
+  }
+
+  // Step 5: mass-balance check (P0-J, ±WT_MASS_BALANCE_TOLERANCE_PCT%).
+  // Dùng chemistry values (không dùng returnPrecipitated vì filter reset về 0).
+  // Với baseline hydroxide-only hiện hành → pct = 0% cho mọi metal;
+  // check vẫn được wire để guard chống chemistry bug trong tương lai.
+  const massBalancePct = computeMassBalancePct(
+    input.composition,
+    filtrate_mgPerL,
+    chemPrecipitated,
+  )
+  const massBalanceExceeded =
+    massBalancePct.Fe > WT_MASS_BALANCE_TOLERANCE_PCT ||
+    massBalancePct.Zn > WT_MASS_BALANCE_TOLERANCE_PCT ||
+    massBalancePct.Pb > WT_MASS_BALANCE_TOLERANCE_PCT
+  if (massBalanceExceeded) {
+    invalidReasonCodes.push('MASS_BALANCE_BELOW_TOLERANCE')
+  }
+
+  // Step 6: override goalStatus nếu pH guard hit hoặc mass balance fail
   if (invalidReasonCodes.length > 0) {
     goalStatus = 'invalid'
     expectedOutcome = 'invalid'
-  } else if (input.action === 'measure-initial-ph' || input.action === 'add-acid' || input.action === 'add-base') {
-    // Trước khi khuấy/lắng/lọc → goalStatus vẫn pending (chưa có filtrate thật)
-    goalStatus = 'pending'
-    expectedOutcome = 'success'
-  } else {
-    const chemistryStatus = deriveGoalStatus(filtrate_mgPerL)
-    goalStatus = chemistryStatus
-    expectedOutcome = chemistryStatus
   }
-
-  // Step 5: mass-balance (placeholder, P0-J wire-up là phase 2)
-  const massBalancePct = { Fe: 0, Zn: 0, Pb: 0 }
 
   return {
     action: input.action,
-    composition: input.composition,
+    composition: returnComposition,
     pH,
     previousPH,
     capacity,
     capacity_mgPerL,
     filtrate_mgPerL,
-    precipitated_mgPerL,
+    precipitated_mgPerL: returnPrecipitated,
     pHGuardHit,
     massBalancePct,
     goalStatus,
