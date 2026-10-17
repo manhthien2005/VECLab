@@ -106,10 +106,19 @@ function computeFiltrate(
     Zn: cap.Zn * ATOMIC_WEIGHT.Zn * 1000,
     Pb: cap.Pb * ATOMIC_WEIGHT.Pb * 1000,
   }
+  // Filtrate (nồng độ hòa tan cân bằng tại pH đã đo):
+  //   - Nếu composition > capacity: pha rắn hiện hữu → filtrate = capacity
+  //     (lượng dư kết tủa; lượng tan tối đa bằng capacity trả về bởi SOLVER).
+  //   - Nếu composition ≤ capacity: hệ chưa bão hòa → filtrate = composition
+  //     (không kết tủa, tất cả input tan hết).
+  // capacity trả về bởi `capacityAtSaturation(pH)` là tổng mol/L của free ion +
+  // hydrolysis complexes tại SI=0 với pha rắn baseline — tức là giới hạn trên
+  // của nồng độ hòa tan, không phải lượng kết tủa. Sai số hóa học: hydroxide-only
+  // baseline chưa tính Cl⁻/SO₄²⁻/CO₃²⁻ complexes (chemistry owner có thể bổ sung).
   const filtrate = {
-    Fe: Math.max(0, composition.Fe - cap_mgL.Fe),
-    Zn: Math.max(0, composition.Zn - cap_mgL.Zn),
-    Pb: Math.max(0, composition.Pb - cap_mgL.Pb),
+    Fe: Math.min(composition.Fe, cap_mgL.Fe),
+    Zn: Math.min(composition.Zn, cap_mgL.Zn),
+    Pb: Math.min(composition.Pb, cap_mgL.Pb),
   }
   const precipitated = {
     Fe: Math.max(0, composition.Fe - filtrate.Fe),
