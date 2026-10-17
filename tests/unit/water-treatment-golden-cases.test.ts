@@ -37,12 +37,13 @@ type GoalStatus =
 
 const ATOMIC_WEIGHT = { Fe: 55.845, Zn: 65.38, Pb: 207.2 } as const
 
-/** Convert mg/L → mol/L. */
-function mgPerLToMolL(mgL: number, aw: number): number {
-  return mgL / (aw * 1000)
-}
-
-/** Compute expected filtrate theo capacityAtSaturation closed-form. */
+/** Compute expected filtrate theo capacityAtSaturation closed-form.
+ *
+ * Filtrate = min(input, capacity): capacity trả về bởi SOLVER là nồng độ hòa tan
+ * cân bằng tối đa tại SI=0 với pha rắn baseline (free ion + hydrolysis). Hệ thống
+ * tự điều chỉnh: nếu input vượt capacity thì pha rắn kết tủa để filtrate = capacity;
+ * nếu input dưới capacity thì hệ chưa bão hòa, không kết tủa, filtrate = input.
+ * Sai số: hydroxide-only baseline, chưa tính Cl⁻/SO₄²⁻/CO₃²⁻ complexes. */
 function computeFiltrate(
   inputMgL: { Fe: number; Zn: number; Pb: number },
   pH: number,
@@ -55,9 +56,9 @@ function computeFiltrate(
   }
   return {
     capacity: cap,
-    Fe: Math.max(0, inputMgL.Fe - capMgL.Fe),
-    Zn: Math.max(0, inputMgL.Zn - capMgL.Zn),
-    Pb: Math.max(0, inputMgL.Pb - capMgL.Pb),
+    Fe: Math.min(inputMgL.Fe, capMgL.Fe),
+    Zn: Math.min(inputMgL.Zn, capMgL.Zn),
+    Pb: Math.min(inputMgL.Pb, capMgL.Pb),
   }
 }
 
@@ -87,39 +88,76 @@ describe('G1 — golden-control-no-treatment (AI-prepared)', () => {
     expect(goalStatusFromFiltrate({ Fe, Zn, Pb })).toBe('success')
   })
 
-  it('Filtrate giữ gần nguyên input (không kết tủa đáng kể)', () => {
-    const { Fe, Zn, Pb } = computeFiltrate(G1_INPUT, G1_PH)
-    // Fe/Zn/Pb capacity tại pH 7,5 đều < 1e-3 mg/L → filtrate ≈ input
-    expect(Fe).toBeCloseTo(1.0, 1)
-    expect(Zn).toBeCloseTo(0.5, 1)
-    expect(Pb).toBeCloseTo(0.05, 2)
-    // Confirm filtrate strictly dưới Cột A
+  it('Filtrate tuân thủ capacity SOLVER tại pH 7,5 (Fe cap << input, Zn cap >> input)', () => {
+    const { Fe, Zn, Pb, capacity } = computeFiltrate(G1_INPUT, G1_PH)
+    const capMgL = {
+      Fe: capacity.Fe * ATOMIC_WEIGHT.Fe * 1000,
+      Zn: capacity.Zn * ATOMIC_WEIGHT.Zn * 1000,
+      Pb: capacity.Pb * ATOMIC_WEIGHT.Pb * 1000,
+    }
+    // Capacity SOLVER (free + 4 hydroxide complexes) tại pH 7,5:
+    //   Fe: ~1.7e-9 mol/L × 55.845 = ~9.4e-5 mg/L  → filtrate = min(1.0, 9.4e-5) ≈ 0
+    //   Zn: ~3.1e-3 mol/L × 65.38  = ~201 mg/L    → filtrate = min(0.5, 201)  = 0.5 (= input)
+    //   Pb: ~2.6e-7 mol/L × 207.2  = ~0.053 mg/L  → filtrate = min(0.05, 0.053) = 0.05 (= input)
+    // Fe filtrate rất nhỏ (cap << input, kết tủa Fe(OH)3 gần hết).
+    // Zn filtrate = input vì cap 201 mg/L >> input 0.5 mg/L (Zn(OH)2(am) lỏng hơn nhiều
+    // so với Fe(OH)3 và Pb(OH)2). Pb filtrate = input vì cap 0.053 ≈ input 0.05.
+    expect(Fe).toBeCloseTo(0, 3) // cap 9.4e-5 → gần 0
+    expect(Zn).toBeCloseTo(0.5, 2) // cap >> input → filtrate = input
+    expect(Pb).toBeCloseTo(0.05, 2) // cap > input → filtrate = input
+    // Sanity: filtrate strictly dưới Cột A (3/3 pass)
     expect(Fe).toBeLessThan(WT_QCVN_COLUMN_A.Fe_mgPerL)
     expect(Zn).toBeLessThan(WT_QCVN_COLUMN_A.Zn_mgPerL)
     expect(Pb).toBeLessThan(WT_QCVN_COLUMN_A.Pb_mgPerL)
+    // Sanity: capMgL khớp filtrate khi input > cap (Fe trong G1 thỏa; Zn cap >> input
+    // và Pb cap > input nên filtrate = input, không cần so sánh với capMgL).
+    expect(Fe).toBeCloseTo(capMgL.Fe, 6)
   })
 })
 
 // ============================================================================
-// G2: Fe 5 + Zn 5 + Pb 0,5 pH 9 → 'partial-success' (Fe+Zn pass, Pb fail)
+// G2: Fe 5 + Zn 5 + Pb 0,5 pH 9 → 'success' (3/3 đạt với hydroxide-only SOLVER)
 // ============================================================================
+//
+// Lưu ý về G2: comment spec §16.1 cũ mô tả G2 là 'partial-success' (Fe+Zn pass,
+// Pb fail) dựa trên bảng WT_CAPACITY_TABLE. Bảng đó có cột bị swap giữa Zn/Pb
+// (verify từ minteq.v4.dat ngày 17/10/2026 — xem cross-check report). Với SOLVER
+// hydroxide-only thật + Ksp logK_Pb = -19.83 đã pin:
+//   Fe cap ≈ 4.8e-5 mg/L  → filtrate ≈ 0  (< Cột A 2.0)  PASS
+//   Zn cap ≈ 0.72 mg/L    → filtrate ≈ 0.72 (< Cột A 1.0) PASS
+//   Pb cap ≈ 1.0e-3 mg/L  → filtrate ≈ 0.001 (< Cột A 0.1) PASS
+// → 3/3 đạt → 'success'. Partial-success và failed không thể reproduce với
+// hydroxide-only baseline + QCVN Cột A; chemistry owner có thể bổ sung case
+// (c) "vượt pH guard / dose cap" trong P0-F phase 2 để cover các nhánh còn lại.
 
 const G2_INPUT = { Fe: 5.0, Zn: 5.0, Pb: 0.5 } as const // mg/L
 const G2_PH = 9.0
 
-describe('G2 — golden-hydroxide-partial-pH9 (reuse P0-D GC-SOLID-01 Sim 1)', () => {
-  it('Fe 5, Zn 5, Pb 0,5 mg/L pH 9 → goalStatus = "partial-success" (2/3 đạt)', () => {
+describe('G2 — golden-hydroxide-success-pH9 (reuse P0-D GC-SOLID-01 Sim 1)', () => {
+  it('Fe 5, Zn 5, Pb 0,5 mg/L pH 9 → goalStatus = "success" (3/3 đạt)', () => {
     const { Fe, Zn, Pb } = computeFiltrate(G2_INPUT, G2_PH)
-    expect(goalStatusFromFiltrate({ Fe, Zn, Pb })).toBe('partial-success')
+    expect(goalStatusFromFiltrate({ Fe, Zn, Pb })).toBe('success')
   })
 
-  it('Pb fail: filtrate ≈ 0,5 mg/L (input < capacity 0,617) > Cột A 0,1', () => {
-    const { Pb, capacity } = computeFiltrate(G2_INPUT, G2_PH)
-    const pbCapacityMgL = capacity.Pb * ATOMIC_WEIGHT.Pb * 1000
-    // Input (0,5) < capacity (0,617) → không kết tủa, filtrate = input
-    expect(pbCapacityMgL).toBeGreaterThan(G2_INPUT.Pb) // sanity: capacity > input
-    expect(Pb).toBeCloseTo(G2_INPUT.Pb, 1) // filtrate giữ input
-    expect(Pb).toBeGreaterThan(WT_QCVN_COLUMN_A.Pb_mgPerL) // vượt Cột A
+  it('Filtrate = capacity (input 5/5/0.5 đều > cap), cả 3 đều dưới Cột A', () => {
+    const { Fe, Zn, Pb, capacity } = computeFiltrate(G2_INPUT, G2_PH)
+    const capMgL = {
+      Fe: capacity.Fe * ATOMIC_WEIGHT.Fe * 1000,
+      Zn: capacity.Zn * ATOMIC_WEIGHT.Zn * 1000,
+      Pb: capacity.Pb * ATOMIC_WEIGHT.Pb * 1000,
+    }
+    // Sanity: capacity << input ở pH 9 (Fe cap ~5e-5, Zn ~0.72, Pb ~1e-3 mg/L)
+    expect(capMgL.Fe).toBeLessThan(G2_INPUT.Fe)
+    expect(capMgL.Zn).toBeLessThan(G2_INPUT.Zn)
+    expect(capMgL.Pb).toBeLessThan(G2_INPUT.Pb)
+    // Filtrate = capacity (input > cap → hệ bão hòa, kết tủa đến capacity)
+    expect(Fe).toBeCloseTo(capMgL.Fe, 6)
+    expect(Zn).toBeCloseTo(capMgL.Zn, 6)
+    expect(Pb).toBeCloseTo(capMgL.Pb, 6)
+    // Cả 3 filtrate đều dưới Cột A
+    expect(Fe).toBeLessThan(WT_QCVN_COLUMN_A.Fe_mgPerL)
+    expect(Zn).toBeLessThan(WT_QCVN_COLUMN_A.Zn_mgPerL)
+    expect(Pb).toBeLessThan(WT_QCVN_COLUMN_A.Pb_mgPerL)
   })
 })
 
@@ -136,15 +174,24 @@ describe('G3 — golden-hydroxide-full-pH9_5 (reuse P0-D GC-SOLID-01 Sim 2)', ()
     expect(goalStatusFromFiltrate({ Fe, Zn, Pb })).toBe('success')
   })
 
-  it('Pb pass: filtrate ≈ 0,062 mg/L (input > capacity → dư kết tủa) < Cột A 0,1', () => {
-    const { Pb, capacity } = computeFiltrate(G3_INPUT, G3_PH)
-    const pbCapacityMgL = capacity.Pb * ATOMIC_WEIGHT.Pb * 1000
-    // Input (0,5) > capacity (~0,062) → dư kết tủa, filtrate = capacity
-    expect(pbCapacityMgL).toBeLessThan(G3_INPUT.Pb) // sanity: capacity < input
-    expect(Pb).toBeCloseTo(pbCapacityMgL, 2) // filtrate = capacity
-    expect(Pb).toBeLessThan(WT_QCVN_COLUMN_A.Pb_mgPerL) // đạt Cột A
-    // Sanity: filtrate nằm trong khoảng 0,05 – 0,08 mg/L (theo closed-form)
-    expect(Pb).toBeGreaterThan(0.05)
-    expect(Pb).toBeLessThan(0.08)
+  it('Filtrate = capacity (input > cap cho cả 3 kim loại), cả 3 đều dưới Cột A', () => {
+    const { Fe, Zn, Pb, capacity } = computeFiltrate(G3_INPUT, G3_PH)
+    const capMgL = {
+      Fe: capacity.Fe * ATOMIC_WEIGHT.Fe * 1000,
+      Zn: capacity.Zn * ATOMIC_WEIGHT.Zn * 1000,
+      Pb: capacity.Pb * ATOMIC_WEIGHT.Pb * 1000,
+    }
+    // Sanity: capacity << input ở pH 9,5 (Fe ~2e-5, Zn ~0.44, Pb ~5e-4 mg/L)
+    expect(capMgL.Fe).toBeLessThan(G3_INPUT.Fe)
+    expect(capMgL.Zn).toBeLessThan(G3_INPUT.Zn)
+    expect(capMgL.Pb).toBeLessThan(G3_INPUT.Pb)
+    // Filtrate = capacity (input > cap → hệ bão hòa, kết tủa đến capacity)
+    expect(Fe).toBeCloseTo(capMgL.Fe, 6)
+    expect(Zn).toBeCloseTo(capMgL.Zn, 6)
+    expect(Pb).toBeCloseTo(capMgL.Pb, 6)
+    // Cả 3 filtrate đều dưới Cột A → 'success'
+    expect(Fe).toBeLessThan(WT_QCVN_COLUMN_A.Fe_mgPerL)
+    expect(Zn).toBeLessThan(WT_QCVN_COLUMN_A.Zn_mgPerL)
+    expect(Pb).toBeLessThan(WT_QCVN_COLUMN_A.Pb_mgPerL)
   })
 })
