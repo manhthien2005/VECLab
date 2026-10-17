@@ -1,0 +1,55 @@
+{
+  "v": 1,
+  "kind": "task",
+  "id": "WT-02",
+  "coder": 2,
+  "repo": "manhthien2005/VECLab",
+  "branch": "feature/coder-2-wt-02-ui-wiring",
+  "target": "Manh-water-treatment",
+  "base": "8c6d747adeba6357f117f6080a8dc67524508a8e",
+  "goal": "Wire 7 nút action trong workbench (đo pH ban đầu/cuối, +NaOH, +HCl, khuấy, lắng, lọc) với server action runWaterTreatmentAction; hiển thị realtime capacity, filtrate, precipitated, sludge mass, mass balance, goal status tone, và banner invalid khi pH guard vi phạm hoặc mass balance lệch ±2%.",
+  "read": [
+    "AGENTS.md",
+    "docs/workflow/web-handoff-contract.md",
+    "docs/workflow/parallel-work.md",
+    "docs/workflow/ui-skills.md",
+    ".agents/skills/veclab-implement/SKILL.md",
+    "docs/experiments/water-treatment-spec.md",
+    "docs/superpowers/plans/2026-10-17-water-treatment-build-plan.md",
+    "src/features/water-treatment/workbench.tsx",
+    "src/features/water-treatment/workbench.module.css",
+    "src/features/water-treatment/use-water-treatment-attempt.ts",
+    "src/features/water-treatment/constants.ts",
+    "src/app/simulate/water-treatment/actions.ts"
+  ],
+  "files": [
+    "src/features/water-treatment/workbench.tsx",
+    "src/features/water-treatment/workbench.module.css"
+  ],
+  "accept": [
+    "7 nút action trong workbench gọi attempt.run(action, { dose_mL, volume_mL }) từ useWaterTreatmentAttempt; mỗi nút truyền đúng action type ('measure-initial-ph' | 'add-base' | 'add-acid' | 'stir' | 'settle' | 'filter' | 'measure-final') với dose_mL lấy từ input điều khiển và volume_mL mặc định 1000.",
+    "Sau mỗi action thành công: pH hiện tại cập nhật từ result.pH; event log thêm dòng mới (action, timestamp, pH, note); capacity card hiển thị capacity_mgPerL Fe/Zn/Pb; filtrate card hiển thị filtrate_mgPerL Fe/Zn/Pb; precipitated card hiển thị precipitated_mgPerL Fe/Zn/Pb.",
+    "goalStatus pill dùng GOAL_STATUS_TONE map đã có trong workbench.tsx (success/partial-success/failed/invalid/pending/unknown), không tự ý đổi màu hoặc nhãn.",
+    "Khi result.invalidReasonCodes.length > 0: hiển thị banner tone 'negative' với danh sách lý do ('PH_GUARD_BELOW_MIN' / 'PH_GUARD_ABOVE_MAX' / 'MASS_BALANCE_BELOW_TOLERANCE') bằng tiếng Việt, không chặn user thao tác tiếp nhưng cảnh báo rõ.",
+    "Sludge mass card hiển thị tổng precipitated × volume / 1000 (mg) cộng dồn theo history.",
+    "Nút bấm disabled khi attempt.state.isRunning; hiển thị spinner hoặc text 'Đang chạy...' (không animation xoay nếu prefers-reduced-motion).",
+    "Khi result.goalStatus = 'pending' (sau measure-initial-ph / add-acid / add-base), KHÔNG hiển thị filtrate dự đoán — chỉ hiển thị capacity table và composition hiện tại.",
+    "Không đổi signature hoặc type của props WaterTreatmentWorkbench, không đổi constants.ts, không đổi actions.ts; chỉ sửa phần handlers + render kết quả trong workbench.tsx."
+  ],
+  "checks": {
+    "unit": "npm run test -- src/features/water-treatment/",
+    "types": "npm run typecheck",
+    "lint": "npm run lint -- src/features/water-treatment/workbench.tsx src/features/water-treatment/workbench.module.css",
+    "diff": "git diff 8c6d747adeba6357f117f6080a8dc67524508a8e -- src/features/water-treatment/workbench.tsx src/features/water-treatment/workbench.module.css --check",
+    "manual": "npm run dev — duyệt /simulate/water-treatment, reproduce G1 (input thấp + pH 7,5 → 'success'), G2 (input trung bình + pH 9 → 'partial-success'), G3 (input trung bình + pH 9,5 → 'success'); test pH guard bằng cách dùng dose_mL lớn để đẩy pH ra ngoài [2;13]"
+  },
+  "notes": [
+    "Base SHA 8c6d747 đã có workbench.tsx (939 dòng) và workbench.module.css (1040 dòng) với shell UI; chỉ wire phần handlers + render kết quả.",
+    "Không đụng actions.ts, constants.ts, capacity.ts, tests — đó là scope coder 1 (WT-01).",
+    "Không tạo file mới; CSS thêm class trong workbench.module.css hiện có.",
+    "Spinner/transition không ảnh hưởng chemistry (per rule: animation không tính hóa học).",
+    "Reduced motion: thay rotate bằng fade hoặc bỏ animation.",
+    "Mobile/landscape responsive giữ nguyên hiện trạng của workbench; nếu cần thêm breakpoint thì dùng class trong workbench.module.css hiện có.",
+    "Result JSON v1 theo docs/workflow/templates/result.json; status chỉ 'pending_review' hoặc 'blocked'."
+  ]
+}
