@@ -1,0 +1,53 @@
+{
+  "v": 1,
+  "kind": "task",
+  "id": "WT-03",
+  "coder": 2,
+  "repo": "manhthien2005/VECLab",
+  "branch": "feature/coder-2-wt-03-report-view",
+  "target": "Manh-water-treatment",
+  "base": "8c6d747adeba6357f117f6080a8dc67524508a8e",
+  "goal": "Bổ sung report view trong workbench: bảng timeline các action (timestamp, pH trước/sau, capacity, filtrate, precipitated, mass balance %), sludge mass card (Σ precipitated × volume / 1000 mg), và rubric card 4 trụ 40/30/15/15 với placeholder 'chưa chấm' (scoring thật thuộc WT-04 coder 1).",
+  "read": [
+    "AGENTS.md",
+    "docs/workflow/web-handoff-contract.md",
+    "docs/workflow/parallel-work.md",
+    "docs/workflow/ui-skills.md",
+    ".agents/skills/veclab-implement/SKILL.md",
+    "docs/experiments/water-treatment-spec.md",
+    "docs/superpowers/plans/2026-10-17-water-treatment-build-plan.md",
+    "src/features/water-treatment/workbench.tsx",
+    "src/features/water-treatment/workbench.module.css",
+    "src/features/water-treatment/use-water-treatment-attempt.ts",
+    "src/features/water-treatment/constants.ts"
+  ],
+  "files": [
+    "src/features/water-treatment/workbench.tsx",
+    "src/features/water-treatment/workbench.module.css"
+  ],
+  "accept": [
+    "Report view (mở bằng setReportOpen(true) hoặc view=report search param) hiển thị bảng timeline gồm các cột: timestamp, action, pH trước, pH sau, capacity Fe/Zn/Pb (mg/L), filtrate Fe/Zn/Pb (mg/L), precipitated Fe/Zn/Pb (mg/L), massBalancePct Fe/Zn/Pb (%). Mỗi dòng tương ứng một entry trong attempt.state.history.",
+    "Sludge mass card hiển thị tổng Σ (precipitated_mgPerL × volume_mL / 1000) mg cộng dồn theo history; chia thành 3 ô Fe/Zn/Pb riêng. Đơn vị mg, làm tròn 1 chữ số thập phân.",
+    "Rubric card hiển thị 4 trụ: 'Kết quả (40)', 'Quy trình (30)', 'Hiệu quả hóa chất–bùn (15)', 'Báo cáo & truy vết (15)' với giá trị hiện tại = '—' và phụ đề 'chưa chấm (WT-04)'. KHÔNG tính điểm thật trong task này.",
+    "Khi history rỗng: report view hiển thị empty state 'Chưa có action nào. Hãy chọn Fe/Zn/Pb rồi chạy thử nghiệm.' (tiếng Việt).",
+    "Bảng timeline dùng semantic HTML (table thead/tbody/tr/td) hoặc CSS Grid; mỗi dòng có key duy nhất (timestamp + action); header sticky khi scroll dọc.",
+    "Không đổi signature WaterTreatmentWorkbench, không đổi constants.ts, không đổi actions.ts, không đổi use-water-treatment-attempt.ts; chỉ thêm phần report view + sludge card + rubric card trong workbench.tsx.",
+    "Không tạo file mới; CSS thêm class trong workbench.module.css hiện có."
+  ],
+  "checks": {
+    "unit": "npm run test -- src/features/water-treatment/",
+    "types": "npm run typecheck",
+    "lint": "npm run lint -- src/features/water-treatment/workbench.tsx src/features/water-treatment/workbench.module.css",
+    "diff": "git diff 8c6d747adeba6357f117f6080a8dc67524508a8e -- src/features/water-treatment/workbench.tsx src/features/water-treatment/workbench.module.css --check",
+    "manual": "npm run dev — /simulate/water-treatment; chạy 3-4 action (đo pH → +NaOH → khuấy → lắng → lọc); mở report dialog; kiểm tra timeline, sludge mass, rubric card; test empty state bằng cách mở report ngay khi mới load trang"
+  },
+  "notes": [
+    "Base 8c6d747 đã có workbench.tsx với reportOpen state; chỉ bổ sung phần render report view hiện đang trống/đơn giản.",
+    "Không đụng backend (actions.ts, constants.ts, capacity.ts, scoring) — đó là scope coder 1.",
+    "Không tự ý wire scoring — WT-04 mới tính điểm; WT-03 chỉ hiển thị placeholder '—'.",
+    "Bảng timeline có thể scroll dọc; dùng overflow-y: auto + max-height để không phá layout mobile.",
+    "Mobile/landscape: bảng timeline dùng horizontal scroll nếu quá rộng; không ẩn cột.",
+    "Reduced motion: transition/fade cho dialog vẫn dùng opacity thay vì transform.",
+    "Result JSON v1 theo docs/workflow/templates/result.json; status chỉ 'pending_review' hoặc 'blocked'."
+  ]
+}
