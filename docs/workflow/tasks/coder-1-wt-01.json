@@ -1,0 +1,62 @@
+{
+  "v": 1,
+  "kind": "task",
+  "id": "WT-01",
+  "coder": 1,
+  "repo": "manhthien2005/VECLab",
+  "branch": "feature/coder-1-wt-01-actions",
+  "target": "Manh-water-treatment",
+  "base": "8c6d747adeba6357f117f6080a8dc67524508a8e",
+  "goal": "Wire stir/settle/filter thật trong server action và bật mass-balance P0-J ±2%, để workbench có thể chạy full 7-action sequence end-to-end với goalStatus phản ánh chemistry (success / partial-success / failed / invalid), không còn placeholder.",
+  "read": [
+    "AGENTS.md",
+    "docs/workflow/web-handoff-contract.md",
+    "docs/workflow/parallel-work.md",
+    ".agents/skills/veclab-implement/SKILL.md",
+    "docs/experiments/water-treatment-spec.md",
+    "docs/superpowers/plans/2026-10-17-water-treatment-build-plan.md",
+    "src/features/water-treatment/capacity.ts",
+    "src/features/water-treatment/constants.ts",
+    "src/features/water-treatment/use-water-treatment-attempt.ts",
+    "src/app/simulate/water-treatment/actions.ts",
+    "src/app/simulate/water-treatment/page.tsx",
+    "tests/unit/water-treatment-capacity.test.ts",
+    "tests/unit/water-treatment-golden-cases.test.ts"
+  ],
+  "files": [
+    "src/app/simulate/water-treatment/actions.ts",
+    "src/features/water-treatment/capacity.ts",
+    "src/features/water-treatment/constants.ts",
+    "tests/unit/water-treatment-mass-balance.test.ts",
+    "tests/unit/water-treatment-stir-settle-filter.test.ts"
+  ],
+  "accept": [
+    "Server action 'stir' trả previousPH === pH (không dịch pH), goalStatus = 'pending' (chưa tách pha).",
+    "Server action 'settle' cập nhật precipitated_mgPerL theo (input - capacity_at_pH) khi capacity < input, ngược lại precipitated = 0; filtrate_mgPerL = max(0, input - capacity).",
+    "Server action 'filter' thay composition bằng filtrate_mgPerL hiện tại (pH không đổi), reset precipitated_mgPerL về 0 cho lượt sau; goalStatus cập nhật theo composition mới.",
+    "Server action 'measure-initial-ph' và 'measure-final' KHÔNG đổi composition, pH, hay filtrate; chỉ log event note với pH đọc được.",
+    "massBalancePct tính thật: pct = abs(input - filtrate - precipitated) / max(input, 1e-9) * 100 cho Fe/Zn/Pb; nếu pct > 2% một nguyên tố bất kỳ thì invalidReasonCodes thêm 'MASS_BALANCE_BELOW_TOLERANCE' và goalStatus = 'invalid' (kể cả khi trước đó chemistry pass).",
+    "pH guard [2; 13] giữ nguyên logic hiện tại; vi phạm vẫn set pHGuardHit + 'PH_GUARD_BELOW_MIN' / 'PH_GUARD_ABOVE_MAX' trong invalidReasonCodes và goalStatus = 'invalid'.",
+    "7 action types đều trả về cùng shape WaterTreatmentResult như cũ — KHÔNG thêm field mới vào type đã export, KHÔNG đổi signature.",
+    "constants.ts chỉ được thêm hằng số mới trong 'as const' (vd WT_MASS_BALANCE_TOLERANCE_PCT = 2), không đổi type hoặc đổi giá trị các hằng đã có."
+  ],
+  "checks": {
+    "unit": "npm run test -- tests/unit/water-treatment-{capacity,golden-cases,mass-balance,stir-settle-filter}.test.ts",
+    "types": "npm run typecheck",
+    "lint": "npm run lint -- src/app/simulate/water-treatment/ src/features/water-treatment/",
+    "diff": "git diff 8c6d747adeba6357f117f6080a8dc67524508a8e -- src/app/simulate/water-treatment/ src/features/water-treatment/ tests/unit/water-treatment-*.test.ts --check"
+  },
+  "notes": [
+    "Base SHA 8c6d747 đã chứa toàn bộ water-treatment source (capacity, constants, workbench skeleton, 2 test files cũ) + spec + build plan.",
+    "Không đụng UI (workbench.tsx, workbench.module.css) — UI wire nút bấm thuộc WT-02 coder 2.",
+    "Không tạo file mới ngoài 2 test file trên. Nếu cần helper thêm trong capacity.ts thì export từ capacity.ts hiện có.",
+    "Phase 2 (Davies + Cl complexes, tighten ±0,025 → ±0,004) chưa thuộc task này.",
+    "P0-E (LOD) deferred — không wire.",
+    "Test mass-balance với G1 (input thấp + pH 7,5): mong đợi massBalancePct Fe/Zn/Pb < 1% (capacity << input).",
+    "Test pH guard: pH = 1 → 'PH_GUARD_BELOW_MIN'; pH = 14 → 'PH_GUARD_ABOVE_MAX'.",
+    "Test replay idempotent: gọi 'settle' 2 lần trên cùng state → kết quả giống nhau (filtrate và precipitated không đổi lần 2).",
+    "Test stir: previousPH === pH, filtrate === input (chưa tách), precipitated === 0.",
+    "Test filter: composition cũ bị thay bằng filtrate; precipitated mới = 0 vì pha rắn đã tách.",
+    "Result JSON v1 theo docs/workflow/templates/result.json; status chỉ 'pending_review' hoặc 'blocked'."
+  ]
+}
