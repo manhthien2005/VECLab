@@ -1,0 +1,57 @@
+{
+  "v": 1,
+  "kind": "task",
+  "id": "WT-04",
+  "coder": 1,
+  "repo": "manhthien2005/VECLab",
+  "branch": "feature/coder-1-wt-04-rubric-scoring",
+  "target": "Manh-water-treatment",
+  "base": "8c6d747adeba6357f117f6080a8dc67524508a8e",
+  "goal": "Implement rubric scoring 40/30/15/15 cho Water Treatment theo spec §10: 4 trụ Kết quả / Quy trình / Hiệu quả hóa chất–bùn / Báo cáo & truy vết. Thêm module scoring.ts mới, hằng WT_RUBRIC trong constants.ts, field score optional trong WaterTreatmentResult, test riêng. UI hiển thị từ WT-03; backend chỉ tính và trả.",
+  "read": [
+    "AGENTS.md",
+    "docs/workflow/web-handoff-contract.md",
+    "docs/workflow/parallel-work.md",
+    ".agents/skills/veclab-implement/SKILL.md",
+    "docs/experiments/water-treatment-spec.md",
+    "docs/superpowers/plans/2026-10-17-water-treatment-build-plan.md",
+    "src/features/water-treatment/constants.ts",
+    "src/features/water-treatment/capacity.ts",
+    "src/app/simulate/water-treatment/actions.ts",
+    "src/features/water-treatment/use-water-treatment-attempt.ts",
+    "tests/unit/water-treatment-golden-cases.test.ts"
+  ],
+  "files": [
+    "src/features/water-treatment/scoring.ts",
+    "src/features/water-treatment/constants.ts",
+    "src/app/simulate/water-treatment/actions.ts",
+    "tests/unit/water-treatment-scoring.test.ts"
+  ],
+  "accept": [
+    "File mới src/features/water-treatment/scoring.ts export type WaterTreatmentScore với 4 field: result (0-100), process (0-100), chemicalEfficiency (0-100), report (0 hoặc 100); và type WaterTreatmentScoring gồm 4 trụ này + total (tính theo trọng số 40/30/15/15) + status ('scored' | 'unresolved').",
+    "Hàm scoreAttempt(attempt: AttemptSnapshot): WaterTreatmentScoring; trong đó AttemptSnapshot tối thiểu có: goalStatus, history (ReadonlyArray<{action, pH, dose_mL?, volume_mL?}>), composition, massBalancePct.",
+    "Trụ 'result' (40): success = 100, partial-success = 60, failed = 0, invalid = 0, pending = 0, unknown = 0. Nếu goalStatus = 'invalid' do mass-balance vượt ±2% thì status = 'unresolved', total = null.",
+    "Trụ 'process' (30): tỉ lệ (số action distinct trong history) / (số action distinct tối thiểu = 4: measure-initial-ph, add-base HOẶC add-acid, stir, settle, filter). Nếu ratio >= 1.0 thì 100; nếu ratio < 0.5 thì 0; trung gian nội suy tuyến tính. N/A chuẩn hoá mẫu số theo spec §10: nếu chưa có settle/filter (chỉ measure + add), trụ process = null và KHÔNG tính vào total.",
+    "Trụ 'chemicalEfficiency' (15): placeholder — score = 100 nếu tổng dose_mL của add-acid + add-base <= 5 mL; score = 50 nếu 5 < dose <= 10; score = 0 nếu > 10. Nếu history không có add-acid/add-base thì chemicalEfficiency = null (N/A) và KHÔNG tính vào total.",
+    "Trụ 'report' (15): 100 nếu history có ít nhất 1 measure-initial-ph VÀ 1 stir VÀ 1 settle VÀ 1 filter (đủ protocol chuẩn); 0 nếu thiếu bất kỳ mục nào.",
+    "total: Σ (trụ_i × weight_i) / Σ weight_i (chỉ với trụ khác null). Nếu chỉ có 1 trụ khác null thì total = trụ đó. Nếu status = 'unresolved' thì total = null.",
+    "constants.ts thêm export WT_RUBRIC = { weights: { result: 0.4, process: 0.3, chemicalEfficiency: 0.15, report: 0.15 } } as const; không đổi type/giá trị các hằng đã có.",
+    "actions.ts thêm field score?: WaterTreatmentScore vào WaterTreatmentResult; chỉ set khi attempt đã complete (goalStatus !== 'pending' && goalStatus !== 'unknown'). KHÔNG đổi các field khác.",
+    "scoring.ts KHÔNG import từ 'react' hoặc 'next/*'; pure function, deterministic, có thể chạy trong worker."
+  ],
+  "checks": {
+    "unit": "npm run test -- tests/unit/water-treatment-{capacity,golden-cases,scoring}.test.ts",
+    "types": "npm run typecheck",
+    "lint": "npm run lint -- src/features/water-treatment/ src/app/simulate/water-treatment/",
+    "diff": "git diff 8c6d747adeba6357f117f6080a8dc67524508a8e -- src/features/water-treatment/ src/app/simulate/water-treatment/ tests/unit/water-treatment-scoring.test.ts --check"
+  },
+  "notes": [
+    "Base 8c6d747 đã có constants.ts, capacity.ts, actions.ts; chỉ thêm scoring.ts mới + extend types.",
+    "Không đụng UI (workbench.tsx, workbench.module.css) — UI hiển thị thuộc WT-03.",
+    "scoring.ts pure, deterministic; test với 4 case: G1 (success, full protocol → total ~ 95-100), G2 (partial → result=60, total < 100), invalid-mass-balance (total=null, status=unresolved), history rỗng (total=null).",
+    "N/A chuẩn hoá mẫu số: nếu ≥ 1 trụ null và các trụ còn lại đủ để tính, total vẫn ra; nếu tất cả trụ null thì total = null.",
+    "P0-E (LOD) deferred — không dùng trong scoring.",
+    "Phase 2 (Davies γ, Cl complexes) chưa thuộc task này.",
+    "Result JSON v1 theo docs/workflow/templates/result.json; status chỉ 'pending_review' hoặc 'blocked'."
+  ]
+}
