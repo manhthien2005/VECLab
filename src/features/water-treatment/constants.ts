@@ -39,6 +39,20 @@ export const WT_QCVN_COLUMN_A = {
   pdfSha256: '1fb859f91af39c31c32936fd8988f69b4d2f25805a9689afff578be4050ac5da',
 } as const
 
+/**
+ * Mass-balance tolerance ±2% (P0-J) cho sample-level check, theo
+ * `docs/experiments/water-treatment-spec.md` §6.6 step 5 + §7.4.5 và
+ * `docs/scientific-evidence-register.md` §5.1.4 (đã chốt O9 ngày 16/10/2026).
+ *
+ * Công thức: `pct = |input - filtrate - precipitated| / max(input, 1e-9) × 100`
+ * cho Fe/Zn/Pb. Nếu pct > tolerance ở bất kỳ nguyên tố nào →
+ * `invalidReasonCodes` thêm `'MASS_BALANCE_BELOW_TOLERANCE'` và
+ * `goalStatus = 'invalid'`. Với baseline hydroxide-only hiện hành
+ * (filtrate + precipitated = input exact) → pct = 0% cho mọi case;
+ * check vẫn được wire để guard chống chemistry bug trong tương lai.
+ */
+export const WT_MASS_BALANCE_TOLERANCE_PCT = 2 as const
+
 // P0-A (QCVN legal) và P0-D (chemistry pin) đóng ngày 16/10/2026. P0-C (capacity
 // 3 KL closed-form) đóng 17/10/2026. P0-F (≥ 3 golden case) đóng 17/10/2026
 // (G1 AI-prepared + G2/G3 reuse `GC-SOLID-01` từ P0-D). Tất cả P0-A → P0-F
