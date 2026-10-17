@@ -15,6 +15,7 @@ import {
 import { TargetIcon, GuideIcon, TheoryIcon, SourcesIcon, ReportIcon, InfoIcon } from '@/features/workbench/icons.js'
 import {
   WT_DATABASE,
+  WT_CAPACITY_TABLE,
   WT_KSP_LOGK,
   WT_KSP_REACTION,
   WT_OPEN_BLOCKERS,
