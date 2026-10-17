@@ -55,6 +55,23 @@ const PRESENTATION = {
     outcome: 'Nồng độ màu, hiệu suất loại màu',
     procedure: ['Chuẩn bị dung dịch và lượng than hoạt tính', 'Cho tiếp xúc theo điều kiện đã chọn', 'Đo nồng độ và tính hiệu suất loại màu'],
   },
+  'water-treatment': {
+    image: '/assets/auth-laboratory-v2.webp',
+    imageAlt: 'Phòng thí nghiệm ảo với bình khuấy, máy đo và giá đựng mẫu nước',
+    category: 'Hóa học nước – hydroxide route',
+    question: 'Điều kiện pH và quy trình nào giúp loại Fe, Zn, Pb khỏi mẫu nước?',
+    learning: 'Phân biệt pH, kim loại hòa tan và kim loại đã tách; hiểu rằng kết quả mô phỏng chưa được nhóm phát triển kiểm chứng bằng thí nghiệm độc lập.',
+    tools: 'Buret acid/base, máy khuấy, thiết bị lắng và lọc, máy đo pH và quang phổ.',
+    prerequisites: 'Hiểu pH, cân bằng acid–base, Ksp và cách đọc giới hạn QCVN 40:2025/BTNMT (Cột A).',
+    input: 'Mẫu nước tổng hợp ảo chứa Fe, Zn, Pb · Nội dung dự kiến',
+    parameters: 'pH 6–9 · Fe ≤ 2,0 · Zn ≤ 1,0 · Pb ≤ 0,1 mg/L · Thể tích 500–2.000 mL',
+    outcome: 'Nồng độ sau xử lý, khối lượng bùn, tổng hóa chất đã dùng',
+    procedure: [
+      'Chọn Fe/Zn/Pb và thể tích; pH ban đầu là kết quả tính từ composition, không phải user input.',
+      'Thêm HCl hoặc NaOH để điều chỉnh pH về dải mục tiêu; khuấy, lắng và lọc để tách kết tủa hydroxide.',
+      'Đo Fe, Zn, Pb và pH sau xử lý; đối chiếu với Cột A (Fe ≤ 2,0; Zn ≤ 1,0; Pb ≤ 0,1 mg/L; pH 6–9).',
+    ],
+  },
 } as const
 
 export const PLASTIC_OVERVIEW = {
