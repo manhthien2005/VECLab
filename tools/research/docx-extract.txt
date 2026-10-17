@@ -1,0 +1,154 @@
+﻿
+HỒ SƠ THU THẬP BẰNG CHỨNG P0
+Dự án mô phỏng xử lý nước thải Fe–Zn–Pb | 16/10/2026
+Mục tiêu: tổng hợp dữ liệu cần có, câu hỏi phải trả lời và nguồn công khai/chính thống để xác minh các hạng mục P0. Đây là kế hoạch thu thập bằng chứng, không phải xác nhận rằng các hạng mục đã được đóng.
+1. Quy tắc sử dụng bằng chứng
+Văn bản pháp lý: ưu tiên văn bản gốc từ cơ quan có thẩm quyền; ghi số văn bản, ngày hiệu lực, điều/phụ lục/bảng và cột áp dụng.
+Phần mềm: dùng đúng PHREEQC release và database đã pin trong dự án; lưu phiên bản, tên file và SHA-256.
+Hằng số hóa học: lưu nguyên văn phương trình phản ứng, log K, nhiệt độ, pha rắn, chú thích nguồn và phép chuyển đổi sang Ksp nếu có.
+LOD/LOQ và độ chính xác: phương pháp tiêu chuẩn không tự chứng minh năng lực của thiết bị cụ thể; cần dữ liệu xác nhận hoặc ghi rõ là giả định mô phỏng.
+Nồng độ stock, dose cap, rubric, rounding và dung sai là quyết định thiết kế nếu dự án không có dữ liệu thực nghiệm/quy định nội bộ.
+Trạng thái bằng chứng hóa học phải đi theo candidate-identified → source-checked → cross-checked; không coi một giá trị xuất hiện trong database là đã được phê duyệt.
+2. Trạng thái P0 theo bảng bạn gửi
+P0
+Hạng mục
+Trạng thái
+Việc cần làm
+A
+QCVN 40:2025/BTNMT
+Đã đóng
+Giữ citation tới đúng phụ lục/bảng và căn cứ chọn cột.
+B
+Precursor salt bundle
+Một phần
+Nồng độ stock, SDS, dose cap, mô phỏng hay thực tế.
+C
+Capacity model 3 KL
+Mở
+Môi trường chạy PHREEQC, định nghĩa 3 KL, cross-check.
+D
+6 claim hóa học
+Một phần
+Phương trình, nguồn, pha rắn, đối chiếu và discrepancy log.
+E
+LOD/accuracy/rounding
+Mở
+Phương pháp đo, LOD/LOQ, uncertainty, rounding.
+F
+≥3 golden cases
+Mở
+Input/output độc lập, database pin, expected result, pass/fail.
+G
+Rubric + trọng số + N/A
+Một phần
+Trọng số tổng 100%, công thức và quy tắc N/A.
+H
+Slider step
+Đã khóa
+Giữ test và bằng chứng yêu cầu.
+J
+Mass-balance ±2%
+Một phần
+Định nghĩa cân bằng, ranh giới hệ, dung sai và cách xử lý fail.
+3. P0-B — Muối tiền chất
+Muối: FeCl₃·6H₂O, ZnSO₄·7H₂O và Pb(NO₃)₂.
+Thu thập tên hóa chất/hydrate chính xác, CAS RN, grade/độ tinh khiết, nhà cung cấp và SDS đúng sản phẩm.
+Nếu là dung dịch thật: nồng độ stock mol/L, thể tích, cách pha và ngày pha. Nếu chỉ là mô phỏng, ghi rõ nồng độ là giả định thiết kế.
+Thu thập dose cap cho một lần châm và tổng lượng châm từ yêu cầu thiết bị/quy trình hoặc quyết định owner; không tự suy ra từ SDS.
+Lấy yêu cầu PPE, lưu trữ, bất tương thích, xử lý tràn đổ và chất thải từ SDS.
+Không gán pH cố định cho dung dịch muối nếu chưa có nồng độ, nền nước và mô hình thủy phân.
+Nguồn: NIOSH Pocket Guide https://www.cdc.gov/niosh/npg/ ; mục iron salts https://www.cdc.gov/niosh/npg/npgd0346.html . NIOSH là nguồn nguy hại nghề nghiệp tổng quát, không thay thế SDS của nhà cung cấp.
+Dự án là mô phỏng hoàn toàn hay mô phỏng khớp phòng lab thật?
+Có stock concentration/volume cụ thể cho từng muối không?
+Dose cap đã được quy định hay cần thiết kế mới?
+Có SDS của đúng nhà cung cấp và đúng hydrate không?
+4. P0-C và P0-F — PHREEQC và golden cases
+Xác nhận PHREEQC CLI chạy được; ghi hệ điều hành, lệnh chạy, phiên bản và vị trí executable.
+Lưu release/version và SHA-256 của database chính xác được sử dụng.
+Làm rõ “3 KL” nghĩa là 3 kim loại đồng thời hay thể tích 3 kilolitre; nếu là 3 kL, cần định nghĩa cách scale lượng hóa chất.
+Mỗi golden case phải có ID, mục tiêu, input đầy đủ, database pin, lệnh chạy, output gốc, expected result, tolerance so sánh và pass/fail.
+Bộ tối thiểu 3 case: (1) trường hợp không cần xử lý hoặc dễ đạt; (2) Fe/Zn đạt nhưng Pb chưa đạt; (3) vượt dose cap hoặc vi phạm ràng buộc.
+Nếu spec đã định nghĩa GC-HYD-01, GC-PREC-01/02/03/04, GC-SO4-01, GC-SOLID-01, giữ ID đó và ghi revision khi thay đổi.
+Nguồn chính thức: USGS PHREEQC https://www.usgs.gov/software/phreeqc-version-3 ; manual https://water.usgs.gov/water-resources/software/PHREEQC/Phreeqc_3_2013_manual.pdf
+PHREEQC CLI đã chạy chưa? Nếu có, gửi lệnh và output version.
+Database pin nào được dùng và SHA-256 là gì?
+“3 KL” được định nghĩa thế nào trong spec?
+Đã có log của 7 case hay mới có thiết kế case?
+5. P0-D — Sáu claim hóa học
+Claims: WT-CHEM-K-FeOH, WT-CHEM-Ksp-Fe, WT-CHEM-Ksp-Zn, WT-CHEM-Ksp-Pb, WT-CHEM-pKa2-H2SO4, WT-CHEM-SOLID-PHASE.
+Với từng claim, chép nguyên văn phương trình phản ứng trong database, log_k, nhiệt độ, pha, tên database, hash và comment nguồn.
+Không nhầm hằng số tạo loài hòa tan/hydrolysis với Ksp của chất rắn.
+Không so sánh log K từ hai database nếu phương trình hoặc pha rắn khác nhau.
+Cross-check bằng input/output PHREEQC độc lập; kiểm tra cân bằng khối lượng, saturation index và pha kết tủa.
+Giá trị trong GitHub công khai chỉ để đối chiếu; bằng chứng dự án phải trỏ tới database đã pin.
+Giá trị ứng viên để kiểm tra — chưa phải giá trị phê duyệt
+Trong MINTEQ v4 công khai, các phản ứng và log K được liệt kê như sau: Ferrihydrite: Fe(OH)₃ + 3H⁺ = Fe³⁺ + 3H₂O, log K = 3.191; Zn(OH)₂(am) + 2H⁺ = Zn²⁺ + 2H₂O, log K = 12.474; Pb(OH)₂ + 2H⁺ = Pb²⁺ + 2H₂O, log K = 8.15.
+Nếu dùng pKw = 13.99 như ghi trong spec, quy đổi sang phản ứng hòa tan với OH⁻ cho: Fe ferrihydrite log Ksp = 3.191 − 3×13.99 = −38.779; Zn(OH)₂(am) = 12.474 − 2×13.99 = −15.506; Pb(OH)₂ = 8.15 − 2×13.99 = −19.830. Cần xác nhận lại trong đúng database/hash đã pin trước khi sử dụng.
+FeOH log K = −2.19 và H₂SO₄ pKa₂/log K = −1.99 là giá trị ghi trong registry, cần xác nhận đúng phương trình và database pin. PubChem nêu pKa = 1.92 ở 25 °C cho H₂SO₄ theo nguồn HSDB/OECD; cần ghi nhận chênh lệch với 1.99 thay vì âm thầm chọn một giá trị.
+Nguồn: mô tả database PHREEQC của USGS https://water.usgs.gov/water-resources/software/PHREEQC/documentation/phreeqc3-html/phreeqc3-5.htm ; MINTEQ v4 https://github.com/phreeqc-dev/phreeqc3/blob/master/database/minteq.v4.dat ; PubChem sulfuric acid https://pubchem.ncbi.nlm.nih.gov/compound/1118
+Nguồn gốc các giá trị cũ −38.6 (Fe), −16.9 (Zn), −15.3 (Pb) là gì? Có citation/lịch sử thay đổi không?
+Database pin thực tế có phương trình/log_k nào cho các pha trên?
+Chemistry owner chọn pha rắn nào cho từng kim loại?
+pKa₂ chọn theo nguồn/điều kiện nào và discrepancy 1.92/1.99 sẽ được xử lý ra sao?
+Có output GC-HYD-01, GC-SO4-01, GC-SOLID-01 để cross-check chưa?
+6. P0-E — LOD, accuracy, rounding
+Xác định sản phẩm mô phỏng kết quả đo hay đại diện phòng thử nghiệm thật.
+Nếu thực nghiệm: phương pháp (ICP-OES/ICP-MS/AAS...), model thiết bị, nền mẫu, lọc/tiêu hủy, đường chuẩn, LOD/LOQ được xác nhận và khoảng làm việc.
+Nếu mô phỏng: ghi LOD/LOQ là tham số giả định, không tuyên bố đó là năng lực đo thực.
+Định nghĩa riêng bias/accuracy và precision/repeatability; không gộp thành một con số.
+Quy tắc làm tròn phải áp dụng nhất quán; không làm tròn trước khi phân loại đạt/không đạt nếu điều đó có thể đổi kết luận.
+Định nghĩa cách xử lý kết quả dưới LOD/LOQ và truyền uncertainty.
+Nguồn EPA Method 200.7: https://www.epa.gov/esam/method-2007-determination-metals-and-trace-elements-water-and-wastes-inductively-coupled ; danh mục Method 200.7/200.8: https://www.epa.gov/cwa-methods/approved-cwa-test-methods-metals
+EPA nêu giới hạn phát hiện thực tế phụ thuộc nền mẫu, thiết bị và điều kiện vận hành. Vì vậy không mặc định Pb LOD = 0.001 mg/L hoặc Fe/Zn LOD = 0.01 mg/L nếu chưa có dữ liệu phù hợp.
+VECLab là mô phỏng hay đại diện một phòng thử nghiệm thật?
+Nếu thật, phương pháp/thiết bị và LOD/LOQ đã xác nhận là gì?
+Rounding dùng để hiển thị hay dùng để quyết định tuân thủ?
+Có guideline nội bộ hoặc yêu cầu pháp lý về uncertainty/accuracy không?
+7. P0-G — Rubric, trọng số, N/A
+Đây là quyết định thiết kế đánh giá, không có một bộ trọng số pháp lý chung bắt buộc cho mọi mô hình xử lý nước.
+Baseline để owner cân nhắc (chưa phê duyệt): kết quả đầu ra 40%; quy trình 30%; hiệu quả hóa chất/bùn 15%; báo cáo và truy vết 15%; tổng 100%.
+Định nghĩa từng tiêu chí, thang điểm, đơn vị và công thức.
+Trọng số nhóm/tiêu chí phải tổng 100%.
+Định nghĩa N/A, cách chuẩn hóa mẫu số khi loại tiêu chí và trường hợp không được dùng N/A để né lỗi.
+Quy tắc khi input thiếu, solver lỗi/không hội tụ hoặc kết quả dưới LOD.
+Kiểm thử ít nhất 3 ví dụ tính điểm bằng tay.
+8. P0-J — Mass-balance tolerance
+Định nghĩa cân bằng theo nguyên tố hay theo từng ion/loài; với kết tủa, tính kim loại trong pha nước + pha rắn/bùn + các dòng ra.
+Định nghĩa ranh giới hệ: mẫu lấy ra, nước rửa, dòng hồi lưu và thất thoát có được tính không.
+Thống nhất công thức, dấu, mẫu số và trường hợp tổng đầu vào bằng 0. Ví dụ: sai lệch (%) = 100 × (tổng đầu vào − tổng đầu ra) / tổng đầu vào.
+Phân biệt tolerance của solver/mô phỏng với sai số phân tích phòng thí nghiệm.
+Khi fail: lưu input/output, tạo discrepancy, để unresolved và không báo pass khi chưa giải thích.
+Không tự tách Pb thành ±5% chỉ vì nồng độ thấp; cần căn cứ uncertainty/LOD/LOQ hoặc quyết định owner.
+Standard Methods có mô tả QC như blank, spike/recovery; ví dụ một phương pháp kim loại dùng recovery 85–115% trong điều kiện của phương pháp đó. Đây không phải căn cứ trực tiếp để đặt mass-balance tolerance ±2% cho solver. Nguồn tham khảo: https://law.resource.org/pub/us/cfr/ibr/002/apha.method.3111.1992.html
+9. P0-A — QCVN 40:2025/BTNMT
+Lưu Thông tư 06/2025/TT-BTNMT, toàn văn QCVN và phụ lục phương pháp.
+Ghi điều kiện áp dụng, cột/nhóm nguồn tiếp nhận, thông số kim loại, đơn vị, phương pháp thử và điều khoản chuyển tiếp.
+Không chọn Cột A/B/C tùy ý; ghi căn cứ chọn cột và phạm vi áp dụng.
+Nếu P0-A đã đóng, chỉ rà lại citation tới đúng bảng/phụ lục và tránh dùng nhầm QCVN 40:2011/BTNMT.
+Nguồn cơ quan quản lý: https://vukhcn.monre.gov.vn/tin-khoa-hoc-cong-nghe-cua-bo/quy-chuan-ky-thuat-quoc-gia-qcvn-402025-btnmt-ve-nuoc-thai-cong-nghiep/tt-9067
+Thông tin văn bản: https://thuvienphapluat.vn/van-ban/Tai-nguyen-Moi-truong/Circular-06-2025-TT-BTNMT-promulgating-national-technical-regulation-on-industrial-effluent-648181.aspx
+10. Hồ sơ bằng chứng tối thiểu cho mỗi claim/P0
+ID yêu cầu/claim và phát biểu chính xác.
+Giá trị, đơn vị, phương trình/định nghĩa, điều kiện áp dụng.
+Tên nguồn, tác giả/cơ quan, năm, URL/DOI, phiên bản, trang/bảng/dòng.
+Tệp gốc hoặc snapshot, ngày truy cập, checksum khi phù hợp.
+Cách trích xuất/tính đổi, giả định và người phê duyệt.
+Output cross-check độc lập, input/output gốc, tolerance và pass/fail.
+Trạng thái bằng chứng và discrepancy log; không xóa lịch sử thay đổi.
+11. Thứ tự ưu tiên
+P0-D: xác nhận database pin/hash; truy nguồn −38.6, −16.9, −15.3; chốt pha rắn; xử lý pKa₂; chạy cross-check.
+P0-C/F: xác nhận CLI, định nghĩa 3 KL, chạy golden cases và lưu output độc lập.
+P0-B: xác định mô phỏng/thực tế; lấy stock concentration, SDS và dose cap.
+P0-E/J: chốt mục tiêu đo lường, LOD/LOQ/accuracy và tolerance theo bằng chứng phù hợp.
+P0-G: chốt rubric, trọng số, N/A và unit tests.
+P0-A/H: không làm lại nếu bằng chứng đã đủ; giữ citation và test.
+12. File bạn nên gửi để mình rà soát
+docs/scientific-evidence-register.md bản mới nhất.
+Spec hiện tại có §6.5 và discrepancy log.
+PIN.json và đúng database PHREEQC đã pin.
+Báo cáo verify cuối cùng và log script.
+Input/output của các golden cases.
+SDS của ba muối nếu có cấu hình hóa chất thật.
+Decision record về dose cap, rubric, LOD/accuracy và mass-balance.
+Giới hạn: Các link là điểm bắt đầu để truy nguồn. Trước khi đóng P0 phải kiểm tra tài liệu đầy đủ, đúng điều kiện áp dụng và đúng hash/database của repository. Các giá trị ứng viên trong hồ sơ này chưa phải quyết định phê duyệt.
+

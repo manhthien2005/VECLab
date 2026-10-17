@@ -7,6 +7,7 @@ import { ShowcaseCarouselTrack } from './showcase-carousel-track.js'
 const CARD_ART = {
   'acid-base-extraction': { Icon: FlaskIcon, image: '/assets/experiments/extraction.webp', alt: 'Phễu chiết hai pha và các bình thu mẫu' },
   'jar-test': { Icon: MoleculeIcon, image: '/assets/experiments/jar.webp', alt: 'Hai cốc Jar Test với cánh khuấy và bông cặn đang lắng' },
+  'water-treatment': { Icon: LayersIcon, image: '/assets/auth-laboratory-v2.webp', alt: 'Bình khuấy và máy đo trong phòng thí nghiệm xử lý nước nhiều kim loại nặng' },
   'methylene-blue-adsorption': { Icon: LayersIcon, image: '/assets/experiments/adsorption.webp', alt: 'Dung dịch xanh methylene và than hoạt tính dùng trong hấp phụ theo mẻ' },
 } as const
 

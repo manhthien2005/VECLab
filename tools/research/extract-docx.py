@@ -1,0 +1,10 @@
+import zipfile, re, html
+z = zipfile.ZipFile(r'D:\VECLab\docs\experiments\Ho_so_thu_thap_bang_chung_P0_Water_Treatment.docx')
+xml = z.read('word/document.xml').decode('utf-8')
+text = re.sub(r'</w:p>', '\n', xml)
+text = re.sub(r'<w:tab/>', '\t', text)
+text = re.sub(r'<w:br/>', '\n', text)
+text = re.sub(r'<[^>]+>', '', text)
+text = html.unescape(text)
+text = re.sub(r'\n{3,}', '\n\n', text)
+print(text)
