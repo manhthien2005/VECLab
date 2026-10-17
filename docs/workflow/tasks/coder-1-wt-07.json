@@ -1,0 +1,68 @@
+{
+  "v": 1,
+  "kind": "task",
+  "id": "WT-07",
+  "coder": 1,
+  "repo": "manhthien2005/VECLab",
+  "branch": "feature/coder-1-wt-07-persistence",
+  "target": "Manh-water-treatment",
+  "base": "8c6d747adeba6357f117f6080a8dc67524508a8e",
+  "goal": "Wire water-treatment attempt vào Supabase qua existing RPC contract (create_attempt + commit_attempt_event + complete_attempt). Đăng ký 'water-treatment' làm scenario key trong contracts, tạo domain module cho water-treatment, wrap runWaterTreatmentAction để accept attemptId (resume path), và thêm integration test với guest-repository để verify event log round-trip + idempotency.",
+  "read": [
+    "AGENTS.md",
+    "docs/workflow/web-handoff-contract.md",
+    "docs/workflow/parallel-work.md",
+    ".agents/skills/veclab-implement/SKILL.md",
+    "docs/data-and-state-model.md",
+    "docs/system-architecture.md",
+    "docs/experiments/water-treatment-spec.md",
+    "docs/superpowers/plans/2026-10-17-water-treatment-build-plan.md",
+    "src/app/simulate/water-treatment/actions.ts",
+    "src/app/simulate/water-treatment/page.tsx",
+    "src/features/water-treatment/constants.ts",
+    "src/features/water-treatment/capacity.ts",
+    "src/features/water-treatment/use-water-treatment-attempt.ts",
+    "src/domain/process/contracts.ts",
+    "src/domain/process/lifecycle.ts",
+    "src/application/simulation/commit-action.ts",
+    "src/application/attempts/repository.ts",
+    "src/application/attempts/guest-repository.ts",
+    "tests/unit/water-treatment-golden-cases.test.ts"
+  ],
+  "files": [
+    "src/domain/process/contracts.ts",
+    "src/domain/experiments/water-treatment/model.ts",
+    "src/domain/experiments/water-treatment/actions.ts",
+    "src/app/simulate/water-treatment/actions.ts",
+    "src/app/simulate/water-treatment/page.tsx",
+    "tests/integration/water-treatment-persistence.test.ts"
+  ],
+  "accept": [
+    "src/domain/process/contracts.ts: SCENARIO_KEYS bao gồm 'water-treatment' làm phần tử thứ 3 (sau jar-test, acid-base-extraction). Kiểu liên quan (ScenarioKey, ATTEMPT_SCENARIO_KEYS) tự động mở rộng, không cần đổi chỗ khác.",
+    "src/domain/experiments/water-treatment/{model,actions}.ts (mới): xuất ra kiểu WaterTreatmentDomainState (composition, pH, history) + DomainModule<WaterTreatmentDomainState> tuân thủ contract trong src/domain/process/lifecycle.ts. Module KHÔNG tính chemistry (delegate sang @/features/water-treatment/capacity.ts qua thin wrapper); chỉ state diff + event payload.",
+    "src/app/simulate/water-treatment/actions.ts: export mới runPersistedWaterTreatmentAction(input) chấp nhận { attemptId?: UUID, actionId?: UUID, expectedRevision?: number, action, composition, pH, dose_mL?, volume_mL?, actorUserId?: UUID }. Khi attemptId có: tạo event qua guest-repository.appendAction (cho guest mode) hoặc cloud repository (khi actorUserId có). Khi attemptId KHÔNG có: fallback runWaterTreatmentAction hiện tại (in-memory preview).",
+    "src/app/simulate/water-treatment/actions.ts: export mới createWaterTreatmentAttempt({ initialComposition, initialPH, volume_mL, actorUserId?, contentLocale? }) → trả về { attemptId, releaseId, scenarioKey, revision: 0 } qua repository.createAttempt. Release id = 'water-treatment@0.1.0' (constant trong constants.ts).",
+    "src/app/simulate/water-treatment/page.tsx: đọc search param 'attempt' (UUID validate). Khi có: gọi server action loadAttempt(attemptId) → trả về { timeline: WaterTreatmentDomainState[] } từ repository.getAttempt(id, { includeEvents: true }). Hiển thị 'Bản lưu N' (revision) + nút 'Tiếp tục lượt'. Khi URL không hợp lệ: hiển thị 'Không tìm thấy lượt thí nghiệm' + KHÔNG tạo attempt mới (giống jar-test pattern).",
+    "src/features/water-treatment/constants.ts: thêm constant WT_SCENARIO_RELEASE_ID = 'water-treatment@0.1.0' (as const) + WT_SCENARIO_KEY = 'water-treatment'. KHÔNG đổi type/signature hiện có.",
+    "tests/integration/water-treatment-persistence.test.ts (mới): 3 test qua guest-repository: (1) createAttempt với scenarioKey='water-treatment' + releaseId='water-treatment@0.1.0' → repository trả { revision: 0, lastSequence: 0 }. (2) appendAction 'stir' với cùng actionId gọi 2 lần → sequence vẫn = 1 (idempotent_replay), revision không đổi. (3) appendAction 3 actions liên tiếp (stir → settle → filter) với 3 actionId khác nhau → lastSequence = 3, revision = 3, history rebuild đúng từ timeline.",
+    "npm run typecheck PASS; npm run lint -- src/domain/experiments/water-treatment/ src/app/simulate/water-treatment/ tests/integration/water-treatment-persistence.test.ts PASS; npm run test -- tests/integration/water-treatment-persistence.test.ts PASS; npm run test -- tests/unit/water-treatment-*.test.ts PASS (không regress 4 test hiện có)."
+  ],
+  "checks": {
+    "unit": "npm run test -- tests/unit/water-treatment-{capacity,golden-cases,replay-and-guard}.test.ts tests/integration/water-treatment-persistence.test.ts",
+    "types": "npm run typecheck",
+    "lint": "npm run lint -- src/domain/experiments/water-treatment/ src/domain/simulate/water-treatment/ src/app/simulate/water-treatment/ tests/integration/water-treatment-persistence.test.ts",
+    "diff": "git diff 8c6d747adeba6357f117f6080a8dc67524508a8e -- src/domain/process/contracts.ts src/features/water-treatment/constants.ts src/app/simulate/water-treatment/ src/domain/experiments/water-treatment/ tests/integration/water-treatment-persistence.test.ts --check",
+    "db": "echo 'skipped for guest path; cloud Supabase local only checked when actorUserId supplied (out of scope of integration test)'"
+  },
+  "notes": [
+    "Base 8c6d747 chưa có domain module cho water-treatment — đây là integration boundary mới.",
+    "Architecture đã có sẵn: src/application/attempts/repository.ts (cloud, Supabase RPC) + src/application/attempts/guest-repository.ts (local fallback) + src/application/simulation/commit-action.ts (generic domain commit). WT-07 theo pattern này, KHÔNG tạo persistence layer mới.",
+    "Wiring chỉ dùng guest-repository trong unit/integration test (Supabase local chưa boot ở CI unit). Cloud path phải qua repository interface; không gọi supabase-js thẳng trong action.",
+    "idempotency: actionId (UUID) phải được generate phía client; server chỉ append nếu action_id chưa tồn tại trong attempt_events. Khi retry với cùng actionId + cùng fingerprint → idempotent_replay.",
+    "JCS canonical: requestFingerprint = SHA-256(canonical({attemptId, releaseId, actionType, normalizedInput})). Sử dụng canonicalize() + createHash('sha256') từ node:crypto.",
+    "Khi attempt không tồn tại: page.tsx render 404-style message ('Không tìm thấy lượt thí nghiệm'), không redirect tạo attempt mới (giống jar-test bảo toàn dữ liệu).",
+    "Không đụng scoring.ts, UI workbench (coder 2 sở hữu), constants type/signature.",
+    "naming: waterTreatmentDomainState (camelCase). Test dùng 'describe(\"Water Treatment persistence (guest repo)\")' để match pattern hiện có.",
+    "Result JSON v1 theo docs/workflow/templates/result.json; status chỉ 'pending_review' hoặc 'blocked'."
+  ]
+}
