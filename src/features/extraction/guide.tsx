@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
 import { ArrowRightIcon } from '@/features/landing/icons.js'
 import { EXTRACTION_SOURCES } from '@/content/evidence/acid-base-extraction.js'
+import { ExtractionLessonVideos } from './lesson-videos.js'
 import styles from '@/features/experiment-guide/article.module.css'
 import local from './guide.module.css'
 const STEPS=[
@@ -55,6 +56,7 @@ export function ExtractionGuide({attemptId}:{attemptId:string|undefined}) {
  return <div className={'page '+styles.guide}>
   <Breadcrumbs items={[{label:'Trang chủ',href:'/'},{label:'Thí nghiệm',href:'/experiments'},{label:'Chiết tách axit–bazơ',href:'/experiments/acid-base-extraction'},{label:'Lý thuyết & cách làm'}]}/>
   <header className={styles.header}><div><h1>Chiết tách axit–bazơ: lý thuyết & cách làm</h1><p>Theo dõi mẫu qua từng bình, chọn đúng pha và thu riêng ba sản phẩm. Mỗi bước có công cụ, cách thao tác và kết quả cần kiểm tra.</p></div><Link className={styles.returnLink} href={resume}>{attemptId?'Quay lại lượt đang làm':'Bắt đầu thực hành'}<ArrowRightIcon/></Link></header>
+  <ExtractionLessonVideos/>
   <div className={styles.readingLayout}>
    <aside className={styles.rail}><nav className={styles.contents} aria-label="Tra nhanh các bước"><h2>Tra nhanh các bước</h2><ol>{STEPS.map(step=><li key={step.id}><a href={'#'+step.id}>{step.title}</a></li>)}</ol></nav><p>Đang làm? Mở nút “Cách…” tại đúng nhóm thao tác. Kiểm tra bình nguồn, bình nhận và pha trước mỗi lần chuyển.</p></aside>
    <article className={styles.article} aria-label="Hướng dẫn thực hành chiết tách axit–bazơ">
