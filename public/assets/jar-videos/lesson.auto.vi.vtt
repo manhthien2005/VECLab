@@ -1,0 +1,668 @@
+WEBVTT
+
+NOTE Phụ đề nhận dạng tự động từ âm thanh; đã rà lỗi chữ và một số thuật ngữ.
+
+1
+00:00:00.000 --> 00:00:03.194
+Chào mừng mọi người đến với bài giải thích
+chi tiết về thí nghiệm Jar Test
+
+2
+00:00:03.194 --> 00:00:04.100
+trên hệ thống VECLab.
+
+3
+00:00:04.640 --> 00:00:08.448
+Hôm nay, chúng ta sẽ cùng nhau biến hóa
+những lý thuyết hóa học nghe có vẻ
+
+4
+00:00:08.448 --> 00:00:08.860
+khô khan
+
+5
+00:00:08.860 --> 00:00:11.680
+thành các bước thực hành mô phỏng cực kỳ
+thực tế và sống động.
+
+6
+00:00:12.320 --> 00:00:16.029
+Bắt tay ngay vào việc tìm hiểu cách xử lý
+độ đục của nước một cách bài bản
+
+7
+00:00:16.029 --> 00:00:16.480
+nhất nhé.
+
+8
+00:00:17.400 --> 00:00:20.900
+Nội dung hôm nay sẽ đi qua năm chặng
+chính: bài toán xử lý độ đục,
+
+9
+00:00:21.500 --> 00:00:24.140
+hóa học cốt lõi cần biết, thiết kế thí
+nghiệm chuẩn,
+
+10
+00:00:24.840 --> 00:00:28.100
+luồng thực hành trên VECLab và cuối cùng
+là phân tích kết luận.
+
+11
+00:00:28.840 --> 00:00:32.711
+Đi ngay vào phần 1, bài toán xử lý độ đục
+và cách xác định mục tiêu thực
+
+12
+00:00:32.711 --> 00:00:32.980
+hành.
+
+13
+00:00:33.660 --> 00:00:37.000
+Hãy tưởng tượng chúng ta có một mẫu nước
+đục tổng hợp từ đất sét kaolin.
+
+14
+00:00:37.640 --> 00:00:39.760
+Các hạt cặn này vô cùng mịn và cản trở ánh
+sáng.
+
+15
+00:00:40.300 --> 00:00:44.700
+Vậy câu hỏi lớn đặt ra đây là nên chọn pH
+ban đầu và liều phèn nhôm thế nào
+
+16
+00:00:44.700 --> 00:00:46.120
+để làm trong nước hiệu quả nhất.
+
+17
+00:00:46.820 --> 00:00:50.268
+Rõ ràng là chúng ta không thể đoán mò
+được, mà phải thử nghiệm và đo lường
+
+18
+00:00:50.268 --> 00:00:51.480
+số liệu một cách khoa học.
+
+19
+00:00:52.140 --> 00:00:53.660
+Có một sự thật khá thú vị thế này.
+
+20
+00:00:53.660 --> 00:00:57.253
+Mắt người thường bị đánh lừa rất giỏi và
+không thể phân biệt chính xác những
+
+21
+00:00:57.253 --> 00:00:58.860
+thay đổi nhỏ về độ trong của nước.
+
+22
+00:00:59.440 --> 00:01:03.949
+Chính vì vậy, người ta phải dùng đến NTU,
+đơn vị đo độ đục dựa trên sự tán
+
+23
+00:01:03.949 --> 00:01:04.680
+xạ ánh sáng.
+
+24
+00:01:05.340 --> 00:01:06.900
+Cần phải nhớ một điều cực kỳ quan trọng.
+
+25
+00:01:07.360 --> 00:01:11.262
+NTU không phải là số gam cặn tính trên mỗi
+lít nước đâu, mà nó là thước đo
+
+26
+00:01:11.262 --> 00:01:12.580
+quang học khách quan nhất
+
+27
+00:01:12.580 --> 00:01:14.620
+để chúng ta biết nước đang đục đến mức
+nào.
+
+28
+00:01:15.420 --> 00:01:19.260
+Chuyển sang phần 2, hóa học cốt lõi và cơ
+chế hoạt động của phèn nhôm.
+
+29
+00:01:20.040 --> 00:01:22.400
+Vậy thì điều gì thực sự xảy ra bên trong
+mẫu nước?
+
+30
+00:01:22.780 --> 00:01:24.480
+Đầu tiên là quá trình keo tụ.
+
+31
+00:01:25.020 --> 00:01:28.400
+Điều này giải thích rất rõ lý do tại sao
+trên hệ thống, thao tác đầu tiên,
+
+32
+00:01:28.660 --> 00:01:30.540
+ngay sau khi cấp phèn lại là khuấy nhanh.
+
+33
+00:01:31.180 --> 00:01:34.211
+Việc khuấy nhanh ở tốc độ cao sẽ giúp hóa
+chất phân tán đều khắp mẫu nước
+
+34
+00:01:34.211 --> 00:01:35.000
+chỉ trong chớp mắt.
+
+35
+00:01:35.540 --> 00:01:38.720
+Bước này sẽ phá vỡ sự ổn định của các hạt
+cao lanh,
+
+36
+00:01:38.760 --> 00:01:41.060
+tạo điều kiện hoàn hảo để chúng bắt đầu
+dính lại với nhau.
+
+37
+00:01:41.940 --> 00:01:43.820
+Ngay sau keo tụ là quá trình tạo bông.
+
+38
+00:01:44.500 --> 00:01:46.540
+Lúc này tốc độ khuấy sẽ được giảm xuống
+đáng kể.
+
+39
+00:01:46.540 --> 00:01:50.743
+Việc khuấy chậm nhẹ nhàng thế này cho phép
+các hạt keo đã mất ổn định có cơ
+
+40
+00:01:50.743 --> 00:01:51.920
+hội va chạm vào nhau.
+
+41
+00:01:52.540 --> 00:01:54.920
+Nhờ có chất keo là phèn nhôm kết nối.
+
+42
+00:01:55.440 --> 00:01:58.620
+Chúng bám dính lại, cứ thế lớn dần lên
+thành những bông keo to hơn,
+
+43
+00:01:58.980 --> 00:02:01.920
+nặng hơn, đến mức mắt thường cũng có thể
+dễ dàng nhìn thấy được.
+
+44
+00:02:02.580 --> 00:02:05.909
+Khi các bông keo đã trở nên to và nặng
+trĩu, chúng ta bước vào giai đoạn
+
+45
+00:02:05.909 --> 00:02:06.140
+lắng.
+
+46
+00:02:06.640 --> 00:02:09.020
+Trên hệ thống, lúc này máy khuấy sẽ dừng
+lại hoàn toàn.
+
+47
+00:02:09.560 --> 00:02:12.885
+Dưới tác dụng của trọng lực, những bông
+keo nặng này sẽ từ từ chìm xuống đáy
+
+48
+00:02:12.885 --> 00:02:13.060
+cốc,
+
+49
+00:02:13.060 --> 00:02:15.220
+tách biệt hẳn khỏi phần nước trong trẻo
+phía trên.
+
+50
+00:02:15.860 --> 00:02:18.640
+Nghe thì có vẻ đơn giản, nhưng đây chính
+là nguyên lý vật lý tuyệt vời,
+
+51
+00:02:18.900 --> 00:02:21.140
+đằng sau mọi quy trình làm sạch nước bằng
+hóa chất.
+
+52
+00:02:21.960 --> 00:02:25.533
+Cùng đến với phần 3, thiết kế thí nghiệm
+chuẩn và nguyên tắc so sánh biến
+
+53
+00:02:25.533 --> 00:02:25.680
+số.
+
+54
+00:02:26.540 --> 00:02:30.199
+Điểm mấu chốt ở đây chính là quy tắc vàng
+trong mọi thí nghiệm khoa học:
+
+55
+00:02:30.199 --> 00:02:31.520
+nguyên tắc cô lập biến số.
+
+56
+00:02:32.320 --> 00:02:36.800
+Trên hệ thống, chúng ta có các mức pH ban
+đầu là 5, 7 hoặc 9.
+
+57
+00:02:37.460 --> 00:02:40.960
+Nếu muốn biết liều phèn tác động ra sao,
+bắt buộc phải thiết lập các cốc có
+
+58
+00:02:40.960 --> 00:02:41.660
+chung 1 mức pH.
+
+59
+00:02:42.180 --> 00:02:45.920
+Ngược lại, muốn biết pH ảnh hưởng thế nào
+thì phải cấp chung một liều phèn.
+
+60
+00:02:46.560 --> 00:02:49.804
+Đừng bao giờ thay đổi cả hai yếu tố cùng
+lúc, nếu không muốn kết quả trở
+
+61
+00:02:49.804 --> 00:02:50.840
+thành một mớ bòng bong.
+
+62
+00:02:51.520 --> 00:02:54.380
+Và đây, một cái bẫy rất phổ biến cần phải
+làm rõ ngay.
+
+63
+00:02:55.020 --> 00:02:58.556
+Liều phèn tính bằng miligam trên lít, thực
+chất là nồng độ mục tiêu cho một
+
+64
+00:02:58.556 --> 00:02:58.980
+lít nước.
+
+65
+00:02:59.440 --> 00:03:02.480
+Thế nhưng, sức chứa thực tế của mỗi cốc mô
+phỏng chỉ là nửa lít,
+
+66
+00:03:02.780 --> 00:03:03.940
+tức là 0,5 lít thôi.
+
+67
+00:03:04.640 --> 00:03:08.688
+Vì vậy, muốn có liều 100 miligam trên lít,
+khuấy lượng phèn thực tế cần cho
+
+68
+00:03:08.688 --> 00:03:09.120
+vào cốc,
+
+69
+00:03:09.400 --> 00:03:10.460
+chỉ là 50 miligam.
+
+70
+00:03:11.060 --> 00:03:14.664
+Phân biệt rõ ràng giữa liều lượng và khuấy
+lượng sẽ giúp chúng ta thao tác
+
+71
+00:03:14.664 --> 00:03:16.320
+chuẩn xác tuyệt đối trên hệ thống.
+
+72
+00:03:17.000 --> 00:03:21.023
+Tiếp theo là phần 4, luồng thực hành trên
+VECLab: biến lý thuyết thành thao
+
+73
+00:03:21.023 --> 00:03:21.720
+tác trên web.
+
+74
+00:03:22.480 --> 00:03:25.940
+Để thí nghiệm thành công, có 5 bước chuẩn
+xác cần phải tuân thủ nghiêm ngặt.
+
+75
+00:03:26.560 --> 00:03:29.340
+Thứ 1, đo độ đục mẫu ban đầu để lấy mốc so
+sánh.
+
+76
+00:03:29.900 --> 00:03:32.340
+Thứ 2, chuẩn bị cốc về giá trị pH mong
+muốn.
+
+77
+00:03:32.960 --> 00:03:34.980
+Thứ 3, thực hiện cấp phèn thật cẩn thận.
+
+78
+00:03:34.980 --> 00:03:39.240
+Thứ tư, cho hệ thống chạy toàn bộ chu
+trình: khuấy nhanh, khuấy chậm và
+
+79
+00:03:39.240 --> 00:03:39.540
+lắng.
+
+80
+00:03:40.060 --> 00:03:44.249
+Và cuối cùng, đo độ đục đầu ra, tự tính
+toán và ghi lại kết quả để chọn ra
+
+81
+00:03:44.249 --> 00:03:46.060
+phương án nộp bài hoàn hảo nhất.
+
+82
+00:03:46.660 --> 00:03:48.920
+Cứ làm đúng trình tự này là không thể trật
+đi đâu được.
+
+83
+00:03:49.800 --> 00:03:51.640
+Mọi người hãy nhìn vào bức tranh thời gian
+này xem.
+
+84
+00:03:52.260 --> 00:03:56.360
+Một phút khuấy nhanh, 20 phút khuấy chậm
+và 30 phút dành cho pha lắng.
+
+85
+00:03:56.920 --> 00:03:59.400
+Tổng cộng thí nghiệm mô phỏng này kéo dài
+51 phút.
+
+86
+00:04:00.000 --> 00:04:03.204
+Nhưng đừng lo lắng, cần nhớ rằng đây chỉ
+là thời gian trong thế giới mô
+
+87
+00:04:03.204 --> 00:04:03.700
+phỏng thôi.
+
+88
+00:04:03.700 --> 00:04:06.957
+Chứ không phải là thời gian thực mà chúng
+ta phải ngồi ròng rã chờ đợi trước
+
+89
+00:04:06.957 --> 00:04:07.900
+màn hình máy tính đâu.
+
+90
+00:04:08.660 --> 00:04:11.660
+Tuy nhiên, có một vài luật chơi cốt lõi
+cần nhớ.
+
+91
+00:04:12.260 --> 00:04:15.940
+Việc đo độ đục của mốc ban đầu sẽ luôn cho
+ra giá trị 125 NTU
+
+92
+00:04:15.940 --> 00:04:18.060
+và mốc này dùng chung cho toàn bộ các cốc.
+
+93
+00:04:18.760 --> 00:04:22.136
+Thứ hai, nếu cấp phèn nhiều lần vào cùng
+một cốc, lượng phèn sẽ được hệ
+
+94
+00:04:22.136 --> 00:04:23.040
+thống cộng dồn lại.
+
+95
+00:04:23.380 --> 00:04:24.540
+Và điều cực kỳ quan trọng.
+
+96
+00:04:24.900 --> 00:04:27.880
+Khi đã bấm nút, tất cả các cốc sẽ chạy
+chung một mẻ mô phỏng.
+
+97
+00:04:27.880 --> 00:04:31.040
+Toàn bộ thiết lập sẽ bị khóa chặt lại ngay
+khi quá trình khuấy bắt đầu.
+
+98
+00:04:31.720 --> 00:04:35.020
+Cuối cùng là phần năm, phân tích và kết
+luận về hiệu quả xử lý.
+
+99
+00:04:35.800 --> 00:04:39.068
+Đây chính là công thức toán học trung tâm
+để đo lường mức độ thành công của
+
+100
+00:04:39.068 --> 00:04:39.460
+chúng ta.
+
+101
+00:04:39.960 --> 00:04:42.000
+Hiệu suất giảm đục, ký hiệu là E.
+
+102
+00:04:42.600 --> 00:04:47.200
+Rất dễ hiểu: lấy độ đục ban đầu, T không,
+trừ đi độ đục sau xử lý, T cuối,
+
+103
+00:04:47.560 --> 00:04:50.720
+rồi chia lại cho độ đục ban đầu và nhân
+100 để ra phần trăm.
+
+104
+00:04:51.420 --> 00:04:55.740
+Lấy một ví dụ nhé: từ 125 NTU giảm xuống
+còn 25 NTU,
+
+105
+00:04:55.740 --> 00:04:59.900
+hệ thống đã loại bỏ được 100 NTU, tương
+đương với mức hiệu suất là 80%,
+
+106
+00:04:59.900 --> 00:05:01.200
+quá tuyệt vời phải không?
+
+107
+00:05:01.960 --> 00:05:04.800
+Giờ hãy soi kỹ vào bảng dữ liệu thực tế
+tại pH 9 này.
+
+108
+00:05:05.320 --> 00:05:10.020
+Khi tăng liều phèn từ 50 lên 100 rồi 150,
+hiệu suất tăng dần đều
+
+109
+00:05:10.020 --> 00:05:12.480
+và lập đỉnh ở 86,79%.
+
+110
+00:05:12.480 --> 00:05:17.529
+Nhưng khoan đã, chuyện gì xảy ra khi chúng
+ta cố tình cho thêm phèn lên 200
+
+111
+00:05:17.529 --> 00:05:18.000
+và 250,
+
+112
+00:05:18.780 --> 00:05:21.500
+độ đục lại tăng lên và hiệu suất rớt thê
+thảm.
+
+113
+00:05:22.060 --> 00:05:24.460
+Đây là minh chứng cực kỳ sắc bén trong
+nguyên lý hóa học,
+
+114
+00:05:24.460 --> 00:05:27.540
+không phải cứ đắp thêm nhiều hóa chất là
+nước sẽ càng sạch,
+
+115
+00:05:27.920 --> 00:05:31.980
+việc quá liều thực chất sẽ phá vỡ hoàn
+toàn cấu trúc keo tụ vừa được tạo ra.
+
+116
+00:05:32.660 --> 00:05:36.080
+Về phần này có một số hiểu lầm tai hại mà
+chúng ta tuyệt đối phải tránh.
+
+117
+00:05:36.860 --> 00:05:41.062
+Thứ nhất, nếu quên bấm nút đo trong một
+cốc, hệ thống sẽ ghi nhận dữ liệu đó
+
+118
+00:05:41.062 --> 00:05:41.560
+bị thiếu,
+
+119
+00:05:41.860 --> 00:05:44.900
+chứ không phải là nước đã sạch tuyệt đối,
+đạt 0 NTU đâu nhé.
+
+120
+00:05:45.620 --> 00:05:48.080
+Thứ hai, một cốc nước nhìn bằng mắt thấy
+trong vắt,
+
+121
+00:05:48.460 --> 00:05:51.843
+hoàn toàn không đồng nghĩa với việc nó đã
+an toàn về mặt vi sinh để có thể
+
+122
+00:05:51.843 --> 00:05:52.300
+uống được.
+
+123
+00:05:52.840 --> 00:05:56.691
+Và như chúng ta vừa phân tích ở bảng dữ
+liệu, liều lượng cao nhất hiếm khi
+
+124
+00:05:56.691 --> 00:05:57.680
+nào là liều tối ưu.
+
+125
+00:05:58.360 --> 00:06:01.640
+Trước khi đi đến bước cuối, hãy nhớ lại
+tiêu chí nộp bài của hệ thống.
+
+126
+00:06:02.380 --> 00:06:06.215
+Cốc được chọn, bắt buộc phải chứng minh
+được khả năng giảm độ đục tối thiểu
+
+127
+00:06:06.215 --> 00:06:06.420
+80%.
+
+128
+00:06:06.860 --> 00:06:10.621
+Không chỉ vậy, kết quả tính toán phần trăm
+hiệu suất mà chúng ta tự nhập vào
+
+129
+00:06:10.621 --> 00:06:11.660
+phải cực kỳ chuẩn xác
+
+130
+00:06:11.660 --> 00:06:15.679
+với mức sai số cho phép không được vượt
+quá 0,5% so với đáp án chuẩn của hệ
+
+131
+00:06:15.679 --> 00:06:16.000
+thống.
+
+132
+00:06:16.800 --> 00:06:19.340
+Để khép lại bài giải thích hôm nay, hãy
+cùng suy ngẫm một chút.
+
+133
+00:06:19.880 --> 00:06:23.255
+Việc làm chủ không gian mô phỏng, biết
+cách kiểm soát từng biến số và tính
+
+134
+00:06:23.255 --> 00:06:24.760
+toán dữ liệu chặt chẽ như thế này
+
+135
+00:06:24.760 --> 00:06:26.520
+không chỉ dừng lại ở một bài tập ảo.
+
+136
+00:06:26.900 --> 00:06:30.342
+Vậy, làm thế nào để chúng ta áp dụng tư
+duy thiết kế thử nghiệm có hệ thống
+
+137
+00:06:30.342 --> 00:06:30.480
+này
+
+138
+00:06:30.480 --> 00:06:33.339
+để giải quyết những thách thức xử lý môi
+trường nước phức tạp ngoài đời
+
+139
+00:06:33.339 --> 00:06:33.540
+thực?
+
+140
+00:06:34.160 --> 00:06:35.180
+Rất đáng để suy ngẫm phải không?
+
+141
+00:06:35.920 --> 00:06:37.740
+Cảm ơn mọi người đã đồng hành cùng bài
+giải thích này.
+
+142
+00:06:38.200 --> 00:06:40.926
+Hi vọng những kiến thức hôm nay sẽ là hành
+trang tuyệt vời cho những khám
+
+143
+00:06:40.926 --> 00:06:41.860
+phá sắp tới của chúng ta.
+
+144
+00:06:42.440 --> 00:06:42.860
+Hẹn gặp lại.

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ExtractionGuide } from './guide.js'
+import { ExtractionLessonVideos } from './lesson-videos.js'
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
 import { ScienceBackdrop } from '@/shared/ui/science-backdrop.js'
 import { TheoryIcon, TargetIcon, ToolsIcon, SourcesIcon, ControlIcon } from '@/features/workbench/icons.js'
@@ -15,6 +16,7 @@ export function ExtractionLesson({guide=false,attemptId}:{guide?:boolean;attempt
   <Breadcrumbs items={[{label:'Trang chủ',href:'/'},{label:'Thí nghiệm',href:'/experiments'},{label:'Chiết tách axit–bazơ'}]}/>
   <header className={styles.heading}><div><div className={styles.tags}><span>Chiết lỏng – lỏng</span><span>Có thể thực hành · Lưu trên trình duyệt</span></div><h1>Chiết tách axit–bazơ</h1><p>Tách axit yếu, bazơ yếu và chất trung tính khỏi cùng một mẫu bằng cách lựa chọn môi trường và thu đúng pha.</p></div><Link className={styles.action} href={resume}>{attemptId?'Quay lại lượt đang làm':'Bắt đầu thực hành'}<ArrowRightIcon/></Link></header>
 
+  <ExtractionLessonVideos/>
   <div className={styles.bento}>
    <section className={styles.goal}><h2><TargetIcon/>Mục tiêu & kết quả cần đạt</h2><p>Tách ba chất giả định A, B, N thành ba sản phẩm riêng trong R1/R2/R3. Bạn tự chọn hướng chiết và bình chứa từng chất.</p><dl className={styles.facts}><div><dt>Thu hồi từng chất</dt><dd>80–100%<small>Tối thiểu 80 mg chất cần tách từ 100 mg đầu</small></dd></div><div><dt>Độ tinh khiết theo mô hình</dt><dd>90–100%<small>Tính trong tổng A/B/N của bình sản phẩm</small></dd></div><div><dt>Sai lệch phép tính</dt><dd>≤1 điểm %<small>So với tỷ lệ tính từ số cân đã lưu</small></dd></div></dl><p>Mỗi sản phẩm phải được làm khô, cân sau thao tác cuối và lưu đáp số. Lượt mới còn đánh giá việc trộn hai pha trước mỗi lần thu pha sau cấp/chuyển dịch.</p><p><strong>Không có một số cân “đúng” duy nhất.</strong> Khối lượng cân gồm cả phần lẫn; đạt phép tính chưa có nghĩa đạt thu hồi hoặc tinh khiết.</p></section>
    <section className={styles.inputs}><h2><ToolsIcon/>Mẫu đầu vào & điều kiện</h2><dl className={styles.facts}><div><dt>Mẫu trong S</dt><dd>A: 100 mg · B: 100 mg · N: 100 mg<small>Axit yếu · Bazơ yếu · Trung tính</small></dd></div><div><dt>Dung môi hữu cơ ban đầu</dt><dd>40 mL<small>Chứa cả A, B, N; chưa có pha nước</small></dd></div><div><dt>Dung dịch được cấp</dt><dd>Axit / bazơ 0,1 M · Nước · Dung môi</dd></div><div><dt>Điều kiện mô hình</dt><dd>25 °C · Mỗi bình 250 mL</dd></div></dl><p>Bạn được chọn thuốc thử, thể tích, thứ tự chiết, số lần chiết, pha thu và bình nhận. Tổng lượng chất được theo dõi cả trong dịch còn lại và W.</p></section>
