@@ -6,6 +6,7 @@ import { parseUUID } from '@/shared/ids.js'
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
 import { JAR_SOURCES } from '@/content/evidence/jar-test.js'
 import { ArrowRightIcon } from '@/features/landing/icons.js'
+import { JarLessonVideos } from '@/features/jar-test/lesson-videos.js'
 import styles from '@/features/experiment-guide/article.module.css'
 
 export const metadata: Metadata = {
@@ -108,6 +109,7 @@ export default async function JarGuidePage({ searchParams }: { searchParams: Pro
       <div><h1>Jar Test: lý thuyết & cách làm bài</h1><p>Từ chuẩn bị dàn cốc đến đọc báo cáo. Mỗi bước chỉ rõ công cụ, thao tác và kết quả cần kiểm tra trên VECLab.</p></div>
       <Link className={styles.returnLink} href={workbenchHref}>{id ? 'Quay lại lượt đang làm' : 'Bắt đầu thực hành'}<ArrowRightIcon /></Link>
     </header>
+    <JarLessonVideos />
     <div className={styles.readingLayout}>
       <aside className={styles.rail}><nav className={styles.contents} aria-label="Tra nhanh các bước"><h2>Tra nhanh các bước</h2><ol>{STEPS.map(step => <li key={step.id}><a href={'#' + step.id}>{step.title}</a></li>)}</ol></nav><p>Đang thao tác? Dùng nút “Cách…” ngay trong nhóm cần tra cứu trên bàn thực hành.</p></aside>
       <article className={styles.article} aria-label="Hướng dẫn thực hành Jar Test">

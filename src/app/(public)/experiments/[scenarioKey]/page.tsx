@@ -7,6 +7,7 @@ import { JAR_LIMITS, JAR_SOURCES } from '@/content/evidence/jar-test.js'
 import { EXPERIMENT_OVERVIEWS } from '@/features/experiment-catalog/overviews.js'
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
 import { ScienceBackdrop } from '@/shared/ui/science-backdrop.js'
+import { JarLessonVideos } from '@/features/jar-test/lesson-videos.js'
 import { ArrowRightIcon, CheckCircleIcon, FlaskIcon, LayersIcon, ShieldCheckIcon, BookIcon, RepeatIcon } from '@/features/landing/icons.js'
 
 type Props = { params: Promise<{ scenarioKey: string }> }
@@ -25,6 +26,7 @@ export default async function ExperimentDetailPage({ params }: Props) {
     <ScienceBackdrop />
     <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: 'Thí nghiệm', href: '/experiments' }, { label: overview.title }]} />
     <header className="experiment-detail-header"><div><div className="experiment-detail-tags"><span className="experiment-topic">{overview.category}</span><span className={'experiment-availability' + (available ? ' is-available' : '')}>{available ? 'Có thể thực hành · Lưu trên trình duyệt' : 'Chưa triển khai'}</span></div><h1>{overview.title}</h1><p>{overview.question}</p></div>{available && <Link className="btn experiment-library-start" href="/simulate/jar-test">Bắt đầu thực hành <ArrowRightIcon /></Link>}</header>
+    {available && <JarLessonVideos />}
     {!available ? <section className="experiment-detail-panel"><h2>Chưa triển khai bài thực hành</h2><p>{overview.learning} Đây là hướng nội dung dự kiến; chưa có mô hình và quy trình được khóa để mở thực hành.</p><Link href="/experiments">Quay lại danh sách thí nghiệm</Link></section> : <div className="experiment-detail-grid">
       <section className="experiment-detail-panel experiment-detail-goal"><h2><CheckCircleIcon />Mục tiêu bài thực hành</h2><p>So sánh pH ban đầu và liều phèn nhôm để tìm phương án giảm độ đục ít nhất <strong>{JAR_PROFILE.goalRemovalPercent}%</strong>. Dùng số đo để tự tính hiệu suất và giải thích kết quả.</p>
         <dl className="experiment-detail-brief"><div><dt>Bạn được quyết định</dt><dd>pH ban đầu và tổng liều phèn của từng cốc.</dd></div><div><dt>Bạn cần nộp</dt><dd>Số đo, hiệu suất tự tính và một cốc làm phương án xử lý.</dd></div><div><dt>Phản hồi sau khi nộp</dt><dd>Đối chiếu đáp số, mức giảm đục và các bước cần xem lại.</dd></div></dl>
