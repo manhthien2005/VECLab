@@ -944,7 +944,7 @@
 .apparatusReadout small { font-size:.65rem; color:var(--ink-muted); }
 .apparatusReadout strong { font-size:1.1rem; color:var(--accent-hover); font-weight:750; }
 .apparatusReadout em { font-style:normal; font-size:.7rem; color:var(--ink-muted); margin-left:2px; }
-.apparatusStage { display:grid; grid-template-columns:minmax(0, 1fr) 154px; align-items:center; gap:10px; padding:8px 12px; background:linear-gradient(180deg, #f7fafc 0%, #e9f1f4 100%); border-radius:12px; border:1px solid var(--border); }
+.apparatusStage { display:grid; grid-template-columns:minmax(0, 380px) 154px; justify-content:center; align-items:center; gap:2px; padding:8px 12px; background:linear-gradient(180deg, #f7fafc 0%, #e9f1f4 100%); border-radius:12px; border:1px solid var(--border); }
 .volumeModel { grid-column:2; grid-row:1; width:100%; border:1px solid #b9d1d8; border-radius:7px; background:rgb(255 255 255 / 88%); overflow:hidden; box-shadow:0 3px 10px rgb(28 60 80 / 8%); }
 .volumeModelHeader { padding:5px 7px 4px; border-bottom:1px solid #dfe9ee; }
 .volumeModelHeader strong { color:var(--ink); font-size:.64rem; }
@@ -963,9 +963,9 @@
 .volumeDot[data-solution='pb'] { background:#7568a8; }
 .volumeDotGray { display:inline-block; flex:0 0 5px; width:5px; height:5px; border-radius:50%; background:#8fa8b8; }
 .volumeDotAccent { display:inline-block; flex:0 0 5px; width:5px; height:5px; border-radius:50%; background:#2a6f78; }
-.apparatusSvg { grid-column:1; grid-row:1; width:100%; max-width:380px; height:auto; justify-self:center; }
+.apparatusSvg { grid-column:1; grid-row:1; width:100%; max-width:380px; height:auto; justify-self:end; }
 @media (max-width:600px) {
-  .apparatusStage { grid-template-columns:minmax(0, 1fr) 132px; gap:7px; padding-inline:7px; }
+  .apparatusStage { grid-template-columns:minmax(0, 380px) 132px; justify-content:center; gap:1px; padding-inline:7px; }
   .volumeModelLabel, .volumeModelValue { font-size:.52rem; }
   .volumeModelHeader strong { font-size:.58rem; }
   .volumeModelGrid { padding-inline:5px; }
