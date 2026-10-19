@@ -18,7 +18,7 @@ export const SCENARIO_KEYS = [
   'acid-base-extraction',
 ] as const
 
-export type ScenarioKey = (typeof SCENARIO_KEYS)[number]
+export type ScenarioKey = (typeof SCENARIO_KEYS)[number] | 'plastic-separation'
 
 export type ScenarioRef = {
   key: ScenarioKey

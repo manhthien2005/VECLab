@@ -1,7 +1,22 @@
-import type {
-  EvidenceSource,
-  ClaimEvidenceLink,
-} from './acid-neutralization.js'
+export type EvidenceSource = {
+  key: string
+  title: string
+  authorsOrOrganization: string
+  year: number
+  url: string
+  sourceType: string
+  checkedAt: string
+  locations: string[]
+  conditions: string[]
+  limitations: string[]
+}
+
+export type ClaimEvidenceLink = {
+  claimKey: string
+  sourceKeys: string[]
+  usage: 'constant' | 'procedure' | 'limitation'
+  status: 'source-checked' | 'pending'
+}
 
 export const PLASTIC_EVIDENCE_REGISTER_VERSION = '1.0.0'
 
