@@ -1,7 +1,8 @@
 'use client'
 
-import { useId, useRef, useState, useEffect, type CSSProperties } from 'react'
-import { PlayIcon, StopIcon, PlusIcon, ResetIcon } from './icons.js'
+import { useId, useRef, useState, useEffect } from 'react'
+import { runWaterTreatmentAction, type WaterTreatmentResult } from '@/app/simulate/water-treatment/actions.js'
+import { PlayIcon, StopIcon, PlusIcon, ResetIcon, BeakerIcon } from './icons.js'
 import styles from './workbench.module.css'
 
 /**
@@ -44,6 +45,11 @@ const BURET_NAOH_CX = 152
 const BURET_HCL_CX = 228
 
 const STIRRER_CX = 190
+
+type TreatmentStepMl = 0.1 | 0.5 | 1 | 2 | 5
+const TREATMENT_STEPS: readonly TreatmentStepMl[] = [0.1, 0.5, 1, 2, 5]
+
+export type TreatmentCalculation = Pick<WaterTreatmentResult, 'pH' | 'composition' | 'capacity_mgPerL' | 'filtrate_mgPerL' | 'precipitated_mgPerL' | 'goalStatus' | 'verificationStatus'>
 
 const INITIAL_STATUS: ApStatus = {
   pH: 5.4,
@@ -138,11 +144,15 @@ export function WaterTreatmentApparatus({
   onAddDrop,
   onToggleStir,
   onReset,
+  onCalculate,
+  calculation,
 }: {
   status?: Partial<ApStatus>
-  onAddDrop: (reagent: AcidBase) => void
+  onAddDrop: (reagent: AcidBase, amountMl: number) => void
   onToggleStir: () => void
   onReset: () => void
+  onCalculate: (result: TreatmentCalculation) => void
+  calculation: TreatmentCalculation | null
 }) {
   const uid = useId().replaceAll(':', '')
   const status: ApStatus = { ...INITIAL_STATUS, ...external }
@@ -158,6 +168,8 @@ export function WaterTreatmentApparatus({
 
   // Animation trigger: brief drop when added
   const [activeDrop, setActiveDrop] = useState<{ reagent: AcidBase; tick: number } | null>(null)
+  const [hasBeenStirred, setHasBeenStirred] = useState(false)
+  const [dropSteps, setDropSteps] = useState<Record<AcidBase, TreatmentStepMl>>({ naoh: 1, hcl: 1 })
   const lastAdded = useRef({ naoh: status.naohAddedMl, hcl: status.hclAddedMl })
   useEffect(() => {
     if (status.naohAddedMl !== lastAdded.current.naoh) {
@@ -172,6 +184,37 @@ export function WaterTreatmentApparatus({
     const t = setTimeout(() => setActiveDrop(null), 800)
     return () => clearTimeout(t)
   }, [activeDrop])
+
+  useEffect(() => {
+    if (status.stirring) setHasBeenStirred(true)
+    if (status.naohAddedMl === 0 && status.hclAddedMl === 0) setHasBeenStirred(false)
+  }, [status.stirring, status.naohAddedMl, status.hclAddedMl])
+
+  const hasFinishedStirring = hasBeenStirred && !status.stirring
+  const setDropStep = (reagent: AcidBase, value: string) => {
+    const amount = Number(value) as TreatmentStepMl
+    if (TREATMENT_STEPS.includes(amount)) setDropSteps((current) => ({ ...current, [reagent]: amount }))
+  }
+  const [calculationBusy, setCalculationBusy] = useState(false)
+  const [calculationError, setCalculationError] = useState<string | null>(null)
+  const calculateTreatment = async () => {
+    if (!hasFinishedStirring || calculationBusy) return
+    setCalculationBusy(true)
+    setCalculationError(null)
+    try {
+      const result = await runWaterTreatmentAction({
+        action: 'measure-final',
+        composition: { Fe: 100, Zn: 100, Pb: 100 },
+        pH: status.pH,
+        volume_mL: status.volumeMl,
+      })
+      onCalculate(result)
+    } catch (error) {
+      setCalculationError(error instanceof Error ? error.message : 'Không thể tính kết quả xử lý nước.')
+    } finally {
+      setCalculationBusy(false)
+    }
+  }
 
   return <div className={styles.apparatus}>
     <div className={styles.apparatusHeader}>
@@ -306,28 +349,43 @@ export function WaterTreatmentApparatus({
     </div>
 
     <div className={styles.apparatusControls}>
-      <button
-        type="button"
-        className={styles.stirButton}
-        data-active={status.stirring}
-        onClick={onToggleStir}
-        data-testid="wt-toggle-stir"
-      >
+      <button type="button" className={styles.stirButton} data-active={status.stirring} onClick={onToggleStir} data-testid="wt-toggle-stir">
         {status.stirring ? <StopIcon /> : <PlayIcon />}
         {status.stirring ? 'Dừng khuấy' : 'Bật khuấy'}
       </button>
+      <button type="button" className={styles.calculateButton} onClick={calculateTreatment} disabled={!hasFinishedStirring || calculationBusy} title={hasFinishedStirring ? 'Tính pH và lượng kim loại còn lại sau xử lý' : 'Hãy khuấy xong rồi dừng máy trước khi tính'} data-testid="wt-calculate">
+        <BeakerIcon /> {calculationBusy ? 'Đang tính…' : 'Tính toán'}
+      </button>
       <div className={styles.buretControls}>
-        <button type="button" className={styles.buretAdd} data-testid="wt-add-naoh" onClick={() => onAddDrop('naoh')}>
-          <PlusIcon /> NaOH <span>{naohEmpty ? 'Đã hết' : '+1 mL'}</span>
-        </button>
-        <button type="button" className={styles.buretAdd} data-testid="wt-add-hcl" onClick={() => onAddDrop('hcl')}>
-          <PlusIcon /> HCl <span>{hclEmpty ? 'Đã hết' : '+1 mL'}</span>
-        </button>
-        <button type="button" className={styles.buretReset} onClick={onReset} aria-label="Đặt lại bàn thực hành">
-          <ResetIcon /> Đặt lại
-        </button>
+        {(['naoh', 'hcl'] as const).map((reagent) => {
+          const empty = reagent === 'naoh' ? naohEmpty : hclEmpty
+          const label = reagent === 'naoh' ? 'NaOH' : 'HCl'
+          return <div className={styles.buretControl} key={reagent}>
+            <span>{label}</span>
+            <select className={styles.doseStepTrigger} value={dropSteps[reagent]} onChange={(event) => setDropStep(reagent, event.target.value)} disabled={empty} aria-label={`Bước thêm ${label}`}>
+              {TREATMENT_STEPS.map((step) => <option key={step} value={step}>{step} mL</option>)}
+            </select>
+            <button type="button" className={styles.buretAdd} data-testid={`wt-add-${reagent}`} onClick={() => onAddDrop(reagent, dropSteps[reagent])} disabled={empty}>
+              <PlusIcon /> <span>{empty ? 'Đã hết' : 'Thêm'}</span>
+            </button>
+          </div>
+        })}
+        <button type="button" className={styles.buretReset} onClick={onReset} aria-label="Đặt lại bàn thực hành"><ResetIcon /> Đặt lại</button>
       </div>
     </div>
+    {calculationError ? <p className={styles.calculationError} role="alert">{calculationError}</p> : null}
+    {calculation ? (
+      <section className={styles.calculationPanel} aria-label="Bảng tổng hợp kết quả bàn xử lý nước">
+        <div className={styles.calculationHeader}><div><strong>Kết quả xử lý nước</strong><span className={styles.calculationHeaderNote}>Bảng tổng hợp sau khuấy</span></div><span>Đơn vị: mg/L</span></div>
+        <p className={styles.calculationExplanation}>So sánh lượng kim loại còn hòa tan với lượng đã chuyển thành kết tủa sau khi điều chỉnh pH.</p>
+        <div className={styles.tableScroll}><table className={styles.table}><caption className={styles.tableCaption}>Kết quả Fe, Zn và Pb sau xử lý.</caption><thead><tr><th scope="col">Đại lượng</th><th scope="col">Fe</th><th scope="col">Zn</th><th scope="col">Pb</th></tr></thead><tbody>
+          <tr><th scope="row">Còn hòa tan</th><td>{calculation.filtrate_mgPerL.Fe.toFixed(6)}</td><td>{calculation.filtrate_mgPerL.Zn.toFixed(6)}</td><td>{calculation.filtrate_mgPerL.Pb.toFixed(6)}</td></tr>
+          <tr><th scope="row">Đã kết tủa</th><td>{calculation.precipitated_mgPerL.Fe.toFixed(6)}</td><td>{calculation.precipitated_mgPerL.Zn.toFixed(6)}</td><td>{calculation.precipitated_mgPerL.Pb.toFixed(6)}</td></tr>
+          <tr><th scope="row">Giới hạn Cột A</th><td>2.000000</td><td>1.000000</td><td>0.100000</td></tr>
+        </tbody></table></div>
+        <div className={styles.calculationSummary}><span>pH sau xử lý <strong>{calculation.pH.toFixed(6)}</strong></span><span>Trạng thái <strong>{calculation.goalStatus}</strong></span></div>
+      </section>
+    ) : null}
 
     <p className={styles.apparatusNote}>Mực buret, tốc độ khuấy và pH chỉ mang tính minh họa; giá trị thật lưu ở bảng dưới.</p>
   </div>

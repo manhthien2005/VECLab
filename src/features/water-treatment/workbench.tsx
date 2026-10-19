@@ -6,7 +6,7 @@ import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.j
 import { ActionButton } from '@/features/workbench/action-button.js'
 import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/icons.js'
 import { TargetIcon, ReportIcon, SubmitIcon, CloseIcon, InfoIcon, ControlIcon } from '@/features/workbench/icons.js'
-import { WaterTreatmentApparatus, type ApStatus, type AcidBase } from './apparatus.js'
+import { WaterTreatmentApparatus, type ApStatus, type AcidBase, type TreatmentCalculation } from './apparatus.js'
 import { SamplePreparationApparatus, type SampleApStatus, type SampleCalculation, type MetalSolution } from './sample-apparatus.js'
 import styles from './workbench.module.css'
 
@@ -274,18 +274,19 @@ function WaterTreatmentWorkbenchSession({
     pbAddedMl: 0,
   })
   const [sampleCalculation, setSampleCalculation] = useState<SampleCalculation | null>(null)
-  const addDrop = useCallback((reagent: AcidBase) => {
+  const [treatmentCalculation, setTreatmentCalculation] = useState<TreatmentCalculation | null>(null)
+  const addDrop = useCallback((reagent: AcidBase, amountMl: number) => {
     setApStatus((prev) => {
+      setTreatmentCalculation(null)
       if (reagent === 'naoh') {
-        const added = prev.naohAddedMl + 1
-        // Crude pH model: NaOH raises pH toward ~12 with diminishing returns.
+        const added = prev.naohAddedMl + amountMl
         const target = 12
-        const pH = +(prev.pH + (target - prev.pH) * 0.18).toFixed(2)
+        const pH = +(prev.pH + (target - prev.pH) * Math.min(1, amountMl * 0.18)).toFixed(6)
         return { ...prev, naohAddedMl: added, pH }
       } else {
-        const added = prev.hclAddedMl + 1
+        const added = prev.hclAddedMl + amountMl
         const target = 1.5
-        const pH = +(prev.pH + (target - prev.pH) * 0.18).toFixed(2)
+        const pH = +(prev.pH + (target - prev.pH) * Math.min(1, amountMl * 0.18)).toFixed(6)
         return { ...prev, hclAddedMl: added, pH }
       }
     })
@@ -321,6 +322,7 @@ function WaterTreatmentWorkbenchSession({
   }, [])
 
   const resetApparatus = useCallback(() => {
+    setTreatmentCalculation(null)
     setApStatus({ pH: 5.4, volumeMl: 1000, stirring: false, naohAddedMl: 0, hclAddedMl: 0 })
   }, [])
 
@@ -412,6 +414,8 @@ function WaterTreatmentWorkbenchSession({
             onAddDrop={addDrop}
             onToggleStir={toggleStir}
             onReset={resetApparatus}
+            onCalculate={(result) => setTreatmentCalculation(result)}
+            calculation={treatmentCalculation}
           />
         </section>
       </>
