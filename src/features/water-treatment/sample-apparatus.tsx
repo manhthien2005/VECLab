@@ -11,7 +11,7 @@ import styles from './workbench.module.css'
  *   • Top support bar carrying three metal-ion burets
  *   • Three 10 mL burets hang from the bar (Fe, Zn, Pb solutions)
  *   • Flat-bottom 2.5 L beaker sitting on a magnetic stirrer hotplate
- *   • Stir bar rotates when the stirrer is on
+ *   • Stir bar stays fixed while the liquid and suspended particles move
  *
  * Geometry is qualitative; concentration, dose and buret state are tracked by the
  * session and reflected here.
@@ -338,19 +338,6 @@ export function SamplePreparationApparatus({
   }
 
   const totalAddedMl = feAddedMl + znAddedMl + pbAddedMl
-  const mixtureLabel = hasFe && hasZn && hasPb
-    ? 'Fe³⁺ + Zn²⁺ + Pb²⁺ · vàng nhạt, có thể đục'
-    : hasFe && (hasZn || hasPb)
-      ? 'Fe³⁺ + ion kim loại · vàng nhạt, độ trong có thể thay đổi'
-      : hasZn && hasPb
-        ? 'Zn²⁺ + Pb²⁺ · gần không màu, có thể đục do PbSO₄'
-        : hasFe
-          ? 'Fe³⁺ · vàng nhạt'
-          : hasZn
-            ? 'Zn²⁺ · không màu'
-            : hasPb
-              ? 'Pb²⁺ · không màu'
-              : 'Nước cất · không màu'
 
   return (
     <div className={styles.apparatus}>
@@ -554,6 +541,43 @@ export function SamplePreparationApparatus({
             fill={solutionFill}
             fillOpacity={solutionOpacity}
           />
+          {status.stirring ? (
+            <g className={styles.vortex} aria-label="Lốc xoáy trên mặt nước">
+              <ellipse cx={STIRRER_CX} cy={waterY + 5} rx="54" ry="8" fill="#d8bd70" fillOpacity=".28" />
+              <path
+                d={'M' + (BEAKER_LEFT_X + 10) + ' ' + (waterY + 3) + ' Q190 ' + (waterY + 46) + ' ' + (BEAKER_RIGHT_X - 10) + ' ' + (waterY + 3) + ' Q190 ' + (waterY + 22) + ' ' + (BEAKER_LEFT_X + 10) + ' ' + (waterY + 3)}
+                fill="#d2ad54"
+                fillOpacity=".28"
+                stroke="#a88439"
+                strokeOpacity=".5"
+                strokeWidth="1.2"
+              />
+              <path
+                d={'M' + (STIRRER_CX - 21) + ' ' + (waterY + 4) + ' Q' + STIRRER_CX + ' ' + (waterY + 24) + ' ' + (STIRRER_CX + 21) + ' ' + (waterY + 4)}
+                fill="none"
+                stroke="#f5e6ad"
+                strokeOpacity=".75"
+                strokeWidth="2"
+              />
+              <ellipse cx={STIRRER_CX} cy={waterY + 35} rx="12" ry="4" fill="#a56535" fillOpacity=".35" />
+            </g>
+          ) : null}
+          {status.stirring && fePrecipitating ? (
+            <g className={styles.particulateSpin} aria-label="Hạt kết tủa Fe(OH)3 đang quay theo dòng nước">
+              {[0, 1, 2, 3, 4, 5].map((index) => {
+                return (
+                  <circle
+                    key={index}
+                    cx={STIRRER_CX + (index - 2.5) * 12}
+                    cy={waterY + 36 + (index % 3) * 9}
+                    r={2 + (index % 2)}
+                    fill="#a56535"
+                    fillOpacity=".78"
+                  />
+                )
+              })}
+            </g>
+          ) : null}
           {hasFe && !mixtureStirred ? (
             <g className={styles.localDropPlume} aria-label="Vệt dung dịch Fe chưa khuấy">
               <ellipse cx={feDropX} cy={waterY + 8} rx="13" ry="5" fill="#e2bd5d" fillOpacity=".72" />
@@ -582,7 +606,7 @@ export function SamplePreparationApparatus({
           />
 
           <rect
-            className={status.stirring ? styles.stirBarSpin : styles.stirBar}
+            className={styles.stirBar}
             x={STIRRER_CX - 22}
             y={BEAKER_BOTTOM_Y - 9}
             width="44"
