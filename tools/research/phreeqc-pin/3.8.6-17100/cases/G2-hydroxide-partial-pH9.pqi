@@ -1,0 +1,15 @@
+# G2 — Golden case: hydroxide route "đạt Fe+Zn, fail Pb" (partial success)
+# Tái sử dụng GC-SOLID-01 Sim 1 (pH 9) — input Fe 5 + Zn 5 + Pb 0,5 mg/L ở pH 9
+# Expected theo closed-form capacityAtSaturation(8.78):
+#   - Fe capacity 1,55e-24 mol/L = 8,7e-23 mg/L → filtrate 0 → < Cột A 2,0 → PASS Fe
+#   - Zn capacity 8,67e-20 mol/L = 5,7e-18 mg/L → filtrate 0 → < Cột A 1,0 → PASS Zn
+#   - Pb capacity 2,98e-6 mol/L = 0,617 mg/L; input 0,5 < capacity → filtrate = 0,5 → > Cột A 0,1 → FAIL Pb
+#   - → goalStatus = 'partial-success' (2/3 kim loại đạt Cột A)
+#
+# Verify: PHREEQC output từ `actual/GC-SOLID-01.select.out` Sim 1:
+#   - pH final 8,78; total Fe 7,40e-10; Zn 1,91e-5; Pb 7,66e-9
+#   - Sai số closed-form vs PHREEQC ≤ 0,023 log (đã verify trong P0-C test).
+#
+# PHREEQC input file gốc: `cases/GC-SOLID-01.pqi` (đã chạy 16/10/2026)
+# Output: `actual/GC-SOLID-01.select.out`
+# Path: D:\VECLab\tools\research\phreeqc-pin\3.8.6-17100\
