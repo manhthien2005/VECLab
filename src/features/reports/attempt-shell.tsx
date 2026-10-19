@@ -20,7 +20,7 @@ export function AttemptShell({ attemptId, view }: { attemptId: string; view: 'at
     void new GuestAttemptRepository<unknown>().getAttempt(id).then(attempt => {
       if (cancelled) return
       if (attempt === null) { setState('missing'); return }
-      const href = savedAttemptHref(attempt.scenarioKey, id, view)
+      const href = savedAttemptHref(attempt.scenarioKey, id, view, attempt.scenarioReleaseId)
       if (href === null) { setState('retired'); return }
       router.replace(href)
     }).catch(() => { if (!cancelled) setState('error') })
@@ -30,7 +30,7 @@ export function AttemptShell({ attemptId, view }: { attemptId: string; view: 'at
   const status = id === null ? 'missing' : state
   if (status === 'loading') return <div className="page stack"><p role="status">Đang mở lượt thực hành…</p></div>
   const message = status === 'retired'
-    ? 'Bài thí nghiệm này đã ngừng phục vụ. Dữ liệu đã lưu vẫn được giữ trên trình duyệt này; phiên bản hiện tại chỉ hỗ trợ Jar Test và chiết tách axit–bazơ.'
+    ? 'Bài thí nghiệm hoặc phiên bản của lượt này chưa được hỗ trợ. Dữ liệu đã lưu vẫn được giữ trên trình duyệt này. Về Lab để mở các lượt thuộc bài đang phục vụ.'
     : status === 'error'
       ? 'Chưa đọc được dữ liệu trên trình duyệt này. Hãy tải lại trang để thử lại.'
       : 'Không tìm thấy lượt thực hành trên trình duyệt này. Hãy mở bằng trình duyệt đã lưu lượt hoặc chọn bài để bắt đầu.'

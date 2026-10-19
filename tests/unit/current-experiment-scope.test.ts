@@ -4,9 +4,9 @@ import { listCatalog } from '@/features/experiment-catalog/catalog.js'
 import { EXPERIMENT_OVERVIEWS } from '@/features/experiment-catalog/overviews.js'
 
 describe('current experiment scope', () => {
-  it('serves only Jar Test and acid–base extraction', () => {
+  it('serves current lessons including virgin plastic separation', () => {
     expect([...SCENARIO_KEYS].sort()).toEqual(['acid-base-extraction', 'jar-test'])
-    expect(listCatalog().map(entry => entry.scenarioKey).sort()).toEqual(['acid-base-extraction', 'jar-test'])
+    expect(listCatalog().map(entry => entry.scenarioKey).sort()).toEqual(['acid-base-extraction', 'jar-test', 'plastic-density-separation'])
   })
 
   it('keeps the adsorption introduction without inventing a runnable lesson', () => {

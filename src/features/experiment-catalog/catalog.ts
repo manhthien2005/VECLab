@@ -1,5 +1,6 @@
 import { EXTRACTION_PROFILE } from '@/domain/experiments/acid-base-extraction/model.js'
 import { JAR_PROFILE } from '@/domain/experiments/jar-test/model.js'
+import { PLASTIC_PROFILE } from '@/domain/experiments/virgin-plastic-separation/model.js'
 
 export type CatalogEntry = {
   scenarioKey: string; releaseId: string; title: string; summary: string
@@ -11,4 +12,10 @@ const JAR_ENTRY: CatalogEntry = {
   summary: 'Khảo sát pH và liều phèn nhôm để giảm độ đục sau khuấy – lắng.',
 }
 
-export function listCatalog(): CatalogEntry[] { return [{ ...JAR_ENTRY }, { scenarioKey: 'acid-base-extraction', releaseId: EXTRACTION_PROFILE.releaseId, title: 'Chiết tách axit–bazơ', summary: 'Tách mẫu mô phỏng A/B/N qua hai pha, thu sản phẩm và đối chiếu thu hồi, độ tinh khiết.' }] }
+export function listCatalog(): CatalogEntry[] {
+  return [
+    { ...JAR_ENTRY },
+    { scenarioKey: 'acid-base-extraction', releaseId: EXTRACTION_PROFILE.releaseId, title: 'Chiết tách axit–bazơ', summary: 'Tách mẫu mô phỏng A/B/N qua hai pha, thu sản phẩm và đối chiếu thu hồi, độ tinh khiết.' },
+    { scenarioKey: 'plastic-density-separation', releaseId: PLASTIC_PROFILE.releaseId, title: 'Phân loại nhựa nguyên sinh', summary: 'Theo dõi sáu polymer qua các bước tách chìm–nổi bằng nước máy, ethanol và NaCl; đọc khối lượng phân đoạn và thu hồi theo preset.' },
+  ]
+}

@@ -5,9 +5,9 @@ export const PLASTIC_LESSON_VIDEOS = [
   {
     id: 'lesson',
     title: 'Bài học',
-    summary: 'Nguyên lý & cơ chế chìm–nổi',
+    summary: 'Khối lượng riêng và hiện tượng nổi–chìm',
     description:
-      'Tìm hiểu nguyên lý tỷ trọng biểu kiến, cơ chế phân tách phân đoạn nhẹ và nặng bằng nước máy, ethanol và NaCl trong bể pilot theo nghiên cứu của Meneses Quelal et al. (2022).',
+      'Tìm hiểu cách phân loại nhựa dựa trên khối lượng riêng, vai trò của nước máy, dung dịch ethanol và NaCl trong quy trình nghiên cứu.',
     playLabel: 'Phát video bài học Phân loại nhựa',
     playerLabel: 'Video bài học Phân loại nhựa nguyên sinh',
     poster: '/assets/plastic-separation/plastic-theory-overview-cover.jpg',
@@ -17,9 +17,9 @@ export const PLASTIC_LESSON_VIDEOS = [
   {
     id: 'practice',
     title: 'Thao tác thực hành trên VECLab',
-    summary: 'Từ nạp mẫu đến tổng kết phân đoạn',
+    summary: 'Đang dùng video bài học để tham khảo',
     description:
-      'Video thực hiện trọn vẹn một mẻ thực hành trên bàn mô phỏng: nạp 6 mẫu polymer, tách nước, ly tâm và cân, chạy 2 nhánh ethanol/NaCl và đọc báo cáo.',
+      'Mục này đang dùng tạm video bài học, chưa có video thao tác riêng trên VECLab. Để thực hành, làm theo hướng dẫn từng bước bên dưới trang Lý thuyết & cách làm bài.',
     playLabel: 'Phát video thực hành Phân loại nhựa',
     playerLabel: 'Video bài học dùng tạm cho mục thực hành Phân loại nhựa',
     poster: '/assets/plastic-separation/plastic-practice-overview-cover.jpg',

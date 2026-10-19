@@ -1,155 +1,34 @@
-'use client'
-
+import type { StoredAttemptEventRecord } from '@/application/attempts/repository.js'
+import type { PlasticSeparationState } from '@/domain/experiments/virgin-plastic-separation/model.js'
 import type { PlasticProjection } from '@/application/scenarios/plastic-projection.js'
-import { VIRGIN_POLYMERS } from '@/domain/experiments/virgin-plastic-separation/index.js'
-import styles from './workbench.module.css'
+import { PLASTIC_PROFILE, VIRGIN_POLYMERS } from '@/domain/experiments/virgin-plastic-separation/model.js'
+import { plasticFractionReadout, plasticStageLabel } from './readouts.js'
+import ui from './workbench-ui.module.css'
 
-type NotebookProps = {
-  projection: PlasticProjection
+export function PlasticNotebook({ projection, history = null }: { projection: PlasticProjection; history?: readonly StoredAttemptEventRecord<PlasticSeparationState>[] | null }) {
+  return <section className={ui.notebook} aria-label="Sổ thực hành phân loại nhựa">
+    <div className={ui.sectionHeader}><div><h2>Sổ thực hành</h2><p className={ui.muted}>Các bước tách và phân đoạn đã ghi nhận trong lượt này.</p></div><span className={ui.badge}>{plasticStageLabel(projection.stage)}</span></div>
+    <p className={ui.muted}>Thu hồi tham khảo từ bài báo; khối lượng quy đổi từ 2,0 kg cấp liệu mỗi loại, không phải phép đo mới. Ô chưa ghi nhận không được tính là 0.</p>
+    {projection.pendingCentrifugation && <p role="status" className={ui.muted}>Phân đoạn vừa tách đang chờ ghi nhận ly tâm và cân. Số liệu của bước này chưa được đưa vào bảng thu hồi.</p>}
+    <PlasticFractionsTable projection={projection} feedMassKg={PLASTIC_PROFILE.sampleFeedMassKg} polymers={VIRGIN_POLYMERS} />
+    <details open={projection.outcomesHistory.length === 0}><summary>Các bước tách đã ghi nhận · {projection.outcomesHistory.length}</summary>
+      {!projection.outcomesHistory.length ? <p className={ui.muted}>Chưa ghi nhận bước tách nào. Bắt đầu từ mục Thao tác.</p> : <div className={ui.tableWrap}><table className={ui.table}><caption>Diễn biến các bước tách</caption><thead><tr><th scope="col">Môi trường</th><th scope="col">Phân đoạn nổi</th><th scope="col">Phân đoạn chìm</th><th scope="col">Trạng thái</th></tr></thead><tbody>{projection.outcomesHistory.map((outcome, index) => <tr key={index}><td>{outcome.mediumVi}</td><td>{outcome.floating.join(', ') || '—'}</td><td>{outcome.sinking.join(', ') || '—'}</td><td>{projection.pendingCentrifugation && index === projection.outcomesHistory.length - 1 ? 'Chờ ly tâm và cân' : 'Đã ghi nhận'}</td></tr>)}</tbody></table></div>}
+    </details>
+    <details><summary>Lịch sử thao tác đã lưu{history ? ' · ' + history.length : ''}</summary>{history ? history.length ? <ol className={ui.history}>{history.map(event => <li key={event.sequence}><span>{plasticActionLabel(event.actionType, event.normalizedInput)}</span><time dateTime={new Date(event.occurredAt).toISOString()}>{new Date(event.occurredAt).toLocaleString('vi-VN')}</time></li>)}</ol> : <p className={ui.muted}>Chưa ghi nhận thao tác nào.</p> : <p className={ui.muted}>Chưa đọc được lịch sử thao tác. Bạn có thể tải lại lượt; số liệu đã lưu được giữ nguyên.</p>}</details>
+    <details><summary>Hồ sơ sáu mẫu ban đầu</summary><div className={ui.tableWrap}><table className={ui.table}><caption>Thông số mẫu nguyên sinh trong hồ sơ</caption><thead><tr><th scope="col">Mẫu</th><th scope="col">Khối lượng riêng</th><th scope="col">Hình thái</th><th scope="col">Kích thước</th></tr></thead><tbody>{VIRGIN_POLYMERS.map(polymer => <tr key={polymer.id}><th scope="row">{polymer.id}</th><td>{polymer.nominalDensity}</td><td>{polymer.formVi}</td><td>{polymer.sizeRangeMm}</td></tr>)}</tbody></table></div><p className={ui.muted}>Màu hạt trên mô phỏng là mã nhận diện; không biểu thị màu thật của tất cả mẫu.</p></details>
+  </section>
 }
 
-export function PlasticNotebook({ projection }: NotebookProps) {
-  return (
-    <div className={styles.resultsMatrixCard}>
-      <h3 className={styles.matrixTitle}>Sổ tay thực hành · Theo dõi phân đoạn và thu hồi</h3>
-      <p style={{ fontSize: '0.875rem', color: 'var(--ink-muted)', marginBottom: '1rem' }}>
-        Ghi chép các bước tách, môi trường tỷ trọng, hiện tượng nổi–chìm quan sát được và số liệu thu hồi công bố trong bài báo Meneses Quelal và cộng sự (2022).
-      </p>
-
-      {/* Polymer baseline table */}
-      <div className={styles.tableScroll}>
-      <table className={styles.matrixTable} style={{ marginBottom: '1.5rem' }}>
-        <thead>
-          <tr>
-            <th>Mã polymer</th>
-            <th>Tên đầy đủ</th>
-            <th>Khối lượng riêng (g/cm³)</th>
-            <th>Hình thái hạt</th>
-            <th>Khối lượng mẫu</th>
-            <th>Trạng thái hiện tại</th>
-          </tr>
-        </thead>
-        <tbody>
-          {VIRGIN_POLYMERS.map((p) => {
-            const visual = projection.polymers.find((item) => item.id === p.id)
-            return (
-              <tr key={p.id}>
-                <td>
-                  <span style={{ fontWeight: 700, color: p.colorHex }}>{p.id}</span>
-                </td>
-                <td>{p.name}</td>
-                <td style={{ fontFamily: 'monospace' }}>{p.nominalDensity}</td>
-                <td>{p.formVi}</td>
-                <td>2,0 kg</td>
-                <td>
-                  {visual?.recovered ? (
-                    <span style={{ color: 'var(--ok)', fontWeight: 600 }}>
-                      Đã thu hồi ({visual.recoveryPercent}%)
-                    </span>
-                  ) : visual?.location === 'water_floating' ? (
-                    <span style={{ color: 'var(--accent)' }}>Đang nổi trong nước</span>
-                  ) : visual?.location === 'water_sinking' ? (
-                    <span style={{ color: 'var(--ink-faint)' }}>Đang chìm trong nước</span>
-                  ) : visual?.location === 'separated_floating' ? (
-                    <span style={{ color: 'var(--accent)' }}>Nổi trong dung dịch nhánh</span>
-                  ) : visual?.location === 'separated_sinking' ? (
-                    <span style={{ color: 'var(--ink-faint)' }}>Chìm trong dung dịch nhánh</span>
-                  ) : (
-                    <span>Trong khay mẫu</span>
-                  )}
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-      </div>
-
-      {/* History of separation outcomes */}
-      <h4 style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'var(--ink)', marginBottom: '0.5rem' }}>
-        Nhật ký các phân đoạn đã tách
-      </h4>
-      {projection.outcomesHistory.length === 0 ? (
-        <p style={{ fontSize: '0.875rem', color: 'var(--ink-faint)' }}>
-          Chưa thực hiện bước tách nào. Hãy bắt đầu từ khâu làm ướt mẫu trong bể pilot.
-        </p>
-      ) : (
-        <div className={styles.tableScroll}>
-        <table className={styles.matrixTable}>
-          <thead>
-            <tr>
-              <th>Giai đoạn</th>
-              <th>Môi trường dung dịch</th>
-              <th>Phân đoạn nổi (Floating)</th>
-              <th>Phân đoạn chìm (Sinking)</th>
-              <th>Số liệu thu hồi (theo bài báo)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {projection.outcomesHistory.map((outcome, idx) => (
-              <tr key={idx}>
-                <td style={{ fontWeight: 600 }}>{outcome.titleVi}</td>
-                <td>{outcome.mediumVi}</td>
-                <td>
-                  {outcome.floating.map((f) => (
-                    <span
-                      key={f}
-                      style={{
-                        display: 'inline-block',
-                        padding: '1px 6px',
-                        margin: '2px',
-                        borderRadius: '3px',
-                        background: 'var(--accent-softer)',
-                        color: 'var(--accent)',
-                        fontWeight: 700,
-                        fontSize: '0.8125rem',
-                      }}
-                    >
-                      {f}
-                    </span>
-                  ))}
-                </td>
-                <td>
-                  {outcome.sinking.map((s) => (
-                    <span
-                      key={s}
-                      style={{
-                        display: 'inline-block',
-                        padding: '1px 6px',
-                        margin: '2px',
-                        borderRadius: '3px',
-                        background: 'var(--surface-3)',
-                        color: 'var(--ink-muted)',
-                        fontWeight: 600,
-                        fontSize: '0.8125rem',
-                      }}
-                    >
-                      {s}
-                    </span>
-                  ))}
-                </td>
-                <td>
-                  {outcome.recoveryTextVi.map((t, i) => (
-                    <div key={i} className={styles.matrixRecoveryBadge}>
-                      {t}
-                    </div>
-                  ))}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        </div>
-      )}
-
-      {/* Ethanol Label Conflict Disclosure */}
-      <div className={styles.conflictAlert} style={{ marginTop: '1.5rem' }}>
-        <div>⚠️</div>
-        <div>
-          <strong>Minh bạch về mâu thuẫn trong bài báo nguồn:</strong> Phần Tóm tắt và Kết luận có cách gán nhãn polymer ở nhánh ethanol khác với phần Kết quả và Hình 6. Bảng dữ liệu theo phần Kết quả và Hình 6; số liệu thu hồi chỉ hiện sau khi chạy và hoàn tất ly tâm, cân theo Meneses Quelal và cộng sự (2022).
-        </div>
-      </div>
-    </div>
-  )
+export function PlasticFractionsTable({ projection, feedMassKg, polymers }: { projection: PlasticProjection; feedMassKg: number; polymers: typeof VIRGIN_POLYMERS }) {
+  return <div className={ui.tableWrap}><table className={ui.table}><caption>Các phân đoạn đã ghi nhận</caption><thead><tr><th scope="col">Mẫu</th><th scope="col">Phân đoạn thu</th><th scope="col">Thu hồi tham khảo</th><th scope="col">Khối lượng quy đổi</th></tr></thead><tbody>{polymers.map(polymer => {
+    const readout = plasticFractionReadout(projection, polymer.id, feedMassKg)
+    return <tr key={polymer.id}><th scope="row">{polymer.id}</th><td>{readout ? <>{readout.fraction.mediumUsed}<br />{readout.fraction.behavior === 'floating' ? 'Phân đoạn nổi' : 'Phân đoạn chìm'}</> : 'Chưa ghi nhận'}</td><td>{readout?.recovery == null ? 'Chưa ghi nhận' : readout.recovery.toLocaleString('vi-VN') + '%'}</td><td>{readout?.massKg == null ? 'Chưa ghi nhận' : '≈ ' + readout.massKg.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' kg'}</td></tr>
+  })}</tbody></table></div>
 }
 
+function plasticActionLabel(type: string, input: Record<string, number | string | boolean>) {
+  const labels: Record<string, string> = { prepare_samples: 'Chuẩn bị sáu mẫu', load_and_wet: 'Nạp mẫu và ghi nhận làm ướt', separate_water: 'Tách sơ bộ trong nước', centrifuge_and_weigh: 'Ghi nhận ly tâm và cân', summarize_fractions: 'Xem tổng kết phân đoạn', complete: 'Nộp bài', completed: 'Nộp bài' }
+  if (type === 'select_branch') return input.branch === 'light' ? 'Chọn nhánh ethanol' : 'Chọn nhánh NaCl'
+  if (type === 'run_ethanol_preset' || type === 'run_nacl_preset') return 'Chạy ' + (type === 'run_ethanol_preset' ? 'ethanol ' : 'NaCl ') + (input.concentration === 11.5 ? '11–12' : Number(input.concentration).toLocaleString('vi-VN')) + (type === 'run_ethanol_preset' ? '% v/v' : '% w/v')
+  return labels[type] ?? 'Ghi nhận thao tác của lượt'
+}

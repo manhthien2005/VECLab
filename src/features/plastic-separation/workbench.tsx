@@ -8,21 +8,29 @@ import {
   createPlasticSession,
   type PlasticSessionView,
 } from '@/application/simulation/plastic-session.js'
+import type { StoredAttemptEventRecord } from '@/application/attempts/repository.js'
 import type { UUID } from '@/domain/process/contracts.js'
 import {
-  VIRGIN_POLYMERS,
   type PlasticSeparationState,
   type PolymerId,
 } from '@/domain/experiments/virgin-plastic-separation/model.js'
-import { GuideIcon, TheoryIcon, SourcesIcon, InfoIcon, TargetIcon } from '@/features/workbench/icons.js'
-import { ArrowRightIcon } from '@/features/landing/icons.js'
-import { WorkbenchTour, type WorkbenchTourStep } from '@/features/workbench/tour.js'
+import { GuideIcon, TheoryIcon, SourcesIcon, TargetIcon, ReportIcon, SubmitIcon } from '@/features/workbench/icons.js'
+import { ArrowRightIcon, FlaskIcon, CheckCircleIcon } from '@/features/landing/icons.js'
+import { type WorkbenchTourStep } from '@/features/workbench/tour.js'
 import { PlasticSeparationApparatus } from './apparatus.js'
 import { PlasticEquipmentShelf } from './equipment-shelf.js'
 import { PlasticEquipmentPanel, type PlasticItemKind } from './equipment-panel.js'
 import { PlasticNotebook } from './notebook.js'
 import { PlasticCompletionDialog } from './completion.js'
 import styles from './workbench.module.css'
+import bench from '@/features/extraction/bench.module.css'
+import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.js'
+import { ActionButton } from '@/features/workbench/action-button.js'
+import { PlasticControls } from './controls.js'
+import { PlasticDialog } from './dialog.js'
+import { plasticSubmissionChecks, PLASTIC_WORKBENCH_STEPS, plasticWorkbenchContext, type PlasticControlGroup } from './readouts.js'
+import ui from './workbench-ui.module.css'
+import type { PlasticMotion } from './motion.js'
 
 function EquipmentArtPlastic() {
   const id = useId().replaceAll(':', '')
@@ -82,13 +90,13 @@ const PLASTIC_WORKBENCH_TOUR: readonly WorkbenchTourStep[] = [
     area: 'shelf',
     title: 'Mẫu & dụng cụ',
     description:
-      'Kệ bên trái giới thiệu mẫu, hóa chất và thiết bị của bài. Bạn thao tác với chúng qua bảng Thao tác, không cần kéo thả. Có thể mở lại hướng dẫn này bất cứ lúc nào.',
+      'Ba mục giới thiệu sáu mẫu nhựa, bể pilot và bộ ly tâm–cân. Nhấn từng mục để xem chi tiết; các bước thực hành nằm trong bảng Thao tác.',
   },
   {
     area: 'simulation',
     title: 'Khu vực thực hành',
     description:
-      'Mô phỏng trực quan bể pilot 800 L với động học khuấy và phân tầng chìm–nổi của các hạt nhựa theo nồng độ môi trường. Khi hoàn tất, nơi đây hiển thị ma trận 6 khay thu hồi.',
+      'Quan sát minh họa bể pilot và phân đoạn nổi–chìm theo hồ sơ. Chuyển động không mô phỏng dòng chảy hay tốc độ phân tách ngoài thực tế.',
   },
   {
     area: 'controls',
@@ -100,140 +108,53 @@ const PLASTIC_WORKBENCH_TOUR: readonly WorkbenchTourStep[] = [
     area: 'notebook',
     title: 'Sổ đo & lịch sử',
     description:
-      'Chuyển sang tab Sổ thực hành để xem lại các bước thao tác, số liệu phân đoạn thu hồi và bảng cân bằng khối lượng các loại polymer.',
+      'Mở khu vực Sổ đo để xem lại các bước thao tác, các phân đoạn thu hồi và khối lượng quy đổi từ tỷ lệ tham khảo.',
   },
 ] as const
 
 type WorkbenchProps = {
   attemptId: string | null
+  invalidAttempt?: boolean
   storageMode?: 'local' | 'cloud'
   openReport?: boolean
   initialPane?: 'simulation' | 'notebook'
 }
 
-type PhaseOneVisual = 'idle' | 'trays' | 'loading-trays' | 'prepared' | 'water-rising' | 'pouring' | 'mixing'
-type InitialCentrifugeVisual = 'idle' | 'loading' | 'spinning' | 'transferring' | 'complete'
-type BranchSeparationVisual = 'idle' | 'mixing' | 'separating' | 'ready'
-type SummaryTrayState = 'hidden' | 'animating' | 'visible'
 type LoadState = 'idle' | 'loading' | 'ready' | 'missing' | 'error'
 
 export function PlasticSeparationWorkbench({
   attemptId,
+  invalidAttempt = false,
   openReport = false,
   initialPane = 'simulation',
 }: WorkbenchProps) {
   const router = useRouter()
-  const session = useMemo(
-    () => createPlasticSession(new GuestAttemptRepository<PlasticSeparationState>()),
-    [],
-  )
-  const [loadState, setLoadState] = useState<LoadState>(attemptId ? 'loading' : 'idle')
+  const repository = useMemo(() => new GuestAttemptRepository<PlasticSeparationState>(), [])
+  const session = useMemo(() => createPlasticSession(repository), [repository])
+  const [loadState, setLoadState] = useState<LoadState>(invalidAttempt ? 'missing' : attemptId ? 'loading' : 'idle')
   const [attempt, setAttempt] = useState<PlasticSessionView | null>(null)
-  const [activePane, setActivePane] = useState<'simulation' | 'notebook'>(initialPane)
+  const [activePane, setActivePane] = useState<WorkbenchPane>(initialPane)
+  const [groupSelection, setGroupSelection] = useState<{ revision: number; id: PlasticControlGroup | null } | null>(null)
+  const notebookRef = useRef<HTMLDivElement>(null)
   const [isReportOpen, setIsReportOpen] = useState(openReport)
   const [selectedPolymerId, setSelectedPolymerId] = useState<PolymerId | null>(null)
-  const [activeCue, setActiveCue] = useState<{ id: string; actionType: string; message: string } | null>(null)
+  const [motion, setMotion] = useState<PlasticMotion | null>(null)
+  const finishMotion = useCallback((key: string) => setMotion(current => current?.key === key && current.playing ? { ...current, playing: false } : current), [])
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [resetModalOpen, setResetModalOpen] = useState(false)
-  const [phaseOneVisual, setPhaseOneVisual] = useState<PhaseOneVisual>('idle')
-  const [tankParticleSeed, setTankParticleSeed] = useState(1)
-  const [waterSeparationRunning, setWaterSeparationRunning] = useState(false)
-  const [initialCentrifugeVisual, setInitialCentrifugeVisual] = useState<InitialCentrifugeVisual>('idle')
-  const [branchSeparationVisual, setBranchSeparationVisual] = useState<BranchSeparationVisual>('idle')
-  const [branchSelectionPending, setBranchSelectionPending] = useState(false)
-  const [summaryTrayState, setSummaryTrayState] = useState<SummaryTrayState>('hidden')
-  const [summaryVisibleCount, setSummaryVisibleCount] = useState(0)
-  const root = useRef<HTMLDivElement>(null)
+  const [history, setHistory] = useState<{ attemptId: string; records: readonly StoredAttemptEventRecord<PlasticSeparationState>[] } | null>(null)
+  const writing = useRef(false)
+  const [submissionOpen, setSubmissionOpen] = useState(false)
   const [tourOpen, setTourOpen] = useState(false)
-  const [tourStep, setTourStep] = useState(0)
   const [equipmentItem, setEquipmentItem] = useState<PlasticItemKind | null>(null)
   const tourTrigger = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    if (!attempt) return
-    const timer = window.setTimeout(() => {
-      if (attempt.projection.wetted && phaseOneVisual === 'idle') setPhaseOneVisual('mixing')
-      else if (attempt.projection.samplesPrepared && phaseOneVisual === 'idle') setPhaseOneVisual('prepared')
-    }, 0)
-    return () => window.clearTimeout(timer)
-  }, [attempt, phaseOneVisual])
-
-  useEffect(() => {
-    if (attempt?.projection.stage === 'branch_selection' && attempt.projection.centrifuged && initialCentrifugeVisual === 'idle' && !branchSelectionPending) {
-      const timer = window.setTimeout(() => setInitialCentrifugeVisual('complete'), 0)
-      return () => window.clearTimeout(timer)
-    }
-  }, [attempt, initialCentrifugeVisual, branchSelectionPending])
-
-  useEffect(() => {
-    if (attempt?.projection.activeBranch !== null) {
-      const timer = window.setTimeout(() => setBranchSelectionPending(false), 0)
-      return () => window.clearTimeout(timer)
-    }
-  }, [attempt])
-
-  useEffect(() => {
-    const next = phaseOneVisual === 'trays' ? ['loading-trays', 650] as const
-      : phaseOneVisual === 'loading-trays' ? ['prepared', 2300] as const
-        : phaseOneVisual === 'water-rising' ? ['pouring', 1800] as const
-          : phaseOneVisual === 'pouring' ? ['mixing', 2600] as const
-            : null
-    if (!next) return
-    const timer = window.setTimeout(() => setPhaseOneVisual(next[0]), next[1])
-    return () => window.clearTimeout(timer)
-  }, [phaseOneVisual])
-
-  useEffect(() => {
-    if (!waterSeparationRunning) return
-    const timer = window.setTimeout(() => setWaterSeparationRunning(false), 8_800)
-    return () => window.clearTimeout(timer)
-  }, [waterSeparationRunning])
-
-  useEffect(() => {
-    const next = initialCentrifugeVisual === 'loading' ? ['spinning', 1_250] as const
-      : initialCentrifugeVisual === 'spinning' ? ['transferring', 3_000] as const
-        : initialCentrifugeVisual === 'transferring' ? ['complete', 2_000] as const
-          : null
-    if (!next) return
-    const timer = window.setTimeout(() => setInitialCentrifugeVisual(next[0]), next[1])
-    return () => window.clearTimeout(timer)
-  }, [initialCentrifugeVisual])
-
-  useEffect(() => {
-    const next = branchSeparationVisual === 'mixing' ? ['separating', 1_800] as const
-      : branchSeparationVisual === 'separating' ? ['ready', 8_500] as const
-        : null
-    if (!next) return
-    const timer = window.setTimeout(() => setBranchSeparationVisual(next[0]), next[1])
-    return () => window.clearTimeout(timer)
-  }, [branchSeparationVisual])
-
-  // Summary tray stagger animation: fire when stage becomes 'summary'
-  useEffect(() => {
-    if (attempt?.projection.stage === 'summary' && summaryTrayState === 'hidden') {
-      const timer = window.setTimeout(() => {
-        setSummaryTrayState('animating')
-        setSummaryVisibleCount(0)
-      }, 0)
-      return () => window.clearTimeout(timer)
-    }
-  }, [attempt, summaryTrayState])
-
-  useEffect(() => {
-    if (summaryTrayState !== 'animating') return
-    if (summaryVisibleCount >= 6) {
-      const timer = window.setTimeout(() => setSummaryTrayState('visible'), 0)
-      return () => window.clearTimeout(timer)
-    }
-    const timer = window.setTimeout(() => setSummaryVisibleCount((n) => n + 1), 160)
-    return () => window.clearTimeout(timer)
-  }, [summaryTrayState, summaryVisibleCount])
 
   // Initialize session and load attempt if specified
   useEffect(() => {
     let cancelled = false
     async function init() {
+      if (invalidAttempt) { setLoadState('missing'); setAttempt(null); return }
       if (!attemptId) {
         setLoadState('idle')
         setAttempt(null)
@@ -250,10 +171,10 @@ export function PlasticSeparationWorkbench({
           setLoadState('missing')
           setAttempt(null)
         }
-      } catch (err: unknown) {
+      } catch {
         if (!cancelled) {
           setLoadState('error')
-          setErrorMessage(err instanceof Error ? err.message : 'Không thể kết nối đến phiên thực hành.')
+          setErrorMessage('Chưa đọc được dữ liệu trên trình duyệt. Tải lại lượt để thử lại.')
         }
       }
     }
@@ -262,11 +183,21 @@ export function PlasticSeparationWorkbench({
     return () => {
       cancelled = true
     }
-  }, [attemptId, session])
+  }, [attemptId, invalidAttempt, session])
+
+  useEffect(() => {
+    if (!attempt) return
+    let cancelled = false
+    void repository.getAttemptEventRecords(attempt.attemptId).then(records => {
+      if (!cancelled) setHistory({ attemptId: attempt.attemptId, records })
+    }).catch(() => { if (!cancelled) setHistory(null) })
+    return () => { cancelled = true }
+  }, [attempt, repository])
 
   // Start fresh attempt handler (from hero entry button)
   const handleStartSession = useCallback(async () => {
-    if (isPending) return
+    if (isPending || writing.current) return
+    writing.current = true
     setErrorMessage(null)
     startTransition(async () => {
       try {
@@ -274,41 +205,36 @@ export function PlasticSeparationWorkbench({
         setAttempt(fresh)
         setLoadState('ready')
         router.replace(`/simulate/plastic-density-separation?attempt=${fresh.attemptId}`, { scroll: false })
-      } catch (err: unknown) {
-        setErrorMessage(err instanceof Error ? err.message : 'Không thể khởi tạo phiên thực hành.')
-      }
+      } catch {
+        setErrorMessage('Chưa tạo được lượt trên trình duyệt. Kiểm tra quyền lưu dữ liệu rồi thử lại.')
+      } finally { writing.current = false }
     })
   }, [session, router, isPending])
 
 
   // Action dispatcher
   const dispatchAction = useCallback(
-    async (actionType: string, parameters: Record<string, number | string | boolean> = {}, cueMessage?: string) => {
-      if (!attempt) return
+    async (actionType: string, parameters: Record<string, number | string | boolean> = {}) => {
+      if (!attempt || writing.current || attempt.status !== 'in_progress') return
+      writing.current = true
       setErrorMessage(null)
 
       startTransition(async () => {
         try {
-          const res = await session.apply(attempt.attemptId, actionType, parameters)
+          const res = await session.apply(attempt.attemptId, actionType, parameters, {}, { expectedRevision: attempt.revision })
           if (res.ok) {
             setAttempt(res.state)
-            if (cueMessage) {
-              const cueId = `cue-${Date.now()}`
-              setActiveCue({ id: cueId, actionType, message: cueMessage })
-              setTimeout(() => {
-                setActiveCue((current) => (current?.id === cueId ? null : current))
-              }, 4000)
-            }
+            setMotion({ key: `${res.state.attemptId}:${res.state.revision}`, actionType, previous: attempt.projection, playing: true })
           } else {
             if ('error' in res && res.error) {
-              setErrorMessage(`Thao tác không hợp lệ: ${res.error.code}`)
+              setErrorMessage('Chưa thể lưu thao tác ở trạng thái hiện tại. Tải lại lượt để lấy dữ liệu mới nhất trước khi tiếp tục.')
             } else if ('outcome' in res) {
-              setErrorMessage(`Không thể thực hiện: ${res.outcome}`)
+              setErrorMessage('Lượt có thể đã thay đổi ở tab khác. Tải lại lượt để xác nhận trạng thái đã lưu.')
             }
           }
-        } catch (err: unknown) {
-          setErrorMessage(err instanceof Error ? err.message : 'Lỗi khi gửi hành động.')
-        }
+        } catch {
+          setErrorMessage('Chưa xác nhận được thao tác đã lưu. Tải lại lượt trước khi tiếp tục để tránh ghi trùng.')
+        } finally { writing.current = false }
       })
     },
     [session, attempt],
@@ -316,27 +242,32 @@ export function PlasticSeparationWorkbench({
 
   // Complete attempt
   const handleComplete = useCallback(async () => {
-    if (!attempt) return
+    if (!attempt || writing.current || attempt.status !== 'in_progress' || !plasticSubmissionChecks(attempt.projection).every(check => check.done)) return
+    writing.current = true
     setErrorMessage(null)
 
     startTransition(async () => {
       try {
-        const res = await session.complete(attempt.attemptId)
+        const res = await session.complete(attempt.attemptId, { expectedRevision: attempt.revision })
         if (res.ok) {
           setAttempt(res.state)
+          setSubmissionOpen(false)
           setIsReportOpen(true)
         } else {
           setErrorMessage('Chưa thể hoàn thành lượt: vui lòng kiểm tra lại các bước.')
         }
-      } catch (err: unknown) {
-        setErrorMessage(err instanceof Error ? err.message : 'Lỗi khi hoàn tất lượt.')
-      }
+      } catch {
+        setErrorMessage('Chưa xác nhận được bài nộp. Tải lại lượt để kiểm tra báo cáo đã lưu.')
+      } finally { writing.current = false }
     })
   }, [session, attempt])
 
   // Reset attempt
   const handleReset = useCallback(async () => {
+    if (writing.current) return
+    writing.current = true
     setResetModalOpen(false)
+    setSubmissionOpen(false)
     setErrorMessage(null)
 
     startTransition(async () => {
@@ -344,272 +275,103 @@ export function PlasticSeparationWorkbench({
         const fresh = await session.start()
         setAttempt(fresh)
         setLoadState('ready')
+        setGroupSelection(null)
+        setActivePane('simulation')
         setSelectedPolymerId(null)
-        setActiveCue(null)
+        setMotion(null)
         setIsReportOpen(false)
-        setPhaseOneVisual('idle')
-        setWaterSeparationRunning(false)
-        setInitialCentrifugeVisual('idle')
-        setBranchSeparationVisual('idle')
-        setBranchSelectionPending(false)
-        setSummaryTrayState('hidden')
-        setSummaryVisibleCount(0)
         router.replace(`/simulate/plastic-density-separation?attempt=${fresh.attemptId}`)
-      } catch (err: unknown) {
-        setErrorMessage(err instanceof Error ? err.message : 'Lỗi khi đặt lại lượt.')
-      }
+      } catch {
+        setErrorMessage('Chưa tạo được lượt mới. Lượt hiện tại vẫn được giữ nguyên; tải lại để kiểm tra dữ liệu.')
+      } finally { writing.current = false }
     })
   }, [session, router])
 
   const ready = loadState === 'ready' && !!attempt
-  const projection = attempt?.projection ?? null
-  const initialCentrifugeActive = projection ? projection.stage === 'branch_selection' && initialCentrifugeVisual !== 'idle' : false
-  const branchSeparationActive = projection ? projection.pendingCentrifugation && branchSeparationVisual !== 'idle' : false
-  const isBranchView =
-    projection !== null &&
-    projection.activeBranch !== null &&
-    (projection.stage === 'ethanol_branch' ||
-      projection.stage === 'nacl_branch' ||
-      (projection.stage === 'centrifugation' && projection.pendingCentrifugation))
-  const visibleShelfPolymers = isBranchView && projection
-    ? VIRGIN_POLYMERS.filter((polymer) =>
-        projection.activeBranch === 'light' ? polymer.id === 'PP' || polymer.id === 'HDPE' : ['PS', 'ABS', 'PA', 'PC'].includes(polymer.id),
-      )
-    : VIRGIN_POLYMERS
-  const handlePrepareSamples = () => {
-    setPhaseOneVisual('trays')
-    void dispatchAction('prepare_samples', {}, 'Đã chuẩn bị sáu mẫu polymer nguyên sinh theo điều kiện nghiên cứu')
+  const projection = loadState === 'ready' ? attempt?.projection ?? null : null
+  const currentMotion = motion?.key === `${attempt?.attemptId}:${projection?.revision}` ? motion : null
+  const handlePrepareSamples = () => { void dispatchAction('prepare_samples') }
+  const handleLoadAndWet = () => { void dispatchAction('load_and_wet') }
+  const handleSeparateWater = () => { void dispatchAction('separate_water') }
+  const handleInitialCentrifuge = () => { void dispatchAction('centrifuge_and_weigh') }
+  const handleBranchPreset = (type: string, parameters: Record<string, number | string | boolean>) => { void dispatchAction(type, parameters) }
+  const context = projection ? plasticWorkbenchContext(projection) : null
+  const openGroup = groupSelection?.revision === projection?.revision ? groupSelection?.id ?? null : context?.group ?? null
+  const chooseGroup = (id: PlasticControlGroup | null) => setGroupSelection({ revision: projection?.revision ?? -1, id })
+  const showControls = (id: PlasticControlGroup) => {
+    chooseGroup(id)
+    setActivePane('controls')
+    requestAnimationFrame(() => {
+      const summary = document.getElementById('plastic-control-' + id)?.querySelector('summary')
+      summary?.scrollIntoView({ block: 'nearest', behavior: 'instant' })
+      summary?.focus({ preventScroll: true })
+    })
   }
-  const handleLoadAndWet = () => {
-    setTankParticleSeed(Math.random())
-    setPhaseOneVisual('water-rising')
-    void dispatchAction('load_and_wet', {}, 'Đã nạp mẫu và ghi nhận điều kiện làm ướt 160 rpm trong 1 giờ')
+  const showNotebook = () => {
+    setActivePane('notebook')
+    requestAnimationFrame(() => {
+      notebookRef.current?.scrollIntoView({ block: 'start', behavior: 'instant' })
+      notebookRef.current?.focus({ preventScroll: true })
+    })
   }
-  const handleSeparateWater = () => {
-    setWaterSeparationRunning(true)
-    void dispatchAction(
-      'separate_water',
-      {},
-      'Tách nước thành công: PP và HDPE nổi (thu hồi 97,5%), nhóm nặng chìm đáy',
-    )
-  }
-  const handleInitialCentrifuge = () => {
-    setInitialCentrifugeVisual('loading')
-    void dispatchAction(
-      'centrifuge_and_weigh',
-      {},
-      'Đưa phân đoạn PP + HDPE vào máy ly tâm 2.950 rpm; sau đó chuyển mẫu sang cân',
-    )
-  }
-  const handleBranchPreset = (
-    actionType: string,
-    parameters: Record<string, number | string | boolean>,
-    cueMessage: string,
-  ) => {
-    setTankParticleSeed(Math.random())
-    setInitialCentrifugeVisual('idle')
-    setBranchSeparationVisual('mixing')
-    void dispatchAction(actionType, parameters, cueMessage)
-  }
-  const branchPresetLocked = isPending || (projection ? projection.pendingCentrifugation : false) || branchSeparationVisual === 'mixing' || branchSeparationVisual === 'separating'
-  const branchIntroActive =
-    projection !== null &&
-    projection.activeBranch !== null &&
-    (projection.stage === 'ethanol_branch' || projection.stage === 'nacl_branch') &&
-    phaseOneVisual !== 'mixing'
-
-  return (
-    <div ref={root} className={styles.workbenchContainer}>
-      {/* Header bar with breadcrumbs and views */}
-      <header className={styles.headerBar} data-workbench-area="header">
-        <nav className={styles.breadcrumbs} aria-label="Breadcrumb">
-          <Link href="/" className={styles.breadcrumbLink}>
-            Trang chủ
-          </Link>
-          <span className={styles.breadcrumbSeparator}>/</span>
-          <Link href="/experiments" className={styles.breadcrumbLink}>
-            Thí nghiệm
-          </Link>
-          <span className={styles.breadcrumbSeparator}>/</span>
-          <Link href="/experiments/plastic-density-separation" className={styles.breadcrumbLink}>
-            Phân loại nhựa nguyên sinh
-          </Link>
-          <span className={styles.breadcrumbSeparator}>/</span>
-          <span className={styles.breadcrumbCurrent}>Bàn thí nghiệm</span>
-        </nav>
-
-        <div className={styles.headerGoal}>
-          <TargetIcon />
-          <span><strong>Mục tiêu:</strong> Thu hồi PP 95,6% · HDPE 99,7%</span>
-          <span className={styles.headerGoalDivider}>|</span>
-          <span><strong>Quy mô:</strong> Bể pilot 800 L · 6 polymer (12 kg)</span>
-        </div>
-
-        <div className={styles.headerActions}>
-          <div className={styles.viewButtonGroup} role="tablist">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activePane === 'simulation'}
-              className={`${styles.viewButton} ${activePane === 'simulation' ? styles.viewButtonActive : ''}`}
-              onClick={() => setActivePane('simulation')}
-            >
-              Bàn thí nghiệm
-            </button>
-            <button
-              type="button"
-              role="tab"
-              data-workbench-area="notebook"
-              aria-selected={activePane === 'notebook'}
-              className={`${styles.viewButton} ${activePane === 'notebook' ? styles.viewButtonActive : ''}`}
-              onClick={() => setActivePane('notebook')}
-            >
-              Sổ thực hành
-            </button>
-          </div>
-
-          {attempt && attempt.status === 'completed' && (
-            <button
-              type="button"
-              className={styles.secondaryBtn}
-              onClick={() => setIsReportOpen(true)}
-            >
-              Xem báo cáo
-            </button>
-          )}
-
-          {attempt && (
-            <button
-              type="button"
-              className={styles.secondaryBtn}
-              onClick={() => setResetModalOpen(true)}
-              title="Bắt đầu lại mẻ thí nghiệm"
-            >
-              Làm lại
-            </button>
-          )}
-        </div>
-      </header>
-
-      {/* Error message notification if any */}
-      {errorMessage && (
-        <div className={styles.conflictAlert} style={{ borderColor: 'var(--bad)', background: '#fef2f2', color: '#991b1b' }}>
-          <div>❌</div>
-          <div>{errorMessage}</div>
-        </div>
-      )}
-
-      {/* Main View Switch */}
-      {activePane === 'notebook' ? (
-        <div data-workbench-area="notebook">
-          {!ready || !projection ? (
-            <p className={styles.notebookTeaser}>Sổ thực hành sẽ hiển thị số liệu sau khi bắt đầu lượt.</p>
-          ) : (
-            <PlasticNotebook projection={projection} />
-          )}
-        </div>
-      ) : (
-        <div className={styles.workbenchGrid}>
-          <aside className={styles.materialShelf} data-workbench-area="shelf" aria-label="Mẫu và dụng cụ">
-            <h2>Mẫu & dụng cụ</h2>
-            <div className={styles.materialList}>
-              {visibleShelfPolymers.map((polymer) => (
-                <button
-                  type="button"
-                  key={polymer.id}
-                  className={`${styles.materialCard} ${selectedPolymerId === polymer.id ? styles.materialCardSelected : ''}`}
-                  onClick={() => {
-                    setSelectedPolymerId(polymer.id)
-                    setEquipmentItem(polymer.id.toLowerCase() as PlasticItemKind)
-                  }}
-                  aria-label={`Mẫu ${polymer.id}: ${polymer.nominalDensity}, ${polymer.formVi}. Nhấn để xem chi tiết.`}
-                >
-                  <div className={styles.materialCardMain}>
-                    <span className={styles.materialSwatch} style={{ backgroundColor: polymer.colorHex }} />
-                    <div className={styles.materialCardBody}>
-                      <div className={styles.materialCardHeader}>
-                        <strong className={styles.materialName}>{polymer.id}</strong>
-                        <span className={styles.materialDensity}>{polymer.nominalDensity}</span>
-                      </div>
-                      <span className={styles.materialForm}>{polymer.formVi}</span>
-                    </div>
-                  </div>
-                  <span className={styles.materialCardAction} aria-hidden="true" title="Xem ảnh thật & thông số">
-                    <InfoIcon />
-                  </span>
-                </button>
-              ))}
+  const done = attempt?.status === 'completed'
+  const lockReason = !ready ? 'Đang mở lượt thực hành.' : isPending ? 'Đang lưu. Chờ xác nhận trước khi tiếp tục.' : errorMessage ? 'Tải lại lượt để xác nhận dữ liệu trước khi tiếp tục.' : attempt?.status === 'stopped' ? 'Lượt đã dừng. Bắt đầu lượt mới để tiếp tục.' : null
+  const guideHref = '/experiments/plastic-density-separation/guide' + (attempt ? '?attempt=' + encodeURIComponent(attempt.attemptId) : '')
+  const checks = projection ? plasticSubmissionChecks(projection) : []
+  const selectBranch = (branch: 'light' | 'heavy') => { void dispatchAction('select_branch', { branch }) }
+  const header = <>
+    <Link className={bench.brand} href="/" aria-label="Trang chủ VECLab"><span><FlaskIcon /></span><strong>VECLab</strong></Link>
+    <Link className={bench.back} href="/experiments"><ArrowRightIcon />Thí nghiệm</Link>
+    <div className={bench.title}><h1>Phân loại nhựa nguyên sinh</h1><p>Nổi–chìm · Hai nhánh dung dịch · Thu hồi</p></div>
+    <details className={ui.goal}><summary><TargetIcon />Mục tiêu & phạm vi</summary><div className={ui.goalPanel}><h2>Mục tiêu học tập</h2><p>Giải thích cách phân loại sáu loại nhựa nguyên sinh theo khối lượng riêng; đọc phân đoạn nổi–chìm và đối chiếu tỷ lệ thu hồi.</p><h2>Phạm vi lượt thực hành</h2><p>Sáu mẫu · 2,0 kg mỗi loại. Hoàn thành bước tách nước, nhánh ethanol và nhánh NaCl với các mức nồng độ cố định; ghi nhận ly tâm và cân sau từng bước tách.</p><p>Thu hồi là dữ liệu tham khảo; khối lượng được quy đổi, không phải phép đo mới. Không suy ra độ tinh khiết hoặc thiết kế quy trình thật.</p></div></details>
+    <div className={bench.headerActions}><span className={bench.saveState} role="status"><CheckCircleIcon />{loadState === 'loading' ? 'Đang mở lượt…' : isPending ? 'Đang lưu…' : errorMessage ? 'Cần xác nhận dữ liệu' : ready ? 'Đã lưu trên thiết bị' : 'Lưu trên trình duyệt'}</span>
+      <button className={bench.button} type="button" disabled={!attempt?.report} onClick={() => setIsReportOpen(true)} title={attempt?.report ? 'Xem báo cáo đã chốt' : 'Báo cáo được lưu sau khi nộp bài'}><ReportIcon />Báo cáo</button>
+      <button className={bench.primary} type="button" disabled={!ready || isPending || attempt?.status === 'stopped' || (done && !attempt?.report)} onClick={() => done ? setIsReportOpen(true) : setSubmissionOpen(true)}>{done ? <CheckCircleIcon /> : <SubmitIcon />}{done ? 'Đã nộp' : 'Nộp bài'}</button>
+    </div>
+  </>
+  const shelf = <div className={bench.shelfContent}>
+    <PlasticEquipmentShelf onSelectEquipment={setEquipmentItem} />
+    <div className={bench.shelfHelp}>
+      <button ref={tourTrigger} className={bench.guideButton} type="button" onClick={() => setTourOpen(true)}>
+        <GuideIcon />Hướng dẫn thao tác
+      </button>
+      <Link className={bench.theoryLink} href={guideHref} target="_blank" rel="noopener noreferrer">
+        <TheoryIcon /><span>Lý thuyết & cách làm bài</span>
+      </Link>
+      <details><summary><SourcesIcon />Nguồn & giới hạn</summary>
+        <p>Các điều kiện cố định theo Meneses Quelal và cộng sự (2022). Khối lượng được quy đổi từ tỷ lệ thu hồi tham khảo, không phải phép đo mới.</p>
+        <Link href={guideHref + '#plastic-sources'} target="_blank" rel="noopener noreferrer">Đọc nguồn và giới hạn — mở tab mới <ArrowRightIcon /></Link>
+      </details>
+    </div>
+  </div>
+  const simulation = (
+<div className={styles.centerColumn} data-workbench-area="simulation">
+            <div className={ui.stageHeader}>
+              <div className={ui.sceneTitle}><div><h2>Khu vực thực hành</h2><p>Sáu mẫu nhựa nguyên sinh · Hai nhánh dung dịch</p></div>{context && <span className={ui.badge}>{attempt?.status === 'completed' ? 'Đã nộp' : context.label}</span>}</div>
+              <ol className={ui.steps} aria-label="Quy trình phân loại nhựa">{PLASTIC_WORKBENCH_STEPS.map((step, index) => <li key={step.id} aria-current={ready && context?.group === step.id ? 'step' : undefined}>
+                <button type="button" disabled={!ready} aria-label={'Mở thao tác: ' + step.label} onClick={() => showControls(step.id)}><span>{index + 1}</span>{step.label}</button>
+              </li>)}</ol>
             </div>
-            <p className={styles.materialNote}>Mỗi mẫu nguyên sinh: 2,0 kg theo nghiên cứu pilot.</p>
-            <PlasticEquipmentShelf onSelectEquipment={(kind) => setEquipmentItem(kind)} />
-            <div className={styles.shelfHelp}>
-              <p className={styles.shelfNote}>Mẫu pilot 2,0 kg/loại polymer. Dữ liệu mẻ thực hành lưu trên trình duyệt.</p>
-              <button
-                ref={tourTrigger}
-                type="button"
-                className={styles.guideButton}
-                onClick={() => {
-                  setTourStep(0)
-                  setTourOpen(true)
-                }}
-              >
-                <GuideIcon />
-                <span>Hướng dẫn thao tác</span>
-              </button>
-              <Link
-                className={styles.theoryLink}
-                href="/experiments/plastic-density-separation/guide"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <TheoryIcon />
-                <span>Lý thuyết & cách làm bài</span>
-              </Link>
-              <details className={styles.shelfSources}>
-                <summary>
-                  <SourcesIcon />
-                  <span>Nguồn & giới hạn</span>
-                </summary>
-                <p>Nghiên cứu pilot quy mô 800 L của Meneses Quelal và cộng sự (2022). Tỷ lệ thu hồi qua cân bằng khối lượng, không biểu thị độ tinh khiết hóa học.</p>
-                <a
-                  href="https://doi.org/10.1007/s11356-021-15611-w"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Bài báo Meneses Quelal et al. (2022) — mở tab mới <ArrowRightIcon />
-                </a>
-                <p>Không suy liều hoặc thiết kế dây chuyền thực tế từ mô hình này.</p>
-              </details>
-            </div>
-          </aside>
-
-          <div className={styles.centerColumn} data-workbench-area="simulation">
-            <div className={styles.stageHeading}>
-              <div><h2>Khu vực thực hành</h2><p>Phân loại nhựa nguyên sinh · 6 polymer</p></div>
-              <ol className={styles.processSteps} aria-label="Quy trình phân loại nhựa">
-                {['Chuẩn bị', 'Tách nước', 'Ly tâm & cân', 'Phân loại dung dịch', 'Kết quả'].map((label, index) => {
-                  const branchSorting = branchSeparationVisual === 'mixing' || branchSeparationVisual === 'separating'
-                  const activeIndex = !projection ? -1 : projection.stage === 'preparation' ? 0 : projection.stage === 'wetting' ? (phaseOneVisual === 'mixing' ? 1 : 0) : projection.stage === 'water_separation' || (projection.stage === 'centrifugation' && waterSeparationRunning) ? 1 : projection.stage === 'branch_selection' ? initialCentrifugeVisual === 'complete' ? 3 : 2 : branchSorting ? 3 : projection.stage === 'centrifugation' ? 2 : projection.stage === 'ethanol_branch' || projection.stage === 'nacl_branch' ? 3 : 4
-                  return <li key={label} aria-current={ready && index === activeIndex ? 'step' : undefined}><span>{index + 1}</span>{label}</li>
-                })}
-              </ol>
-            </div>
+            {ready && projection && context && <div className={ui.sceneContext} aria-label="Trạng thái thực hành">
+              <dl><div><dt>Môi trường hiện tại</dt><dd>{context.medium}</dd></div><div><dt>Nhánh đã hoàn tất</dt><dd>{projection.completedBranches.length}/2</dd></div></dl>
+              <p>Chuyển động minh họa các bước đã ghi nhận; có thể xem ngay trạng thái cuối.</p>
+            </div>}
             {/* Center Column: Hero entry when not ready, summary scene when completed/summary, apparatus card when running */}
             {!ready || !projection ? (
-              <div className={styles.entry}>
+              <div className={bench.entry}>
                 {loadState === 'idle' && (
                   <>
                     <EquipmentArtPlastic />
-                    <h2 className={styles.entryTitle}>Phân loại nhựa nguyên sinh bằng tỷ trọng</h2>
+                    <h2 className={styles.entryTitle}>Phân loại nhựa theo khối lượng riêng</h2>
                     <p className={styles.entryDesc}>
-                      Phân loại 6 loại polymer nguyên sinh (PP, HDPE, PS, ABS, PA, PC) dựa trên sự khác biệt khối lượng riêng qua các môi trường nước máy, dung dịch ethanol và dung dịch muối NaCl theo nghiên cứu Meneses Quelal et al. (2022).
+                      Chuẩn bị sáu mẫu nhựa, tách sơ bộ trong nước rồi thực hiện hai nhánh ethanol và NaCl. Ghi nhận ly tâm, cân và đối chiếu các phân đoạn thu hồi.
                     </p>
                     <p className={styles.entryMuted}>
-                      Quy mô bể pilot 800 L, khuấy 160 rpm trong 1 giờ, rotor ly tâm tách ẩm 2.950 rpm. Lượt thực hành chỉ lưu trong trình duyệt của bạn.
+                      Các mức nồng độ cố định theo hồ sơ. Khối lượng được quy đổi từ tỷ lệ thu hồi tham khảo; lượt thực hành lưu trên trình duyệt.
                     </p>
                     <button
                       type="button"
-                      className={styles.entryStartBtn}
+                      className={bench.primary}
                       onClick={() => void handleStartSession()}
                       disabled={isPending}
                     >
@@ -622,710 +384,34 @@ export function PlasticSeparationWorkbench({
                 )}
                 {loadState === 'missing' && (
                   <div role="alert" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                    <h2 className={styles.entryTitle}>Không tìm thấy lượt thí nghiệm</h2>
-                    <p className={styles.entryDesc}>Liên kết không hợp lệ hoặc lượt không còn tồn tại. Dữ liệu hiện có được giữ nguyên.</p>
-                    <Link className={styles.entryStartBtn} href="/simulate/plastic-density-separation">Về màn bắt đầu</Link>
+                    <h2 className={styles.entryTitle}>Chưa mở được lượt thực hành</h2>
+                    <p className={styles.entryDesc}>Liên kết không hợp lệ, lượt không có trên trình duyệt này hoặc thuộc phiên bản chưa hỗ trợ. Dữ liệu đã lưu được giữ nguyên.</p>
+                    <Link className={bench.primary} href="/simulate/plastic-density-separation">Về màn bắt đầu</Link>
                   </div>
                 )}
                 {loadState === 'error' && (
                   <div role="alert" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                    <h2 className={styles.entryTitle}>Chưa thể mở lượt thực hành</h2>
+                    <h2 className={styles.entryTitle}>Chưa mở được lượt thực hành</h2>
                     <p className={styles.entryDesc}>{errorMessage ?? 'Lỗi kết nối bộ lưu trữ.'}</p>
-                    <button type="button" className={styles.entryStartBtn} onClick={() => void handleStartSession()}>Tạo lượt mới</button>
+                    <button type="button" className={bench.primary} onClick={() => location.reload()}>Tải lại lượt</button>
                   </div>
                 )}
               </div>
-            ) : projection.stage === 'summary' ? (
-              <div className={styles.summaryScene}>
-                <div className={styles.summarySceneHeader}>
-                <div className={styles.summarySceneIcon}>✅</div>
-                <div>
-                  <div className={styles.summarySceneTitle}>Kết quả phân loại hoàn tất</div>
-                  <div className={styles.summarySceneSubtitle}>Sáu polymer nguyên sinh đã được phân tách theo bài báo Meneses Quelal et al. (2022)</div>
-                </div>
-              </div>
-
-              <div className={styles.summaryFlowBadges}>
-                {[
-                  { label: 'Nước máy', ok: projection.outcomesHistory.some((o) => o.kind === 'water') },
-                  { label: 'Ethanol 23 & 31% v/v', ok: projection.ethanolProgress === 2 },
-                  { label: 'NaCl 11–12, 20 & 40% w/v', ok: projection.naclProgress === 3 },
-                ].map(({ label, ok }) => (
-                  <span key={label} className={ok ? styles.summaryFlowBadgeOk : styles.summaryFlowBadgePending}>
-                    {ok ? '✓' : '…'} {label}
-                  </span>
-                ))}
-              </div>
-
-              <div className={styles.summaryTrayGrid}>
-                {VIRGIN_POLYMERS.map((polymer, idx) => {
-                  const fraction = projection.collectedFractions.find((f) => f.polymerId === polymer.id)
-                  const polymerVis = projection.polymers.find((p) => p.id === polymer.id)
-                  const recoveryPct = polymerVis?.recoveryPercent ?? null
-                  const massKg = recoveryPct !== null ? (2.0 * recoveryPct / 100).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'
-                  const mediumLabel = fraction?.mediumUsed ?? (
-                    polymer.id === 'PP' || polymer.id === 'HDPE' ? 'Ethanol' : 'NaCl'
-                  )
-                  const isVisible = summaryVisibleCount > idx || summaryTrayState === 'visible'
-                  return (
-                    <div
-                      key={polymer.id}
-                      className={`${styles.summaryTray} ${isVisible ? styles.summaryTrayVisible : ''}`}
-                      style={{ '--tray-color': polymer.colorHex, '--tray-stroke': polymer.strokeHex } as React.CSSProperties}
-                    >
-                      <div className={styles.summaryTrayParticles}>
-                        {Array.from({ length: 9 }).map((_, i) => {
-                          const shapes: Record<string, string> = {
-                            pellet: 'ellipse',
-                            sphere: 'circle',
-                            rectangle: 'rect',
-                            cylinder: 'ellipse',
-                          }
-                          const shape = shapes[polymer.particleShape] ?? 'circle'
-                          const col = i % 3
-                          const row = Math.floor(i / 3)
-                          const cx = 16 + col * 20
-                          const cy = 14 + row * 18
-                          return (
-                            <svg key={i} width="72" height="66" viewBox="0 0 72 66" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
-                              {shape === 'circle' && (
-                                <circle cx={cx} cy={cy} r={7} fill={polymer.colorHex} stroke={polymer.strokeHex} strokeWidth="1" opacity={0.82 - i * 0.02} />
-                              )}
-                              {shape === 'ellipse' && (
-                                <ellipse cx={cx} cy={cy} rx={8} ry={5} fill={polymer.colorHex} stroke={polymer.strokeHex} strokeWidth="1" opacity={0.82 - i * 0.02} />
-                              )}
-                              {shape === 'rect' && (
-                                <rect x={cx - 7} y={cy - 4.5} width={14} height={9} rx={2} fill={polymer.colorHex} stroke={polymer.strokeHex} strokeWidth="1" opacity={0.82 - i * 0.02} />
-                              )}
-                            </svg>
-                          )
-                        })}
-                      </div>
-                      <div className={styles.summaryTrayLabel}>
-                        <strong>{polymer.id}</strong>
-                        <small>{polymer.nominalDensity}</small>
-                      </div>
-                      <div className={styles.summaryTrayMeta}>
-                        <span className={styles.summaryTrayMedium}>{mediumLabel}</span>
-                        {recoveryPct !== null && (
-                          <span className={styles.summaryTrayRecovery}>
-                            {recoveryPct.toLocaleString('vi-VN')}%
-                          </span>
-                        )}
-                      </div>
-                      <div className={styles.summaryTrayMass}>
-                        ≈ {massKg} kg thu hồi
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          ) : (
-          <div className={styles.apparatusCard}>
-            <PlasticSeparationApparatus
-              projection={projection}
-              phaseOneVisual={phaseOneVisual}
-              centrifugeVisual={initialCentrifugeVisual}
-              branchSeparationVisual={branchSeparationVisual}
-              tankParticleSeed={tankParticleSeed}
-              onSelectPolymer={(id) => setSelectedPolymerId(id === selectedPolymerId ? null : id)}
-              selectedPolymerId={selectedPolymerId}
-              activeCue={activeCue}
-            />
-
-            {/* Apparatus Telemetry Bar */}
-            <div className={styles.apparatusTelemetry}>
-              <div className={styles.telemetryItem}>
-                <span className={styles.telemetryLabel}>{initialCentrifugeVisual !== 'idle' && projection.stage === 'branch_selection' ? 'Thiết bị' : isBranchView ? 'Bình phân tách' : 'Bể pilot'}</span>
-                <span className={styles.telemetryValue}>
-                  {initialCentrifugeVisual !== 'idle' && projection.stage === 'branch_selection'
-                    ? 'Máy ly tâm · rotor 2.950 rpm'
-                    : isBranchView
-                    ? projection.activeBranch === 'light'
-                      ? 'Bể pilot 800 L · Ethanol'
-                      : 'Bể pilot 800 L · NaCl'
-                    : '800 L'}
-                </span>
-              </div>
-              <div className={styles.telemetryItem}>
-                <span className={styles.telemetryLabel}>{initialCentrifugeVisual !== 'idle' && projection.stage === 'branch_selection' ? 'Trạng thái' : isBranchView ? 'Môi trường' : 'Cánh khuấy'}</span>
-                <span className={styles.telemetryValue}>
-                  {initialCentrifugeVisual !== 'idle' && projection.stage === 'branch_selection'
-                    ? initialCentrifugeVisual === 'complete' ? 'Đã cân mẫu' : 'Đang ly tâm & cân'
-                    : isBranchView
-                    ? projection.activeBranch === 'light'
-                      ? 'Ethanol · 23 / 31% v/v'
-                      : 'NaCl · 11–12 / 20 / 40% w/v'
-                    : projection.stage === 'wetting'
-                    ? '160 rpm · bước làm ướt'
-                    : activeCue?.actionType.startsWith('run_')
-                      ? '160 rpm · bước tách'
-                      : '160 rpm · điều kiện bài báo'}
-                </span>
-              </div>
-              <div className={styles.telemetryItem}>
-                <span className={styles.telemetryLabel}>Máy ly tâm</span>
-                <span className={styles.telemetryValue}>2.950 rpm</span>
-              </div>
-              <div className={styles.telemetryItem}>
-                <span className={styles.telemetryLabel}>
-                  {initialCentrifugeActive && initialCentrifugeVisual !== 'complete'
-                    ? 'Khối lượng phân đoạn'
-                    : projection.weighedFractions.PA && projection.weighedFractions.PC
-                    ? 'Khối lượng từng phân đoạn'
-                    : projection.weighedMassKg === null ? 'Khối lượng cấp liệu' : 'Khối lượng quy đổi'}
-                </span>
-                <span className={styles.telemetryValue}>
-                  {initialCentrifugeActive && initialCentrifugeVisual !== 'complete'
-                    ? 'Đang xử lý mẫu…'
-                    : projection.weighedFractions.PA && projection.weighedFractions.PC
-                    ? `PA ≈ ${projection.weighedFractions.PA.massKg.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg · PC ≈ ${projection.weighedFractions.PC.massKg.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg`
-                    : projection.weighedMassKg === null
-                      ? '2,0 kg / polymer'
-                      : `≈ ${projection.weighedMassKg.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg`}
-                </span>
-              </div>
-            </div>
-          </div>
-          )}
-          </div>
-
-          {/* Right Column: Guidance & Stepper Control Panels */}
-          <div className={styles.controlsPanel} data-workbench-area="controls">
-            {!ready || !projection ? (
-              <>
-                <div className={styles.promptCard}>
-                  <div className={styles.promptEyebrow}>HƯỚNG DẪN THỰC HÀNH</div>
-                  <div className={styles.promptBody}>
-                    Bấm “Bắt đầu thí nghiệm Phân loại nhựa” ở khu vực thực hành để khởi tạo mẻ pilot mới và mở các bước thao tác.
-                  </div>
-                </div>
-                <p className={styles.empty}>Bắt đầu lượt để chuẩn bị mẫu 6 polymer và nạp vào bể pilot 800 L.</p>
-              </>
             ) : (
-              <>
-                {/* Context Prompt Card */}
-                <div className={styles.promptCard}>
-                  <div className={styles.promptEyebrow}>HƯỚNG DẪN THỰC HÀNH</div>
-                  <div className={styles.promptBody}>
-                    {initialCentrifugeActive && initialCentrifugeVisual !== 'complete'
-                      ? initialCentrifugeVisual === 'spinning'
-                        ? 'Mẫu PP + HDPE đang quay trong máy ly tâm ở 2.950 rpm. Chờ hết chu trình mô phỏng.'
-                        : initialCentrifugeVisual === 'transferring'
-                          ? 'Mẫu đã ly tâm; đang chuyển hạt vào khay cân để đọc khối lượng và hiệu suất thu hồi.'
-                          : 'Đang đưa phân đoạn PP + HDPE từ bể sang rotor máy ly tâm.'
-                      : projection.nextPromptVi}
-                  </div>
-                </div>
-
-            {/* Step 1: Preparation & Wetting */}
-            <div className={styles.stepGroup}>
-              <div className={styles.stepHeader}>
-                <div className={styles.stepTitleBlock}>
-                  <span
-                    className={`${styles.stepNumber} ${
-                      projection.wetted && phaseOneVisual === 'mixing' ? styles.stepNumberDone : styles.stepNumberActive
-                    }`}
-                  >
-                    {projection.wetted && phaseOneVisual === 'mixing' ? '✓' : '1'}
-                  </span>
-                  <div>
-                    <div className={styles.stepTitle}>1. Chuẩn bị mẫu & Làm ướt bể pilot</div>
-                    <div className={styles.stepSubtitle}>
-                  {projection.wetted && phaseOneVisual === 'mixing'
-                    ? 'Đã nạp mẫu và ghi nhận điều kiện làm ướt (160 rpm · 1 giờ)'
-                    : projection.wetted
-                      ? phaseOneVisual === 'water-rising'
-                        ? 'Nước đang dâng lên trong bể pilot…'
-                        : phaseOneVisual === 'pouring'
-                          ? 'Các mẫu polymer đang được đổ vào bể…'
-                          : 'Đang hoàn tất bước làm ướt…'
-                    : projection.samplesPrepared
-                      ? 'Sáu mẫu nguyên sinh đã chuẩn bị theo Table 1'
-                      : 'Sáu polymer nguyên sinh · 2,0 kg mỗi mẫu'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {!projection.samplesPrepared && !projection.wetted && (
-                <div className={styles.stepBody}>
-                  <p style={{ fontSize: '0.875rem', marginBottom: '0.75rem', color: 'var(--ink)' }}>
-                    Bắt đầu từ sáu loại nhựa nguyên sinh trong nghiên cứu: PP, HDPE, PS, ABS, PA và PC. Mỗi polymer được cấp 2,0 kg; hình dạng, kích thước và khối lượng riêng được trình bày trên khay mẫu.
-                  </p>
-                  <button
-                    type="button"
-                    className={styles.actionBtn}
-                    disabled={isPending || phaseOneVisual === 'trays' || phaseOneVisual === 'loading-trays'}
-                    onClick={handlePrepareSamples}
-                  >
-                    Chuẩn bị 6 mẫu polymer
-                  </button>
-                </div>
-              )}
-
-              {projection.samplesPrepared && !projection.wetted && (
-                <div className={styles.stepBody}>
-                  <p style={{ fontSize: '0.875rem', marginBottom: '0.75rem', color: 'var(--ink)' }}>
-                    Nạp 2,0 kg mỗi polymer vào bể pilot có thể tích hữu ích 800 L, trộn với nước máy và khuấy 160 rpm trong 1 giờ để làm ướt mẫu, tránh hình thành bọt khí. Mô phỏng ghi nhận điều kiện này mà không chạy bộ đếm thời gian.
-                  </p>
-                  <button
-                    type="button"
-                    className={styles.actionBtn}
-                    disabled={isPending || phaseOneVisual !== 'prepared'}
-                    onClick={handleLoadAndWet}
-                  >
-                    Nạp mẫu & ghi nhận bước làm ướt
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Step 2: Water Separation */}
-            <div className={styles.stepGroup}>
-              <div className={styles.stepHeader}>
-                <div className={styles.stepTitleBlock}>
-                  <span
-                    className={`${styles.stepNumber} ${
-                      projection.waterSeparated && !waterSeparationRunning
-                        ? styles.stepNumberDone
-                        : projection.wetted && phaseOneVisual === 'mixing'
-                          ? styles.stepNumberActive
-                          : ''
-                    }`}
-                  >
-                    {projection.waterSeparated && !waterSeparationRunning ? '✓' : '2'}
-                  </span>
-                  <div>
-                    <div className={styles.stepTitle}>2. Tách sơ bộ bằng nước máy</div>
-                    <div className={styles.stepSubtitle}>
-                      {waterSeparationRunning
-                        ? 'Các hạt PP và HDPE đang nổi lên; PS, ABS, PA và PC đang chìm xuống…'
-                        : projection.waterSeparated
-                          ? 'Đã tách: PP+HDPE nổi (97,5%) · PS+ABS+PA+PC chìm'
-                        : 'Phân lớp tự nhiên theo khối lượng riêng trong nước'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {projection.wetted && !projection.waterSeparated && (
-                <div className={styles.stepBody}>
-                  <p style={{ fontSize: '0.875rem', marginBottom: '0.75rem', color: 'var(--ink)' }}>
-                    Theo kết quả bước tách bằng nước trong bài báo, PP và HDPE thuộc phân đoạn nổi; PS, ABS, PA và PC thuộc phân đoạn chìm. Tỷ lệ thu hồi 97,5% được báo cáo cho nhóm PP + HDPE.
-                  </p>
-                  <button
-                    type="button"
-                    className={styles.actionBtn}
-                    disabled={isPending || phaseOneVisual !== 'mixing'}
-                    onClick={handleSeparateWater}
-                  >
-                    Ghi nhận tách sơ bộ trong nước
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Step 3: Centrifuge & Weigh */}
-            <div className={styles.stepGroup}>
-              <div className={styles.stepHeader}>
-                <div className={styles.stepTitleBlock}>
-                  <span
-                    className={`${styles.stepNumber} ${
-                      projection.centrifuged && !projection.pendingCentrifugation && !(projection.stage === 'branch_selection' && initialCentrifugeVisual !== 'complete')
-                        ? styles.stepNumberDone
-                        : projection.waterSeparated && !waterSeparationRunning
-                          ? styles.stepNumberActive
-                          : ''
-                    }`}
-                  >
-                    {projection.centrifuged && !projection.pendingCentrifugation ? '✓' : '3'}
-                  </span>
-                  <div>
-                    <div className={styles.stepTitle}>3. Ly tâm & Cân khối lượng</div>
-                    <div className={styles.stepSubtitle}>
-                      {initialCentrifugeActive && initialCentrifugeVisual === 'loading'
-                        ? 'Đang chuyển phân đoạn PP + HDPE vào rotor…'
-                        : initialCentrifugeActive && initialCentrifugeVisual === 'spinning'
-                          ? 'Đang ly tâm ở 2.950 rpm · mô phỏng 3 giây…'
-                          : initialCentrifugeActive && initialCentrifugeVisual === 'transferring'
-                            ? 'Đang đưa hạt vào khay cân…'
-                        : initialCentrifugeActive && initialCentrifugeVisual === 'complete'
-                              ? `Đã cân PP + HDPE · thu hồi ${projection.weighedRecoveryPercent?.toLocaleString('vi-VN') ?? '—'}%`
-                              : projection.pendingCentrifugation
-                                ? 'Cần ghi nhận ly tâm phân đoạn ở 2.950 rpm'
-                                : projection.centrifuged
-                                  ? 'Điều kiện nghiên cứu: ly tâm 2.950 rpm sau mỗi giai đoạn tách'
-                                  : 'Điều kiện nghiên cứu: ly tâm 2.950 rpm'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {((projection.waterSeparated && !projection.centrifuged && !waterSeparationRunning) || projection.pendingCentrifugation || initialCentrifugeActive) && (
-                <div className={styles.stepBody}>
-                  <p style={{ fontSize: '0.875rem', marginBottom: '0.75rem', color: 'var(--ink)' }}>
-                    {initialCentrifugeActive && initialCentrifugeVisual === 'complete'
-                      ? `Khối lượng phân đoạn PP + HDPE: khoảng ${projection.weighedMassKg?.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? '—'} kg; hiệu suất thu hồi ${projection.weighedRecoveryPercent?.toLocaleString('vi-VN') ?? '—'}%. Đây là giá trị quy đổi theo bài báo, không phải phép đo mới.`
-                      : initialCentrifugeActive
-                        ? 'Mẫu đang được chuyển vào rotor, ly tâm rồi đưa sang khay cân. Khối lượng và hiệu suất sẽ hiện khi cân hoàn tất.'
-                        : 'Phân đoạn nổi PP + HDPE sẽ được chuyển vào máy ly tâm 2.950 rpm, sau đó đưa sang khay cân. Khối lượng và hiệu suất được quy đổi theo tỷ lệ thu hồi công bố trong bài báo.'}
-                  </p>
-                  {!initialCentrifugeActive && <button
-                    type="button"
-                    className={styles.actionBtn}
-                    disabled={isPending || (branchSeparationActive && branchSeparationVisual !== 'ready')}
-                    onClick={handleInitialCentrifuge}
-                  >
-                    Ghi nhận ly tâm phân đoạn & Cân mẫu
-                  </button>}
-                </div>
-              )}
-            </div>
-
-            {/* Step 4: Branch Selection & Selective Separation */}
-            <div className={styles.stepGroup}>
-              <div className={styles.stepHeader}>
-                <div className={styles.stepTitleBlock}>
-                  <span
-                    className={`${styles.stepNumber} ${
-                      projection.completedBranches.length === 2
-                        ? styles.stepNumberDone
-                            : projection.centrifuged && (!initialCentrifugeActive || initialCentrifugeVisual === 'complete')
-                          ? styles.stepNumberActive
-                          : ''
-                    }`}
-                  >
-                    {projection.completedBranches.length === 2 ? '✓' : '4'}
-                  </span>
-                  <div>
-                    <div className={styles.stepTitle}>4. Phân loại theo nhánh dung dịch</div>
-                    <div className={styles.stepSubtitle}>
-                      {projection.completedBranches.length === 2
-                        ? 'Đã hoàn thành cả 2 nhánh (Ethanol & NaCl)'
-                        : initialCentrifugeActive && initialCentrifugeVisual !== 'complete'
-                          ? 'Chờ hoàn tất ly tâm và cân mẫu'
-                        : projection.activeBranch
-                          ? branchSeparationActive && branchSeparationVisual === 'mixing'
-                            ? `Đang khuấy nhánh ${projection.activeBranch === 'light' ? 'Ethanol' : 'NaCl'} · 160 rpm…`
-                            : branchSeparationActive && branchSeparationVisual === 'separating'
-                              ? 'Các hạt đang từ từ nổi lên và chìm xuống…'
-                              : branchSeparationActive && branchSeparationVisual === 'ready'
-                                ? 'Đã ổn định phân đoạn · tiếp tục ly tâm và cân'
-                                : `Đang thực hiện nhánh ${projection.activeBranch === 'light' ? 'Ethanol (nhẹ)' : 'NaCl (nặng)'}`
-                          : 'Chọn phân đoạn để phân loại tiếp'}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {projection.centrifuged && !projection.pendingCentrifugation && projection.stage !== 'summary' && !(projection.stage === 'branch_selection' && initialCentrifugeVisual !== 'complete') && (
-                <div className={styles.stepBody}>
-                  {/* Branch switcher */}
-                  <div className={styles.branchSwitcher}>
-                    <button
-                      type="button"
-                      className={`${styles.secondaryBtn} ${
-                        projection.activeBranch === 'light' ? styles.viewButtonActive : ''
-                      }`}
-                      disabled={isPending}
-                      onClick={() => {
-                        setBranchSelectionPending(true)
-                        setTankParticleSeed(Math.random())
-                        setInitialCentrifugeVisual('idle')
-                        setBranchSeparationVisual('idle')
-                        setPhaseOneVisual('water-rising')
-                        dispatchAction('select_branch', { branch: 'light' })
-                      }}
-                    >
-                      Nhánh nhẹ (Ethanol)
-                      {projection.completedBranches.includes('light') && ' ✓'}
-                    </button>
-                    <button
-                      type="button"
-                      className={`${styles.secondaryBtn} ${
-                        projection.activeBranch === 'heavy' ? styles.viewButtonActive : ''
-                      }`}
-                      disabled={isPending}
-                      onClick={() => {
-                        setBranchSelectionPending(true)
-                        setTankParticleSeed(Math.random())
-                        setInitialCentrifugeVisual('idle')
-                        setBranchSeparationVisual('idle')
-                        setPhaseOneVisual('water-rising')
-                        dispatchAction('select_branch', { branch: 'heavy' })
-                      }}
-                    >
-                      Nhánh nặng (NaCl)
-                      {projection.completedBranches.includes('heavy') && ' ✓'}
-                    </button>
-                  </div>
-
-                  {/* Ethanol branch controls */}
-                  {projection.activeBranch === 'light' && (
-                    <div className={styles.presetGrid}>
-                      <div
-                        className={`${styles.presetCard} ${
-                          projection.ethanolProgress >= 1 ? styles.presetCardActive : ''
-                        }`}
-                      >
-                        <div>
-                          <strong>Preset 1: Ethanol 23% v/v</strong>
-                          <div style={{ fontSize: '0.8125rem', color: 'var(--ink-muted)' }}>
-                            Khuấy 160 rpm · 1 giờ · ly tâm 2.950 rpm. PP nổi, HDPE chìm · Thu hồi PP: 95,60%
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          className={styles.secondaryBtn}
-                          disabled={projection.ethanolProgress !== 0 || branchPresetLocked || branchIntroActive}
-                          onClick={() =>
-                            handleBranchPreset(
-                              'run_ethanol_preset',
-                              { concentration: 23 },
-                              'Ethanol 23% v/v: PP nổi (thu hồi 95,60%), HDPE chìm',
-                            )
-                          }
-                        >
-                          {projection.ethanolProgress >= 1 ? 'Đã chạy' : 'Chạy'}
-                        </button>
-                      </div>
-
-                      <div
-                        className={`${styles.presetCard} ${
-                          projection.ethanolProgress === 2 ? styles.presetCardActive : ''
-                        }`}
-                      >
-                        <div>
-                          <strong>Preset 2: Ethanol 31% v/v</strong>
-                          <div style={{ fontSize: '0.8125rem', color: 'var(--ink-muted)' }}>
-                            Nạp lại PP cùng phân đoạn HDPE đã cân · Khuấy 160 rpm · 1 giờ. PP nổi hoàn toàn, chỉ cân HDPE · Thu hồi HDPE: 99,70%
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          className={styles.secondaryBtn}
-                          disabled={projection.ethanolProgress !== 1 || branchPresetLocked || branchIntroActive}
-                          onClick={() =>
-                            handleBranchPreset(
-                              'run_ethanol_preset',
-                              { concentration: 31 },
-                              'Ethanol 31%: nạp lại PP + HDPE; PP nổi hoàn toàn, chỉ cân HDPE.',
-                            )
-                          }
-                        >
-                          {projection.ethanolProgress === 2 ? 'Đã chạy' : 'Chạy'}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* NaCl branch controls */}
-                  {projection.activeBranch === 'heavy' && (
-                    <div className={styles.presetGrid}>
-                      <div
-                        className={`${styles.presetCard} ${
-                          projection.naclProgress >= 1 ? styles.presetCardActive : ''
-                        }`}
-                      >
-                        <div>
-                          <strong>Preset 1: NaCl 11–12% w/v</strong>
-                          <div style={{ fontSize: '0.8125rem', color: 'var(--ink-muted)' }}>
-                            Khuấy 160 rpm · 1 giờ · ly tâm 2.950 rpm. PS nổi · Thu hồi: 80,3%
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          className={styles.secondaryBtn}
-                          disabled={projection.naclProgress !== 0 || branchPresetLocked || branchIntroActive}
-                          onClick={() =>
-                            handleBranchPreset(
-                              'run_nacl_preset',
-                              { concentration: 11.5 },
-                              'NaCl 11–12% w/v: PS nổi (thu hồi 80,3%), ABS/PA/PC chìm',
-                            )
-                          }
-                        >
-                          {projection.naclProgress >= 1 ? 'Đã chạy' : 'Chạy'}
-                        </button>
-                      </div>
-
-                      <div
-                        className={`${styles.presetCard} ${
-                          projection.naclProgress >= 2 ? styles.presetCardActive : ''
-                        }`}
-                      >
-                        <div>
-                          <strong>Preset 2: NaCl 20% w/v</strong>
-                          <div style={{ fontSize: '0.8125rem', color: 'var(--ink-muted)' }}>
-                            Khuấy 160 rpm · 1 giờ · ly tâm 2.950 rpm. ABS nổi · Thu hồi: 84,8%
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          className={styles.secondaryBtn}
-                          disabled={projection.naclProgress !== 1 || branchPresetLocked || branchIntroActive}
-                          onClick={() =>
-                            handleBranchPreset(
-                              'run_nacl_preset',
-                              { concentration: 20 },
-                              'NaCl 20% w/v: ABS nổi (thu hồi 84,8%), PA/PC chìm',
-                            )
-                          }
-                        >
-                          {projection.naclProgress >= 2 ? 'Đã chạy' : 'Chạy'}
-                        </button>
-                      </div>
-
-                      <div
-                        className={`${styles.presetCard} ${
-                          projection.naclProgress === 3 ? styles.presetCardActive : ''
-                        }`}
-                      >
-                        <div>
-                          <strong>Preset 3: NaCl 40% w/v</strong>
-                          <div style={{ fontSize: '0.8125rem', color: 'var(--ink-muted)' }}>
-                            Khuấy 160 rpm · 1 giờ · ly tâm 2.950 rpm. PA nổi (70%) · PC chìm (95,4%)
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          className={styles.secondaryBtn}
-                          disabled={projection.naclProgress !== 2 || branchPresetLocked || branchIntroActive}
-                          onClick={() =>
-                            handleBranchPreset(
-                              'run_nacl_preset',
-                              { concentration: 40 },
-                              'NaCl 40% w/v: PA nổi (thu hồi 70%), PC chìm đáy (thu hồi 95,4%)',
-                            )
-                          }
-                        >
-                          {projection.naclProgress === 3 ? 'Đã chạy' : 'Chạy'}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Summarize button if at least 1 branch completed */}
-                  {projection.completedBranches.length === 2 && !projection.pendingCentrifugation && (
-                    <div style={{ marginTop: '1rem' }}>
-                      <button
-                        type="button"
-                        className={styles.actionBtn}
-                        onClick={() => dispatchAction('summarize_fractions')}
-                      >
-                        Xem tổng kết các phân đoạn thu hồi
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Step 5: Summary & Complete */}
-            {projection.stage === 'summary' && (
-              <div className={styles.stepGroup}>
-                <div className={styles.stepHeader}>
-                  <div className={styles.stepTitleBlock}>
-                    <span className={`${styles.stepNumber} ${styles.stepNumberActive}`}>5</span>
-                    <div>
-                      <div className={styles.stepTitle}>5. Hoàn tất &amp; Lưu báo cáo</div>
-                      <div className={styles.stepSubtitle}>
-                        Khóa lượt và ghi nhận kết quả vào cơ sở dữ liệu
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.stepBody}>
-                  <div className={styles.summaryFlowPath}>
-                    <span>💧 Nước máy</span>
-                    <span className={styles.summaryArrow}>→</span>
-                    <span>🧪 Ethanol</span>
-                    <span className={styles.summaryArrow}>→</span>
-                    <span>🧂 NaCl</span>
-                  </div>
-                  <p style={{ fontSize: '0.875rem', marginBottom: '0.75rem', color: 'var(--ink)', marginTop: '0.75rem' }}>
-                    Bạn đã hoàn thành cả hai nhánh phân loại. Khay thu hồi hiển thị sáu polymer đã tách. Nhấn hoàn thành để đóng lượt và lưu báo cáo khoa học.
-                  </p>
-                  <button
-                    type="button"
-                    className={styles.actionBtn}
-                    disabled={isPending}
-                    onClick={handleComplete}
-                  >
-                    Hoàn tất lượt thực hành
-                  </button>
-                </div>
-              </div>
-            )}
-              </>
+              <PlasticSeparationApparatus key={attempt?.attemptId} projection={projection} motion={currentMotion} onMotionEnd={finishMotion}
+                onSelectPolymer={id => setSelectedPolymerId(current => current === id ? null : id)} selectedPolymerId={selectedPolymerId} />
             )}
           </div>
-        </div>
-      )}
-
-      {/* Completion Report Dialog */}
-      {isReportOpen && attempt?.report && (
-        <PlasticCompletionDialog
-          report={attempt.report}
-          onClose={() => setIsReportOpen(false)}
-          onNewAttempt={handleReset}
-        />
-      )}
-
-      {/* Reset Confirmation Modal */}
-      {resetModalOpen && (
-        <div className={styles.modalBackdrop}>
-          <div className={styles.modalCard} style={{ maxWidth: '420px' }}>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--ink)', marginBottom: '0.75rem' }}>
-              Xác nhận bắt đầu lại?
-            </h3>
-            <p style={{ fontSize: '0.875rem', color: 'var(--ink-muted)', marginBottom: '1.25rem' }}>
-              Thao tác này sẽ tạo một lượt thí nghiệm mới từ bước chuẩn bị mẫu. Dữ liệu hiện tại của bạn sẽ không bị ghi đè.
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-              <button
-                type="button"
-                className={styles.secondaryBtn}
-                onClick={() => setResetModalOpen(false)}
-              >
-                Hủy
-              </button>
-              <button
-                type="button"
-                className={styles.actionBtn}
-                onClick={handleReset}
-              >
-                Bắt đầu lại
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Equipment and Material Real Photo Modal Panel */}
-      {equipmentItem && (
-        <PlasticEquipmentPanel
-          item={equipmentItem}
-          onItemChange={setEquipmentItem}
-          onClose={() => setEquipmentItem(null)}
-        />
-      )}
-
-      {/* Workbench Tour (Matching Jar Test exactly) */}
-      {tourOpen && (
-        <WorkbenchTour
-          steps={PLASTIC_WORKBENCH_TOUR}
-          root={root}
-          step={tourStep}
-          onStepChange={setTourStep}
-          onClose={() => {
-            setTourStep(0)
-            setTourOpen(false)
-            requestAnimationFrame(() => tourTrigger.current?.focus({ preventScroll: true }))
-          }}
-        />
-      )}
-    </div>
   )
+  return <div className={ui.root}>
+    <WorkbenchFrame label="Bàn phân loại nhựa nguyên sinh" header={header} shelf={shelf} simulation={simulation}
+      controls={<PlasticControls projection={projection} context={context} openGroup={openGroup} onGroupChange={chooseGroup} lockReason={lockReason} done={done} reportAvailable={!!attempt?.report} guideHref={guideHref} onPrepare={handlePrepareSamples} onWet={handleLoadAndWet} onWater={handleSeparateWater} onCentrifuge={handleInitialCentrifuge} onBranch={selectBranch} onPreset={handleBranchPreset} onSummary={() => void dispatchAction('summarize_fractions')} onSubmit={() => setSubmissionOpen(true)} onReport={() => setIsReportOpen(true)} onNotebook={showNotebook} onReset={() => setResetModalOpen(true)} />}
+      notebook={<div ref={notebookRef} tabIndex={-1}>{projection ? <PlasticNotebook projection={projection} history={history?.attemptId === attempt?.attemptId ? history?.records ?? null : null} /> : <div className={ui.notebook}><h2>Sổ thực hành</h2><p className={ui.muted}>Chưa có lượt thực hành để ghi sổ.</p></div>}</div>}
+      pane={activePane} onPaneChange={setActivePane} contentSized tourSteps={PLASTIC_WORKBENCH_TOUR} tourOpen={tourOpen} onTourClose={() => { setTourOpen(false); requestAnimationFrame(() => tourTrigger.current?.focus({ preventScroll: true })) }} onShelfInfo={() => setEquipmentItem('pp')}
+      notices={errorMessage ? <div className={ui.notice} role="alert"><p>{errorMessage}</p><button className={ui.button} type="button" onClick={() => location.reload()}>Tải lại lượt</button></div> : openReport && ready && !attempt?.report ? <div className={ui.notice} role="status">{done ? 'Chưa đọc được báo cáo đã chốt. Dữ liệu được giữ nguyên; bạn vẫn có thể xem sổ thực hành.' : 'Lượt chưa nộp nên chưa có báo cáo. Bạn có thể xem sổ và tiếp tục thực hành.'}</div> : undefined} />
+    {submissionOpen && projection && <PlasticDialog title="Kiểm tra trước khi nộp bài" onClose={() => setSubmissionOpen(false)}><p>Nộp bài sẽ chốt báo cáo và khóa các thao tác của lượt này. Dữ liệu được lưu trên trình duyệt, chưa gửi đến giảng viên.</p><ul className={ui.checks}>{checks.map(check => <li key={check.label}><span>{check.done ? 'Đã hoàn thành' : 'Chưa hoàn thành'}</span><span>{check.label}</span></li>)}</ul>{errorMessage && <p role="alert">{errorMessage} <button className={ui.button} type="button" onClick={() => location.reload()}>Tải lại lượt</button></p>}<div className={ui.actions}><button className={ui.button} type="button" onClick={() => setSubmissionOpen(false)}>Tiếp tục thực hành</button><ActionButton className={ui.primary} reasonClassName={ui.reason} reason={lockReason ?? (!checks.every(check => check.done) ? 'Hoàn thành các mục còn thiếu trước khi nộp bài.' : null)} onClick={() => void handleComplete()}>Hoàn tất lượt thực hành</ActionButton></div></PlasticDialog>}
+    {isReportOpen && attempt?.report && <PlasticCompletionDialog report={attempt.report} onClose={() => { setIsReportOpen(false); setActivePane('notebook') }} onNewAttempt={() => { setIsReportOpen(false); setResetModalOpen(true) }} />}
+    {resetModalOpen && <PlasticDialog title="Bắt đầu lượt mới?" onClose={() => setResetModalOpen(false)}><p>Lượt hiện tại và báo cáo đã lưu được giữ nguyên trong Lab. Lượt mới bắt đầu từ bước chuẩn bị sáu mẫu.</p><div className={ui.actions}><button className={ui.button} type="button" onClick={() => setResetModalOpen(false)}>Quay lại</button><button className={ui.primary} type="button" disabled={isPending} onClick={() => void handleReset()}>Tạo lượt mới</button></div></PlasticDialog>}
+    {equipmentItem && <PlasticEquipmentPanel item={equipmentItem} onItemChange={setEquipmentItem} onClose={() => setEquipmentItem(null)} />}
+  </div>
 }

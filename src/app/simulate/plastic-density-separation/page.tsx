@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { PlasticSeparationWorkbench } from '@/features/plastic-separation/workbench.js'
+import { parseUUID } from '@/shared/ids.js'
 
 export const metadata: Metadata = {
   title: 'Phân loại nhựa nguyên sinh',
@@ -12,6 +13,8 @@ export default async function PlasticDensitySeparationSimulationPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const { attempt } = await searchParams
-  return <PlasticSeparationWorkbench attemptId={typeof attempt === 'string' ? attempt : null} />
+  const { attempt, view } = await searchParams
+  const id = typeof attempt === 'string' ? parseUUID(attempt) : null
+  return <PlasticSeparationWorkbench attemptId={id} invalidAttempt={attempt !== undefined && id === null}
+    openReport={view === 'report'} initialPane={view === 'notebook' ? 'notebook' : 'simulation'} />
 }
