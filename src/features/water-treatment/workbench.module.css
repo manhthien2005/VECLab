@@ -1002,18 +1002,22 @@
 .precipitateGuide strong { color:var(--ink); font-size:.74rem; }
 .precipitateGuide span { display:block; }
 
-/* Stir bar (nam châm khuấy) — sits on flat beaker bottom, spins when stirring */
+/* Stir bar (nam châm khuấy) — stays still on the flat beaker bottom */
 .localDropPlume { pointer-events:none; }
 .fePrecipitate { pointer-events:none; }
-.stirBarSpin { transform-box:fill-box; transform-origin:center; animation:wtStirBar 1.4s linear infinite; }
-@keyframes wtStirBar { from { transform:rotate(0); } to { transform:rotate(360deg); } }
+.stirBar { transform-box:fill-box; transform-origin:center; }
 .dialArm { transform-box:fill-box; transform-origin:center; transition:transform 220ms ease; }
 
-/* Liquid surface vortex hint when stirring */
-.vortex { animation:wtPulse 1.4s ease-in-out infinite; transform-origin:center; transform-box:fill-box; }
-@keyframes wtPulse { 0%,100% { transform:scaleX(0.5); opacity:.6; } 50% { transform:scaleX(1); opacity:1; } }
-.particulate { animation:wtParticle 3s linear infinite; transform-origin:center; transform-box:fill-box; }
-@keyframes wtParticle { from { transform:translateY(-6px); opacity:.3; } to { transform:translateY(6px); opacity:.9; } }
+/* Fe(OH)3 particles move around the vertical centerline of the beaker. */
+.particulateSpin {
+  animation:wtParticleAxis 1.9s ease-in-out infinite;
+  transform-box:fill-box;
+  transform-origin:center center;
+}
+@keyframes wtParticleAxis {
+  0%,100% { transform:scaleX(.25); opacity:.6; }
+  50% { transform:scaleX(1); opacity:1; }
+}
 .indicatorOn { animation:wtIndicator 1s ease-in-out infinite; }
 @keyframes wtIndicator { 0%,100% { opacity:1; } 50% { opacity:.55; } }
 
@@ -1024,7 +1028,7 @@
 @keyframes wtStream { 0% { opacity:0; stroke-dashoffset:0; } 30% { opacity:1; } 100% { opacity:0; stroke-dashoffset:-30; } }
 
 @media (prefers-reduced-motion:reduce) {
-  .vortex, .particulate, .indicatorOn, .dropFall, .dripStream, .stirBarSpin { animation:none; }
+  .vortex, .particulateSpin, .indicatorOn, .dropFall, .dripStream { animation:none; }
 }
 
 
