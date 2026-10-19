@@ -67,10 +67,6 @@ function buretTickY(ml: number) {
   return BURET_BODY_TOP + (BURET_BODY_HEIGHT * ml) / BURET_CAPACITY
 }
 
-function formatPh(value: number) {
-  return value.toLocaleString('vi-VN', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
-}
-
 function Buret({
   uid, color, lightColor, deepColor, cx, label, topY, remainingMl, isDripping, remainingDisplay,
 }: {
@@ -182,10 +178,6 @@ export function WaterTreatmentApparatus({
       <div>
         <h2>Bàn xử lý nước</h2>
         <p>Máy khuấy từ · 2 buret NaOH/HCl 1 M · cốc 2 L đế bằng</p>
-      </div>
-      <div className={styles.apparatusReadout}>
-        <span><small>pH</small><strong data-testid="wt-ap-ph">{formatPh(status.pH)}</strong></span>
-        <span><small>Thể tích</small><strong>{status.volumeMl} <em>mL</em></strong></span>
       </div>
     </div>
 
