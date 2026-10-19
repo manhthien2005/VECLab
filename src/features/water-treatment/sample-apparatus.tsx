@@ -1,6 +1,7 @@
 'use client'
 
 import { useId, useRef, useState, useEffect } from 'react'
+import { runSampleChemistry, type SampleChemistryResult } from '@/app/simulate/water-treatment/sample-chemistry-action.js'
 import { PlayIcon, StopIcon, PlusIcon, ResetIcon, BeakerIcon } from './icons.js'
 import styles from './workbench.module.css'
 
@@ -68,12 +69,7 @@ const METAL_COLORS = {
   pb: { color: '#F8FAFC', light: '#ffffff', deep: '#e8edf1', label: 'Pb²⁺', fullLabel: 'Dung dịch Pb(NO₃)₂' },
 } as const
 
-export type SampleCalculation = {
-  pH: number
-  dissolvedMgL: { fe: number; zn: number; pb: number }
-  precipitateMg: { fe: number; zn: number; pb: number }
-  totalPrecipitateMg: number
-}
+export type SampleCalculation = Pick<SampleChemistryResult, 'pH' | 'totalVolumeMl' | 'inputMassMg' | 'dissolvedMgL' | 'dissolvedMassMg' | 'precipitateMg' | 'totalPrecipitateMg' | 'diagnostics' | 'database' | 'configuredPhases' | 'convergence' | 'massBalance' | 'engine'>
 
 const PRECIPITATE_GUIDANCE = [
   { label: 'Fe(OH)₃ · nâu đỏ #A56535', ph: 'pH tham khảo 2–4' },
@@ -260,6 +256,7 @@ export function SamplePreparationApparatus({
   onReset: () => void
   onCalculate: (result: SampleCalculation) => void
   calculation: SampleCalculation | null
+  calculationError?: string | null
 }) {
   const reactId = useId()
   const uid = reactId.replace(/:/g, '')
@@ -349,39 +346,27 @@ export function SamplePreparationApparatus({
   }
 
   const totalAddedMl = feAddedMl + znAddedMl + pbAddedMl
-  const totalSolutionMl = status.targetVolumeMl + totalAddedMl
   const hasFinishedStirring = hasBeenStirred && !status.stirring
-  const calculateSample = () => {
-    if (!hasFinishedStirring) return
-
-    const volumeL = totalSolutionMl / 1000
-    const sourceMgL = 100
-    const addedMassMg = {
-      fe: sourceMgL * feAddedMl / 1000,
-      zn: sourceMgL * znAddedMl / 1000,
-      pb: sourceMgL * pbAddedMl / 1000,
+  const [calculationBusy, setCalculationBusy] = useState(false)
+  const [localCalculationError, setLocalCalculationError] = useState<string | null>(null)
+  const calculateSample = async () => {
+    if (!hasFinishedStirring || calculationBusy) return
+    setCalculationBusy(true)
+    setLocalCalculationError(null)
+    try {
+      const result = await runSampleChemistry({
+        targetVolumeMl: status.targetVolumeMl,
+        feAddedMl,
+        znAddedMl,
+        pbAddedMl,
+        sourceMgL: 100,
+      })
+      onCalculate(result)
+    } catch (error) {
+      setLocalCalculationError(error instanceof Error ? error.message : 'Không thể chạy PHREEQC.')
+    } finally {
+      setCalculationBusy(false)
     }
-    const dissolvedMgL = {
-      fe: fePrecipitating ? 0 : addedMassMg.fe / volumeL,
-      zn: addedMassMg.zn / volumeL,
-      pb: addedMassMg.pb / volumeL,
-    }
-    const precipitateIonMg = {
-      fe: fePrecipitating ? addedMassMg.fe : 0,
-      zn: 0,
-      pb: 0,
-    }
-    const precipitateMg = {
-      fe: precipitateIonMg.fe * 106.87 / 55.85,
-      zn: precipitateIonMg.zn * 99.41 / 65.38,
-      pb: precipitateIonMg.pb * 241.2 / 207.2,
-    }
-    onCalculate({
-      pH: mixedPh,
-      dissolvedMgL,
-      precipitateMg,
-      totalPrecipitateMg: precipitateMg.fe + precipitateMg.zn + precipitateMg.pb,
-    })
   }
 
   return (
@@ -783,11 +768,11 @@ export function SamplePreparationApparatus({
           type="button"
           className={styles.calculateButton}
           onClick={calculateSample}
-          disabled={!hasFinishedStirring}
-          title={hasFinishedStirring ? 'Tính pH, ion còn tan và khối lượng kết tủa' : 'Hãy khuấy xong rồi dừng máy trước khi tính'}
+          disabled={!hasFinishedStirring || calculationBusy}
+          title={hasFinishedStirring ? 'Chạy PHREEQC để tính pH, ion còn tan và pha rắn' : 'Hãy khuấy xong rồi dừng máy trước khi tính'}
           data-testid="sample-calculate"
         >
-          <BeakerIcon /> Tính toán
+          <BeakerIcon /> {calculationBusy ? 'Đang chạy PHREEQC…' : 'Tính bằng PHREEQC'}
         </button>
         <div className={styles.buretControls}>
           <div className={styles.buretControl}>
@@ -855,26 +840,36 @@ export function SamplePreparationApparatus({
         </div>
       </div>
 
+      {localCalculationError ? (
+        <p className={styles.calculationError} role="alert">{localCalculationError}</p>
+      ) : null}
       {calculation ? (
-        <section className={styles.calculationPanel} aria-label="Kết quả tính toán sau khuấy">
+        <section className={styles.calculationPanel} aria-label="Kết quả tính toán bằng PHREEQC">
           <div className={styles.calculationHeader}>
-            <strong>Kết quả sau khuấy</strong>
-            <span>pH và nồng độ theo mô hình mô phỏng</span>
+            <div>
+              <strong>Kết quả sau xử lý</strong>
+              <span className={styles.calculationHeaderNote}>{calculation.totalVolumeMl.toFixed(6)} mL mẫu</span>
+            </div>
+            <span>Khối lượng tính theo nguyên tố kim loại</span>
           </div>
+          <p className={styles.calculationExplanation}>
+            Bảng cho biết lượng kim loại còn trong nước và lượng đã chuyển thành kết tủa.
+          </p>
           <div className={styles.tableScroll}>
             <table className={styles.table}>
+              <caption className={styles.tableCaption}>Lượng ion còn trong dung dịch và lượng ion đã kết tủa.</caption>
               <thead>
                 <tr><th scope="col">Đại lượng</th><th scope="col">Fe³⁺</th><th scope="col">Zn²⁺</th><th scope="col">Pb²⁺</th></tr>
               </thead>
               <tbody>
-                <tr><th scope="row">Ion còn tan (mg/L)</th><td>{calculation.dissolvedMgL.fe.toFixed(3)}</td><td>{calculation.dissolvedMgL.zn.toFixed(3)}</td><td>{calculation.dissolvedMgL.pb.toFixed(3)}</td></tr>
-                <tr><th scope="row">Khối lượng kết tủa (mg)</th><td>{calculation.precipitateMg.fe.toFixed(3)}</td><td>{calculation.precipitateMg.zn.toFixed(3)}</td><td>{calculation.precipitateMg.pb.toFixed(3)}</td></tr>
+                <tr><th scope="row">Ion còn trong dung dịch (mg/L)</th><td>{calculation.dissolvedMgL.fe.toFixed(6)}</td><td>{calculation.dissolvedMgL.zn.toFixed(6)}</td><td>{calculation.dissolvedMgL.pb.toFixed(6)}</td></tr>
+                <tr><th scope="row">Ion kết tủa (mg)</th><td>{calculation.precipitateMg.fe.toFixed(6)}</td><td>{calculation.precipitateMg.zn.toFixed(6)}</td><td>{calculation.precipitateMg.pb.toFixed(6)}</td></tr>
               </tbody>
             </table>
           </div>
           <div className={styles.calculationSummary}>
-            <span>pH sau khuấy <strong>{calculation.pH.toFixed(2)}</strong></span>
-            <span>Tổng kết tủa <strong>{calculation.totalPrecipitateMg.toFixed(3)} mg</strong></span>
+            <span>pH sau xử lý <strong>{calculation.pH.toFixed(6)}</strong></span>
+            <span>Tổng ion kim loại kết tủa <strong>{calculation.totalPrecipitateMg.toFixed(6)} mg</strong></span>
           </div>
         </section>
       ) : null}
