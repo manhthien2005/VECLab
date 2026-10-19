@@ -186,6 +186,59 @@ function Buret({
   )
 }
 
+function DoseStepMenu({
+  solution,
+  value,
+  disabled,
+  onChange,
+}: {
+  solution: MetalSolution
+  value: DropStepMl
+  disabled: boolean
+  onChange: (value: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const menuId = `dose-step-${solution}`
+
+  return (
+    <div className={styles.doseStepMenu}>
+      <button
+        type="button"
+        className={styles.doseStepTrigger}
+        aria-label={`Bước thêm ${solution}`}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={menuId}
+        disabled={disabled}
+        onClick={() => setOpen((current) => !current)}
+        onBlur={() => setTimeout(() => setOpen(false), 120)}
+      >
+        {value} mL
+      </button>
+      {open ? (
+        <div id={menuId} className={styles.doseStepMenuList} role="listbox" aria-label={`Chọn bước thêm ${solution}`}>
+          {DROP_STEPS.map((step) => (
+            <button
+              type="button"
+              role="option"
+              aria-selected={step === value}
+              className={styles.doseStepOption}
+              key={step}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                onChange(String(step))
+                setOpen(false)
+              }}
+            >
+              {step} mL
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 export function SamplePreparationApparatus({
   status: external,
   onAddDrop,
@@ -570,14 +623,12 @@ export function SamplePreparationApparatus({
         <div className={styles.buretControls}>
           <div className={styles.buretControl}>
             <span>Fe³⁺</span>
-            <select
-              aria-label="Bước thêm Fe³⁺"
+            <DoseStepMenu
+              solution="fe"
               value={dropSteps.fe}
-              onChange={(event) => setDropStep('fe', event.target.value)}
+              onChange={(value) => setDropStep('fe', value)}
               disabled={feEmpty}
-            >
-              {DROP_STEPS.map((step) => <option key={step} value={step}>{step} mL</option>)}
-            </select>
+            />
             <button
               type="button"
               className={styles.buretAdd}
@@ -585,19 +636,17 @@ export function SamplePreparationApparatus({
               onClick={() => onAddDrop('fe', dropSteps.fe)}
               disabled={feEmpty || dropSteps.fe > feRemaining}
             >
-              <PlusIcon /> Thêm <span>{feEmpty ? 'Đã hết' : 'Thêm'}</span>
+              <PlusIcon /> <span>{feEmpty ? 'Đã hết' : 'Thêm'}</span>
             </button>
           </div>
           <div className={styles.buretControl}>
             <span>Zn²⁺</span>
-            <select
-              aria-label="Bước thêm Zn²⁺"
+            <DoseStepMenu
+              solution="zn"
               value={dropSteps.zn}
-              onChange={(event) => setDropStep('zn', event.target.value)}
+              onChange={(value) => setDropStep('zn', value)}
               disabled={znEmpty}
-            >
-              {DROP_STEPS.map((step) => <option key={step} value={step}>{step} mL</option>)}
-            </select>
+            />
             <button
               type="button"
               className={styles.buretAdd}
@@ -605,19 +654,17 @@ export function SamplePreparationApparatus({
               onClick={() => onAddDrop('zn', dropSteps.zn)}
               disabled={znEmpty || dropSteps.zn > znRemaining}
             >
-              <PlusIcon /> Thêm <span>{znEmpty ? 'Đã hết' : 'Thêm'}</span>
+              <PlusIcon /> <span>{znEmpty ? 'Đã hết' : 'Thêm'}</span>
             </button>
           </div>
           <div className={styles.buretControl}>
             <span>Pb²⁺</span>
-            <select
-              aria-label="Bước thêm Pb²⁺"
+            <DoseStepMenu
+              solution="pb"
               value={dropSteps.pb}
-              onChange={(event) => setDropStep('pb', event.target.value)}
+              onChange={(value) => setDropStep('pb', value)}
               disabled={pbEmpty}
-            >
-              {DROP_STEPS.map((step) => <option key={step} value={step}>{step} mL</option>)}
-            </select>
+            />
             <button
               type="button"
               className={styles.buretAdd}
@@ -625,7 +672,7 @@ export function SamplePreparationApparatus({
               onClick={() => onAddDrop('pb', dropSteps.pb)}
               disabled={pbEmpty || dropSteps.pb > pbRemaining}
             >
-              <PlusIcon /> Thêm <span>{pbEmpty ? 'Đã hết' : 'Thêm'}</span>
+              <PlusIcon /> <span>{pbEmpty ? 'Đã hết' : 'Thêm'}</span>
             </button>
           </div>
           <button
