@@ -343,6 +343,58 @@ export function SamplePreparationApparatus({
         className={styles.apparatusStage}
         aria-label="Bàn pha mẫu với máy khuấy từ, cốc 2500mL và ba buret Fe, Zn, Pb"
       >
+        <div className={styles.volumeModel} aria-label="Mô hình thể tích dung dịch trong cốc">
+          <div className={styles.volumeModelHeader}>
+            <strong>Thể tích trong cốc</strong>
+          </div>
+          <div className={styles.volumeModelGrid}>
+            <div className={styles.volumeModelRow}>
+              <span className={styles.volumeModelLabel}>
+                <span className={styles.volumeDot} data-solution="water" />
+                Nước cất
+              </span>
+              <span className={styles.volumeModelValue}>{status.targetVolumeMl} mL</span>
+            </div>
+            <div className={styles.volumeModelDivider} />
+            <div className={styles.volumeModelRow}>
+              <span className={styles.volumeModelLabel}>
+                <span className={styles.volumeDot} data-solution="fe" />
+                FeCl₃
+              </span>
+              <span className={styles.volumeModelValue}>{feAddedMl} mL</span>
+            </div>
+            <div className={styles.volumeModelRow}>
+              <span className={styles.volumeModelLabel}>
+                <span className={styles.volumeDot} data-solution="zn" />
+                ZnSO₄
+              </span>
+              <span className={styles.volumeModelValue}>{znAddedMl} mL</span>
+            </div>
+            <div className={styles.volumeModelRow}>
+              <span className={styles.volumeModelLabel}>
+                <span className={styles.volumeDot} data-solution="pb" />
+                Pb(NO₃)₂
+              </span>
+              <span className={styles.volumeModelValue}>{pbAddedMl} mL</span>
+            </div>
+            <div className={styles.volumeModelDivider} />
+            <div className={styles.volumeModelRow}>
+              <span className={styles.volumeModelLabel}>
+                <span className={styles.volumeDotGray} />
+                Tổng 3 chất
+              </span>
+              <span className={styles.volumeModelValue}>{totalAddedMl} mL</span>
+            </div>
+            <div className={styles.volumeModelRow} data-total>
+              <span className={styles.volumeModelLabel}>
+                <span className={styles.volumeDotAccent} />
+                Tổng cộng
+              </span>
+              <span className={styles.volumeModelValue}>{status.targetVolumeMl + totalAddedMl} mL</span>
+            </div>
+          </div>
+        </div>
+
         <svg
           viewBox="0 0 380 470"
           className={styles.apparatusSvg}
