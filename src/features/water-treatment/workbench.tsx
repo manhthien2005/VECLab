@@ -302,13 +302,11 @@ function WaterTreatmentWorkbenchSession({
         pb: prev.pbAddedMl,
       }
       added[solution] = nextValue
-      const total = added.fe + added.zn + added.pb
       return {
         ...prev,
         feAddedMl: added.fe,
         znAddedMl: added.zn,
         pbAddedMl: added.pb,
-        targetVolumeMl: Math.min(2500, total + 1000),
       }
     })
   }, [])

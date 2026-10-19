@@ -944,8 +944,32 @@
 .apparatusReadout small { font-size:.65rem; color:var(--ink-muted); }
 .apparatusReadout strong { font-size:1.1rem; color:var(--accent-hover); font-weight:750; }
 .apparatusReadout em { font-style:normal; font-size:.7rem; color:var(--ink-muted); margin-left:2px; }
-.apparatusStage { display:flex; justify-content:center; padding:8px 18px; background:linear-gradient(180deg, #f7fafc 0%, #e9f1f4 100%); border-radius:12px; border:1px solid var(--border); }
-.apparatusSvg { width:100%; max-width:380px; height:auto; }
+.apparatusStage { display:grid; grid-template-columns:minmax(0, 1fr) 154px; align-items:center; gap:10px; padding:8px 12px; background:linear-gradient(180deg, #f7fafc 0%, #e9f1f4 100%); border-radius:12px; border:1px solid var(--border); }
+.volumeModel { grid-column:2; grid-row:1; width:100%; border:1px solid #b9d1d8; border-radius:7px; background:rgb(255 255 255 / 88%); overflow:hidden; box-shadow:0 3px 10px rgb(28 60 80 / 8%); }
+.volumeModelHeader { padding:5px 7px 4px; border-bottom:1px solid #dfe9ee; }
+.volumeModelHeader strong { color:var(--ink); font-size:.64rem; }
+.volumeModelGrid { padding:3px 7px 4px; display:flex; flex-direction:column; gap:2px; }
+.volumeModelRow { display:flex; justify-content:space-between; align-items:center; gap:5px; padding:1px 0; }
+.volumeModelRow[data-total] { padding-top:3px; margin-top:1px; border-top:1px solid #d5e3e8; }
+.volumeModelRow[data-total] .volumeModelLabel { font-weight:750; color:var(--accent-hover); }
+.volumeModelRow[data-total] .volumeModelValue { font-weight:800; color:var(--accent-hover); }
+.volumeModelLabel { display:flex; align-items:center; gap:4px; min-width:0; color:var(--ink); font-size:.58rem; font-weight:600; white-space:nowrap; }
+.volumeModelValue { color:var(--ink-muted); font-size:.58rem; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.volumeModelDivider { height:1px; background:#dde9ee; margin:1px 0; }
+.volumeDot { display:inline-block; flex:0 0 5px; width:5px; height:5px; border-radius:50%; }
+.volumeDot[data-solution='water'] { background:#a8cfe0; }
+.volumeDot[data-solution='fe'] { background:#d6a928; }
+.volumeDot[data-solution='zn'] { background:#4f9663; }
+.volumeDot[data-solution='pb'] { background:#7568a8; }
+.volumeDotGray { display:inline-block; flex:0 0 5px; width:5px; height:5px; border-radius:50%; background:#8fa8b8; }
+.volumeDotAccent { display:inline-block; flex:0 0 5px; width:5px; height:5px; border-radius:50%; background:#2a6f78; }
+.apparatusSvg { grid-column:1; grid-row:1; width:100%; max-width:380px; height:auto; justify-self:center; }
+@media (max-width:600px) {
+  .apparatusStage { grid-template-columns:minmax(0, 1fr) 132px; gap:7px; padding-inline:7px; }
+  .volumeModelLabel, .volumeModelValue { font-size:.52rem; }
+  .volumeModelHeader strong { font-size:.58rem; }
+  .volumeModelGrid { padding-inline:5px; }
+}
 .apparatusControls { display:flex; flex-wrap:wrap; gap:14px; justify-content:space-between; align-items:center; padding:10px 18px; border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:#fbfdfe; }
 .stirButton { display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:8px; border:1px solid #2a6f78; background:#2a6f78; color:white; font:inherit; font-weight:700; cursor:pointer; transition:background 180ms; }
 .stirButton:hover { background:#1d5259; }
