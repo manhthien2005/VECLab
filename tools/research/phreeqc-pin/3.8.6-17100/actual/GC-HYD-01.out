@@ -1,0 +1,266 @@
+   Input file: cases\GC-HYD-01.pqi
+  Output file: actual\GC-HYD-01.out
+Database file: database\minteq.v4.dat
+
+------------------
+Reading data base.
+------------------
+
+	SOLUTION_MASTER_SPECIES
+	SOLUTION_SPECIES
+	SOLUTION_SPECIES
+	PHASES
+	PHASES
+	SURFACE_MASTER_SPECIES
+	SURFACE_SPECIES
+	END
+------------------------------------
+Reading input data for simulation 1.
+------------------------------------
+
+	SELECTED_OUTPUT 1
+	    high_precision true
+	    file actual/GC-HYD-01.select.out
+	    reset false
+	    totals Fe
+	    molalities Fe+3 FeOH+2 Fe(OH)2+ Fe(OH)3 Fe(OH)4-
+	    ph true
+	    activities Fe+3 FeOH+2 H+
+	END
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 2.
+------------------------------------
+
+	SOLUTION 1
+	    temp 25
+	    pH 2.5
+	    Fe(3) 0.179
+	END
+-------------------------------------------
+Beginning of initial solution calculations.
+-------------------------------------------
+
+Initial solution 1.	
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Fe(3)             1.790e-04   1.790e-04
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   2.500    
+                                       pe  =   4.000    
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   2.018e-03
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =  -3.473e-03
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   3.652e-03
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  = 100.00
+                               Iterations  =   4
+                                  Total H  = 1.110172e+02
+                                  Total O  = 5.550704e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   H+              3.324e-03   3.162e-03    -2.478    -2.500    -0.022      0.00
+   OH-             3.348e-12   3.184e-12   -11.475   -11.497    -0.022     (0)  
+   H2O             5.551e+01   9.999e-01     1.744    -0.000     0.000     18.07
+Fe(3)         1.790e-04
+   Fe(OH)2+        7.082e-05   6.744e-05    -4.150    -4.171    -0.021     (0)  
+   FeOH+2          6.627e-05   5.445e-05    -4.179    -4.264    -0.085     (0)  
+   Fe+3            4.145e-05   2.648e-05    -4.382    -4.577    -0.195     (0)  
+   Fe2(OH)2+4      2.283e-07   9.816e-08    -6.641    -7.008    -0.367     (0)  
+   Fe3(OH)4+5      3.578e-10   9.569e-11    -9.446   -10.019    -0.573     (0)  
+   Fe(OH)3         2.306e-10   2.306e-10    -9.637    -9.637     0.000     (0)  
+   Fe(OH)4-        7.180e-17   6.837e-17   -16.144   -16.165    -0.021     (0)  
+H(0)          1.415e-16
+   H2              7.076e-17   7.079e-17   -16.150   -16.150     0.000     (0)  
+O(0)          0.000e+00
+   O2              0.000e+00   0.000e+00   -59.995   -59.995     0.000     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Ferrihydrite     -0.27      2.92    3.19  Fe(OH)3
+  Goethite          2.43      2.92    0.49  FeOOH
+  Hematite          7.26      5.85   -1.42  Fe2O3
+  Lepidocrocite     1.55      2.92    1.37  FeOOH
+  Maghemite        -0.54      5.85    6.39  Fe2O3
+  O2(g)           -57.09     26.00   83.09  O2
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 3.
+------------------------------------
+
+	SOLUTION 2
+	    temp 25
+	    pH 3.0
+	    Fe(3) 0.179
+	END
+-------------------------------------------
+Beginning of initial solution calculations.
+-------------------------------------------
+
+Initial solution 2.	
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Fe(3)             1.790e-04   1.790e-04
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   3.000    
+                                       pe  =   4.000    
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   6.882e-04
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =  -1.081e-03
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   1.260e-03
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  = 100.00
+                               Iterations  =   4
+                                  Total H  = 1.110150e+02
+                                  Total O  = 5.550714e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   H+              1.030e-03   1.000e-03    -2.987    -3.000    -0.013      0.00
+   OH-             1.037e-11   1.007e-11   -10.984   -10.997    -0.013     (0)  
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+Fe(3)         1.790e-04
+   Fe(OH)2+        1.346e-04   1.307e-04    -3.871    -3.884    -0.013     (0)  
+   FeOH+2          3.755e-05   3.337e-05    -4.425    -4.477    -0.051     (0)  
+   Fe+3            6.710e-06   5.133e-06    -5.173    -5.290    -0.116     (0)  
+   Fe2(OH)2+4      6.036e-08   3.687e-08    -7.219    -7.433    -0.214     (0)  
+   Fe(OH)3         1.414e-09   1.414e-09    -8.850    -8.850     0.000     (0)  
+   Fe3(OH)4+5      1.505e-10   6.965e-11    -9.823   -10.157    -0.334     (0)  
+   Fe(OH)4-        1.365e-15   1.325e-15   -14.865   -14.878    -0.013     (0)  
+H(0)          1.416e-17
+   H2              7.078e-18   7.079e-18   -17.150   -17.150     0.000     (0)  
+O(0)          0.000e+00
+   O2              0.000e+00   0.000e+00   -57.995   -57.995     0.000     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Ferrihydrite      0.52      3.71    3.19  Fe(OH)3
+  Goethite          3.22      3.71    0.49  FeOOH
+  Hematite          8.84      7.42   -1.42  Fe2O3
+  Lepidocrocite     2.34      3.71    1.37  FeOOH
+  Maghemite         1.03      7.42    6.39  Fe2O3
+  O2(g)           -55.09     28.00   83.09  O2
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 4.
+------------------------------------
+
+	SOLUTION 3
+	    temp 25
+	    pH 3.5
+	    Fe(3) 0.179
+	END
+-------------------------------------------
+Beginning of initial solution calculations.
+-------------------------------------------
+
+Initial solution 3.	
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Fe(3)             1.790e-04   1.790e-04
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   3.500    
+                                       pe  =   4.000    
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   2.748e-04
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =  -3.379e-04
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   5.169e-04
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  = 100.00
+                               Iterations  =   4
+                                  Total H  = 1.110143e+02
+                                  Total O  = 5.550718e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   H+              3.223e-04   3.162e-04    -3.492    -3.500    -0.008      0.00
+   OH-             3.246e-11   3.184e-11   -10.489   -10.497    -0.008     (0)  
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+Fe(3)         1.790e-04
+   Fe(OH)2+        1.642e-04   1.611e-04    -3.785    -3.793    -0.008     (0)  
+   FeOH+2          1.403e-05   1.301e-05    -4.853    -4.886    -0.033     (0)  
+   Fe+3            7.510e-07   6.326e-07    -6.124    -6.199    -0.074     (0)  
+   Fe2(OH)2+4      7.649e-09   5.602e-09    -8.116    -8.252    -0.135     (0)  
+   Fe(OH)3         5.510e-09   5.510e-09    -8.259    -8.259     0.000     (0)  
+   Fe3(OH)4+5      2.122e-11   1.305e-11   -10.673   -10.885    -0.211     (0)  
+   Fe(OH)4-        1.665e-14   1.634e-14   -13.779   -13.787    -0.008     (0)  
+H(0)          1.416e-18
+   H2              7.079e-19   7.079e-19   -18.150   -18.150     0.000     (0)  
+O(0)          0.000e+00
+   O2              0.000e+00   0.000e+00   -55.995   -55.995     0.000     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Ferrihydrite      1.11      4.30    3.19  Fe(OH)3
+  Goethite          3.81      4.30    0.49  FeOOH
+  Hematite         10.02      8.60   -1.42  Fe2O3
+  Lepidocrocite     2.93      4.30    1.37  FeOOH
+  Maghemite         2.22      8.60    6.39  Fe2O3
+  O2(g)           -53.09     30.00   83.09  O2
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 5.
+------------------------------------
+
+------------------------------
+End of Run after 0.03 Seconds.
+------------------------------
+

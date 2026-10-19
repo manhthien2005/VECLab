@@ -1,0 +1,52 @@
+# GC-PREC-03 — Pb(OH)₂ precipitation ở pH 8, 8.5, 9 — CASE BẮT BUỘC phân giải discrepancy
+# Verify: WT-CHEM-Ksp-Pb (logKsp = -19,830 cho Pb(OH)₂)
+# Phản ứng: Pb(OH)₂(s) + 2H⁺ ⇌ Pb²⁺ + 2H₂O ; log_k = 8,15 (minteq.v4.dat / phreeqc.dat)
+#   → logKsp (Pb²⁺ + 2OH⁻ ⇌ Pb(OH)₂(s)) = 8,15 − 2 × 13,990 = -19,830
+#   → [Pb²⁺]_sat = 10^(-19,830) / [OH⁻]² ; tại pH 9: [Pb²⁺]_sat ≈ 10^-19,83 / (10^-4,99)² ≈ 1,4e-10 M ≈ 0,03 mg/L
+# Spec §6.5 cũ dùng Ksp = -15,3 (legacy) → tại pH 9: [Pb²⁺]_sat ≈ 4,8e-6 M = 0,99 mg/L > Cột A 0,1 → "Pb không kết tủa"
+# Baseline mới -19,830: tại pH 9: [Pb²⁺]_sat ≈ 0,03 mg/L ≪ Cột A → "Pb kết tủa"
+# Input: Pb 1 mg/L = 0,00483 mmol/kgw (10 lần Cột A) — sẽ kết tủa gần hết
+# Path: chạy từ D:\VECLab\tools\research\phreeqc-pin\3.8.6-17100\
+
+SELECTED_OUTPUT 1
+    -high_precision true
+    -file actual/GC-PREC-03.select.out
+    -reset false
+    -totals Pb
+    -molalities Pb+2 PbOH+ Pb(OH)2 Pb(OH)3- Pb(OH)4-2
+    -pH true
+    -si Pb(OH)2
+END
+
+# Sim 1: pH 8
+SOLUTION 1
+    -temp 25
+    pH 8
+    Pb 0.00483
+END
+USE solution 1
+EQUILIBRIUM_PHASES 1
+    Pb(OH)2 0 0
+END
+
+# Sim 2: pH 8.5
+SOLUTION 2
+    -temp 25
+    pH 8.5
+    Pb 0.00483
+END
+USE solution 2
+EQUILIBRIUM_PHASES 2
+    Pb(OH)2 0 0
+END
+
+# Sim 3: pH 9
+SOLUTION 3
+    -temp 25
+    pH 9
+    Pb 0.00483
+END
+USE solution 3
+EQUILIBRIUM_PHASES 3
+    Pb(OH)2 0 0
+END

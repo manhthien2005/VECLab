@@ -1,0 +1,548 @@
+   Input file: cases\GC-PREC-03.pqi
+  Output file: actual\GC-PREC-03.out
+Database file: database\minteq.v4.dat
+
+------------------
+Reading data base.
+------------------
+
+	SOLUTION_MASTER_SPECIES
+	SOLUTION_SPECIES
+	SOLUTION_SPECIES
+	PHASES
+	PHASES
+	SURFACE_MASTER_SPECIES
+	SURFACE_SPECIES
+	END
+------------------------------------
+Reading input data for simulation 1.
+------------------------------------
+
+	SELECTED_OUTPUT 1
+	    high_precision true
+	    file actual/GC-PREC-03.select.out
+	    reset false
+	    totals Pb
+	    molalities Pb+2 PbOH+ Pb(OH)2 Pb(OH)3- Pb(OH)4-2
+	    ph true
+	    si Pb(OH)2
+	END
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 2.
+------------------------------------
+
+	SOLUTION 1
+	    temp 25
+	    pH 8
+	    Pb 0.00483
+	END
+-------------------------------------------
+Beginning of initial solution calculations.
+-------------------------------------------
+
+Initial solution 1.	
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Pb                4.830e-06   4.830e-06
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   8.000    
+                                       pe  =   4.000    
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   4.890e-06
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   4.592e-06
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   5.068e-06
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =  71.51
+                               Iterations  =   4
+                                  Total H  = 1.110137e+02
+                                  Total O  = 5.550684e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             1.010e-06   1.007e-06    -5.996    -5.997    -0.001     (0)  
+   H+              1.003e-08   1.000e-08    -7.999    -8.000    -0.001      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          1.416e-27
+   H2              7.079e-28   7.079e-28   -27.150   -27.150     0.000     (0)  
+O(0)          2.023e-38
+   O2              1.011e-38   1.011e-38   -37.995   -37.995     0.000     (0)  
+Pb            4.830e-06
+   PbOH+           3.376e-06   3.368e-06    -5.472    -5.473    -0.001     (0)  
+   Pb+2            1.345e-06   1.331e-06    -5.871    -5.876    -0.004     (0)  
+   Pb(OH)2         1.072e-07   1.072e-07    -6.970    -6.970     0.000     (0)  
+   Pb3(OH)4+2      3.086e-10   3.054e-10    -9.511    -9.515    -0.005     (0)  
+   Pb(OH)3-        1.083e-10   1.080e-10    -9.966    -9.967    -0.001     (0)  
+   Pb2OH+3         7.274e-11   7.106e-11   -10.138   -10.148    -0.010     (0)  
+   Pb4(OH)4+4      3.367e-12   3.230e-12   -11.473   -11.491    -0.018     (0)  
+   Pb(OH)4-2       2.690e-14   2.663e-14   -13.570   -13.575    -0.005     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Litharge         -2.57     10.12   12.69  PbO
+  Massicot         -2.77     10.12   12.89  PbO
+  Minium          -19.15     54.37   73.52  Pb3O4
+  O2(g)           -35.09     48.00   83.09  O2
+  Pb(OH)2           1.97     10.12    8.15  Pb(OH)2
+  Pb2O(OH)2        -5.94     20.25   26.19  Pb2O(OH)2
+  Pb2O3           -16.79     44.25   61.04  Pb2O3
+  Pbmetal         -18.12    -13.88    4.25  Pb
+  PbO:0.3H2O       -2.86     10.12   12.98  PbO:0.33H2O
+  Plattnerite     -15.48     34.12   49.60  PbO2
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 3.
+------------------------------------
+
+	USE solution 1
+	EQUILIBRIUM_PHASES 1
+	    Pb(OH)2 0 0
+	END
+-----------------------------------------
+Beginning of batch-reaction calculations.
+-----------------------------------------
+
+Reaction step 1.
+
+Using solution 1.	
+Using pure phase assemblage 1.	
+
+-------------------------------Phase assemblage--------------------------------
+
+                                                      Moles in assemblage
+Phase               SI  log IAP  log K(T, P)   Initial       Final       Delta
+
+Pb(OH)2           0.00     8.15      8.15    0.000e+00   2.092e-06   2.092e-06
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Pb                2.738e-06   2.738e-06
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   6.898      Charge balance
+                                       pe  =  -1.553      Adjusted to redox equilibrium
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   4.898e-06
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   4.084e-07
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   5.068e-06
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =  96.95
+                               Iterations  =  12
+                                  Total H  = 1.110137e+02
+                                  Total O  = 5.550683e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   H+              1.268e-07   1.265e-07    -6.897    -6.898    -0.001      0.00
+   OH-             7.981e-08   7.960e-08    -7.098    -7.099    -0.001     (0)  
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          2.893e-14
+   H2              1.446e-14   1.446e-14   -13.840   -13.840     0.000     (0)  
+O(0)          0.000e+00
+   O2              0.000e+00   0.000e+00   -64.616   -64.616     0.000     (0)  
+Pb            2.738e-06
+   Pb+2            2.284e-06   2.260e-06    -5.641    -5.646    -0.005     (0)  
+   PbOH+           4.531e-07   4.520e-07    -6.344    -6.345    -0.001     (0)  
+   Pb(OH)2         1.138e-09   1.138e-09    -8.944    -8.944     0.000     (0)  
+   Pb2OH+3         1.657e-11   1.619e-11   -10.781   -10.791    -0.010     (0)  
+   Pb(OH)3-        9.079e-14   9.055e-14   -13.042   -13.043    -0.001     (0)  
+   Pb3(OH)4+2      5.898e-14   5.837e-14   -13.229   -13.234    -0.005     (0)  
+   Pb4(OH)4+4      1.093e-15   1.048e-15   -14.962   -14.980    -0.018     (0)  
+   Pb(OH)4-2       1.784e-18   1.765e-18   -17.749   -17.753    -0.005     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Litharge         -4.54      8.15   12.69  PbO
+  Massicot         -4.74      8.15   12.89  PbO
+  Minium          -38.38     35.14   73.52  Pb3O4
+  O2(g)           -61.71     21.38   83.09  O2
+  Pb(OH)2           0.00      8.15    8.15  Pb(OH)2
+  Pb2O(OH)2        -9.89     16.30   26.19  Pb2O(OH)2
+  Pb2O3           -34.05     26.99   61.04  Pb2O3
+  Pbmetal          -6.79     -2.54    4.25  Pb
+  PbO:0.3H2O       -4.83      8.15   12.98  PbO:0.33H2O
+  Plattnerite     -30.76     18.84   49.60  PbO2
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 4.
+------------------------------------
+
+	SOLUTION 2
+	    temp 25
+	    pH 8.5
+	    Pb 0.00483
+	END
+-------------------------------------------
+Beginning of initial solution calculations.
+-------------------------------------------
+
+Initial solution 2.	
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Pb                4.830e-06   4.830e-06
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   8.500    
+                                       pe  =   4.000    
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   4.559e-06
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   7.923e-06
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   1.737e-06
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =  21.38
+                               Iterations  =   4
+                                  Total H  = 1.110137e+02
+                                  Total O  = 5.550684e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             3.192e-06   3.184e-06    -5.496    -5.497    -0.001     (0)  
+   H+              3.170e-09   3.162e-09    -8.499    -8.500    -0.001      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          1.416e-28
+   H2              7.079e-29   7.079e-29   -28.150   -28.150     0.000     (0)  
+O(0)          2.023e-36
+   O2              1.011e-36   1.011e-36   -35.995   -35.995     0.000     (0)  
+Pb            4.830e-06
+   PbOH+           3.933e-06   3.924e-06    -5.405    -5.406    -0.001     (0)  
+   Pb+2            4.955e-07   4.906e-07    -6.305    -6.309    -0.004     (0)  
+   Pb(OH)2         3.951e-07   3.951e-07    -6.403    -6.403     0.000     (0)  
+   Pb3(OH)4+2      1.543e-09   1.528e-09    -8.812    -8.816    -0.004     (0)  
+   Pb(OH)3-        1.261e-09   1.258e-09    -8.899    -8.900    -0.001     (0)  
+   Pb2OH+3         3.120e-11   3.050e-11   -10.506   -10.516    -0.010     (0)  
+   Pb4(OH)4+4      6.197e-12   5.953e-12   -11.208   -11.225    -0.017     (0)  
+   Pb(OH)4-2       9.909e-13   9.810e-13   -12.004   -12.008    -0.004     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Litharge         -2.00     10.69   12.69  PbO
+  Massicot         -2.20     10.69   12.89  PbO
+  Minium          -16.45     57.07   73.52  Pb3O4
+  O2(g)           -33.09     50.00   83.09  O2
+  Pb(OH)2           2.54     10.69    8.15  Pb(OH)2
+  Pb2O(OH)2        -4.81     21.38   26.19  Pb2O(OH)2
+  Pb2O3           -14.66     46.38   61.04  Pb2O3
+  Pbmetal         -18.56    -14.31    4.25  Pb
+  PbO:0.3H2O       -2.29     10.69   12.98  PbO:0.33H2O
+  Plattnerite     -13.91     35.69   49.60  PbO2
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 5.
+------------------------------------
+
+	USE solution 2
+	EQUILIBRIUM_PHASES 2
+	    Pb(OH)2 0 0
+	END
+-----------------------------------------
+Beginning of batch-reaction calculations.
+-----------------------------------------
+
+Reaction step 1.
+
+Using solution 2.	
+Using pure phase assemblage 2.	
+
+-------------------------------Phase assemblage--------------------------------
+
+                                                      Moles in assemblage
+Phase               SI  log IAP  log K(T, P)   Initial       Final       Delta
+
+Pb(OH)2          -0.00     8.15      8.15    0.000e+00   3.797e-06   3.797e-06
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Pb                1.033e-06   1.033e-06
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   7.133      Charge balance
+                                       pe  =  10.488      Adjusted to redox equilibrium
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   1.775e-06
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   3.289e-07
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   1.737e-06
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =  86.37
+                               Iterations  =  10
+                                  Total H  = 1.110137e+02
+                                  Total O  = 5.550683e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             1.371e-07   1.369e-07    -6.863    -6.864    -0.001     (0)  
+   H+              7.366e-08   7.355e-08    -7.133    -7.133    -0.001      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          8.081e-39
+   H2              4.041e-39   4.041e-39   -38.394   -38.394     0.000     (0)  
+O(0)          6.209e-16
+   O2              3.105e-16   3.105e-16   -15.508   -15.508     0.000     (0)  
+Pb            1.033e-06
+   Pb+2            7.688e-07   7.640e-07    -6.114    -6.117    -0.003     (0)  
+   PbOH+           2.632e-07   2.628e-07    -6.580    -6.580    -0.001     (0)  
+   Pb(OH)2         1.138e-09   1.138e-09    -8.944    -8.944     0.000     (0)  
+   Pb2OH+3         3.227e-12   3.182e-12   -11.491   -11.497    -0.006     (0)  
+   Pb(OH)3-        1.560e-13   1.558e-13   -12.807   -12.808    -0.001     (0)  
+   Pb3(OH)4+2      1.985e-14   1.973e-14   -13.702   -13.705    -0.003     (0)  
+   Pb4(OH)4+4      1.228e-16   1.197e-16   -15.911   -15.922    -0.011     (0)  
+   Pb(OH)4-2       5.255e-18   5.223e-18   -17.279   -17.282    -0.003     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Litharge         -4.54      8.15   12.69  PbO
+  Massicot         -4.74      8.15   12.89  PbO
+  Minium          -13.83     59.69   73.52  Pb3O4
+  O2(g)           -12.60     70.49   83.09  O2
+  Pb(OH)2          -0.00      8.15    8.15  Pb(OH)2
+  Pb2O(OH)2        -9.89     16.30   26.19  Pb2O(OH)2
+  Pb2O3            -9.50     51.54   61.04  Pb2O3
+  Pbmetal         -31.34    -27.09    4.25  Pb
+  PbO:0.3H2O       -4.83      8.15   12.98  PbO:0.33H2O
+  Plattnerite      -6.21     43.39   49.60  PbO2
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 6.
+------------------------------------
+
+	SOLUTION 3
+	    temp 25
+	    pH 9
+	    Pb 0.00483
+	END
+-------------------------------------------
+Beginning of initial solution calculations.
+-------------------------------------------
+
+Initial solution 3.	
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Pb                4.830e-06   4.830e-06
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   9.000    
+                                       pe  =   4.000    
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   7.118e-06
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   1.594e-05
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =  -6.279e-06
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  = -45.03
+                               Iterations  =   7
+                                  Total H  = 1.110137e+02
+                                  Total O  = 5.550685e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             1.010e-05   1.007e-05    -4.996    -4.997    -0.001     (0)  
+   H+              1.003e-09   1.000e-09    -8.999    -9.000    -0.001      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          1.416e-29
+   H2              7.079e-30   7.079e-30   -29.150   -29.150     0.000     (0)  
+O(0)          2.023e-34
+   O2              1.011e-34   1.011e-34   -33.995   -33.995     0.000     (0)  
+Pb            4.830e-06
+   PbOH+           3.542e-06   3.531e-06    -5.451    -5.452    -0.001     (0)  
+   Pb(OH)2         1.124e-06   1.124e-06    -5.949    -5.949     0.000     (0)  
+   Pb+2            1.414e-07   1.396e-07    -6.850    -6.855    -0.005     (0)  
+   Pb(OH)3-        1.136e-08   1.132e-08    -7.945    -7.946    -0.001     (0)  
+   Pb3(OH)4+2      3.566e-09   3.521e-09    -8.448    -8.453    -0.005     (0)  
+   Pb(OH)4-2       2.827e-11   2.792e-11   -10.549   -10.554    -0.005     (0)  
+   Pb2OH+3         8.036e-12   7.813e-12   -11.095   -11.107    -0.012     (0)  
+   Pb4(OH)4+4      4.106e-12   3.905e-12   -11.387   -11.408    -0.022     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Litharge         -1.55     11.14   12.69  PbO
+  Massicot         -1.75     11.14   12.89  PbO
+  Minium          -14.09     59.43   73.52  Pb3O4
+  O2(g)           -31.09     52.00   83.09  O2
+  Pb(OH)2           2.99     11.14    8.15  Pb(OH)2
+  Pb2O(OH)2        -3.90     22.29   26.19  Pb2O(OH)2
+  Pb2O3           -12.75     48.29   61.04  Pb2O3
+  Pbmetal         -19.10    -14.86    4.25  Pb
+  PbO:0.3H2O       -1.84     11.14   12.98  PbO:0.33H2O
+  Plattnerite     -12.46     37.14   49.60  PbO2
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 7.
+------------------------------------
+
+	USE solution 3
+	EQUILIBRIUM_PHASES 3
+	    Pb(OH)2 0 0
+	END
+-----------------------------------------
+Beginning of batch-reaction calculations.
+-----------------------------------------
+
+Reaction step 1.
+
+Using solution 3.	
+Using pure phase assemblage 3.	
+
+-------------------------------Phase assemblage--------------------------------
+
+                                                      Moles in assemblage
+Phase               SI  log IAP  log K(T, P)   Initial       Final       Delta
+
+Pb(OH)2          -0.00     8.15      8.15    0.000e+00   4.823e-06   4.823e-06
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Pb                7.257e-09   7.257e-09
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   8.795      Charge balance
+                                       pe  =  -3.476      Adjusted to redox equilibrium
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   3.148e-06
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   6.294e-06
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =  -6.279e-06
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  = -99.74
+                               Iterations  =  14
+                                  Total H  = 1.110137e+02
+                                  Total O  = 5.550684e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             6.287e-06   6.274e-06    -5.202    -5.202    -0.001     (0)  
+   H+              1.608e-09   1.605e-09    -8.794    -8.795    -0.001      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          3.262e-14
+   H2              1.631e-14   1.631e-14   -13.788   -13.788     0.000     (0)  
+O(0)          0.000e+00
+   O2              0.000e+00   0.000e+00   -64.720   -64.720     0.000     (0)  
+Pb            7.257e-09
+   PbOH+           5.746e-09   5.734e-09    -8.241    -8.242    -0.001     (0)  
+   Pb(OH)2         1.138e-09   1.138e-09    -8.944    -8.944     0.000     (0)  
+   Pb+2            3.669e-10   3.638e-10    -9.436    -9.439    -0.004     (0)  
+   Pb(OH)3-        7.153e-12   7.138e-12   -11.146   -11.146    -0.001     (0)  
+   Pb(OH)4-2       1.106e-14   1.097e-14   -13.956   -13.960    -0.004     (0)  
+   Pb2OH+3         3.369e-17   3.306e-17   -16.473   -16.481    -0.008     (0)  
+   Pb3(OH)4+2      9.473e-18   9.395e-18   -17.023   -17.027    -0.004     (0)  
+   Pb4(OH)4+4      2.807e-23   2.715e-23   -22.552   -22.566    -0.014     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Litharge         -4.54      8.15   12.69  PbO
+  Massicot         -4.74      8.15   12.89  PbO
+  Minium          -38.43     35.09   73.52  Pb3O4
+  O2(g)           -61.81     21.28   83.09  O2
+  Pb(OH)2          -0.00      8.15    8.15  Pb(OH)2
+  Pb2O(OH)2        -9.89     16.30   26.19  Pb2O(OH)2
+  Pb2O3           -34.10     26.94   61.04  Pb2O3
+  Pbmetal          -6.73     -2.49    4.25  Pb
+  PbO:0.3H2O       -4.83      8.15   12.98  PbO:0.33H2O
+  Plattnerite     -30.81     18.79   49.60  PbO2
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 8.
+------------------------------------
+
+-------------------------------
+End of Run after 0.035 Seconds.
+-------------------------------
+

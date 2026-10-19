@@ -1,0 +1,34 @@
+# GC-HYD-01 — Fe(III) hydrolysis ở pH 2.5, 3.0, 3.5 (3 simulations, không kết tủa)
+# Verify: WT-CHEM-K-FeOH (log_k = -2,19)
+# Path: chạy từ D:\VECLab\tools\research\phreeqc-pin\3.8.6-17100\
+
+SELECTED_OUTPUT 1
+    -high_precision true
+    -file actual/GC-HYD-01.select.out
+    -reset false
+    -totals Fe
+    -molalities Fe+3 FeOH+2 Fe(OH)2+ Fe(OH)3 Fe(OH)4-
+    -pH true
+    -activities Fe+3 FeOH+2 H+
+END
+
+# Sim 1: pH 2.5
+SOLUTION 1
+    -temp 25
+    pH 2.5
+    Fe(3) 0.179
+END
+
+# Sim 2: pH 3.0 — tăng 10× ratio
+SOLUTION 2
+    -temp 25
+    pH 3.0
+    Fe(3) 0.179
+END
+
+# Sim 3: pH 3.5 — tăng 10× ratio nữa
+SOLUTION 3
+    -temp 25
+    pH 3.5
+    Fe(3) 0.179
+END

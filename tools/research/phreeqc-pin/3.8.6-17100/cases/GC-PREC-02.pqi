@@ -1,0 +1,50 @@
+# GC-PREC-02 — Zn(OH)₂(am) precipitation ở pH 8, 8.5, 9
+# Verify: WT-CHEM-Ksp-Zn (logKsp = -15,506 cho Zn(OH)₂(am))
+# Phản ứng: Zn(OH)₂(s) + 2H⁺ ⇌ Zn²⁺ + 2H₂O ; log_k = 12,474 (minteq.v4.dat)
+#   → logKsp (Zn²⁺ + 2OH⁻ ⇌ Zn(OH)₂(s)) = 12,474 − 2 × 13,990 = -15,506
+#   → [Zn²⁺]_sat = 10^(-15,506) / [OH⁻]² ; tại pH 8: [Zn²⁺]_sat ≈ 10^-9,5 ≈ 3,2e-10 M ≈ 0,021 mg/L
+# Input: Zn 5 mg/L = 0,0765 mmol/kgw (0,5 lần Cột A) — sẽ kết tủa hết → filtrate = [Zn²⁺]_sat
+# Path: chạy từ D:\VECLab\tools\research\phreeqc-pin\3.8.6-17100\
+
+SELECTED_OUTPUT 1
+    -high_precision true
+    -file actual/GC-PREC-02.select.out
+    -reset false
+    -totals Zn
+    -molalities Zn+2 ZnOH+ Zn(OH)2 Zn(OH)3- Zn(OH)4-2
+    -pH true
+    -si Zn(OH)2(am)
+END
+
+# Sim 1: pH 8
+SOLUTION 1
+    -temp 25
+    pH 8
+    Zn 0.0765
+END
+USE solution 1
+EQUILIBRIUM_PHASES 1
+    Zn(OH)2(am) 0 0
+END
+
+# Sim 2: pH 8.5
+SOLUTION 2
+    -temp 25
+    pH 8.5
+    Zn 0.0765
+END
+USE solution 2
+EQUILIBRIUM_PHASES 2
+    Zn(OH)2(am) 0 0
+END
+
+# Sim 3: pH 9
+SOLUTION 3
+    -temp 25
+    pH 9
+    Zn 0.0765
+END
+USE solution 3
+EQUILIBRIUM_PHASES 3
+    Zn(OH)2(am) 0 0
+END

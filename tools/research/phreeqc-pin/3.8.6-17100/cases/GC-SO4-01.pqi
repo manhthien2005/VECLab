@@ -1,0 +1,41 @@
+# GC-SO4-01 — Sulfate speciation (pKa₂ = 1,99 theo convention MINTEQ v4 đã pin)
+# Verify: WT-CHEM-pKa2-H2SO4 (pKa₂ = +1,99 dương; logK_dissociation = -1,99; logK_protonation = +1,99)
+# Phản ứng protonation: H⁺ + SO₄²⁻ ⇌ HSO₄⁻ ; log_k = 1,99 (minteq.v4.dat)
+#   → a_HSO₄⁻ / a_SO₄²⁻ = 10^1,99 × a_H⁺
+#   → log(a_HSO₄⁻ / a_SO₄²⁻) = 1,99 - pH
+# Tại pH 2: ratio ≈ 0,98 ; pH 3: ratio ≈ 0,098 ; pH 4: ratio ≈ 0,0098
+# Path: chạy từ D:\VECLab\tools\research\phreeqc-pin\3.8.6-17100\
+
+SELECTED_OUTPUT 1
+    -high_precision true
+    -file actual/GC-SO4-01.select.out
+    -reset false
+    -totals S
+    -molalities SO4-2 HSO4-
+    -pH true
+    -activities SO4-2 HSO4- H+
+END
+
+# Sim 1: pH 2
+SOLUTION 1
+    -temp 25
+    pH 2
+    S(6) 100.0
+    Na 200.0
+END
+
+# Sim 2: pH 3
+SOLUTION 2
+    -temp 25
+    pH 3
+    S(6) 100.0
+    Na 200.0
+END
+
+# Sim 3: pH 4
+SOLUTION 3
+    -temp 25
+    pH 4
+    S(6) 100.0
+    Na 200.0
+END

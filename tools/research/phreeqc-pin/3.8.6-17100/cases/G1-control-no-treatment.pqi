@@ -1,0 +1,40 @@
+# G1 — Golden case: "đạt không cần xử lý" (control case)
+# Verify: solver trả goalStatus = 'success' khi input đã dưới Cột A QCVN 40:2025/BTNMT
+#         ngay cả khi không thêm reagent / không điều chỉnh pH.
+#
+# Input thấp: Fe 1 mg/L, Zn 0,5 mg/L, Pb 0,05 mg/L (mỗi kim loại < 50% Cột A)
+# pH 7,5 — trung tính nhẹ kiềm, không có EQUILIBRIUM_PHASES → kết tủa tự nhiên (gần 0)
+# Expected:
+#   - Filtrate Fe ≈ 1,0 mg/L (input 1,0, capacity tại pH 7,5 ≈ 1e-18 mg/L, kết tủa 0)
+#   - Filtrate Zn ≈ 0,5 mg/L (input 0,5, capacity ≈ 1e-15 mg/L)
+#   - Filtrate Pb ≈ 0,05 mg/L (input 0,05, capacity ≈ 0,1 mg/L ≈ 0,1; vẫn < Cột A 0,1)
+#   - Cả 3 < Cột A → goalStatus = 'success' ngay từ bước "chuẩn bị mẫu"
+#
+# ⚠️ AI-prepared 17/10/2026 (Cursor Assistant): PQI viết theo spec §7.4.9 nhưng
+#    KHÔNG live-run (env không có phreeqc.exe build). Capacity được verify
+#    bằng closed-form `src/features/water-treatment/capacity.ts` (P0-C đã đóng).
+#    Khi chemistry owner chạy lại trên máy có PHREEQC binary, output PHREEQC
+#    thực tế sẽ được compare với closed-form trong test.
+#
+# Path: chạy từ D:\VECLab\tools\research\phreeqc-pin\3.8.6-17100\
+
+SELECTED_OUTPUT 1
+    -high_precision true
+    -file actual/G1-control-no-treatment.select.out
+    -reset false
+    -totals Fe Zn Pb
+    -molalities Fe+3 FeOH+2 Fe(OH)2+ Fe(OH)3 Fe(OH)4- Zn+2 ZnOH+ Zn(OH)2 Zn(OH)3- Zn(OH)4-2 Pb+2 PbOH+ Pb(OH)2 Pb(OH)3-
+    -pH true
+    -si Ferrihydrite Zn(OH)2(am) Pb(OH)2
+END
+
+# Sim 1: input thấp + pH trung tính, không có EQUILIBRIUM_PHASES
+# Tất cả kim loại tan hoàn toàn (input < Cột A và < solubility tại pH 7,5)
+SOLUTION 1
+    -temp 25
+    pH 7.5
+    Fe(3) 0.0179
+    Zn 0.00765
+    Pb 0.000241
+    Cl 0.057
+END
