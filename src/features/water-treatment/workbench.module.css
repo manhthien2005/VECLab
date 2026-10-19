@@ -1003,7 +1003,8 @@
 .precipitateGuide span { display:block; }
 
 /* Stir bar (nam châm khuấy) — sits on flat beaker bottom, spins when stirring */
-.stirBar { transform-box:fill-box; transform-origin:center; }
+.localDropPlume { pointer-events:none; }
+.fePrecipitate { pointer-events:none; }
 .stirBarSpin { transform-box:fill-box; transform-origin:center; animation:wtStirBar 1.4s linear infinite; }
 @keyframes wtStirBar { from { transform:rotate(0); } to { transform:rotate(360deg); } }
 .dialArm { transform-box:fill-box; transform-origin:center; transition:transform 220ms ease; }

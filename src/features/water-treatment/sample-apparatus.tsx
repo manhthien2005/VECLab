@@ -276,9 +276,9 @@ export function SamplePreparationApparatus({
   const hasFe = feAddedMl > 0
   const hasZn = znAddedMl > 0
   const hasPb = pbAddedMl > 0
-  const solutionFill = hasFe ? '#F1DFA0' : '#F8FAFC'
 
   const [activeDrop, setActiveDrop] = useState<MetalSolution | null>(null)
+  const [hasBeenStirred, setHasBeenStirred] = useState(false)
   const lastAddedRef = useRef({
     fe: status.feAddedMl,
     zn: status.znAddedMl,
@@ -289,10 +289,13 @@ export function SamplePreparationApparatus({
     const prev = lastAddedRef.current
     if (status.feAddedMl !== prev.fe) {
       setActiveDrop('fe')
+      setHasBeenStirred(false)
     } else if (status.znAddedMl !== prev.zn) {
       setActiveDrop('zn')
+      setHasBeenStirred(false)
     } else if (status.pbAddedMl !== prev.pb) {
       setActiveDrop('pb')
+      setHasBeenStirred(false)
     }
     lastAddedRef.current = {
       fe: status.feAddedMl,
@@ -306,6 +309,25 @@ export function SamplePreparationApparatus({
     const t = setTimeout(() => setActiveDrop(null), 800)
     return () => clearTimeout(t)
   }, [activeDrop])
+
+  useEffect(() => {
+    if (!hasFe && !hasZn && !hasPb) setHasBeenStirred(false)
+  }, [hasFe, hasZn, hasPb])
+
+  useEffect(() => {
+    if (status.stirring && (hasFe || hasZn || hasPb)) setHasBeenStirred(true)
+  }, [status.stirring, hasFe, hasZn, hasPb])
+
+  const mixtureStirred = hasBeenStirred || status.stirring
+  const solutionFill = mixtureStirred && hasFe ? '#F1DFA0' : '#F8FAFC'
+  const solutionOpacity = mixtureStirred && hasFe ? '.88' : '.72'
+  // FeCl3 acidifies the distilled-water sample; the UI represents the mixed pH as the Fe(OH)3 window.
+  const mixedPh = hasFe ? Math.min(status.pH, 3.5) : status.pH
+  const fePrecipitating = mixtureStirred && hasFe && mixedPh >= 2 && mixedPh <= 4
+  const fePrecipitateHeight = fePrecipitating
+    ? Math.min(18, 5 + feAddedMl * 2.2)
+    : 0
+  const feDropX = status.stirring ? STIRRER_CX : BURET_FE_CX
 
   const [dropSteps, setDropSteps] = useState<Record<MetalSolution, DropStepMl>>({ fe: 1, zn: 1, pb: 1 })
   const setDropStep = (solution: MetalSolution, value: string) => {
@@ -530,15 +552,31 @@ export function SamplePreparationApparatus({
               ' H' + (BEAKER_LEFT_X + 2) + ' Z'
             }
             fill={solutionFill}
-            fillOpacity={hasFe ? '.88' : '.72'}
+            fillOpacity={solutionOpacity}
           />
+          {hasFe && !mixtureStirred ? (
+            <g className={styles.localDropPlume} aria-label="Vệt dung dịch Fe chưa khuấy">
+              <ellipse cx={feDropX} cy={waterY + 8} rx="13" ry="5" fill="#e2bd5d" fillOpacity=".72" />
+              <ellipse cx={feDropX} cy={waterY + 18} rx="7" ry="14" fill="#e2bd5d" fillOpacity=".42" />
+            </g>
+          ) : null}
+          {fePrecipitating ? (
+            <g className={styles.fePrecipitate} aria-label="Kết tủa Fe(OH)3 sau khi khuấy">
+              <path
+                d={'M' + (BEAKER_LEFT_X + 5) + ' ' + (BEAKER_BOTTOM_Y - 2) + ' Q190 ' + (BEAKER_BOTTOM_Y - fePrecipitateHeight - 5) + ' ' + (BEAKER_RIGHT_X - 5) + ' ' + (BEAKER_BOTTOM_Y - 2) + ' Z'}
+                fill="#a56535"
+                fillOpacity=".82"
+              />
+              <ellipse cx="190" cy={BEAKER_BOTTOM_Y - fePrecipitateHeight - 2} rx="48" ry="3" fill="#c1824e" fillOpacity=".65" />
+            </g>
+          ) : null}
           <ellipse
             cx={(BEAKER_LEFT_X + BEAKER_RIGHT_X) / 2}
             cy={waterY}
             rx={(BEAKER_RIGHT_X - BEAKER_LEFT_X - 4) / 2}
             ry="3.5"
-            fill={hasFe ? '#f8edc9' : '#ffffff'}
-            fillOpacity=".9"
+            fill={mixtureStirred && hasFe ? '#f8edc9' : '#ffffff'}
+            fillOpacity={mixtureStirred && hasFe ? '.9' : '.72'}
             stroke="#6b8a99"
             strokeWidth="1"
           />
