@@ -7,6 +7,7 @@ import { ActionButton } from '@/features/workbench/action-button.js'
 import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/icons.js'
 import { TargetIcon, ReportIcon, SubmitIcon, CloseIcon, InfoIcon, ControlIcon } from '@/features/workbench/icons.js'
 import { WaterTreatmentApparatus, type ApStatus, type AcidBase } from './apparatus.js'
+import { SamplePreparationApparatus, type SampleApStatus, type MetalSolution } from './sample-apparatus.js'
 import styles from './workbench.module.css'
 
 const EQUIPMENT_LIST = [
@@ -14,7 +15,7 @@ const EQUIPMENT_LIST = [
   { id: 'lead-chemical', title: 'Hóa chất chứa ion Chì (Pb²⁺)', description: 'Để tạo mẫu nước' },
   { id: 'iron-chemical', title: 'Hóa chất chứa ion Sắt (Fe²⁺/Fe³⁺)', description: 'Để tạo mẫu nước' },
   { id: 'zinc-chemical', title: 'Hóa chất chứa ion Kẽm (Zn²⁺)', description: 'Để tạo mẫu nước' },
-  { id: 'beaker', title: 'Cốc thủy tinh 2L có vạch chia', description: 'Đo lường thể tích chính xác' },
+  { id: 'beaker', title: 'Cốc thủy tinh 2500 mL có vạch chia', description: 'Đo lường thể tích chính xác' },
   { id: 'burette', title: 'Buret', description: 'Thêm NaOH từng mL' },
   { id: 'filter-paper', title: 'Giấy lọc', description: 'Tách pha rắn/lỏng' },
   { id: 'stirrer', title: 'Máy khuấy', description: 'Khuấy đều mẫu' },
@@ -93,16 +94,16 @@ const WATER_TREATMENT_EQUIPMENT = {
     note: 'Zn(OH)₂ là amphoteric — hòa tan ở pH rất cao (> 10) do tạo ion [Zn(OH)₄]²⁻. Màu trắng của kết tủa là đặc trưng.',
   },
   beaker: {
-    title: 'Cốc thủy tinh 2L có vạch chia',
+    title: 'Cốc thủy tinh 2500 mL có vạch chia',
     image: 'beaker-marked',
-    alt: 'Cốc thủy tinh 2 lít có vạch chia mL trong phòng thí nghiệm',
-    caption: 'Cốc thủy tinh 2L với vạch chia mL. Dung cụ tiêu chuẩn cho đo lường thể tích mẫu và dung dịch.',
+    alt: 'Cốc thủy tinh 2500 mL có vạch chia mL trong phòng thí nghiệm',
+    caption: 'Cốc thủy tinh 2500 mL với vạch chia mL. Dụng cụ tiêu chuẩn cho đo lường thể tích mẫu và dung dịch.',
     author: 'Wikimedia Commons',
     license: 'CC BY-SA 3.0',
     source: 'https://commons.wikimedia.org/wiki/File:Laboratory_Beakers.jpg',
     licenseUrl: 'https://commons.wikimedia.org/wiki/File:Laboratory_Beakers.jpg#Licensing',
     purpose: 'Chứa mẫu nước và các dung dịch, cho phép đo thể tích với vạch chia. Chịu nhiệt tốt, an toàn khi khuấy và đun nóng nhẹ.',
-    facts: [['Dung tích', '2000 mL'], ['Độ chính xác', '±50 mL tại vạch'], ['Vạch chia', 'Từ 100–2000 mL'], ['Chịu nhiệt', 'Có thể dùng cho ứng dụng nhiệt nhẹ']],
+    facts: [['Dung tích', '2500 mL'], ['Độ chính xác', '±50 mL tại vạch'], ['Vạch chia', 'Từ 200–2400 mL'], ['Chịu nhiệt', 'Có thể dùng cho ứng dụng nhiệt nhẹ']],
     steps: ['Đổ mẫu nước ban đầu vào cốc theo thể tích thiết kế.', 'Dùng vạch chia để kiểm tra thể tích chính xác.', 'Khuấy đều mẫu bằng máy khuấy hoặc gậy.'],
     note: 'Vạch chia trên cốc có độ chính xác ≈ ±50 mL. Để cốc ở mặt phẳng khi đọc vạch. Không sử dụng cốc bị vỡ hoặc trầy xước.',
   },
@@ -254,13 +255,23 @@ function WaterTreatmentWorkbenchSession({
   // Placeholder state — will replace with real session later
   const [ready, setReady] = useState(false)
 
-  // Apparatus animation state
+  // Apparatus animation state for WATER TREATMENT
   const [apStatus, setApStatus] = useState<ApStatus>({
     pH: 5.4,
     volumeMl: 1000,
     stirring: false,
     naohAddedMl: 0,
     hclAddedMl: 0,
+  })
+
+  // Apparatus animation state for SAMPLE PREPARATION
+  const [sampleApStatus, setSampleApStatus] = useState<SampleApStatus>({
+    pH: 7.0,
+    targetVolumeMl: 1000,
+    stirring: false,
+    feAddedMl: 0,
+    znAddedMl: 0,
+    pbAddedMl: 0,
   })
   const addDrop = useCallback((reagent: AcidBase) => {
     setApStatus((prev) => {
@@ -278,11 +289,43 @@ function WaterTreatmentWorkbenchSession({
       }
     })
   }, [])
+
+  const addSampleDrop = useCallback((solution: MetalSolution, amountMl: number) => {
+    setSampleApStatus((prev) => {
+      const key = (solution + 'AddedMl') as 'feAddedMl' | 'znAddedMl' | 'pbAddedMl'
+      const currentValue = prev[key]
+      const nextValue = Math.min(10, Math.round((currentValue + amountMl) * 100) / 100)
+      if (nextValue === currentValue) return prev
+      const added = {
+        fe: prev.feAddedMl,
+        zn: prev.znAddedMl,
+        pb: prev.pbAddedMl,
+      }
+      added[solution] = nextValue
+      const total = added.fe + added.zn + added.pb
+      return {
+        ...prev,
+        feAddedMl: added.fe,
+        znAddedMl: added.zn,
+        pbAddedMl: added.pb,
+        targetVolumeMl: Math.min(2500, total + 1000),
+      }
+    })
+  }, [])
   const toggleStir = useCallback(() => {
     setApStatus((prev) => ({ ...prev, stirring: !prev.stirring }))
   }, [])
+
+  const toggleSampleStir = useCallback(() => {
+    setSampleApStatus((prev) => ({ ...prev, stirring: !prev.stirring }))
+  }, [])
+
   const resetApparatus = useCallback(() => {
     setApStatus({ pH: 5.4, volumeMl: 1000, stirring: false, naohAddedMl: 0, hclAddedMl: 0 })
+  }, [])
+
+  const resetSampleApparatus = useCallback(() => {
+    setSampleApStatus({ pH: 7.0, targetVolumeMl: 1000, stirring: false, feAddedMl: 0, znAddedMl: 0, pbAddedMl: 0 })
   }, [])
   
   useEffect(() => {
@@ -337,17 +380,38 @@ function WaterTreatmentWorkbenchSession({
     <div className={styles.stageHeader}>
       <div>
         <h2>Khu vực thực hành</h2>
-        <p>Bàn xử lý nước · Composition → Kết tủa → Lọc</p>
+        <p>Bàn pha mẫu (trên) → Bàn xử lý nước (dưới) · Composition → Kết tủa → Lọc</p>
       </div>
     </div>
 
     {ready ? (
-      <WaterTreatmentApparatus
-        status={apStatus}
-        onAddDrop={addDrop}
-        onToggleStir={toggleStir}
-        onReset={resetApparatus}
-      />
+      <>
+        <section className={styles.stationBlock} aria-labelledby="station-sample">
+          <header className={styles.stationLabel}>
+            <h3 id="station-sample">Bàn 1 — Pha mẫu nước nhiễm kim loại</h3>
+            <p>3 buret dung dịch ion Fe³⁺/Zn²⁺/Pb²⁺ · Máy khuấy từ · Cốc 2500 mL</p>
+          </header>
+          <SamplePreparationApparatus
+            status={sampleApStatus}
+            onAddDrop={addSampleDrop}
+            onToggleStir={toggleSampleStir}
+            onReset={resetSampleApparatus}
+          />
+        </section>
+
+        <section className={styles.stationBlock} aria-labelledby="station-treatment">
+          <header className={styles.stationLabel}>
+            <h3 id="station-treatment">Bàn 2 — Xử lý nước bằng hydroxide</h3>
+            <p>2 buret NaOH/HCl 1M · Máy khuấy từ · Cốc 2500 mL · Kết tủa · Lọc · Đo lại pH</p>
+          </header>
+          <WaterTreatmentApparatus
+            status={apStatus}
+            onAddDrop={addDrop}
+            onToggleStir={toggleStir}
+            onReset={resetApparatus}
+          />
+        </section>
+      </>
     ) : loadState === 'idle' ? (
       <div className={styles.entry}>
         <h2>Xử lý nước tổng hợp chứa Fe, Zn, Pb</h2>
