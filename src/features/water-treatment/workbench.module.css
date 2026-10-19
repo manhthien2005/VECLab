@@ -953,17 +953,23 @@
 .stirButton[data-active]:hover { background:#9a4a09; }
 .stirButton svg { width:14px; height:14px; }
 .buretControls { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
-.buretControl { display:flex; align-items:center; gap:5px; padding:4px; border:1px solid #d7e3e9; border-radius:7px; background:#f8fbfc; color:var(--ink); font:inherit; font-size:.7rem; font-weight:650; }
+.buretControl { display:flex; align-items:center; gap:6px; padding:5px; border:1px solid #d7e3e9; border-radius:9px; background:#f8fbfc; color:var(--ink); font:inherit; font-size:.7rem; font-weight:650; }
 .buretControl > span { min-width:28px; white-space:nowrap; }
-.buretControl select { width:58px; min-height:30px; border:1px solid #b8ccd5; border-radius:5px; padding:3px 4px; background:white; color:var(--ink); font:inherit; font-size:.68rem; font-variant-numeric:tabular-nums; }
-.buretControl select:disabled { background:#edf2f5; color:#607486; }
-.buretAdd { display:inline-flex; align-items:center; gap:5px; padding:6px 8px; min-height:30px; border-radius:6px; border:1px solid #1f8a99; background:white; color:#0e3a45; cursor:pointer; font:inherit; font-size:.7rem; font-weight:650; transition:background 180ms; }
+.doseStepMenu { position:relative; width:64px; }
+.doseStepTrigger { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:32px; border:1px solid #a9c4ce; border-radius:7px; padding:4px 7px; background:#fff; color:var(--ink); font:inherit; font-size:.68rem; font-variant-numeric:tabular-nums; cursor:pointer; }
+.doseStepTrigger::after { content:''; width:6px; height:6px; margin-left:4px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:translateY(-2px) rotate(45deg); }
+.doseStepTrigger:hover:not(:disabled), .doseStepTrigger[aria-expanded='true'] { border-color:#1f8a99; background:#f0f8f9; }
+.doseStepTrigger:focus-visible, .doseStepOption:focus-visible { outline:2px solid #1f8a99; outline-offset:2px; }
+.doseStepTrigger:disabled { background:#edf2f5; color:#607486; cursor:default; }
+.doseStepMenuList { position:absolute; top:calc(100% + 5px); left:0; z-index:20; display:grid; width:100%; min-width:64px; padding:4px; border:1px solid #b8d0d8; border-radius:9px; background:#fff; box-shadow:0 8px 18px rgb(28 60 80 / 16%); }
+.doseStepOption { width:100%; min-height:28px; border:0; border-radius:6px; padding:4px 6px; background:transparent; color:var(--ink); font:inherit; font-size:.68rem; text-align:left; cursor:pointer; }
+.doseStepOption:hover, .doseStepOption[aria-selected='true'] { background:#e6f3f5; color:#0e3a45; }
+.buretAdd { display:inline-flex; align-items:center; gap:5px; padding:6px 8px; min-height:30px; border-radius:7px; border:1px solid #1f8a99; background:white; color:#0e3a45; cursor:pointer; font:inherit; font-size:.7rem; font-weight:650; transition:background 180ms; }
 .buretAdd:hover { background:#e6f3f5; }
 .buretAdd:disabled { opacity:.55; cursor:default; background:#edf2f5; border-color:#c8d5dc; color:#607486; }
 .buretAdd:disabled span { color:#607486; }
 .buretAdd svg { width:13px; height:13px; }
-.buretAdd span { color:var(--ink-muted); font-weight:550; font-size:.68rem; }
-.buretControl .buretAdd span { color:inherit; font-size:.7rem; }
+.buretAdd span { color:inherit; font-weight:650; font-size:.7rem; }
 .buretReset { display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:8px; border:1px solid var(--border); background:white; color:var(--ink-muted); cursor:pointer; font:inherit; }
 .buretReset:hover { background:#f4f8fa; color:var(--ink); }
 .buretReset svg { width:13px; height:13px; }
@@ -998,7 +1004,7 @@
 
 
 @media (max-width:1050px) { .goal { flex:0 0 auto; margin-left:auto; } .goalPanel { position:fixed; inset:80px 12px auto; transform:none; width:520px; max-width:calc(100vw - 24px); max-height:calc(100dvh - 96px); margin-inline:auto; } }
-@media (max-width:600px) { .buretControls { justify-content:stretch; } .buretControl { flex:1 1 100%; } .buretControl select { width:72px; } .buretControl .buretAdd { flex:1; } }
+@media (max-width:600px) { .buretControls { justify-content:stretch; } .buretControl { flex:1 1 100%; } .doseStepMenu { width:78px; } .buretControl .buretAdd { flex:1; } }
 @media (prefers-reduced-motion:reduce) { .goalDetails summary { transition:none; } }
 .notebook { scroll-margin-top:16px; }
 .batchNotice { padding:10px 12px; border-radius:8px; background:#fff3d9; color:#714a0b; font-size:.76rem; line-height:1.65; }
