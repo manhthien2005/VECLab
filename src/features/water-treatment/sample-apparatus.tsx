@@ -1,7 +1,7 @@
 'use client'
 
 import { useId, useRef, useState, useEffect } from 'react'
-import { PlayIcon, StopIcon, PlusIcon, ResetIcon } from './icons.js'
+import { PlayIcon, StopIcon, PlusIcon, ResetIcon, BeakerIcon } from './icons.js'
 import styles from './workbench.module.css'
 
 /**
@@ -67,6 +67,13 @@ const METAL_COLORS = {
   zn: { color: '#F8FAFC', light: '#ffffff', deep: '#e8edf1', label: 'Zn²⁺', fullLabel: 'Dung dịch ZnSO₄' },
   pb: { color: '#F8FAFC', light: '#ffffff', deep: '#e8edf1', label: 'Pb²⁺', fullLabel: 'Dung dịch Pb(NO₃)₂' },
 } as const
+
+export type SampleCalculation = {
+  pH: number
+  dissolvedMgL: { fe: number; zn: number; pb: number }
+  precipitateMg: { fe: number; zn: number; pb: number }
+  totalPrecipitateMg: number
+}
 
 const PRECIPITATE_GUIDANCE = [
   { label: 'Fe(OH)₃ · nâu đỏ #A56535', ph: 'pH tham khảo 2–4' },
@@ -244,11 +251,15 @@ export function SamplePreparationApparatus({
   onAddDrop,
   onToggleStir,
   onReset,
+  onCalculate,
+  calculation,
 }: {
   status?: Partial<SampleApStatus>
   onAddDrop: (solution: MetalSolution, amountMl: DropStepMl) => void
   onToggleStir: () => void
   onReset: () => void
+  onCalculate: (result: SampleCalculation) => void
+  calculation: SampleCalculation | null
 }) {
   const reactId = useId()
   const uid = reactId.replace(/:/g, '')
@@ -338,6 +349,40 @@ export function SamplePreparationApparatus({
   }
 
   const totalAddedMl = feAddedMl + znAddedMl + pbAddedMl
+  const totalSolutionMl = status.targetVolumeMl + totalAddedMl
+  const hasFinishedStirring = hasBeenStirred && !status.stirring
+  const calculateSample = () => {
+    if (!hasFinishedStirring) return
+
+    const volumeL = totalSolutionMl / 1000
+    const sourceMgL = 100
+    const addedMassMg = {
+      fe: sourceMgL * feAddedMl / 1000,
+      zn: sourceMgL * znAddedMl / 1000,
+      pb: sourceMgL * pbAddedMl / 1000,
+    }
+    const dissolvedMgL = {
+      fe: fePrecipitating ? 0 : addedMassMg.fe / volumeL,
+      zn: addedMassMg.zn / volumeL,
+      pb: addedMassMg.pb / volumeL,
+    }
+    const precipitateIonMg = {
+      fe: fePrecipitating ? addedMassMg.fe : 0,
+      zn: 0,
+      pb: 0,
+    }
+    const precipitateMg = {
+      fe: precipitateIonMg.fe * 106.87 / 55.85,
+      zn: precipitateIonMg.zn * 99.41 / 65.38,
+      pb: precipitateIonMg.pb * 241.2 / 207.2,
+    }
+    onCalculate({
+      pH: mixedPh,
+      dissolvedMgL,
+      precipitateMg,
+      totalPrecipitateMg: precipitateMg.fe + precipitateMg.zn + precipitateMg.pb,
+    })
+  }
 
   return (
     <div className={styles.apparatus}>
@@ -734,6 +779,16 @@ export function SamplePreparationApparatus({
           {status.stirring ? <StopIcon /> : <PlayIcon />}
           {status.stirring ? 'Dừng khuấy' : 'Bật khuấy'}
         </button>
+        <button
+          type="button"
+          className={styles.calculateButton}
+          onClick={calculateSample}
+          disabled={!hasFinishedStirring}
+          title={hasFinishedStirring ? 'Tính pH, ion còn tan và khối lượng kết tủa' : 'Hãy khuấy xong rồi dừng máy trước khi tính'}
+          data-testid="sample-calculate"
+        >
+          <BeakerIcon /> Tính toán
+        </button>
         <div className={styles.buretControls}>
           <div className={styles.buretControl}>
             <span>Fe³⁺</span>
@@ -799,6 +854,30 @@ export function SamplePreparationApparatus({
           </button>
         </div>
       </div>
+
+      {calculation ? (
+        <section className={styles.calculationPanel} aria-label="Kết quả tính toán sau khuấy">
+          <div className={styles.calculationHeader}>
+            <strong>Kết quả sau khuấy</strong>
+            <span>pH và nồng độ theo mô hình mô phỏng</span>
+          </div>
+          <div className={styles.tableScroll}>
+            <table className={styles.table}>
+              <thead>
+                <tr><th scope="col">Đại lượng</th><th scope="col">Fe³⁺</th><th scope="col">Zn²⁺</th><th scope="col">Pb²⁺</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">Ion còn tan (mg/L)</th><td>{calculation.dissolvedMgL.fe.toFixed(3)}</td><td>{calculation.dissolvedMgL.zn.toFixed(3)}</td><td>{calculation.dissolvedMgL.pb.toFixed(3)}</td></tr>
+                <tr><th scope="row">Khối lượng kết tủa (mg)</th><td>{calculation.precipitateMg.fe.toFixed(3)}</td><td>{calculation.precipitateMg.zn.toFixed(3)}</td><td>{calculation.precipitateMg.pb.toFixed(3)}</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div className={styles.calculationSummary}>
+            <span>pH sau khuấy <strong>{calculation.pH.toFixed(2)}</strong></span>
+            <span>Tổng kết tủa <strong>{calculation.totalPrecipitateMg.toFixed(3)} mg</strong></span>
+          </div>
+        </section>
+      ) : null}
 
       <p className={styles.apparatusNote}>
         Dung dịch gốc 100 mg/L · mỗi buret chứa 10 mL và không tự nạp lại. Màu dung dịch là minh họa trước khi chỉnh pH.

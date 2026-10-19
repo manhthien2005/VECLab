@@ -7,7 +7,7 @@ import { ActionButton } from '@/features/workbench/action-button.js'
 import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/icons.js'
 import { TargetIcon, ReportIcon, SubmitIcon, CloseIcon, InfoIcon, ControlIcon } from '@/features/workbench/icons.js'
 import { WaterTreatmentApparatus, type ApStatus, type AcidBase } from './apparatus.js'
-import { SamplePreparationApparatus, type SampleApStatus, type MetalSolution } from './sample-apparatus.js'
+import { SamplePreparationApparatus, type SampleApStatus, type SampleCalculation, type MetalSolution } from './sample-apparatus.js'
 import styles from './workbench.module.css'
 
 const EQUIPMENT_LIST = [
@@ -273,6 +273,7 @@ function WaterTreatmentWorkbenchSession({
     znAddedMl: 0,
     pbAddedMl: 0,
   })
+  const [sampleCalculation, setSampleCalculation] = useState<SampleCalculation | null>(null)
   const addDrop = useCallback((reagent: AcidBase) => {
     setApStatus((prev) => {
       if (reagent === 'naoh') {
@@ -296,6 +297,7 @@ function WaterTreatmentWorkbenchSession({
       const currentValue = prev[key]
       const nextValue = Math.min(10, Math.round((currentValue + amountMl) * 100) / 100)
       if (nextValue === currentValue) return prev
+      setSampleCalculation(null)
       const added = {
         fe: prev.feAddedMl,
         zn: prev.znAddedMl,
@@ -323,6 +325,7 @@ function WaterTreatmentWorkbenchSession({
   }, [])
 
   const resetSampleApparatus = useCallback(() => {
+    setSampleCalculation(null)
     setSampleApStatus({ pH: 7.0, targetVolumeMl: 1000, stirring: false, feAddedMl: 0, znAddedMl: 0, pbAddedMl: 0 })
   }, [])
   
@@ -394,6 +397,8 @@ function WaterTreatmentWorkbenchSession({
             onAddDrop={addSampleDrop}
             onToggleStir={toggleSampleStir}
             onReset={resetSampleApparatus}
+            onCalculate={setSampleCalculation}
+            calculation={sampleCalculation}
           />
         </section>
 
