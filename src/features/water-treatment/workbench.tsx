@@ -332,6 +332,20 @@ function WaterTreatmentWorkbenchSession({
     setApStatus((prev) => ({ ...prev, settled: true }))
   }, [])
 
+  /**
+   * Đồng bộ pH cốc Bàn 2 với pH mẫu từ Bàn 1 chỉ trong lần đầu tiên mẫu
+   * được tính. Sau đó pH thuộc về thao tác của người học ở Bàn 2 (thêm
+   * NaOH/HCl), không bị kéo về mỗi lần Bàn 1 tính lại.
+   * Reset khi người học pha mẫu mới (`resetSampleApparatus`).
+   */
+  const pHSyncedRef = useRef(false)
+  useEffect(() => {
+    if (sampleCalculation && !pHSyncedRef.current) {
+      setApStatus((prev) => (prev.pH === 5.4 ? { ...prev, pH: sampleCalculation.pH } : prev))
+      pHSyncedRef.current = true
+    }
+  }, [sampleCalculation])
+
   /* Bước lọc: pha rắn tách khỏi cốc → composition trong cốc là filtrate, và
      lượng kết tủa giữ lại trên giấy lọc để hiển thị. */
   const filterSample = useCallback((result: TreatmentCalculation) => {
@@ -355,6 +369,7 @@ function WaterTreatmentWorkbenchSession({
   const resetSampleApparatus = useCallback(() => {
     setSampleCalculation(null)
     setSampleApStatus({ pH: 7.0, targetVolumeMl: 1000, stirring: false, feAddedMl: 0, znAddedMl: 0, pbAddedMl: 0 })
+    pHSyncedRef.current = false
   }, [])
   
   useEffect(() => {

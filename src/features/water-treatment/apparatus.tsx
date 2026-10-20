@@ -2,13 +2,9 @@
 
 import { useId, useRef, useState, useEffect, useMemo } from 'react'
 import { runWaterTreatmentAction, type WaterTreatmentResult } from '@/app/simulate/water-treatment/actions.js'
-import { capacityAtSaturation } from '@/features/water-treatment/capacity.js'
 import type { SampleCalculation } from './sample-apparatus.js'
 import { PlayIcon, StopIcon, PlusIcon, BeakerIcon, SettleIcon, FilterIcon } from './icons.js'
 import styles from './workbench.module.css'
-
-/** Khối lượng nguyên tử để đổi mol/L của solver sang mg/L (khớp server action). */
-const ATOMIC_WEIGHT = { Fe: 55.845, Zn: 65.38, Pb: 207.2 } as const
 
 /**
  * Màu kết tủa theo thành phần rắn chiếm ưu thế. Kết tủa trắng (Zn/Pb) cần
@@ -296,47 +292,72 @@ export function WaterTreatmentApparatus({
   const treatmentComposition = status.composition ?? inheritedComposition
   const hasTreatmentSample = treatmentComposition !== null
 
+  /**
+   * Pha hòa tan / pha rắn mà cốc Bàn 2 HIỂN THỊ tại thời điểm hiện tại.
+   *
+   * KHÔNG cập nhật ngay khi pH đổi. Chỉ cập nhật khi người học đã thực hiện
+   * bước Lắng (hoặc Lọc) — tức đã có kết quả phân bố pha do solver trả về.
+   *
+   * - Trước khi Lắng: hiển thị pha ban đầu mà mẫu từ Bàn 1 đã pha (ion tan,
+   *   chưa có hydroxide kết tủa vì chưa thêm kiềm).
+   * - Sau Lắng: dùng `filtrate_mgPerL` và `precipitated_mgPerL` từ
+   *   `calculation` để hiển thị màu nước và kết tủa mới.
+   * - Sau Lọc: pha rắn đã chuyển sang giấy lọc, cốc chỉ còn filtrate.
+   *
+   * Khi người học thêm NaOH/HCl, `addDrop` reset `settled` về `false` →
+   * `displayPhases` quay về pha ban đầu cho đến khi Lắng lại.
+   */
+  const displayPhases = useMemo<{ dissolved: MetalComposition; solid: MetalComposition }>(() => {
+    if (!sampleCalculation) {
+      return { dissolved: { Fe: 0, Zn: 0, Pb: 0 }, solid: { Fe: 0, Zn: 0, Pb: 0 } }
+    }
+    if (status.filtered && calculation) {
+      return {
+        dissolved: calculation.filtrate_mgPerL,
+        solid: { Fe: 0, Zn: 0, Pb: 0 },
+      }
+    }
+    if (status.settled && calculation) {
+      return {
+        dissolved: calculation.filtrate_mgPerL,
+        solid: calculation.precipitated_mgPerL,
+      }
+    }
+    // Trước khi Lắng (kể cả vừa thêm NaOH/HCl): giữ nguyên pha ban đầu.
+    // Chuyển đổi từ lowercase (fe,zn,pb) của sampleCalculation sang uppercase (Fe,Zn,Pb).
+    const { fe: df, zn: dz, pb: dp } = sampleCalculation.dissolvedMgL
+    const { fe: pf, zn: pz, pb: pp } = sampleCalculation.precipitateMg
+    const volumeMl = sampleCalculation.totalVolumeMl
+    const factor = volumeMl > 0 ? 1000 / volumeMl : 0
+    return {
+      dissolved: { Fe: df, Zn: dz, Pb: dp },
+      solid: {
+        Fe: pf * factor,
+        Zn: pz * factor,
+        Pb: pp * factor,
+      },
+    }
+  }, [sampleCalculation, status.settled, status.filtered, calculation])
+
   // Tính màu dung dịch và kết tủa phản ánh mẫu đang được xử lý ở Bàn 2
   const sampleMeta = useMemo(() => {
-    const noSample = { liquidColor: '#bcd5e0', precipitateColor: null as string | null, precipitateEdge: null as string | null, pptMg: 0, precipitateColorOnFilter: null as string | null, precipitatedOnFilter: false }
+    const noSample = {
+      liquidColor: '#bcd5e0',
+      precipitateColor: null as string | null,
+      precipitateEdge: null as string | null,
+      pptMg: 0,
+      precipitateColorOnFilter: null as string | null,
+      precipitatedOnFilter: false,
+      /** Pha hòa tan của từng kim loại (mg/L) — dùng cho màu nước. */
+      dissolved: { Fe: 0, Zn: 0, Pb: 0 } as MetalComposition,
+      /** Pha rắn của từng kim loại (mg/L) — dùng cho lớp lắng đáy. */
+      solid: { Fe: 0, Zn: 0, Pb: 0 } as MetalComposition,
+    }
 
     // Mẫu chưa pha ở Bàn 1 → cốc Bàn 2 vẫn là nước cất
     if (!hasFe && !hasZn && !hasPb) return noSample
 
-    /**
-     * Phân bố pha tại pH HIỆN TẠI, tính trên tổng kim loại đang ở trong cốc.
-     *
-     * Cùng công thức với `computeFiltrate` ở server action: pha hòa tan giữ
-     * `min(tổng, capacity)` và phần rắn là phần dư. Vì bước này chạy lại mỗi
-     * lần pH đổi, kết tủa mang sang từ Bàn 1 sẽ tan lại khi thêm HCl và kết
-     * tủa lại khi thêm NaOH — đúng cân bằng Fe(OH)₃ ⇌ Fe³⁺ + 3OH⁻.
-     */
-    const splitPhases = (total: MetalComposition): { dissolved: MetalComposition; solid: MetalComposition } => {
-      if (!total) return { dissolved: { Fe: 0, Zn: 0, Pb: 0 }, solid: { Fe: 0, Zn: 0, Pb: 0 } }
-      const cap = capacityAtSaturation(status.pH)
-      const capMgL = {
-        Fe: cap.Fe * ATOMIC_WEIGHT.Fe * 1000,
-        Zn: cap.Zn * ATOMIC_WEIGHT.Zn * 1000,
-        Pb: cap.Pb * ATOMIC_WEIGHT.Pb * 1000,
-      }
-      const dissolved = {
-        Fe: Math.min(total.Fe, capMgL.Fe),
-        Zn: Math.min(total.Zn, capMgL.Zn),
-        Pb: Math.min(total.Pb, capMgL.Pb),
-      }
-      return {
-        dissolved,
-        solid: {
-          Fe: Math.max(0, total.Fe - dissolved.Fe),
-          Zn: Math.max(0, total.Zn - dissolved.Zn),
-          Pb: Math.max(0, total.Pb - dissolved.Pb),
-        },
-      }
-    }
-
     // Đã lọc → pha rắn nằm trên giấy lọc, cốc chỉ còn filtrate trong.
-    // Lượng trên giấy lọc lấy từ số đo đã commit lúc Lọc, không suy lại từ
-    // composition hiện tại (sau khi lọc thì pha rắn đã ra khỏi cốc).
     if (status.filtered) {
       const onFilter = status.filteredSolid
       return {
@@ -346,14 +367,33 @@ export function WaterTreatmentApparatus({
         pptMg: 0,
         precipitateColorOnFilter: colorForSolid(onFilter),
         precipitatedOnFilter: onFilter.Fe + onFilter.Zn + onFilter.Pb > 0,
+        dissolved: { Fe: 0, Zn: 0, Pb: 0 },
+        solid: { Fe: 0, Zn: 0, Pb: 0 },
       }
     }
 
-    const { dissolved, solid } = splitPhases(treatmentComposition ?? { Fe: 0, Zn: 0, Pb: 0 })
+    // Dùng displayPhases — KHÔNG dùng pH để suy ra pha tức thì. Pha tan / rắn
+    // chỉ thay đổi sau khi người học nhấn "Lắng".
+    const { dissolved, solid } = displayPhases
     const totalPpt = solid.Fe + solid.Zn + solid.Pb
 
-    // Màu dung dịch theo pha hòa tan: Fe³⁺ vàng nâu, Zn²⁺/Pb²⁺ gần như trong.
-    const liquidColor = dissolved.Fe > 0.005 ? '#F1DFA0' : '#F4F6F8'
+    /**
+     * Màu nước: dựa trên Fe³⁺ đã hòa tan, KHÔNG phải tổng Fe.
+     * Khi Fe tan ≤ 5 mg/L (≈ 95% đã kết tủa) → nước gần như trong hoàn toàn.
+     * Fe³⁺ thuần có màu vàng nâu đặc trưng; khi kết tủa hết thì mất.
+     *
+     * Ngưỡng: dissolved.Fe ≤ 5 mg/L → nước trong.
+     * Nếu không có Fe nào trong mẫu → nước nhạt.
+     */
+    const totalFeInSample = treatmentComposition?.Fe ?? 0
+    const feDissolvedRatio = totalFeInSample > 0 ? dissolved.Fe / totalFeInSample : 0
+    const liquidColor =
+      totalFeInSample <= 0 ? '#dbe8ee'
+      : feDissolvedRatio <= 0.05 ? '#dbe8ee'
+      : dissolved.Fe <= 1 ? '#e8edd4'
+      : dissolved.Fe <= 5 ? '#eed89a'
+      : dissolved.Fe <= 15 ? '#e8cb82'
+      : '#F1DFA0'
 
     return {
       liquidColor,
@@ -362,8 +402,10 @@ export function WaterTreatmentApparatus({
       pptMg: totalPpt,
       precipitateColorOnFilter: null as string | null,
       precipitatedOnFilter: false,
+      dissolved,
+      solid,
     }
-  }, [treatmentComposition, status.pH, status.filtered, status.filteredSolid, hasFe, hasZn, hasPb])
+  }, [displayPhases, treatmentComposition, status.filtered, status.filteredSolid, hasFe, hasZn, hasPb])
 
   // Gỡ gợi ý pH cho Zn theo yêu cầu — phạm vi pH phải dựa trên bảng kết quả
   // và capacity (`capacityAtSaturation`), không hiển thị overlay cố định.
@@ -593,70 +635,198 @@ export function WaterTreatmentApparatus({
         <path d={'M' + (BEAKER_LEFT_X + 2) + ' ' + waterY + ' H' + (BEAKER_RIGHT_X - 2) + ' V' + (BEAKER_BOTTOM_Y - 1) + ' H' + (BEAKER_LEFT_X + 2) + ' Z'} fill={liquidColor} fillOpacity=".78" />
         <ellipse cx={(BEAKER_LEFT_X + BEAKER_RIGHT_X) / 2} cy={waterY} rx={(BEAKER_RIGHT_X - BEAKER_LEFT_X - 4) / 2} ry="3.5" fill={liquidColor} stroke="#6b8a99" strokeWidth="1" />
 
-        {/* Kết tủa: lớp lắng đáy cốc khi dừng, hạt quanh trục tung khi khuấy.
-            Vị trí do React đặt; chuyển động do .pptSwirl trên từng hạt. */}
+        {/* Kết tủa: tách lớp theo khối lượng riêng khi lắng, hạt bay lơ lửng khi khuấy.
+            Fe(OH)₃ (ρ ≈ 4.3 g/cm³) nặng nhất → đáy dưới; Pb(OH)₂ (ρ ≈ 7.4 g/cm³)
+            và Zn(OH)₂ (ρ ≈ 3.0 g/cm³) nằm trên. Fe nặng nên khuấy vẫn nằm thấp;
+            Zn nhẹ nên bay lên cao trong cốc. */}
         {(() => {
-          const pptColor = sampleMeta.precipitateColor
-          const pptEdge = sampleMeta.precipitateEdge ?? '#7d6a52'
-          if (!pptColor || liquidDepth <= 8) return null
+          const { solid } = sampleMeta
+          const totalPpt = solid.Fe + solid.Zn + solid.Pb
+          if (totalPpt <= 0 || liquidDepth <= 8) return null
           const cx = (BEAKER_LEFT_X + BEAKER_RIGHT_X) / 2
           const floorY = BEAKER_BOTTOM_Y - 2
-          // Bề dày lớp lắng từ lượng kết tủa đã biết (0 → 16 px)
-          const bedHeight = Math.min(16, Math.max(3, sampleMeta.pptMg * 0.8))
-          const numParticles = Math.min(14, Math.max(4, Math.round(sampleMeta.pptMg * 1.2)))
-          // Bán kính quỹ đạo giữ trong thành cốc: bề rộng trong /2 trừ lề an toàn
-          const orbitRx = Math.max(6, Math.min(26, (BEAKER_RIGHT_X - BEAKER_LEFT_X) / 2 - 12))
-          const orbitRy = Math.max(2, orbitRx * 0.22)
+          // Bề rộng trong của cốc
+          const beakerInnerW = BEAKER_RIGHT_X - BEAKER_LEFT_X - 6
+
+          /**
+           * Tốc độ lắng tương đối theo Stokes: v ∝ Δρ · d² / η
+           * Fe(OH)₃: Δρ lớn nhất, kích thước vón lớn → nhanh nhất → lắng sâu nhất
+           * Zn(OH)₂: Δρ nhỏ, hạt mịn → chậm nhất → bay cao khi khuấy
+           * Pb(OH)₂: trung bình
+           * Đặt normalized settling height (1 = đáy cốc, 0 = bề mặt):
+           * Fe: 1.0 (nhanh), Pb: 0.6, Zn: 0.3
+           */
+          const SETTLE_DEPTH = { Fe: 1.0, Pb: 0.65, Zn: 0.35 }
+
+          // Số hạt mỗi kim loại tỷ lệ với lượng rắn (log scale để tránh 1 hạt cho lượng nhỏ)
+          const metalN = (mgL: number) => Math.max(1, Math.round(Math.log1p(mgL) * 3.5))
+          const feN = metalN(solid.Fe)
+          const pbN = metalN(solid.Pb)
+          const znN = metalN(solid.Zn)
+
+          // Kích thước hạt: Fe vón to (vì floc lớn), Zn/Pb mịn hơn
+          const feSize = (i: number) => 1.8 + ((i * 7) % 7) * 0.4     // Fe: 1.8–4.2
+          const pbSize = (i: number) => 1.1 + ((i * 5) % 5) * 0.3    // Pb: 1.1–2.3
+          const znSize = (i: number) => 0.8 + ((i * 3) % 4) * 0.25   // Zn: 0.8–1.8
+
+          // Tính bề dày mỗi lớp trong lớp lắng đáy.
+          // Hệ số bedPxPerMgL = 0.6 để đảm bảo ngay cả ~5 mg/L cũng thấy rõ;
+          // Fe 30 mg/L → 15 px, Zn 30 mg/L → 8 px, Pb 0.05 mg/L → 0.03 px.
+          // Nếu tổng vượt 30 px thì scale-down đồng đều để không tràn cốc.
+          const bedPxPerMgL = 0.6
+          const feBedHRaw = solid.Fe * bedPxPerMgL
+          const pbBedHRaw = solid.Pb * bedPxPerMgL
+          const znBedHRaw = solid.Zn * bedPxPerMgL
+          const bedCap = 30
+          const bedSumRaw = feBedHRaw + pbBedHRaw + znBedHRaw
+          const bedScale = bedSumRaw > bedCap ? bedCap / bedSumRaw : 1
+          // Cap từng lớp theo khối lượng riêng để 1 lớp không nuốt hết đáy.
+          const feBedH = Math.min(18, feBedHRaw * bedScale)
+          const pbBedH = Math.min(8, pbBedHRaw * bedScale)
+          const znBedH = Math.min(6, znBedHRaw * bedScale)
+          const totalBedH = feBedH + pbBedH + znBedH
+
+          /**
+           * Khi khuấy: hạt phân bố theo độ cao lơ lửng tương ứng.
+           * Fe nặng nhất → gần đáy; Zn nhẹ nhất → bay cao.
+           * Độ cao tối đa = bề dày cột nước trừ vùng lắng.
+           */
+          const maxSuspensionH = liquidDepth - totalBedH - 6
+
+          /**
+           * Hàm vẽ 1 nhóm hạt (khuấy hoặc lắng).
+           * metal: 'Fe' | 'Pb' | 'Zn'
+           */
+          const renderParticles = (
+            metal: 'Fe' | 'Pb' | 'Zn',
+            count: number,
+            sizeFn: (i: number) => number,
+            fill: string,
+            edge: string,
+            settledTopY: number,
+            settledBotY: number,
+            orbitRx: number,
+          ) => {
+            if (count === 0) return null
+            const n = Math.min(count, 10)
+            if (status.stirring) {
+              // Khuấy: hạt lơ lửng theo settling depth
+              const settleDepth = SETTLE_DEPTH[metal]
+              const suspensionTopY = floorY - totalBedH - 6 - maxSuspensionH * settleDepth
+              return Array.from({ length: n }, (_, i) => {
+                const phase = ((i * 7 + (metal === 'Fe' ? 3 : metal === 'Pb' ? 5 : 7)) % 12) / 12
+                const spreadFraction = (i * 11 + 7) % 13 / 13
+                const y = suspensionTopY + spreadFraction * maxSuspensionH * settleDepth
+                const size = sizeFn(i)
+                return (
+                  <ellipse
+                    key={metal + i}
+                    cx={cx}
+                    cy={y}
+                    rx={size} ry={size * 0.7}
+                    fill={fill} stroke={edge} strokeOpacity=".6" strokeWidth=".45"
+                    className={styles.pptSwirl}
+                    style={{
+                      ['--swirl-a' as string]: orbitRx.toFixed(2) + 'px',
+                      ['--swirl-b' as string]: (orbitRx * 0.2).toFixed(2) + 'px',
+                      animationDelay: (-phase * 2.1).toFixed(2) + 's',
+                    } as React.CSSProperties}
+                  />
+                )
+              })
+            } else {
+              // Lắng: hạt nằm trên lớp lắng tương ứng
+              return Array.from({ length: n }, (_, i) => {
+                const seed = i * 13 + (metal === 'Fe' ? 5 : metal === 'Pb' ? 11 : 7)
+                const xFrac = (seed % 11) / 11
+                const yFrac = ((seed * 7) % 9) / 9
+                const x = BEAKER_LEFT_X + 4 + xFrac * beakerInnerW
+                const y = settledTopY + yFrac * (settledBotY - settledTopY)
+                const size = sizeFn(i)
+                return (
+                  <ellipse key={metal + i}
+                    cx={x} cy={y}
+                    rx={size} ry={size * 0.7}
+                    fill={fill} stroke={edge} strokeOpacity=".7" strokeWidth=".4" fillOpacity=".92"
+                  />
+                )
+              })
+            }
+          }
+
+          // Orbit radius nhỏ hơn cho các hạt nhẹ (Zn)
+          const baseOrbitRx = Math.max(6, Math.min(26, beakerInnerW / 2 - 12))
+
+          /**
+           * Lớp lắng đáy: tách 3 lớp theo khối lượng riêng.
+           * Đáy dưới cùng = Fe(OH)₃ (nặng nhất), trên = Pb(OH)₂, trên cùng = Zn(OH)₂.
+           * Nếu chỉ có 1 kim loại → 1 lớp duy nhất.
+           */
+          const hasMultiLayer = (solid.Fe > 0 && solid.Pb > 0) || (solid.Fe > 0 && solid.Zn > 0) || (solid.Pb > 0 && solid.Zn > 0)
 
           return (
             <g clipPath={'url(#' + uid + 'beaker)'} data-testid="wt-precipitate">
-              {/* Lớp kết tủa lắng đáy — luôn hiện, dày dần theo lượng kết tủa */}
-              <path
-                d={'M' + (BEAKER_LEFT_X + 3) + ' ' + floorY + ' Q' + cx + ' ' + (floorY - bedHeight - 4) + ' ' + (BEAKER_RIGHT_X - 3) + ' ' + floorY + ' Z'}
-                fill={pptColor} fillOpacity=".9"
-                stroke={pptEdge} strokeOpacity=".9" strokeWidth="1"
-              />
-
-              {status.stirring ? (
-                // Khuấy: hạt quay quanh trục tung giữa cốc.
-                // cx đặt đúng trục; mọi dịch chuyển ngang do .pptSwirl đảm nhiệm.
-                Array.from({ length: numParticles }, (_, i) => {
-                  const s1 = (i * 7 + 3) % 11
-                  const s2 = (i * 13 + 5) % 13
-                  const phase = ((i * 5) % 12) / 12
-                  const y = floorY - bedHeight - 4 - ((s2 / 13) * Math.min(46, liquidDepth - 14))
-                  const size = 1.3 + ((s1 + s2) % 5) * 0.3
-                  return (
-                    <ellipse
-                      key={i}
-                      cx={cx}
-                      cy={y}
-                      rx={size} ry={size * 0.72}
-                      fill={pptColor} stroke={pptEdge} strokeOpacity=".7" strokeWidth=".55"
-                      className={styles.pptSwirl}
-                      style={{
-                        ['--swirl-a' as string]: orbitRx.toFixed(2) + 'px',
-                        ['--swirl-b' as string]: orbitRy.toFixed(2) + 'px',
-                        // Lệch pha để các hạt không chạy đồng pha
-                        animationDelay: (-phase * 1.9).toFixed(2) + 's',
-                      } as React.CSSProperties}
+              {/* Lớp lắng đáy */}
+              {hasMultiLayer ? (
+                // 3 lớp tách biệt
+                <g>
+                  {/* Fe — đáy dưới */}
+                  {solid.Fe > 0 && (
+                    <path
+                      d={'M' + (BEAKER_LEFT_X + 3) + ' ' + floorY
+                        + ' Q' + cx + ' ' + (floorY - feBedH - 1) + ' ' + (BEAKER_RIGHT_X - 3) + ' ' + floorY
+                        + ' L' + (BEAKER_RIGHT_X - 3) + ' ' + floorY + ' Z'}
+                      fill={SOLID_STYLE.Fe.fill} fillOpacity=".92"
+                      stroke={SOLID_STYLE.Fe.edge} strokeOpacity=".85" strokeWidth=".8"
                     />
-                  )
-                })
+                  )}
+                  {/* Pb — lớp giữa */}
+                  {solid.Pb > 0 && (
+                    <path
+                      d={'M' + (BEAKER_LEFT_X + 3) + ' ' + (floorY - feBedH)
+                        + ' Q' + cx + ' ' + (floorY - feBedH - pbBedH - 1) + ' ' + (BEAKER_RIGHT_X - 3) + ' ' + (floorY - feBedH)
+                        + ' L' + (BEAKER_RIGHT_X - 3) + ' ' + floorY
+                        + ' L' + (BEAKER_LEFT_X + 3) + ' ' + floorY + ' Z'}
+                      fill={SOLID_STYLE.Pb.fill} fillOpacity=".90"
+                      stroke={SOLID_STYLE.Pb.edge} strokeOpacity=".85" strokeWidth=".8"
+                    />
+                  )}
+                  {/* Zn — trên cùng */}
+                  {solid.Zn > 0 && (
+                    <path
+                      d={'M' + (BEAKER_LEFT_X + 3) + ' ' + (floorY - feBedH - pbBedH)
+                        + ' Q' + cx + ' ' + (floorY - totalBedH - 1) + ' ' + (BEAKER_RIGHT_X - 3) + ' ' + (floorY - feBedH - pbBedH)
+                        + ' L' + (BEAKER_RIGHT_X - 3) + ' ' + (floorY - feBedH)
+                        + ' L' + (BEAKER_LEFT_X + 3) + ' ' + (floorY - feBedH) + ' Z'}
+                      fill={SOLID_STYLE.Zn.fill} fillOpacity=".88"
+                      stroke={SOLID_STYLE.Zn.edge} strokeOpacity=".85" strokeWidth=".8"
+                    />
+                  )}
+                </g>
               ) : (
-                // Dừng: hạt nằm yên trên lớp lắng
-                Array.from({ length: numParticles }, (_, i) => {
-                  const s1 = (i * 7 + 3) % 11
-                  const s2 = (i * 13 + 5) % 13
-                  const x = BEAKER_LEFT_X + 8 + ((s1 / 11) * (BEAKER_RIGHT_X - BEAKER_LEFT_X - 16))
-                  const y = floorY - bedHeight * (0.35 + ((s2 / 13) * 0.6))
-                  const size = 1.3 + ((s1 + s2) % 5) * 0.3
-                  return (
-                    <ellipse key={i} cx={x} cy={y} rx={size} ry={size * 0.72}
-                      fill={pptColor} stroke={pptEdge} strokeOpacity=".75" strokeWidth=".5" fillOpacity=".95" />
-                  )
-                })
+                // 1 lớp duy nhất
+                <path
+                  d={'M' + (BEAKER_LEFT_X + 3) + ' ' + floorY
+                    + ' Q' + cx + ' ' + (floorY - totalBedH - 3) + ' ' + (BEAKER_RIGHT_X - 3) + ' ' + floorY
+                    + ' Z'}
+                  fill={sampleMeta.precipitateColor ?? SOLID_STYLE.Fe.fill}
+                  fillOpacity=".9"
+                  stroke={sampleMeta.precipitateEdge ?? SOLID_STYLE.Fe.edge}
+                  strokeOpacity=".9" strokeWidth=".9"
+                />
               )}
+
+              {/* Hạt lơ lửng — Fe */}
+              {renderParticles('Fe', feN, feSize, SOLID_STYLE.Fe.fill, SOLID_STYLE.Fe.edge,
+                floorY - feBedH, floorY, baseOrbitRx)}
+
+              {/* Hạt lơ lửng — Pb */}
+              {renderParticles('Pb', pbN, pbSize, SOLID_STYLE.Pb.fill, SOLID_STYLE.Pb.edge,
+                floorY - feBedH - pbBedH, floorY - feBedH, baseOrbitRx * 0.9)}
+
+              {/* Hạt lơ lửng — Zn (nhẹ nhất, bay cao) */}
+              {renderParticles('Zn', znN, znSize, SOLID_STYLE.Zn.fill, SOLID_STYLE.Zn.edge,
+                floorY - feBedH - pbBedH - znBedH, floorY - feBedH - pbBedH, baseOrbitRx * 0.75)}
             </g>
           )
         })()}
