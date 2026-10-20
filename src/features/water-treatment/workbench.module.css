@@ -1108,6 +1108,8 @@
 .dischargeReady { padding:8px 12px; border:1px solid #4a8c6a; border-left:3px solid #4a8c6a; border-radius:7px; background:#f0f8f3; color:#2a5c3a; font-size:.78rem; line-height:1.5; }
 .dischargeNotReady { padding:8px 12px; border:1px solid #b05a3c; border-left:3px solid #b05a3c; border-radius:7px; background:#fdf3f0; color:#7a3018; font-size:.78rem; line-height:1.5; }
 .dischargeSuccess { padding:8px 12px; border:1px solid #4a8c6a; border-left:3px solid #4a8c6a; border-radius:7px; background:#f0f8f3; color:#2a5c3a; font-size:.78rem; line-height:1.5; }
+.dischargeButtonWrap { display:flex; justify-content:center; margin-top:10px; }
+.dischargeButtonWrap .primary { width:100%; }
 .pass { color:#2a6a2a; font-weight:700; }
 .fail { color:#b03020; font-weight:700; }
 
