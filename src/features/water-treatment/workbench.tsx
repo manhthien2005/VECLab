@@ -299,8 +299,9 @@ function WaterTreatmentWorkbenchSession({
   const addSampleDrop = useCallback((solution: MetalSolution, amountMl: number) => {
     setSampleApStatus((prev) => {
       const key = (solution + 'AddedMl') as 'feAddedMl' | 'znAddedMl' | 'pbAddedMl'
+      const cap = solution === 'zn' ? 100 : solution === 'fe' ? 50 : 10
       const currentValue = prev[key]
-      const nextValue = Math.min(10, Math.round((currentValue + amountMl) * 100) / 100)
+      const nextValue = Math.min(cap, Math.round((currentValue + amountMl) * 100) / 100)
       if (nextValue === currentValue) return prev
       setSampleCalculation(null)
       const added = {

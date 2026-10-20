@@ -328,15 +328,8 @@ export function WaterTreatmentApparatus({
     }
   }, [sampleCalculation, calculation, treatmentComposition, status.pH, status.filtered, hasFe, hasZn, hasPb])
 
-  // Gợi ý vùng pH kết tủa để người học hiểu vì sao pH 7 chưa có kết tủa nhưng
-  // pH 9 thì có, và vì sao tăng pH quá cao kết tủa lại tan bớt.
-  const znAdvice = (() => {
-    if (!hasZn || !hasFe && !hasPb) return null
-    if (sampleMeta.pptMg <= 0) return 'Zn chưa kết tủa ở pH này — thử pH 8–10.'
-    if (status.pH >= 11) return 'Zn(OH)₂ là base lưỡng phân: pH quá cao thì kết tủa tan lại.'
-    if (status.pH >= 9.5) return 'Gần đỉnh kết tủa Zn. Tăng pH thêm sẽ làm kết tủa tan dần.'
-    return null
-  })()
+  // Gỡ gợi ý pH cho Zn theo yêu cầu — phạm vi pH phải dựa trên bảng kết quả
+  // và capacity (`capacityAtSaturation`), không hiển thị overlay cố định.
 
   const liquidColor = sampleMeta.liquidColor
 
@@ -737,7 +730,6 @@ export function WaterTreatmentApparatus({
         })}
       </div>
     </div>
-    {znAdvice ? <p className={styles.pptAdvice} role="status">{znAdvice}</p> : null}
     {calculationError ? <p className={styles.calculationError} role="alert">{calculationError}</p> : null}
     {calculation ? (
       <section className={styles.calculationPanel} aria-label="Bảng tổng hợp kết quả bàn xử lý nước">

@@ -10,7 +10,7 @@ import styles from './workbench.module.css'
  *
  * Layout (top → bottom):
  *   • Top support bar carrying three metal-ion burets
- *   • Three 10 mL burets hang from the bar (Fe, Zn, Pb solutions)
+ *   • Three burets hang from the bar: Fe 50 mL · Zn 100 mL · Pb 10 mL
  *   • Flat-bottom 2.5 L beaker sitting on a magnetic stirrer hotplate
  *   • Stir bar stays fixed while the liquid and suspended particles move
  *
@@ -32,20 +32,22 @@ export type SampleApStatus = {
 }
 
 const BEAKER_CAPACITY_ML = 2500
-const BEAKER_LEFT_X = 80
-const BEAKER_RIGHT_X = 300
+const BEAKER_LEFT_X = 70
+const BEAKER_RIGHT_X = 310
 const BEAKER_TOP_Y = 252
 const BEAKER_BOTTOM_Y = 425
 const BEAKER_HEIGHT = BEAKER_BOTTOM_Y - BEAKER_TOP_Y
 
-const BURET_CAPACITY = 10
+const BURET_CAPACITY_FE = 50    // Fe — nâng để đủ Fe(OH)₃ kết tủa ở pH 2–4
+const BURET_CAPACITY_ZN = 100   // Zn — nâng để đủ Zn(OH)₂ kết tủa ở pH 8.5–9.5
+const BURET_CAPACITY_PB = 10    // Pb — giữ nguyên 10 mL
 const BURET_BODY_TOP = 36
 const BURET_BODY_BOTTOM = 240
 const BURET_BODY_HEIGHT = BURET_BODY_BOTTOM - BURET_BODY_TOP
 const BURET_WIDTH = 22
-const BURET_FE_CX = 100
+const BURET_FE_CX = 90
 const BURET_ZN_CX = 190
-const BURET_PB_CX = 280
+const BURET_PB_CX = 290
 
 const STIRRER_CX = 190
 
@@ -54,13 +56,13 @@ function volumeY(volumeMl: number) {
   return BEAKER_BOTTOM_Y - (BEAKER_HEIGHT * clamped) / BEAKER_CAPACITY_ML
 }
 
-function buretLiquidTopY(remainingMl: number) {
-  const clamped = Math.max(0, Math.min(BURET_CAPACITY, remainingMl))
-  return BURET_BODY_BOTTOM - (BURET_BODY_HEIGHT * clamped) / BURET_CAPACITY
+function buretLiquidTopY(remainingMl: number, capacityMl: number) {
+  const clamped = Math.max(0, Math.min(capacityMl, remainingMl))
+  return BURET_BODY_BOTTOM - (BURET_BODY_HEIGHT * clamped) / capacityMl
 }
 
-function buretTickY(ml: number) {
-  return BURET_BODY_TOP + (BURET_BODY_HEIGHT * ml) / BURET_CAPACITY
+function buretTickY(ml: number, capacityMl: number) {
+  return BURET_BODY_TOP + (BURET_BODY_HEIGHT * ml) / capacityMl
 }
 
 const METAL_COLORS = {
@@ -78,7 +80,7 @@ const PRECIPITATE_GUIDANCE = [
 ] as const
 
 function Buret({
-  uid, cx, topY, theme, remainingMl, isDripping, remainingDisplay,
+  uid, cx, topY, theme, remainingMl, isDripping, remainingDisplay, capacityMl,
 }: {
   uid: string
   cx: number
@@ -87,10 +89,11 @@ function Buret({
   remainingMl: number
   isDripping: boolean
   remainingDisplay: string
+  capacityMl: number
 }) {
   const leftX = cx - BURET_WIDTH / 2
   const rightX = cx + BURET_WIDTH / 2
-  const liqTopY = buretLiquidTopY(remainingMl)
+  const liqTopY = buretLiquidTopY(remainingMl, capacityMl)
   const empty = remainingMl <= 0
   const fillClipId = uid + 'fill' + cx
   const fillRect = (
@@ -125,9 +128,13 @@ function Buret({
         </g>
       )}
 
-      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((ml) => {
-        const y = buretTickY(ml)
-        const major = ml % 2 === 0
+      {/* Tick marks: 0 at top → capacity at bottom. Zn (50 mL) uses 5-mL steps; Fe/Pb (10 mL) use 1-mL steps. */}
+      {Array.from(
+        { length: Math.floor(capacityMl / (capacityMl >= 30 ? 5 : 1)) + 1 },
+        (_, i) => (capacityMl >= 30 ? 5 : 1) * i,
+      ).map((ml) => {
+        const y = buretTickY(ml, capacityMl)
+        const major = capacityMl >= 30 ? ml % 10 === 0 : ml % 2 === 0
         return (
           <g key={ml}>
             <line
@@ -271,13 +278,15 @@ export function SamplePreparationApparatus({
   const status: SampleApStatus = { ...initialStatus, ...external }
   const waterY = volumeY(status.targetVolumeMl)
 
-  const clampAdded = (n: number) => Math.max(0, Math.min(BURET_CAPACITY, n))
-  const feAddedMl = clampAdded(status.feAddedMl)
-  const znAddedMl = clampAdded(status.znAddedMl)
-  const pbAddedMl = clampAdded(status.pbAddedMl)
-  const feRemaining = BURET_CAPACITY - feAddedMl
-  const znRemaining = BURET_CAPACITY - znAddedMl
-  const pbRemaining = BURET_CAPACITY - pbAddedMl
+  const clampFe = (n: number) => Math.max(0, Math.min(BURET_CAPACITY_FE, n))
+  const clampZn = (n: number) => Math.max(0, Math.min(BURET_CAPACITY_ZN, n))
+  const clampPb = (n: number) => Math.max(0, Math.min(BURET_CAPACITY_PB, n))
+  const feAddedMl = clampFe(status.feAddedMl)
+  const znAddedMl = clampZn(status.znAddedMl)
+  const pbAddedMl = clampPb(status.pbAddedMl)
+  const feRemaining = BURET_CAPACITY_FE - feAddedMl
+  const znRemaining = BURET_CAPACITY_ZN - znAddedMl
+  const pbRemaining = BURET_CAPACITY_PB - pbAddedMl
   const feEmpty = feRemaining <= 0
   const znEmpty = znRemaining <= 0
   const pbEmpty = pbRemaining <= 0
@@ -475,25 +484,25 @@ export function SamplePreparationApparatus({
             <clipPath id={uid + 'fill' + BURET_FE_CX}>
               <rect
                 x={BURET_FE_CX - BURET_WIDTH / 2}
-                y={buretLiquidTopY(feRemaining)}
+                y={buretLiquidTopY(feRemaining, BURET_CAPACITY_FE)}
                 width={BURET_WIDTH}
-                height={BURET_BODY_BOTTOM - buretLiquidTopY(feRemaining)}
+                height={BURET_BODY_BOTTOM - buretLiquidTopY(feRemaining, BURET_CAPACITY_FE)}
               />
             </clipPath>
             <clipPath id={uid + 'fill' + BURET_ZN_CX}>
               <rect
                 x={BURET_ZN_CX - BURET_WIDTH / 2}
-                y={buretLiquidTopY(znRemaining)}
+                y={buretLiquidTopY(znRemaining, BURET_CAPACITY_ZN)}
                 width={BURET_WIDTH}
-                height={BURET_BODY_BOTTOM - buretLiquidTopY(znRemaining)}
+                height={BURET_BODY_BOTTOM - buretLiquidTopY(znRemaining, BURET_CAPACITY_ZN)}
               />
             </clipPath>
             <clipPath id={uid + 'fill' + BURET_PB_CX}>
               <rect
                 x={BURET_PB_CX - BURET_WIDTH / 2}
-                y={buretLiquidTopY(pbRemaining)}
+                y={buretLiquidTopY(pbRemaining, BURET_CAPACITY_PB)}
                 width={BURET_WIDTH}
-                height={BURET_BODY_BOTTOM - buretLiquidTopY(pbRemaining)}
+                height={BURET_BODY_BOTTOM - buretLiquidTopY(pbRemaining, BURET_CAPACITY_PB)}
               />
             </clipPath>
           </defs>
@@ -521,6 +530,7 @@ export function SamplePreparationApparatus({
             remainingMl={feRemaining}
             isDripping={activeDrop === 'fe'}
             remainingDisplay={feRemaining + ' mL'}
+            capacityMl={BURET_CAPACITY_FE}
           />
 
           <Buret
@@ -531,6 +541,7 @@ export function SamplePreparationApparatus({
             remainingMl={znRemaining}
             isDripping={activeDrop === 'zn'}
             remainingDisplay={znRemaining + ' mL'}
+            capacityMl={BURET_CAPACITY_ZN}
           />
 
           <Buret
@@ -541,6 +552,7 @@ export function SamplePreparationApparatus({
             remainingMl={pbRemaining}
             isDripping={activeDrop === 'pb'}
             remainingDisplay={pbRemaining + ' mL'}
+            capacityMl={BURET_CAPACITY_PB}
           />
 
           <path
@@ -886,7 +898,7 @@ export function SamplePreparationApparatus({
       ) : null}
 
       <p className={styles.apparatusNote}>
-        Dung dịch gốc 100 mg/L · mỗi buret chứa 10 mL và không tự nạp lại. Màu dung dịch là minh họa trước khi chỉnh pH.
+        Dung dịch gốc 100 mg/L · buret Fe chứa 50 mL, buret Zn 100 mL, buret Pb 10 mL; không tự nạp lại. Màu dung dịch là minh họa trước khi chỉnh pH.
       </p>
       <div className={styles.precipitateGuide} aria-label="Màu và pH tham khảo của kết tủa">
         <strong>Màu kết tủa và pH tham khảo</strong>
