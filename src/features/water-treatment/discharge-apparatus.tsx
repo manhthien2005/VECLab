@@ -406,8 +406,8 @@ export function DischargeApparatus({
           <rect x="356" y="18" width="6" height="14" fill={`url(#${uid}steel)`} />
 
           {/* Burets with fill level and drop animation */}
-          <BuretVisual cx={BURET_NAOH_CX} color="#1f8a99" labelColor="#0e3a45" currentMl={naohMl} isDropping={naohDropping} dropColor="#1f8a99" />
-          <BuretVisual cx={BURET_HCL_CX} color="#b26516" labelColor="#5a3208" currentMl={hclMl} isDropping={hclDropping} dropColor="#b26516" />
+          <BuretVisual cx={BURET_NAOH_CX} color="#1f8a99" labelColor="#0e3a45" currentMl={BURET_CAPACITY - naohMl} isDropping={naohDropping} dropColor="#1f8a99" />
+          <BuretVisual cx={BURET_HCL_CX} color="#b26516" labelColor="#5a3208" currentMl={BURET_CAPACITY - hclMl} isDropping={hclDropping} dropColor="#b26516" />
 
           {/* Beaker — flat bottom */}
           <path
