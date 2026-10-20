@@ -1,14 +1,14 @@
 'use client'
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.js'
 import { ActionButton } from '@/features/workbench/action-button.js'
 import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/icons.js'
-import { TargetIcon, ReportIcon, SubmitIcon, CloseIcon, InfoIcon, ControlIcon } from '@/features/workbench/icons.js'
+import { SubmitIcon, CloseIcon, InfoIcon, ControlIcon } from '@/features/workbench/icons.js'
 import { WaterTreatmentApparatus, type ApStatus, type AcidBase, type TreatmentCalculation, type FilterHistoryEntry } from './apparatus.js'
 import { SamplePreparationApparatus, type SampleApStatus, type SampleCalculation, type MetalSolution } from './sample-apparatus.js'
-import { WT_QCVN_COLUMN_A } from './constants.js'
+import { DischargeApparatus } from './discharge-apparatus.js'
 import styles from './workbench.module.css'
 
 const EQUIPMENT_LIST = [
@@ -23,8 +23,6 @@ const EQUIPMENT_LIST = [
 ] as const
 
 type EquipmentId = typeof EQUIPMENT_LIST[number]['id']
-
-const WT_PATH = '/simulate/water-treatment'
 
 type Props = {
   attemptId: string | null
@@ -231,112 +229,6 @@ function EquipmentInfoDialog({ item, onClose }: { item: EquipmentId; onClose: ()
  * Reuses Jar Test WorkbenchFrame structure for consistency.
  */
 
-/** Bàn 3: cân bằng pH & thải ra môi trường theo cột A QCVN 40:2025. */
-function DischargeTable({
-  lockedData,
-  onDischarge,
-  phase,
-}: {
-  lockedData: {
-    pH: number
-    calculation: TreatmentCalculation
-    filterHistory: FilterHistoryEntry[]
-  }
-  onDischarge: () => void
-  phase: 'balancing' | 'discharged'
-}) {
-  const { calculation } = lockedData
-  const finalComposition = calculation.filtrate_mgPerL
-  const finalPH = lockedData.pH
-
-  const feOk = finalComposition.Fe <= WT_QCVN_COLUMN_A.Fe_mgPerL
-  const znOk = finalComposition.Zn <= WT_QCVN_COLUMN_A.Zn_mgPerL
-  const pbOk = finalComposition.Pb <= WT_QCVN_COLUMN_A.Pb_mgPerL
-  const phOk = finalPH >= WT_QCVN_COLUMN_A.pH_min && finalPH <= WT_QCVN_COLUMN_A.pH_max
-  const allOk = feOk && znOk && pbOk && phOk
-
-  return (
-    <div className={styles.dischargeTable}>
-      <div className={styles.dischargeInfo}>
-        <p>Kết quả xử lý từ Bàn 2 — nồng độ kim loại trong filtrate trước khi cân bằng pH.</p>
-      </div>
-
-      <div className={styles.dischargeTableGrid}>
-        <table className={styles.table}>
-          <caption className={styles.tableCaption}>
-            Kiểm tra cột A QCVN 40:2025 trước khi thải
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">Chỉ tiêu</th>
-              <th scope="col">Kết quả (mg/L)</th>
-              <th scope="col">Cột A (mg/L)</th>
-              <th scope="col">Đạt</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">Fe</th>
-              <td>{finalComposition.Fe.toFixed(4)}</td>
-              <td>≤ {WT_QCVN_COLUMN_A.Fe_mgPerL}</td>
-              <td className={feOk ? styles.pass : styles.fail}>
-                {feOk ? '✓' : '✗'}
-              </td>
-            </tr>
-            <tr>
-              <th scope="row">Zn</th>
-              <td>{finalComposition.Zn.toFixed(4)}</td>
-              <td>≤ {WT_QCVN_COLUMN_A.Zn_mgPerL}</td>
-              <td className={znOk ? styles.pass : styles.fail}>
-                {znOk ? '✓' : '✗'}
-              </td>
-            </tr>
-            <tr>
-              <th scope="row">Pb</th>
-              <td>{finalComposition.Pb.toFixed(4)}</td>
-              <td>≤ {WT_QCVN_COLUMN_A.Pb_mgPerL}</td>
-              <td className={pbOk ? styles.pass : styles.fail}>
-                {pbOk ? '✓' : '✗'}
-              </td>
-            </tr>
-            <tr>
-              <th scope="row">pH</th>
-              <td>{finalPH.toFixed(2)}</td>
-              <td>{WT_QCVN_COLUMN_A.pH_min}–{WT_QCVN_COLUMN_A.pH_max}</td>
-              <td className={phOk ? styles.pass : styles.fail}>
-                {phOk ? '✓' : '✗'}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {phase === 'balancing' ? (
-        <div className={styles.dischargeActions}>
-          <p className={allOk ? styles.dischargeReady : styles.dischargeNotReady}>
-            {allOk
-              ? 'Đạt cột A — sẵn sàng thải ra môi trường.'
-              : 'Chưa đạt cột A — cần điều chỉnh thêm.'}
-          </p>
-          <button
-            type="button"
-            className={styles.primary}
-            onClick={onDischarge}
-            disabled={!allOk}
-            title={allOk ? 'Thải nước đã xử lý ra môi trường' : 'Kết quả chưa đạt cột A'}
-          >
-            Thải ra môi trường
-          </button>
-        </div>
-      ) : (
-        <div className={styles.dischargeSuccess}>
-          <p>Đã thải nước đã xử lý ra môi trường.</p>
-        </div>
-      )}
-    </div>
-  )
-}
-
 export function WaterTreatmentWorkbench(props: Props) {
   const sessionKey = JSON.stringify([
     props.storageMode, props.attemptId, props.invalidAttempt ?? false,
@@ -344,11 +236,11 @@ export function WaterTreatmentWorkbench(props: Props) {
   return <WaterTreatmentWorkbenchSession key={sessionKey} {...props} />
 }
 
-function WaterTreatmentWorkbenchSession({ 
-  attemptId, 
-  invalidAttempt = false, 
-  openReport = false, 
-  initialPane = 'simulation' 
+function WaterTreatmentWorkbenchSession({
+  attemptId,
+  invalidAttempt: _invalidAttempt = false,
+  openReport: _openReport = false,
+  initialPane = 'simulation'
 }: Props) {
   const [loadState, setLoadState] = useState<LoadState>(attemptId === null ? 'idle' : 'loading')
   const [issue, setIssue] = useState<Issue | null>(null)
@@ -391,6 +283,8 @@ function WaterTreatmentWorkbenchSession({
   const [filterHistory, setFilterHistory] = useState<FilterHistoryEntry[]>([])
   /** Phase của Bàn 3 cân bằng pH — 'pending' = Bàn 2 chưa khóa, 'balancing' = Bàn 3, 'discharged' = đã thải */
   const [dischargePhase, setDischargePhase] = useState<'pending' | 'balancing' | 'discharged'>('pending')
+  /** Bàn nào đang hiển thị: 'sample' → Bàn 1, 'treatment' → Bàn 2, 'discharge' → Bàn 3 */
+  const [workPhase, setWorkPhase] = useState<'sample' | 'treatment' | 'discharge'>('sample')
   /** Dữ liệu Bàn 2 tại thời điểm khóa — dùng cho Bàn 3 */
   const [ban2LockedData, setBan2LockedData] = useState<{
     pH: number
@@ -406,6 +300,7 @@ function WaterTreatmentWorkbenchSession({
       filterHistory,
     })
     setDischargePhase('balancing')
+    setWorkPhase('discharge')
   }, [treatmentCalculation, apStatus.pH, filterHistory])
 
   const handleDischarge = useCallback(() => {
@@ -480,6 +375,13 @@ function WaterTreatmentWorkbenchSession({
     }
   }, [sampleCalculation])
 
+  /** Tự động chuyển sang Bàn 2 khi Bàn 1 đã tính xong */
+  useEffect(() => {
+    if (sampleCalculation && workPhase === 'sample') {
+      setWorkPhase('treatment')
+    }
+  }, [sampleCalculation, workPhase])
+
   /* Bước lọc: pha rắn tách khỏi cốc → composition trong cốc là filtrate, và
      lượng kết tủa giữ lại trên giấy lọc để hiển thị.
      Mỗi lần lọc ghi thêm một dòng vào lịch sử, tính cộng dồn so với nồng độ
@@ -532,6 +434,11 @@ function WaterTreatmentWorkbenchSession({
   const resetSampleApparatus = useCallback(() => {
     setSampleCalculation(null)
     setFilterHistory([])
+    setWorkPhase('sample')
+    setDischargePhase('pending')
+    setBan2LockedData(null)
+    setTreatmentCalculation(null)
+    setApStatus({ pH: 5.4, volumeMl: 1000, stirring: false, naohAddedMl: 0, hclAddedMl: 0, settled: false, filtered: false, composition: null, filteredSolid: { Fe: 0, Zn: 0, Pb: 0 } })
     setSampleApStatus({ pH: 7.0, targetVolumeMl: 1000, stirring: false, feAddedMl: 0, znAddedMl: 0, pbAddedMl: 0 })
     pHSyncedRef.current = false
   }, [])
@@ -609,6 +516,7 @@ function WaterTreatmentWorkbenchSession({
           />
         </section>
 
+        {workPhase !== 'sample' ? (
         <section className={styles.stationBlock} aria-labelledby="station-treatment">
           <header className={styles.stationLabel}>
             <h3 id="station-treatment">Bàn 2 — Xử lý nước bằng hydroxide</h3>
@@ -627,17 +535,20 @@ function WaterTreatmentWorkbenchSession({
             sampleStatus={sampleApStatus}
           />
         </section>
+        ) : null}
 
-        {dischargePhase === 'balancing' && ban2LockedData ? (
+        {workPhase === 'discharge' && ban2LockedData ? (
           <section className={styles.stationBlock} aria-labelledby="station-discharge">
             <header className={styles.stationLabel}>
               <h3 id="station-discharge">Bàn 3 — Cân bằng pH &amp; thải ra môi trường</h3>
               <p>Kiểm tra pH đạt cột A (QCVN 40:2025) · pH 6–9 trước khi thải</p>
             </header>
-            <DischargeTable
-              lockedData={ban2LockedData}
+            <DischargeApparatus
+              initialPH={ban2LockedData.pH}
+              calculation={ban2LockedData.calculation}
+              filterHistory={ban2LockedData.filterHistory}
               onDischarge={handleDischarge}
-              phase={dischargePhase}
+              phase={dischargePhase as 'balancing' | 'discharged'}
             />
           </section>
         ) : null}
