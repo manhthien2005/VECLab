@@ -1080,6 +1080,22 @@
   .vortex, .particulateSpin, .pptSwirl, .indicatorOn, .dropFall, .dripStream { animation:none; }
 }
 
+/* ===== Bàn 3: Khóa Bàn 2 ===== */
+.lockButton { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:38px; min-height:38px; padding:0 14px; border-radius:8px; border:1px solid #1f8a99; background:#0e3a45; color:#fff; font:inherit; font-size:.82rem; font-weight:700; cursor:pointer; transition:background 180ms, border-color 180ms; }
+.lockButton:hover { background:#164b57; border-color:#165a65; }
+.lockButton svg { width:15px; height:15px; flex:0 0 auto; }
+
+/* ===== Bàn 3: Discharge table ===== */
+.dischargeTable { padding:14px 16px 16px; }
+.dischargeInfo { margin-bottom:12px; color:var(--muted, #607486); font-size:.78rem; line-height:1.5; }
+.dischargeTableGrid { overflow-x:auto; margin-bottom:14px; }
+.dischargeActions { display:flex; flex-direction:column; gap:8px; }
+.dischargeReady { padding:8px 12px; border:1px solid #4a8c6a; border-left:3px solid #4a8c6a; border-radius:7px; background:#f0f8f3; color:#2a5c3a; font-size:.78rem; line-height:1.5; }
+.dischargeNotReady { padding:8px 12px; border:1px solid #b05a3c; border-left:3px solid #b05a3c; border-radius:7px; background:#fdf3f0; color:#7a3018; font-size:.78rem; line-height:1.5; }
+.dischargeSuccess { padding:8px 12px; border:1px solid #4a8c6a; border-left:3px solid #4a8c6a; border-radius:7px; background:#f0f8f3; color:#2a5c3a; font-size:.78rem; line-height:1.5; }
+.pass { color:#2a6a2a; font-weight:700; }
+.fail { color:#b03020; font-weight:700; }
+
 
 @media (max-width:1050px) { .goal { flex:0 0 auto; margin-left:auto; } .goalPanel { position:fixed; inset:80px 12px auto; transform:none; width:520px; max-width:calc(100vw - 24px); max-height:calc(100dvh - 96px); margin-inline:auto; } }
 @media (max-width:900px) {
