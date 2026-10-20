@@ -6,7 +6,7 @@ import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.j
 import { ActionButton } from '@/features/workbench/action-button.js'
 import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/icons.js'
 import { TargetIcon, ReportIcon, SubmitIcon, CloseIcon, InfoIcon, ControlIcon } from '@/features/workbench/icons.js'
-import { WaterTreatmentApparatus, type ApStatus, type AcidBase, type TreatmentCalculation } from './apparatus.js'
+import { WaterTreatmentApparatus, type ApStatus, type AcidBase, type TreatmentCalculation, type FilterHistoryEntry } from './apparatus.js'
 import { SamplePreparationApparatus, type SampleApStatus, type SampleCalculation, type MetalSolution } from './sample-apparatus.js'
 import styles from './workbench.module.css'
 
@@ -279,6 +279,8 @@ function WaterTreatmentWorkbenchSession({
   })
   const [sampleCalculation, setSampleCalculation] = useState<SampleCalculation | null>(null)
   const [treatmentCalculation, setTreatmentCalculation] = useState<TreatmentCalculation | null>(null)
+  /** Lịch sử các lần lọc cộng dồn của Bàn 2 */
+  const [filterHistory, setFilterHistory] = useState<FilterHistoryEntry[]>([])
   const addDrop = useCallback((reagent: AcidBase, amountMl: number) => {
     setApStatus((prev) => {
       setTreatmentCalculation(null)
@@ -306,6 +308,7 @@ function WaterTreatmentWorkbenchSession({
       const nextValue = Math.min(cap, Math.round((currentValue + amountMl) * 100) / 100)
       if (nextValue === currentValue) return prev
       setSampleCalculation(null)
+      setFilterHistory([])
       const added = {
         fe: prev.feAddedMl,
         zn: prev.znAddedMl,
@@ -347,7 +350,9 @@ function WaterTreatmentWorkbenchSession({
   }, [sampleCalculation])
 
   /* Bước lọc: pha rắn tách khỏi cốc → composition trong cốc là filtrate, và
-     lượng kết tủa giữ lại trên giấy lọc để hiển thị. */
+     lượng kết tủa giữ lại trên giấy lọc để hiển thị.
+     Mỗi lần lọc ghi thêm một dòng vào lịch sử, tính cộng dồn so với nồng độ
+     ban đầu đo được ở Bàn 1. */
   const filterSample = useCallback((result: TreatmentCalculation) => {
     setTreatmentCalculation(result)
     setApStatus((prev) => ({
@@ -360,7 +365,34 @@ function WaterTreatmentWorkbenchSession({
         Pb: result.precipitated_mgPerL.Pb,
       },
     }))
-  }, [])
+    setFilterHistory((prev) => {
+      const remaining = {
+        Fe: result.filtrate_mgPerL.Fe,
+        Zn: result.filtrate_mgPerL.Zn,
+        Pb: result.filtrate_mgPerL.Pb,
+      }
+      // Nồng độ ban đầu lấy từ Bàn 1; thiếu mốc thì lần lọc này chỉ còn
+      // giá trị "còn lại", phần "đã lọc" để trống chứ không gán 0.
+      const initial = sampleCalculation?.dissolvedMgL
+      const filtered = initial
+        ? {
+            Fe: Math.max(0, initial.fe - remaining.Fe),
+            Zn: Math.max(0, initial.zn - remaining.Zn),
+            Pb: Math.max(0, initial.pb - remaining.Pb),
+          }
+        : null
+      return [
+        ...prev,
+        {
+          index: prev.length + 1,
+          timestamp: new Date(),
+          calculation: result,
+          cumulativeRemaining: remaining,
+          cumulativeFiltered: filtered,
+        },
+      ]
+    })
+  }, [sampleCalculation])
 
   const toggleSampleStir = useCallback(() => {
     setSampleApStatus((prev) => ({ ...prev, stirring: !prev.stirring }))
@@ -368,6 +400,7 @@ function WaterTreatmentWorkbenchSession({
 
   const resetSampleApparatus = useCallback(() => {
     setSampleCalculation(null)
+    setFilterHistory([])
     setSampleApStatus({ pH: 7.0, targetVolumeMl: 1000, stirring: false, feAddedMl: 0, znAddedMl: 0, pbAddedMl: 0 })
     pHSyncedRef.current = false
   }, [])
@@ -458,6 +491,7 @@ function WaterTreatmentWorkbenchSession({
             onFilter={filterSample}
             onCalculate={(result) => setTreatmentCalculation(result)}
             calculation={treatmentCalculation}
+            filterHistory={filterHistory}
             sampleCalculation={sampleCalculation}
             sampleStatus={sampleApStatus}
           />
