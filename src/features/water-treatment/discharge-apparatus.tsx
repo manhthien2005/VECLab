@@ -354,8 +354,7 @@ export function DischargeApparatus({
       {/* Header */}
       <div className={styles.apparatusHeader}>
         <div>
-          <h2>Bàn cân bằng pH</h2>
-          <p>Máy khuấy từ · 2 buret NaOH/HCl 1 M · cốc 2 L đế bằng</p>
+
         </div>
       </div>
 

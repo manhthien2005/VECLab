@@ -393,8 +393,7 @@ export function SamplePreparationApparatus({
     <div className={styles.apparatus}>
       <div className={styles.apparatusHeader}>
         <div>
-          <h2>Bàn pha mẫu nước nhiễm kim loại</h2>
-          <p>Máy khuấy từ · 3 buret Fe/Zn/Pb · cốc 2500 mL đế bằng</p>
+
         </div>
       </div>
 
