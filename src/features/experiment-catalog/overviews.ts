@@ -58,19 +58,15 @@ const PRESENTATION = {
   'water-treatment': {
     image: '/assets/auth-laboratory-v2.webp',
     imageAlt: 'Phòng thí nghiệm ảo với bình khuấy, máy đo và giá đựng mẫu nước',
-    category: 'Hóa học nước – hydroxide route',
-    question: 'Điều kiện pH và quy trình nào giúp loại Fe, Zn, Pb khỏi mẫu nước?',
-    learning: 'Phân biệt pH, kim loại hòa tan và kim loại đã tách; hiểu rằng kết quả mô phỏng chưa được nhóm phát triển kiểm chứng bằng thí nghiệm độc lập.',
-    tools: 'Buret acid/base, máy khuấy, thiết bị lắng và lọc, máy đo pH và quang phổ.',
-    prerequisites: 'Hiểu pH, cân bằng acid–base, Ksp và cách đọc giới hạn QCVN 40:2025/BTNMT (Cột A).',
-    input: 'Mẫu nước tổng hợp ảo chứa Fe, Zn, Pb · Nội dung dự kiến',
-    parameters: 'pH 6–9 · Fe ≤ 2,0 · Zn ≤ 1,0 · Pb ≤ 0,1 mg/L · Thể tích 500–2.000 mL',
-    outcome: 'Nồng độ sau xử lý, khối lượng bùn, tổng hóa chất đã dùng',
-    procedure: [
-      'Chọn Fe/Zn/Pb và thể tích; pH ban đầu là kết quả tính từ composition, không phải user input.',
-      'Thêm HCl hoặc NaOH để điều chỉnh pH về dải mục tiêu; khuấy, lắng và lọc để tách kết tủa hydroxide.',
-      'Đo Fe, Zn, Pb và pH sau xử lý; đối chiếu với Cột A (Fe ≤ 2,0; Zn ≤ 1,0; Pb ≤ 0,1 mg/L; pH 6–9).',
-    ],
+    category: 'Kết tủa hydroxide · Xử lý nước',
+    question: 'pH và các bước xử lý ảnh hưởng thế nào đến Fe, Zn, Pb còn lại trong nước?',
+    learning: 'Theo dõi riêng nồng độ kim loại và pH, rồi đối chiếu kết quả mô phỏng với mục tiêu học tập.',
+    tools: 'Bình pha mẫu, máy khuấy, bộ lắng/lọc, NaOH, HCl và thiết bị đo.',
+    prerequisites: 'Hiểu pH, kết tủa hydroxide, tích số tan và đơn vị nồng độ mg/L.',
+    input: 'Mẫu nước tổng hợp Fe/Zn/Pb · 500–2.000 mL',
+    parameters: 'Thành phần kim loại · thể tích · lượng thuốc thử thêm từng giọt',
+    outcome: 'Nồng độ Fe/Zn/Pb sau lọc và pH cuối để đối chiếu riêng từng chỉ tiêu',
+    procedure: ['Pha mẫu và đo pH ban đầu', 'Thêm NaOH, khuấy, lắng và lọc kết tủa', 'Cân bằng pH rồi đối chiếu các chỉ tiêu học tập'],
   },
 } as const
 
