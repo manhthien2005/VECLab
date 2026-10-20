@@ -392,12 +392,10 @@ function WaterTreatmentWorkbenchSession({
     }
   }, [sampleCalculation])
 
-  /** Tự động chuyển sang Bàn 2 khi Bàn 1 đã tính xong */
-  useEffect(() => {
-    if (sampleCalculation && workPhase === 'sample') {
-      setWorkPhase('treatment')
-    }
-  }, [sampleCalculation, workPhase])
+  /** Tự động chuyển sang Bàn 2 khi Bàn 1 đã tính xong. */
+  if (sampleCalculation && workPhase === 'sample') {
+    setWorkPhase('treatment')
+  }
 
   /* Bước lọc: pha rắn tách khỏi cốc → composition trong cốc là filtrate, và
      lượng kết tủa giữ lại trên giấy lọc để hiển thị.

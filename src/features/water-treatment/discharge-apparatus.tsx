@@ -527,8 +527,10 @@ export function DischargeApparatus({
         </button>
 
         <div className={styles.buretControls}>
-          {([['naoh', naohMl, naohDropping, addNaoh, '#1f8a99'], ['hcl', hclMl, hclDropping, addHcl, '#b26516']] as const).map(([reagent, , isDropping, onAdd, color]) => {
+          {(['naoh', 'hcl'] as const).map((reagent) => {
             const label = reagent === 'naoh' ? 'NaOH' : 'HCl'
+            const isDropping = reagent === 'naoh' ? naohDropping : hclDropping
+            const color = reagent === 'naoh' ? '#1f8a99' : '#b26516'
             return (
               <div className={styles.buretControl} key={reagent}>
                 <span>{label}</span>
@@ -541,7 +543,10 @@ export function DischargeApparatus({
                 <button
                   type="button"
                   className={styles.buretAdd}
-                  onClick={onAdd}
+                  onClick={() => {
+                    if (reagent === 'naoh') addNaoh()
+                    else addHcl()
+                  }}
                   disabled={locked || phase === 'discharged'}
                   title={`Nhỏ ${label}`}
                   data-dropping={isDropping}

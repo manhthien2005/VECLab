@@ -467,13 +467,13 @@ export function WaterTreatmentApparatus({
     return () => clearTimeout(t)
   }, [activeDrop])
 
-  useEffect(() => {
-    const shouldBeMarkedStirred = status.stirring || status.naohAddedMl > 0 || status.hclAddedMl > 0
-    setHasBeenStirred((current) => {
-      const next = shouldBeMarkedStirred ? current || status.stirring : false
-      return next === current ? current : next
-    })
-  }, [status.stirring, status.naohAddedMl, status.hclAddedMl])
+  // Keep the stirring latch in sync before rendering children, including reset.
+  const nextHasBeenStirred = status.stirring || status.naohAddedMl > 0 || status.hclAddedMl > 0
+    ? hasBeenStirred || status.stirring
+    : false
+  if (nextHasBeenStirred !== hasBeenStirred) {
+    setHasBeenStirred(nextHasBeenStirred)
+  }
 
   const hasFinishedStirring = hasBeenStirred && !status.stirring
   const setDropStep = (reagent: AcidBase, value: string) => {

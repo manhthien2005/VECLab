@@ -296,7 +296,21 @@ export function SamplePreparationApparatus({
   const hasPb = pbAddedMl > 0
 
   const [activeDrop, setActiveDrop] = useState<MetalSolution | null>(null)
-  const [hasBeenStirred, setHasBeenStirred] = useState(false)
+  const sampleKey = `${status.feAddedMl}/${status.znAddedMl}/${status.pbAddedMl}`
+  const presence = `${hasFe}/${hasZn}/${hasPb}`
+  const [stirredSample, setStirredSample] = useState({
+    key: sampleKey, presence: '', stirring: false, stirred: false,
+  })
+  const hasMetals = hasFe || hasZn || hasPb
+  const sampleChanged = stirredSample.key !== sampleKey
+  const stirringChanged = stirredSample.stirring !== status.stirring || stirredSample.presence !== presence
+  const hasBeenStirred = stirringChanged && status.stirring && hasMetals
+    ? true
+    : hasMetals && !sampleChanged && stirredSample.stirred
+  // A changed/reset sample must be stirred again; keep the latch local to this sample.
+  if (sampleChanged || stirringChanged || stirredSample.stirred !== hasBeenStirred) {
+    setStirredSample({ key: sampleKey, presence, stirring: status.stirring, stirred: hasBeenStirred })
+  }
   const lastAddedRef = useRef({
     fe: status.feAddedMl,
     zn: status.znAddedMl,
@@ -307,13 +321,10 @@ export function SamplePreparationApparatus({
     const prev = lastAddedRef.current
     if (status.feAddedMl !== prev.fe) {
       setActiveDrop('fe')
-      setHasBeenStirred(false)
     } else if (status.znAddedMl !== prev.zn) {
       setActiveDrop('zn')
-      setHasBeenStirred(false)
     } else if (status.pbAddedMl !== prev.pb) {
       setActiveDrop('pb')
-      setHasBeenStirred(false)
     }
     lastAddedRef.current = {
       fe: status.feAddedMl,
@@ -327,14 +338,6 @@ export function SamplePreparationApparatus({
     const t = setTimeout(() => setActiveDrop(null), 800)
     return () => clearTimeout(t)
   }, [activeDrop])
-
-  useEffect(() => {
-    if (!hasFe && !hasZn && !hasPb) setHasBeenStirred(false)
-  }, [hasFe, hasZn, hasPb])
-
-  useEffect(() => {
-    if (status.stirring && (hasFe || hasZn || hasPb)) setHasBeenStirred(true)
-  }, [status.stirring, hasFe, hasZn, hasPb])
 
   const mixtureStirred = hasBeenStirred || status.stirring
   const solutionFill = mixtureStirred && hasFe ? '#F1DFA0' : '#F8FAFC'
@@ -359,7 +362,7 @@ export function SamplePreparationApparatus({
   const hasFinishedStirring = hasBeenStirred && !status.stirring
   const [calculationBusy, setCalculationBusy] = useState(false)
   const [localCalculationError, setLocalCalculationError] = useState<string | null>(null)
-  const [isCalculated, setIsCalculated] = useState(false)
+  const isCalculated = calculation !== null
   
   const calculateSample = async () => {
     if (!hasFinishedStirring || calculationBusy) return
@@ -373,7 +376,6 @@ export function SamplePreparationApparatus({
         pbAddedMl,
         sourceMgL: 100,
       })
-      setIsCalculated(true)
       onCalculate(result)
     } catch (error) {
       setLocalCalculationError(error instanceof Error ? error.message : 'Không thể chạy PHREEQC.')
@@ -382,13 +384,6 @@ export function SamplePreparationApparatus({
     }
   }
   
-  // Reset calculated state when user resets the experiment
-  useEffect(() => {
-    if (!feAddedMl && !znAddedMl && !pbAddedMl) {
-      setIsCalculated(false)
-    }
-  }, [feAddedMl, znAddedMl, pbAddedMl])
-
   return (
     <div className={styles.apparatus}>
       <div className={styles.apparatusHeader}>
