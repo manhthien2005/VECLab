@@ -4,15 +4,28 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.js'
+import { OperationHelp } from '@/features/workbench/operation-help.js'
 import { ActionButton } from '@/features/workbench/action-button.js'
 import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/icons.js'
 import { SubmitIcon, CloseIcon, InfoIcon, ControlIcon, GuideIcon, TheoryIcon, SourcesIcon } from '@/features/workbench/icons.js'
+import { WATER_TREATMENT_OPERATION_HELP } from '@/content/operation-help.vi.js'
 import { WaterTreatmentApparatus, type ApStatus, type AcidBase, type TreatmentCalculation, type FilterHistoryEntry } from './apparatus.js'
 import { SamplePreparationApparatus, type SampleApStatus, type SampleCalculation, type MetalSolution } from './sample-apparatus.js'
 import { DischargeApparatus } from './discharge-apparatus.js'
 import { WaterTreatmentLearningGoal } from './learning-goal.js'
 import { WaterTreatmentNotebook } from './notebook.js'
+import type { WorkbenchTourStep } from '@/features/workbench/tour.js'
 import styles from './workbench.module.css'
+
+const GUIDE_BASE_HREF = '/experiments/water-treatment/guide'
+
+const WATER_TREATMENT_TOUR: readonly WorkbenchTourStep[] = [
+  { area: 'header', title: 'Mục tiêu & lượt thực hành', description: 'Xem mục tiêu học tập và trạng thái lưu ở đầu trang. Nút Nộp bài kết thúc lượt và khóa các thao tác; bạn vẫn có thể xem lại số liệu.' },
+  { area: 'shelf', title: 'Mẫu & dụng cụ', description: 'Kệ bên trái giới thiệu mẫu nước chứa Fe, Zn, Pb và các dụng cụ xử lý. Bạn thao tác với chúng qua bảng Thao tác. Có thể mở lại hướng dẫn này bất cứ lúc nào.' },
+  { area: 'simulation', title: 'Khu vực thực hành', description: 'Khu vực giữa hiển thị ba trạm: pha mẫu, xử lý kim loại và xả thải. Click vào từng trạm để chuyển đổi. Màu sắc và chuyển động giúp quan sát quy trình.' },
+  { area: 'controls', title: 'Thao tác với trạm đang chọn', description: 'Mở từng nhóm để pha mẫu nước, thêm hóa chất NaOH/HCl, khuấy, lắng và lọc. Sau khi lọc xong, chuyển sang trạm tiếp theo.' },
+  { area: 'notebook', title: 'Sổ đo & lịch sử', description: 'Sổ đo ghi lại pH, nồng độ kim loại ở từng giai đoạn. Tab Lịch sử thao tác giúp xem lại những gì đã làm. Chưa đo khác với N/A: N/A là phép đo không hợp lệ.' },
+] as const
 
 const EQUIPMENT_LIST = [
   { id: 'distilled-water', title: 'Nước cất', description: 'Dùng để pha dung dịch' },
@@ -260,6 +273,7 @@ function WaterTreatmentWorkbenchSession({
   const [pane, setPane] = useState<WorkbenchPane>(initialPane)
   const [group, setGroup] = useState<string | null>('composition')
   const [busy, setBusy] = useState(false)
+  const [tourOpen, setTourOpen] = useState(false)
   const submitTrigger = useRef<HTMLButtonElement>(null)
   const tourTrigger = useRef<HTMLButtonElement>(null)
   
@@ -603,6 +617,11 @@ function WaterTreatmentWorkbenchSession({
           open={group === 'composition'}
           onToggle={() => setGroup(group === 'composition' ? null : 'composition')}
         >
+          <OperationHelp 
+            topics={WATER_TREATMENT_OPERATION_HELP.topics}
+            guideBaseHref={GUIDE_BASE_HREF}
+            targetTopic="sample-preparation"
+          />
           <p>Nhập nồng độ Fe, Zn, Pb (mg/L) và thể tích (mL).</p>
           <ActionButton 
             className={styles.button}
@@ -620,6 +639,11 @@ function WaterTreatmentWorkbenchSession({
           open={group === 'treatment'}
           onToggle={() => setGroup(group === 'treatment' ? null : 'treatment')}
         >
+          <OperationHelp 
+            topics={WATER_TREATMENT_OPERATION_HELP.topics}
+            guideBaseHref={GUIDE_BASE_HREF}
+            targetTopic="treatment-process"
+          />
           <p>Thêm NaOH để nâng pH, sau đó khuấy, lắng, lọc.</p>
           <ActionButton 
             className={styles.button}
@@ -637,6 +661,11 @@ function WaterTreatmentWorkbenchSession({
           open={group === 'results'}
           onToggle={() => setGroup(group === 'results' ? null : 'results')}
         >
+          <OperationHelp 
+            topics={WATER_TREATMENT_OPERATION_HELP.topics}
+            guideBaseHref={GUIDE_BASE_HREF}
+            targetTopic="measurement-verification"
+          />
           <p>Đo lại pH và nồng độ Kim loại sau xử lý. So sánh với QCVN 40:2025 Cột A.</p>
           <ActionButton 
             className={styles.button}
@@ -717,7 +746,7 @@ function WaterTreatmentWorkbenchSession({
     </div>
     <div className={styles.shelfHelp}>
       <p className={styles.shelfNote}>Mẫu tổng hợp chứa Fe, Zn, Pb. Lượt lưu trên trình duyệt.</p>
-      <button ref={tourTrigger} type="button" className={styles.guideButton}><GuideIcon />Hướng dẫn thao tác</button>
+      <button ref={tourTrigger} type="button" className={styles.guideButton} onClick={() => setTourOpen(true)}><GuideIcon />Hướng dẫn thao tác</button>
       <Link className={styles.theoryLink} href="/experiments/water-treatment/guide" target="_blank" rel="noopener noreferrer"><TheoryIcon /><span>Lý thuyết & cách làm bài</span></Link>
       <details><summary><SourcesIcon />Nguồn & giới hạn</summary>
         <p>Mẫu nước tổng hợp chứa Fe, Zn, Pb dạng ion hòa tan; không đại diện cho mọi loại nước thải thực tế. Hình ảnh kết tủa không dùng để suy ra hiệu suất.</p>
@@ -740,6 +769,12 @@ function WaterTreatmentWorkbenchSession({
       pane={pane}
       onPaneChange={setPane}
       onShelfInfo={() => router.push('/experiments/water-treatment/guide')}
+      tourOpen={tourOpen}
+      onTourClose={() => {
+        setTourOpen(false)
+        requestAnimationFrame(() => tourTrigger.current?.focus({ preventScroll: true }))
+      }}
+      tourSteps={WATER_TREATMENT_TOUR}
     />
     {equipmentItem && (
       <EquipmentInfoDialog 

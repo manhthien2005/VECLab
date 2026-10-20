@@ -156,24 +156,24 @@ const STEPS: GuideStep[] = [
     actions: [
       'Bấm Đo pH để kiểm tra giá trị hiện tại.',
       'Nếu pH thấp hơn 6, thêm NaOH. Nếu cao hơn 9, thêm HCl. Dùng lượng nhỏ và đo lại sau mỗi lần.',
-      'Khi pH nằm trong khoảng 6–9, bấm Khóa kết quả để hiển thị bảng đối chiếu QCVN.',
+      'Khi pH nằm trong khoảng 6–9, kiểm tra bảng đối chiếu QCVN.',
     ],
     output: 'Bảng kiểm tra QCVN 40:2025 hiện ra: nồng độ Fe, Zn, Pb và pH cùng cột A tương ứng. Lịch sử lọc từ Bàn 2 cũng hiển thị.',
     why: 'QCVN 40:2025 quy định giới hạn pH 6–9 và nồng độ tối đa của Fe, Zn, Pb ở cột A. Cân bằng pH đảm bảo nước thải đạt cả hai tiêu chí.',
   },
   {
-    id: 'wt-step-submit',
-    title: 'Nộp bài và đọc kết quả',
-    tool: 'Bảng rà soát và báo cáo',
-    location: 'Bàn 3 · Sau khi khóa kết quả',
-    before: 'Đã cân bằng pH trong khoảng 6–9 và bấm Khóa kết quả.',
+    id: 'wt-step-check',
+    title: 'Đối chiếu QCVN và đọc kết quả',
+    tool: 'Bảng đối chiếu QCVN 40:2025',
+    location: 'Bàn 3 · Sau khi cân bằng pH',
+    before: 'Đã cân bằng pH trong khoảng 6–9. Bảng kết quả hiển thị nồng độ kim loại và pH cuối.',
     actions: [
       'Kiểm tra bảng đối chiếu QCVN: Fe ≤ 2,0 mg/L, Zn ≤ 1,0 mg/L, Pb ≤ 0,1 mg/L, pH 6–9.',
       'Xem lịch sử lọc từ Bàn 2 để hiểu mức giảm kim loại qua từng lần xử lý.',
-      'Bấm Thải ra môi trường để hoàn thành lượt.',
+      'Đọc kết quả từng chỉ tiêu và đánh giá phương án xử lý.',
     ],
-    output: 'Lượt được khóa, kết quả lưu cố định. Báo cáo cho biết mỗi kim loại đạt hay chưa đạt cột A.',
-    why: 'Báo cáo giúp phân biệt giữa pH chưa đạt, kim loại chưa kết tủa đủ và điều kiện đã đạt mục tiêu. Chưa đạt một chỉ tiêu nghĩa là chưa sẵn sàng thải theo QCVN.',
+    output: 'Bảng cho biết mỗi kim loại và pH đạt hay chưa đạt cột A. Có thể xem lại số đo và lịch sử thao tác.',
+    why: 'Kết quả giúp phân biệt giữa pH chưa đạt, kim loại chưa kết tủa đủ và điều kiện đã đạt mục tiêu. Chưa đạt một chỉ tiêu nghĩa là chưa sẵn sàng thải theo QCVN.',
   },
 ]
 
@@ -478,9 +478,9 @@ export default async function WaterTreatmentGuidePage({
                     </section>
                   )}
 
-                  {step.id === 'wt-step-submit' && (
+                  {step.id === 'wt-step-check' && (
                     <div className={styles.reportNotes} id="wt-output">
-                      <h4>Đọc báo cáo theo ba câu hỏi</h4>
+                      <h4>Đọc kết quả theo ba câu hỏi</h4>
                       <ul>
                         <li>
                           <strong>
