@@ -12,6 +12,8 @@ interface DischargeApparatusProps {
   filterHistory: FilterHistoryEntry[]
   onDischarge: () => void
   phase: 'balancing' | 'discharged'
+  /** Báo pH hiện tại của Bàn 3 về workbench để hiển thị trong notebook. */
+  onPHChange?: (pH: number) => void
 }
 
 // ─── Fixed apparatus geometry ───────────────────
@@ -237,6 +239,7 @@ export function DischargeApparatus({
   filterHistory,
   onDischarge,
   phase,
+  onPHChange,
 }: DischargeApparatusProps) {
   /** pH chưa xác nhận */
   const [pendingPH, setPendingPH] = useState(initialPH)
@@ -247,6 +250,9 @@ export function DischargeApparatus({
   /** Mực hiện tại trong mỗi buret (tính từ dưới lên) */
   const [naohMl, setNaohMl] = useState(0)
   const [hclMl, setHclMl] = useState(0)
+
+  // Sync pH change back to workbench whenever pendingPH updates
+  useEffect(() => { onPHChange?.(pendingPH) }, [pendingPH, onPHChange])
   /** Drop animation states */
   const [naohDropping, setNaohDropping] = useState(false)
   const [hclDropping, setHclDropping] = useState(false)
