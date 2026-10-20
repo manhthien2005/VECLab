@@ -973,6 +973,22 @@
   .volumeModelGrid { padding-inline:5px; }
 }
 .apparatusControls { display:flex; flex-wrap:nowrap; gap:8px; justify-content:flex-start; align-items:center; padding:8px 12px; border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:#fbfdfe; }
+
+/* Nhóm Lắng / Lọc — đặt trước nút khuấy để khớp trình tự khuấy → lắng → lọc */
+.separationControls { display:flex; flex:0 0 auto; gap:6px; align-items:center; padding-right:10px; margin-right:2px; border-right:1px solid #d7e3e9; }
+.settleButton, .filterButton { display:inline-flex; align-items:center; justify-content:center; width:92px; min-width:92px; height:38px; min-height:38px; box-sizing:border-box; gap:6px; flex:0 0 92px; padding:0 10px; border-radius:8px; font:inherit; font-weight:700; line-height:1; transition:background 180ms, border-color 180ms, color 180ms; }
+.settleButton { border:1px solid #a5652f; background:#fdf4ea; color:#7d4a20; cursor:pointer; }
+.settleButton:hover:not(:disabled) { background:#f7e6d2; border-color:#7d4a20; }
+.filterButton { border:1px solid #4a6d8c; background:#eef4f9; color:#33566f; cursor:pointer; }
+.filterButton:hover:not(:disabled) { background:#dde8f2; border-color:#33566f; }
+.settleButton svg, .filterButton svg { width:15px; height:15px; flex:0 0 auto; }
+.settleButton:disabled, .filterButton:disabled { opacity:.45; cursor:not-allowed; }
+.settleButton[data-done='true'], .filterButton[data-done='true'] { opacity:1; cursor:default; background:#e8f0ee; border-color:#5f8a7d; color:#2f5c50; }
+
+/* Cỡ lọc ghép vào miệng cốc sau khi lọc — phủ đúng ô SVG, không đè bảng thể tích */
+.filterStage { grid-column:1; grid-row:1; width:100%; max-width:380px; height:100%; justify-self:end; pointer-events:none; }
+.filterStage svg { width:100%; height:100%; display:block; }
+
 .stirButton, .calculateButton { display:inline-flex; align-items:center; justify-content:center; width:108px; min-width:108px; height:38px; min-height:38px; box-sizing:border-box; gap:6px; flex:0 0 108px; padding:0 11px; border-radius:8px; font:inherit; font-weight:700; line-height:1; }
 .stirButton { border:1px solid #2a6f78; background:#2a6f78; color:white; cursor:pointer; transition:background 180ms; }
 .stirButton:hover { background:#1d5259; }
@@ -1034,6 +1050,21 @@
   0%,100% { transform:scaleX(.25); opacity:.6; }
   50% { transform:scaleX(1); opacity:1; }
 }
+
+/* Bàn 2 — kết ttoa quanh trục tung khi khuấy, lắng thành lớp khi dừng.
+   Quỹ đạo ngang + nén chiều rộng mô phỏng quay quanh trục tung nhìn từ cạnh. */
+.pptSwirl {
+  transform-box:fill-box;
+  transform-origin:center;
+  animation:wtSwirl 1.9s ease-in-out infinite;
+}
+@keyframes wtSwirl {
+  0%   { transform:translate(0,0) scaleX(1); }
+  25%  { transform:translate(var(--swirl-a), calc(-1 * var(--swirl-b))) scaleX(.42); }
+  50%  { transform:translate(0, calc(-1 * var(--swirl-b))) scaleX(1); }
+  75%  { transform:translate(calc(-1 * var(--swirl-a)), calc(-1 * var(--swirl-b))) scaleX(.42); }
+  100% { transform:translate(0,0) scaleX(1); }
+}
 .indicatorOn { animation:wtIndicator 1s ease-in-out infinite; }
 @keyframes wtIndicator { 0%,100% { opacity:1; } 50% { opacity:.55; } }
 
@@ -1044,7 +1075,7 @@
 @keyframes wtStream { 0% { opacity:0; stroke-dashoffset:0; } 30% { opacity:1; } 100% { opacity:0; stroke-dashoffset:-30; } }
 
 @media (prefers-reduced-motion:reduce) {
-  .vortex, .particulateSpin, .indicatorOn, .dropFall, .dripStream { animation:none; }
+  .vortex, .particulateSpin, .pptSwirl, .indicatorOn, .dropFall, .dripStream { animation:none; }
 }
 
 
