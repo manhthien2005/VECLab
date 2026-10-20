@@ -14,3 +14,5 @@ export function BeakerIcon() { return <Icon><path d="M9 3v6L4 19a2 2 0 0 0 2 3h1
 export function SettleIcon() { return <Icon><path d="M4 18.5h16" /><path d="M12 3.5v8.5" /><path d="M8.5 9.5 12 13l3.5-3.5" /><circle cx="6.5" cy="15.2" r="1" /><circle cx="12" cy="16.2" r="1" /><circle cx="17.5" cy="15.2" r="1" /></Icon> }
 /** Lọc: phễu lọc tách pha rắn khỏi pha lỏng. */
 export function FilterIcon() { return <Icon><path d="M3.5 4.5h17l-6.7 7.9v6.4l-3.6 1.7v-8.1L3.5 4.5Z" /></Icon> }
+/** Khóa Bàn 2: chuyển sang cân bằng pH trước khi thải. */
+export function LockIcon() { return <Icon><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></Icon> }

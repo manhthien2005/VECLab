@@ -4,7 +4,7 @@ import { useId, useRef, useState, useEffect, useMemo } from 'react'
 import { runWaterTreatmentAction, type WaterTreatmentResult } from '@/app/simulate/water-treatment/actions.js'
 import { WT_QCVN_COLUMN_A } from './constants.js'
 import type { SampleCalculation } from './sample-apparatus.js'
-import { PlayIcon, StopIcon, PlusIcon, BeakerIcon, SettleIcon, FilterIcon } from './icons.js'
+import { PlayIcon, StopIcon, PlusIcon, SettleIcon, FilterIcon, LockIcon } from './icons.js'
 import styles from './workbench.module.css'
 
 /**
@@ -266,7 +266,7 @@ export function WaterTreatmentApparatus({
   onToggleStir,
   onSettle,
   onFilter,
-  onCalculate,
+  onLockBan2,
   calculation,
   filterHistory,
   sampleCalculation,
@@ -279,7 +279,8 @@ export function WaterTreatmentApparatus({
   onSettle: (result: TreatmentCalculation) => void
   /** Ghi nhận bước lọc — pha rắn tách, cốc còn filtrate. */
   onFilter: (result: TreatmentCalculation) => void
-  onCalculate: (result: TreatmentCalculation) => void
+  /** Khóa Bàn 2, chuyển sang Bàn 3 cân bằng pH trước khi thải. */
+  onLockBan2?: () => void
   calculation: TreatmentCalculation | null
   /** Lịch sử các lần lọc cộng dồn */
   filterHistory?: FilterHistoryEntry[]
@@ -504,12 +505,6 @@ export function WaterTreatmentApparatus({
       setCalculationBusy(false)
     }
   }
-
-  const calculateTreatment = () => runStep(
-    'measure-final',
-    onCalculate,
-    'Không thể tính kết quả xử lý nước.',
-  )
   const settleSample = () => runStep('settle', onSettle, 'Không thể thực hiện bước lắng.')
   const filterSample = () => runStep('filter', onFilter, 'Không thể thực hiện bước lọc.')
 
@@ -543,9 +538,6 @@ export function WaterTreatmentApparatus({
   const filterTitle = status.filtered ? 'Đã lọc — pha rắn đã tách khỏi cốc.'
     : !status.settled ? 'Bấm “Lắng” trước rồi mới lọc.'
     : 'Lọc bỏ pha rắn, thu pha lỏng (filtrate).'
-  const calculateTitle = !hasTreatmentSample ? noSampleReason
-    : hasFinishedStirring ? 'Tính pH và lượng kim loại còn lại sau xử lý'
-    : 'Hãy khuấy xong rồi dừng máy trước khi tính'
 
   return <div className={styles.apparatus}>
     <div className={styles.apparatusHeader}>
@@ -954,13 +946,15 @@ export function WaterTreatmentApparatus({
         <button type="button" className={styles.filterButton} onClick={filterSample} disabled={!canFilter} data-done={status.filtered} title={filterTitle} data-testid="wt-filter">
           <FilterIcon /> {status.filtered ? 'Đã lọc' : calculationBusy ? 'Đang xử lý…' : 'Lọc'}
         </button>
+        {status.filtered ? (
+          <button type="button" className={styles.lockButton} onClick={onLockBan2} data-testid="wt-lock-ban2">
+            <LockIcon /> Khóa Bàn 2
+          </button>
+        ) : null}
       </div>
       <button type="button" className={styles.stirButton} data-active={status.stirring} onClick={onToggleStir} data-testid="wt-toggle-stir">
         {status.stirring ? <StopIcon /> : <PlayIcon />}
         {status.stirring ? 'Dừng khuấy' : 'Bật khuấy'}
-      </button>
-      <button type="button" className={styles.calculateButton} onClick={calculateTreatment} disabled={!hasFinishedStirring || calculationBusy || !hasTreatmentSample} title={calculateTitle} data-testid="wt-calculate">
-        <BeakerIcon /> {calculationBusy ? 'Đang tính…' : 'Tính toán'}
       </button>
       <div className={styles.buretControls}>
         {(['naoh', 'hcl'] as const).map((reagent) => {
