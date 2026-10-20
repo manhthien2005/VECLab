@@ -5,11 +5,12 @@ test.use({ screenshot: 'off', trace: 'off' })
 test('offers the active extraction lesson and keeps adsorption planned', async ({ page }) => {
   await page.goto('/experiments')
   const cards = page.locator('.experiment-library-card')
-  await expect(cards.locator('h2')).toHaveText(['Jar Test', 'Chiết tách axit–bazơ', 'Phân loại nhựa nguyên sinh', 'Hấp phụ xanh methylene'])
-  await expect(cards.locator('a[href^="/simulate/"]')).toHaveCount(3)
+  await expect(cards.locator('h2')).toHaveText(['Jar Test', 'Chiết tách axit–bazơ', 'Phân loại nhựa nguyên sinh', 'Xà phòng hóa (cold process)', 'Hấp phụ xanh methylene'])
+  await expect(cards.locator('a[href^="/simulate/"]')).toHaveCount(4)
   await expect(cards.last()).toContainText('Chưa triển khai')
   await expect(cards.last().locator('a[href^="/simulate/"]')).toHaveCount(0)
   for (const card of await cards.all()) {
+    await card.scrollIntoViewIfNeeded()
     await expect.poll(() => card.locator('img').evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true)
   }
   const extraction = cards.nth(1)

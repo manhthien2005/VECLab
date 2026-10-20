@@ -16,6 +16,7 @@ export type UUID = string & { readonly __brand: 'UUID' }
 export const SCENARIO_KEYS = [
   'jar-test',
   'acid-base-extraction',
+  'cold-process-soap',
 ] as const
 
 export type ScenarioKey = (typeof SCENARIO_KEYS)[number] | 'plastic-separation'

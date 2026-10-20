@@ -1,0 +1,129 @@
+.stage { display:flex; flex-direction:column; flex:1; min-width:0; gap:12px; padding:18px 20px 14px; }
+.stageHeading { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.stageHeading h2 { margin:0; font-size:1.2rem; line-height:1.35; font-weight:750; letter-spacing:-.02em; }
+.stageHeading p { display:flex; flex-wrap:wrap; gap:4px 10px; margin:5px 0 0; font-size:.73rem; line-height:1.6; color:var(--ink-muted); }
+.stageHeading p strong { color:#294e61; font-weight:650; }
+.phaseTag { display:inline-flex; align-items:center; gap:6px; padding:5px 9px; border-radius:6px; background:#edf2f6; color:#486275; font-size:.69rem; white-space:nowrap; }
+.phaseTag::before { content:''; width:5px; height:5px; border-radius:50%; background:#91a8b7; }
+.phaseTag[data-active='true'] { background:#e4f1f2; color:#00656a; }
+.phaseTag[data-active='true']::before { background:#007b80; }
+.failure { display:grid; gap:4px; padding:10px 12px; border:1px solid #e2b8bd; border-radius:8px; background:var(--danger-soft); color:#82272e; font-size:.78rem; line-height:1.6; }
+.failure p { margin:0; }
+.steps { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:stretch; gap:10px; padding:10px 12px; border:1px solid #b7d4d8; border-radius:8px; background:#eef7f8; }
+.stepNav { width:34px; border:1px solid #b7d4d8; border-radius:7px; background:white; color:#134a56; font:inherit; font-size:1.4rem; line-height:1; cursor:pointer; }
+.stepNav:hover:not(:disabled) { background:var(--accent-softer); border-color:var(--accent); }
+.stepNav:disabled { cursor:default; color:#9fb2bd; background:#f2f6f8; }
+.stepBody { display:grid; gap:4px; min-width:0; }
+.stepBody > span { color:#4d6a78; font-size:.65rem; }
+.stepBody > strong { color:#134a56; font-size:.88rem; line-height:1.4; }
+.stepBody > p { margin:0; color:#3e666c; font-size:.7rem; line-height:1.55; }
+.stepBody ul { display:grid; gap:5px; margin:4px 0 0; padding:0; list-style:none; }
+.stepBody li { display:grid; gap:1px; padding-left:20px; position:relative; color:#294e61; font-size:.72rem; line-height:1.5; }
+.stepBody li::before { content:''; position:absolute; left:2px; top:.3em; width:10px; height:10px; border:1.5px solid #8aa5b2; border-radius:50%; }
+.stepBody li[data-done='true']::before { background:#007b80; border-color:#007b80; }
+.stepBody li[data-done='true'] > span { color:#4d6a78; text-decoration:line-through; }
+.stepBody li small { color:#557383; font-size:.64rem; }
+.stepNow { color:#134a56 !important; }
+.stepPick { justify-self:start; min-height:34px; padding:0 12px; border:1px solid var(--accent); border-radius:7px; background:white; color:var(--accent-hover); font:inherit; font-size:.74rem; font-weight:650; cursor:pointer; }
+.stepPick:hover { background:var(--accent-softer); }
+.scene { display:grid; grid-template-columns:minmax(0,1fr) minmax(240px,1.25fr) minmax(0,1fr); align-items:center; gap:12px; flex:1; min-height:280px; padding:10px; border-radius:10px; background:#f7fafc; }
+.scene[data-empty='true'] { display:flex; justify-content:center; }
+.pickNotice { margin:0; color:#456274; font-size:.82rem; text-align:center; }
+.guide { align-self:stretch; display:grid; align-content:start; gap:8px; min-width:0; font-size:.68rem; line-height:1.6; color:#294e61; }
+.guide h3 { margin:0; font-size:.78rem; color:#134a56; }
+.guide h4 { margin:0 0 2px; font-size:.7rem; color:#28596b; }
+.guide section { display:grid; gap:2px; padding:7px 9px; border-radius:7px; background:#eaf2f6; }
+.guide p { margin:0; overflow-wrap:anywhere; }
+.sourceNote { margin-top:4px !important; color:#557383; font-size:.62rem; line-height:1.5; }
+.reqList { display:grid; gap:6px; margin:0; padding:0; list-style:none; }
+.reqList li { display:grid; gap:1px; padding:6px 9px; border-left:3px solid #aebfca; border-radius:0 7px 7px 0; background:#eaf2f6; }
+.reqList li[data-state='ok'] { border-left-color:#2e8b57; background:#e6f4ec; }
+.reqList li[data-state='bad'] { border-left-color:#c0392b; background:#fbeceb; }
+.reqList li > span { color:#4d6a78; font-size:.64rem; }
+.reqList li > strong { color:#134a56; font-size:.72rem; font-weight:700; }
+.reqList li > small { color:#3e5a69; font-size:.64rem; font-variant-numeric:tabular-nums; }
+.sceneArt { position:relative; width:100%; height:280px; }
+.sceneArt[data-kind='pour'], .sceneArt[data-kind='mold'] { height:260px; }
+.cupArt { width:100%; height:100%; display:flex; justify-content:center; }
+.vesselArt { display:block; width:min(220px, 100%); height:100%; }
+.moldArt, .pourScene { display:block; width:100%; height:100%; }
+.pourScene { position:absolute; inset:0; }
+.sceneState { display:grid; gap:3px; text-align:center; color:#28596b; font-size:.75rem; line-height:1.6; }
+.sceneState small { color:#4f6b7d; font-size:.65rem; }
+.vesselPicker { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+.vesselCard { display:flex; align-items:center; flex-direction:column; width:100%; min-width:0; padding:5px 3px 8px; border:1px solid #cad9e3; border-radius:8px; background:#f8fafc; color:var(--ink); font:inherit; cursor:pointer; }
+.vesselCard:hover { background:#eff7f8; border-color:#88b1bb; }
+.vesselCard[aria-pressed='true'] { border-color:var(--accent); background:#def0f1; }
+.vesselCard .vesselArt { width:72px; height:96px; }
+.vesselCard .moldArt { width:96px; height:96px; }
+.vesselTitle { display:flex; justify-content:center; gap:4px; font-size:.67rem; }
+.vesselTitle strong { font-size:.8rem; font-weight:750; }
+.vesselCard > small { margin-top:3px; color:#557383; font-size:.64rem; text-align:center; }
+.graduations { fill:#3d6173; stroke:#678896; stroke-width:.75; font-size:8px; font-variant-numeric:tabular-nums; }
+.graduations text { stroke:none; }
+.hot { animation: soap-heat 2.4s ease-in-out infinite; }
+.swirl, .pourStream { opacity:0; }
+.pourStream { stroke-dasharray:1; stroke-dashoffset:1; }
+.spoon { transform-origin:108px 28px; }
+.impeller { transform-origin:90px 90px; }
+.pourTilt { transform-origin:142px 42px; }
+.level { transform-box:fill-box; transform-origin:bottom; }
+.puddle, .cracks, .shards { transform-box:fill-box; transform-origin:center; }
+.cracks path { stroke-dasharray:1; }
+.fadeIn, .hands { opacity:1; }
+@keyframes soap-heat { 50% { opacity:.55; } }
+@keyframes soapTilt {
+  0% { transform:translate(0, 0) rotate(0deg); }
+  30%, 72% { transform:translate(103px, -26px) rotate(50deg); }
+  100% { transform:translate(0, 0) rotate(0deg); }
+}
+@keyframes soapStream {
+  0%, 31% { opacity:0; stroke-dashoffset:1; }
+  32% { opacity:1; stroke-dashoffset:1; }
+  40%, 70% { opacity:1; stroke-dashoffset:0; }
+  76% { opacity:1; stroke-dashoffset:-1; }
+  100% { opacity:0; stroke-dashoffset:-1; }
+}
+@keyframes soapLevel { from { transform:scaleY(var(--lvl-from)); } to { transform:scaleY(var(--lvl-to)); } }
+@keyframes soapFadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes soapHand { 0%,100% { transform:rotate(-12deg); } 50% { transform:rotate(18deg); } }
+@keyframes soapSpin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+@keyframes soapSwirl { from { opacity:.8; transform:scaleX(1); } 50% { opacity:.45; transform:scaleX(.35); } to { opacity:0; transform:scaleX(1); } }
+@keyframes soapBarOut {
+  0% { transform:translate(-154px, -50px); }
+  30% { transform:translate(-154px, -104px); }
+  72% { transform:translate(0, -104px); }
+  100% { transform:translate(0, 0); }
+}
+@keyframes soapHandsOut { 0%, 78% { opacity:1; } 100% { opacity:0; } }
+@keyframes soapShatter { from { transform:translateY(-8px) rotate(-2deg); } 40% { transform:translateY(2px) rotate(1.5deg); } to { transform:none; } }
+@keyframes soapCrack { from { stroke-dashoffset:1; } to { stroke-dashoffset:0; } }
+@keyframes soapSpill { from { opacity:0; transform:scaleX(.1); } to { opacity:.5; transform:scaleX(1); } }
+@keyframes soapShard { from { opacity:0; transform:translate(-8px, -14px) rotate(-30deg); } to { opacity:1; transform:none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .sceneArt[data-kind='pour'] .cupArt { display:none; }
+  .pourTilt { animation: soapTilt 2400ms ease-in-out both; }
+  .pourStream { animation: soapStream 2400ms linear both; }
+  .level { animation: soapLevel 1000ms 720ms ease-in-out both; }
+  .scene .fadeIn { animation: soapFadeIn 1000ms 900ms both; opacity:0; }
+  .spoon { animation: soapHand 1600ms ease-in-out both; }
+  .impeller { animation: soapSpin 1600ms linear both; }
+  .swirl { transform-box:fill-box; transform-origin:center; animation: soapSwirl 1600ms var(--ease-out) both; }
+  .barOut { animation: soapBarOut 2400ms ease-in-out both; }
+  .hands { animation: soapHandsOut 2400ms linear both; }
+  .brokenGlass { animation: soapShatter 700ms ease-out both; }
+  .cracks path { animation: soapCrack 600ms ease-out both; }
+  .puddle { animation: soapSpill 1100ms 200ms ease-out both; }
+  .shards { animation: soapShard 700ms ease-out both; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hot { animation: none; }
+  .pourScene { display:none; }
+  .hands { display:none; }
+  .cracks path { stroke-dashoffset:0; }
+  .swirl { display:none; }
+}
+@media (max-width: 1100px) {
+  .scene { grid-template-columns:minmax(0,1fr); }
+  .sceneArt { order:-1; }
+}
