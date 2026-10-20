@@ -3,7 +3,7 @@
 import { useId, useRef, useState, useEffect, useMemo } from 'react'
 import { runWaterTreatmentAction, type WaterTreatmentResult } from '@/app/simulate/water-treatment/actions.js'
 import type { SampleCalculation } from './sample-apparatus.js'
-import { PlayIcon, StopIcon, PlusIcon, BeakerIcon } from './icons.js'
+import { PlayIcon, StopIcon, PlusIcon, BeakerIcon, SettleIcon, FilterIcon } from './icons.js'
 import styles from './workbench.module.css'
 
 /**
@@ -28,6 +28,10 @@ export type ApStatus = {
   stirring: boolean
   naohAddedMl: number
   hclAddedMl: number
+  /** Đã lắng xong — kết tủa nằm chặt đáy cốc, chờ lọc. */
+  settled: boolean
+  /** Đã lọc — pha rắn đã tách, cốc chỉ còn pha lỏng (filtrate). */
+  filtered: boolean
 }
 
 const BEAKER_CAPACITY_ML = 2000
@@ -58,6 +62,8 @@ const INITIAL_STATUS: ApStatus = {
   stirring: false,
   naohAddedMl: 0,
   hclAddedMl: 0,
+  settled: false,
+  filtered: false,
 }
 
 function volumeY(volumeMl: number) {
@@ -196,6 +202,8 @@ export function WaterTreatmentApparatus({
   status: external,
   onAddDrop,
   onToggleStir,
+  onSettle,
+  onFilter,
   onCalculate,
   calculation,
   sampleCalculation,
@@ -204,6 +212,10 @@ export function WaterTreatmentApparatus({
   status?: Partial<ApStatus>
   onAddDrop: (reagent: AcidBase, amountMl: number) => void
   onToggleStir: () => void
+  /** Ghi nhận bước lắng — kết tủa chín đã kết tủa ở pH hiện tại. */
+  onSettle: (result: TreatmentCalculation) => void
+  /** Ghi nhận bước lọc — pha rắn tách, cốc còn filtrate. */
+  onFilter: (result: TreatmentCalculation) => void
   onCalculate: (result: TreatmentCalculation) => void
   calculation: TreatmentCalculation | null
   sampleCalculation?: SampleCalculation | null
@@ -222,6 +234,11 @@ export function WaterTreatmentApparatus({
 
   // Tính màu dung dịch và kết tủa phản ánh mẫu đang được xử lý ở Bàn 2
   const sampleMeta = useMemo(() => {
+    const noSample = { liquidColor: '#bcd5e0', precipitateColor: null as string | null, pptMg: 0, precipitateColorOnFilter: null as string | null, precipitatedOnFilter: false }
+
+    // Mẫu chưa pha ở Bàn 1 → cốc Bàn 2 vẫn là nước cất
+    if (!hasFe && !hasZn && !hasPb) return noSample
+
     // Kết tủa ở Bàn 2 đến từ hai nguồn: kết tủa đã có ở Bàn 1 và kết tủa tạo ra khi xử lý
     const samplePpt = sampleCalculation
       ? (sampleCalculation.precipitateMg?.fe || 0) + (sampleCalculation.precipitateMg?.zn || 0) + (sampleCalculation.precipitateMg?.pb || 0)
@@ -230,11 +247,6 @@ export function WaterTreatmentApparatus({
       ? (calculation.precipitated_mgPerL?.Fe || 0) + (calculation.precipitated_mgPerL?.Zn || 0) + (calculation.precipitated_mgPerL?.Pb || 0)
       : 0
     const totalPpt = samplePpt + treatedPpt
-
-    // Mẫu chưa pha ở Bàn 1 → cốc Bàn 2 vẫn là nước cất
-    if (!hasFe && !hasZn && !hasPb) {
-      return { liquidColor: '#bcd5e0', precipitateColor: null as string | null, pptMg: 0 }
-    }
 
     // Màu dung dịch: Fe³⁺ vàng nâu, Zn²⁺/Pb²⁺ gần như trong
     const liquidColor = hasFe ? '#F1DFA0' : '#F4F6F8'
@@ -248,8 +260,19 @@ export function WaterTreatmentApparatus({
       else if (pbPpt > 0) precipitateColor = '#F2EBDD'  // Pb trắng kem
       else precipitateColor = '#F1F1ED'                // Zn(OH)₂ trắng
     }
-    return { liquidColor, precipitateColor, pptMg: totalPpt }
-  }, [sampleCalculation, calculation, hasFe, hasZn, hasPb])
+
+    // Đã lọc → pha rắn nằm trên giấy lọc, cốc chỉ còn filtrate trong
+    if (status.filtered) {
+      return {
+        liquidColor: '#dbe8ee',
+        precipitateColor: null as string | null,
+        pptMg: 0,
+        precipitateColorOnFilter: precipitateColor,
+        precipitatedOnFilter: totalPpt > 0,
+      }
+    }
+    return { liquidColor, precipitateColor, pptMg: totalPpt, precipitateColorOnFilter: null as string | null, precipitatedOnFilter: false }
+  }, [sampleCalculation, calculation, hasFe, hasZn, hasPb, status.filtered])
 
   const liquidColor = sampleMeta.liquidColor
 
@@ -294,25 +317,64 @@ export function WaterTreatmentApparatus({
   }
   const [calculationBusy, setCalculationBusy] = useState(false)
   const [calculationError, setCalculationError] = useState<string | null>(null)
-  const [treatmentComposition, setTreatmentComposition] = useState({ Fe: 100, Zn: 100, Pb: 100 })
-  const calculateTreatment = async () => {
-    if (!hasFinishedStirring || calculationBusy) return
+
+  /** Nồng độ kim loại đang trong cốc (mg/L) — lấy từ kết quả pha mẫu ở Bàn 1.
+   *  Không có mẫu thì cốc Bàn 2 là nước cất → không có kim loại nào để xử lý. */
+  const treatmentComposition = useMemo(() => {
+    const dissolved = sampleCalculation?.dissolvedMgL
+    if (!dissolved) return null
+    return { Fe: dissolved.fe, Zn: dissolved.zn, Pb: dissolved.pb }
+  }, [sampleCalculation])
+  const hasTreatmentSample = treatmentComposition !== null
+
+  const runStep = async (
+    action: 'measure-final' | 'settle' | 'filter',
+    commit: (result: TreatmentCalculation) => void,
+    fallbackError: string,
+  ) => {
+    if (!treatmentComposition || calculationBusy) return
     setCalculationBusy(true)
     setCalculationError(null)
     try {
       const result = await runWaterTreatmentAction({
-        action: 'measure-final',
+        action,
         composition: treatmentComposition,
         pH: status.pH,
         volume_mL: status.volumeMl,
       })
-      onCalculate(result)
+      commit(result)
     } catch (error) {
-      setCalculationError(error instanceof Error ? error.message : 'Không thể tính kết quả xử lý nước.')
+      setCalculationError(error instanceof Error ? error.message : fallbackError)
     } finally {
       setCalculationBusy(false)
     }
   }
+
+  const calculateTreatment = () => runStep(
+    'measure-final',
+    onCalculate,
+    'Không thể tính kết quả xử lý nước.',
+  )
+  const settleSample = () => runStep('settle', onSettle, 'Không thể thực hiện bước lắng.')
+  const filterSample = () => runStep('filter', onFilter, 'Không thể thực hiện bước lọc.')
+
+  // Điều kiện mở/đóng nút theo đúng trình tự: khuấy → lắng → lọc
+  const canSettle = hasTreatmentSample && hasFinishedStirring && !status.settled && !status.filtered && !calculationBusy
+  const canFilter = hasTreatmentSample && status.settled && !status.filtered && !calculationBusy
+
+  // Nút luôn giữ lý do khi bị khoá để không bỏ lửng người học giữa chừng
+  const noSampleReason = 'Pha mẫu và tính ở Bàn 1 trước khi xử lý ở Bàn 2.'
+  const settleTitle = status.filtered ? 'Đã lọc — cần pha mẫu mới để lắng lại.'
+    : status.settled ? 'Đã lắng. Bấm “Lọc” để tách pha rắn.'
+    : !hasTreatmentSample ? noSampleReason
+    : !hasFinishedStirring ? 'Bật khuấy rồi dừng máy để kết tủa hình thành.'
+    : 'Cho kết tủa lắng xuống đáy cốc.'
+  const filterTitle = status.filtered ? 'Đã lọc — pha rắn đã tách khỏi cốc.'
+    : !status.settled ? 'Bấm “Lắng” trước rồi mới lọc.'
+    : 'Lọc bỏ pha rắn, thu pha lỏng (filtrate).'
+  const calculateTitle = !hasTreatmentSample ? noSampleReason
+    : hasFinishedStirring ? 'Tính pH và lượng kim loại còn lại sau xử lý'
+    : 'Hãy khuấy xong rồi dừng máy trước khi tính'
 
   return <div className={styles.apparatus}>
     <div className={styles.apparatusHeader}>
@@ -396,6 +458,10 @@ export function WaterTreatmentApparatus({
           <clipPath id={uid + 'fill' + BURET_HCL_CX}>
             <rect x={BURET_HCL_CX - BURET_WIDTH / 2} y={buretLiquidTopY(hclRemaining)} width={BURET_WIDTH} height={BURET_BODY_BOTTOM - buretLiquidTopY(hclRemaining)} />
           </clipPath>
+          {/* Kẹp kết tủa bên trong thành cốc */}
+          <clipPath id={uid + 'beaker'}>
+            <rect x={BEAKER_LEFT_X + 1} y={BEAKER_TOP_Y + 4} width={BEAKER_RIGHT_X - BEAKER_LEFT_X - 2} height={BEAKER_HEIGHT - 4} />
+          </clipPath>
         </defs>
 
         {/* Top support bar (buret stand rack) */}
@@ -442,29 +508,69 @@ export function WaterTreatmentApparatus({
         <path d={'M' + (BEAKER_LEFT_X + 2) + ' ' + waterY + ' H' + (BEAKER_RIGHT_X - 2) + ' V' + (BEAKER_BOTTOM_Y - 1) + ' H' + (BEAKER_LEFT_X + 2) + ' Z'} fill={liquidColor} fillOpacity=".78" />
         <ellipse cx={(BEAKER_LEFT_X + BEAKER_RIGHT_X) / 2} cy={waterY} rx={(BEAKER_RIGHT_X - BEAKER_LEFT_X - 4) / 2} ry="3.5" fill={liquidColor} stroke="#6b8a99" strokeWidth="1" />
 
-        {/* Kết tủa - hiển thị các hạt nhỏ lắng đáy cốc khi có mẫu */}
+        {/* Kết tủa: lớp lắng đáy cốc khi dừng, hạt quanh trục tung khi khuấy.
+            Vị trí do React đặt; chuyển động do .pptSwirl trên từng hạt. */}
         {(() => {
           const pptColor = sampleMeta.precipitateColor
           if (!pptColor || liquidDepth <= 8) return null
-          // Số hạt dựa trên tổng kết tủa (từ Bàn 1 + Bàn 2)
-          const numParticles = Math.min(24, Math.max(4, Math.round(sampleMeta.pptMg * 1.5)))
-          const centerX = (BEAKER_LEFT_X + BEAKER_RIGHT_X) / 2
-          const halfWidth = (BEAKER_RIGHT_X - BEAKER_LEFT_X) / 2 - 4
-          const baseY = BEAKER_BOTTOM_Y - 1.5
-          // Sinh vị trí hạt (deterministic - không random mỗi render)
-          const particles = Array.from({ length: numParticles }, (_, i) => {
-            const seed = (i * 7 + 3) % 11
-            const seed2 = (i * 13 + 5) % 13
-            const xJitter = ((seed / 11) - 0.5) * 2 * (halfWidth - 3)
-            const yJitter = -((seed2 / 13) * 3)
-            const size = 1.2 + ((seed + seed2) % 5) * 0.35
-            return { x: centerX + xJitter, y: baseY + yJitter, size }
-          })
+          const cx = (BEAKER_LEFT_X + BEAKER_RIGHT_X) / 2
+          const floorY = BEAKER_BOTTOM_Y - 2
+          // Bề dày lớp lắng từ lượng kết tủa đã biết (0 → 16 px)
+          const bedHeight = Math.min(16, Math.max(3, sampleMeta.pptMg * 0.8))
+          const numParticles = Math.min(14, Math.max(4, Math.round(sampleMeta.pptMg * 1.2)))
+          // Bán kính quỹ đạo giữ trong thành cốc: bề rộng trong /2 trừ lề an toàn
+          const orbitRx = Math.max(6, Math.min(26, (BEAKER_RIGHT_X - BEAKER_LEFT_X) / 2 - 12))
+          const orbitRy = Math.max(2, orbitRx * 0.22)
+
           return (
-            <g data-testid="wt-precipitate">
-              {particles.map((p, i) => (
-                <ellipse key={i} cx={p.x} cy={p.y} rx={p.size} ry={p.size * 0.7} fill={pptColor} fillOpacity=".78" stroke={pptColor} strokeOpacity=".4" strokeWidth=".3" />
-              ))}
+            <g clipPath={'url(#' + uid + 'beaker)'} data-testid="wt-precipitate">
+              {/* Lớp kết tủa lắng đáy — luôn hiện, dày dần theo lượng kết tủa */}
+              <path
+                d={'M' + (BEAKER_LEFT_X + 3) + ' ' + floorY + ' Q' + cx + ' ' + (floorY - bedHeight - 4) + ' ' + (BEAKER_RIGHT_X - 3) + ' ' + floorY + ' Z'}
+                fill={pptColor} fillOpacity=".82"
+                stroke={pptColor} strokeOpacity=".35" strokeWidth=".5"
+              />
+
+              {status.stirring ? (
+                // Khuấy: hạt quay quanh trục tung giữa cốc.
+                // cx đặt đúng trục; mọi dịch chuyển ngang do .pptSwirl đảm nhiệm.
+                Array.from({ length: numParticles }, (_, i) => {
+                  const s1 = (i * 7 + 3) % 11
+                  const s2 = (i * 13 + 5) % 13
+                  const phase = ((i * 5) % 12) / 12
+                  const y = floorY - bedHeight - 4 - ((s2 / 13) * Math.min(46, liquidDepth - 14))
+                  const size = 1.3 + ((s1 + s2) % 5) * 0.3
+                  return (
+                    <ellipse
+                      key={i}
+                      cx={cx}
+                      cy={y}
+                      rx={size} ry={size * 0.72}
+                      fill={pptColor}
+                      className={styles.pptSwirl}
+                      style={{
+                        ['--swirl-a' as string]: orbitRx.toFixed(2) + 'px',
+                        ['--swirl-b' as string]: orbitRy.toFixed(2) + 'px',
+                        // Lệch pha để các hạt không chạy đồng pha
+                        animationDelay: (-phase * 1.9).toFixed(2) + 's',
+                      } as React.CSSProperties}
+                    />
+                  )
+                })
+              ) : (
+                // Dừng: hạt nằm yên trên lớp lắng
+                Array.from({ length: numParticles }, (_, i) => {
+                  const s1 = (i * 7 + 3) % 11
+                  const s2 = (i * 13 + 5) % 13
+                  const x = BEAKER_LEFT_X + 8 + ((s1 / 11) * (BEAKER_RIGHT_X - BEAKER_LEFT_X - 16))
+                  const y = floorY - bedHeight * (0.35 + ((s2 / 13) * 0.6))
+                  const size = 1.3 + ((s1 + s2) % 5) * 0.3
+                  return (
+                    <ellipse key={i} cx={x} cy={y} rx={size} ry={size * 0.72}
+                      fill={pptColor} fillOpacity=".9" />
+                  )
+                })
+              )}
             </g>
           )
         })()}
@@ -515,14 +621,45 @@ export function WaterTreatmentApparatus({
         </g>
         <text x="190" y="464" textAnchor="middle" fontSize="7.5" fill="#365964" fontWeight="650">Máy khuấy từ</text>
       </svg>
+
+      {/* Đã lọc: phễu + giấy lọc ghép vào miệng cốc, pha rắn bị giữ lại trên giấy */}
+      {status.filtered ? <div className={styles.filterStage} data-testid="wt-filter-stage">
+        <svg viewBox="0 0 380 470" aria-hidden="true" focusable="false">
+          <g>
+            {/* Giấy lọc gấp nhẹ ở miệng cốc */}
+            <path
+              d={'M' + (BEAKER_LEFT_X + 8) + ' ' + (BEAKER_TOP_Y + 6) + ' H' + (BEAKER_RIGHT_X - 8) + ' L' + (BEAKER_RIGHT_X - 16) + ' ' + (BEAKER_TOP_Y + 20) + ' H' + (BEAKER_LEFT_X + 16) + ' Z'}
+              fill="#efe7d8" stroke="#b8ab93" strokeWidth=".8"
+            />
+            <path
+              d={'M' + (BEAKER_LEFT_X + 16) + ' ' + (BEAKER_TOP_Y + 20) + ' H' + (BEAKER_RIGHT_X - 16)}
+              stroke="#c8bda6" strokeWidth=".6" strokeDasharray="3 2.5"
+            />
+            {/* Kết tủa giữ lại trên giấy lọc */}
+            {sampleMeta.precipitatedOnFilter ? <ellipse
+              cx={(BEAKER_LEFT_X + BEAKER_RIGHT_X) / 2} cy={BEAKER_TOP_Y + 9} rx="34" ry="3.6"
+              fill={sampleMeta.precipitateColorOnFilter ?? '#A56535'} fillOpacity=".9"
+            /> : null}
+            <text x={(BEAKER_LEFT_X + BEAKER_RIGHT_X) / 2} y={BEAKER_TOP_Y - 4} textAnchor="middle" fontSize="6.5" fill="#365964" fontWeight="650">Filtrate trong cốc</text>
+          </g>
+        </svg>
+      </div> : null}
     </div>
 
     <div className={styles.apparatusControls}>
+      <div className={styles.separationControls} role="group" aria-label="Bước lắng và lọc sau khi khuấy">
+        <button type="button" className={styles.settleButton} onClick={settleSample} disabled={!canSettle} data-done={status.settled || status.filtered} title={settleTitle} data-testid="wt-settle">
+          <SettleIcon /> {status.settled || status.filtered ? 'Đã lắng' : calculationBusy ? 'Đang xử lý…' : 'Lắng'}
+        </button>
+        <button type="button" className={styles.filterButton} onClick={filterSample} disabled={!canFilter} data-done={status.filtered} title={filterTitle} data-testid="wt-filter">
+          <FilterIcon /> {status.filtered ? 'Đã lọc' : calculationBusy ? 'Đang xử lý…' : 'Lọc'}
+        </button>
+      </div>
       <button type="button" className={styles.stirButton} data-active={status.stirring} onClick={onToggleStir} data-testid="wt-toggle-stir">
         {status.stirring ? <StopIcon /> : <PlayIcon />}
         {status.stirring ? 'Dừng khuấy' : 'Bật khuấy'}
       </button>
-      <button type="button" className={styles.calculateButton} onClick={calculateTreatment} disabled={!hasFinishedStirring || calculationBusy} title={hasFinishedStirring ? 'Tính pH và lượng kim loại còn lại sau xử lý' : 'Hãy khuấy xong rồi dừng máy trước khi tính'} data-testid="wt-calculate">
+      <button type="button" className={styles.calculateButton} onClick={calculateTreatment} disabled={!hasFinishedStirring || calculationBusy || !hasTreatmentSample} title={calculateTitle} data-testid="wt-calculate">
         <BeakerIcon /> {calculationBusy ? 'Đang tính…' : 'Tính toán'}
       </button>
       <div className={styles.buretControls}>

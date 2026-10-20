@@ -262,6 +262,8 @@ function WaterTreatmentWorkbenchSession({
     stirring: false,
     naohAddedMl: 0,
     hclAddedMl: 0,
+    settled: false,
+    filtered: false,
   })
 
   // Apparatus animation state for SAMPLE PREPARATION
@@ -278,16 +280,18 @@ function WaterTreatmentWorkbenchSession({
   const addDrop = useCallback((reagent: AcidBase, amountMl: number) => {
     setApStatus((prev) => {
       setTreatmentCalculation(null)
+      // Thêm reagent đổi pH → kết tả cũ và kết quả lọc cũ không còn đúng.
+      const resetSeparation = { settled: false, filtered: false }
       if (reagent === 'naoh') {
         const added = prev.naohAddedMl + amountMl
         const target = 12
         const pH = +(prev.pH + (target - prev.pH) * Math.min(1, amountMl * 0.18)).toFixed(6)
-        return { ...prev, naohAddedMl: added, volumeMl: prev.volumeMl + amountMl, pH }
+        return { ...prev, ...resetSeparation, naohAddedMl: added, volumeMl: prev.volumeMl + amountMl, pH }
       } else {
         const added = prev.hclAddedMl + amountMl
         const target = 1.5
         const pH = +(prev.pH + (target - prev.pH) * Math.min(1, amountMl * 0.18)).toFixed(6)
-        return { ...prev, hclAddedMl: added, volumeMl: prev.volumeMl + amountMl, pH }
+        return { ...prev, ...resetSeparation, hclAddedMl: added, volumeMl: prev.volumeMl + amountMl, pH }
       }
     })
   }, [])
@@ -315,6 +319,19 @@ function WaterTreatmentWorkbenchSession({
   }, [])
   const toggleStir = useCallback(() => {
     setApStatus((prev) => ({ ...prev, stirring: !prev.stirring }))
+  }, [])
+
+  /* Bước lắng: kết tủa đã hình thành ở pH hiện tại. Engine trả về
+     `precipitated_mgPerL` + `filtrate_mgPerL` — đưa vào bảng kết quả. */
+  const settleSample = useCallback((result: TreatmentCalculation) => {
+    setTreatmentCalculation(result)
+    setApStatus((prev) => ({ ...prev, settled: true }))
+  }, [])
+
+  /* Bước lọc: pha rắn tách khỏi cốc, composition mới = filtrate. */
+  const filterSample = useCallback((result: TreatmentCalculation) => {
+    setTreatmentCalculation(result)
+    setApStatus((prev) => ({ ...prev, filtered: true }))
   }, [])
 
   const toggleSampleStir = useCallback(() => {
@@ -408,6 +425,8 @@ function WaterTreatmentWorkbenchSession({
             status={apStatus}
             onAddDrop={addDrop}
             onToggleStir={toggleStir}
+            onSettle={settleSample}
+            onFilter={filterSample}
             onCalculate={(result) => setTreatmentCalculation(result)}
             calculation={treatmentCalculation}
             sampleCalculation={sampleCalculation}
