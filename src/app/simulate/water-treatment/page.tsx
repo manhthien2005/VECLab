@@ -6,17 +6,18 @@ export const metadata: Metadata = {
   description: 'Mô phỏng xử lý nước chứa Fe, Zn, Pb bằng hydroxide route. Keo tụ, lắng, lọc.',
 }
 
-export default function WaterTreatmentPage({
+export default async function WaterTreatmentPage({
   searchParams,
 }: {
-  searchParams: Record<string, string | string[] | undefined>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const attemptId = typeof searchParams.attempt === 'string' ? searchParams.attempt : null
-  const invalidAttempt = searchParams.invalid === 'true'
-  const openReport = searchParams.report === '1'
-  const initialPane = 
-    typeof searchParams.pane === 'string' && ['simulation', 'controls', 'notebook'].includes(searchParams.pane)
-      ? (searchParams.pane as 'simulation' | 'controls' | 'notebook')
+  const resolved = await searchParams
+  const attemptId = typeof resolved.attempt === 'string' ? resolved.attempt : null
+  const invalidAttempt = resolved.invalid === 'true'
+  const openReport = resolved.report === '1'
+  const initialPane =
+    typeof resolved.pane === 'string' && ['simulation', 'controls', 'notebook'].includes(resolved.pane)
+      ? (resolved.pane as 'simulation' | 'controls' | 'notebook')
       : 'simulation'
 
   return (
