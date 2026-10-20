@@ -1,5 +1,6 @@
 import { APP_STRINGS } from '@/content/index.js'
 import { JAR_PROFILE } from '@/domain/experiments/jar-test/model.js'
+import { PLASTIC_PROFILE, VIRGIN_POLYMERS } from '@/domain/experiments/virgin-plastic-separation/model.js'
 
 const PRESENTATION = {
   'acid-base-extraction': {
@@ -43,9 +44,31 @@ const PRESENTATION = {
   },
 } as const
 
-/** Presentation only. Runtime availability is always resolved from listCatalog(). */
-export const EXPERIMENT_OVERVIEWS = APP_STRINGS.home.showcaseCards.map(({ scenarioKey, title }) => ({
+export const PLASTIC_OVERVIEW = {
+  scenarioKey: 'plastic-density-separation',
+  title: 'Phân loại nhựa nguyên sinh',
+  image: '/assets/experiments/plastic-density-separation.webp',
+  imageAlt: 'Minh họa bể khuấy với hạt nhựa nổi và chìm, máy ly tâm, cân và hai khay thu phân đoạn',
+  category: 'Phân tách chìm – nổi',
+  question: 'Vì sao cần nhiều môi trường chất lỏng để phân loại sáu loại nhựa?',
+  learning: 'Liên hệ khối lượng riêng với hiện tượng nổi–chìm và phân biệt thu hồi với độ tinh khiết.',
+  tools: 'Bể pilot, máy ly tâm và cân; các khay thu phân đoạn.',
+  prerequisites: 'Hiểu khối lượng riêng, khối lượng và cách đọc nồng độ % v/v, % w/v.',
+  input: `${VIRGIN_POLYMERS.map(polymer => polymer.id).join(', ')} · ${PLASTIC_PROFILE.sampleFeedMassKg.toLocaleString('vi-VN', { minimumFractionDigits: 1 })} kg/loại · Nước máy, ethanol, NaCl`,
+  parameters: 'Ethanol 23 / 31% v/v · NaCl 11–12 / 20 / 40% w/v · Các preset cố định',
+  outcome: 'Phân đoạn nổi–chìm, khối lượng đã cân và tỷ lệ thu hồi theo preset',
+  procedure: ['Chuẩn bị mẫu, làm ướt và tách sơ bộ bằng nước máy', 'Ly tâm, cân và chọn nhánh ethanol hoặc NaCl để tách tiếp', 'Đọc tổng kết phân đoạn, sổ thực hành và báo cáo'],
+} as const
+
+const HOME_OVERVIEWS = APP_STRINGS.home.showcaseCards.map(({ scenarioKey, title }) => ({
   scenarioKey, title, ...PRESENTATION[scenarioKey],
 }))
+
+/** Library lessons can expand without changing the approved landing picker. */
+export const EXPERIMENT_OVERVIEWS = [
+  ...HOME_OVERVIEWS.filter(item => item.scenarioKey !== 'methylene-blue-adsorption'),
+  PLASTIC_OVERVIEW,
+  ...HOME_OVERVIEWS.filter(item => item.scenarioKey === 'methylene-blue-adsorption'),
+]
 
 export type ExperimentOverview = (typeof EXPERIMENT_OVERVIEWS)[number]

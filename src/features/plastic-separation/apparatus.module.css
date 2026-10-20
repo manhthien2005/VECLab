@@ -1,0 +1,38 @@
+.apparatus { min-width:0; padding:0 20px 16px; color:var(--ink); background:#fff; }
+.sceneNav { display:flex; gap:4px; padding:6px; margin-top:4px; border:1px solid var(--border); border-radius:9px; background:#f4f8fa; }
+.sceneNav button { flex:1; min-width:0; min-height:44px; border:0; border-radius:6px; padding:8px 5px; background:none; color:var(--ink-muted); font-size:.76rem; line-height:1.4; font-weight:650; }
+.sceneNav button[aria-pressed=true] { background:white; color:var(--accent-hover); box-shadow:0 2px 6px #254d6214; }
+.sceneHeading { display:flex; align-items:start; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:18px 0 6px; }
+.sceneHeading h3 { margin:0; font-size:1rem; line-height:1.45; font-weight:700; }
+.sceneHeading p { margin:4px 0 0; font-size:.74rem; color:var(--ink-muted); }
+.skip { min-height:44px; padding:8px 12px; background:#e9f4f4; color:var(--accent-hover); border:1px solid #b1d0d3; border-radius:7px; font-size:.74rem; font-weight:650; }
+.tankArt, .weighArt { display:block; width:100%; max-height:440px; height:auto; margin:0 auto; background:#f8fbfc; border-radius:8px; }
+.liquidFill { transform-origin:300px 321px; }
+.stirrer, .rotor { transform-origin:0 0; transform-box:view-box; }
+.sampleGrid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:12px 0; }
+.sampleCard { min-width:0; display:flex; flex-direction:column; align-items:center; gap:6px; background:#f8fbfc; border:1px solid #d8e4eb; border-radius:9px; padding:10px 6px 12px; color:var(--ink); text-align:center; }
+.sampleCard[aria-pressed=true] { background:#e9f5f4; border-color:var(--accent); }
+.sampleCard strong { font-size:.86rem; }
+.sampleCard > span { font-size:.74rem; color:var(--ink-muted); font-variant-numeric:tabular-nums; }
+.sampleArt { display:block; width:100%; height:auto; max-height:112px; }
+.explanation { padding:12px 0; margin:0; font-size:.78rem; color:var(--ink-muted); min-height:52px; }
+.legend { display:flex; flex-wrap:wrap; gap:5px; padding-top:12px; border-top:1px solid var(--border); }
+.legend button { display:flex; align-items:center; justify-content:center; gap:7px; min-height:44px; min-width:58px; padding:8px; border:1px solid var(--border); border-radius:6px; color:var(--ink-muted); background:white; font-size:.76rem; }
+.legend i { width:9px; height:9px; border:1px solid #16334233; border-radius:3px; }
+.legend button[aria-pressed=true] { color:var(--accent-hover); border-color:var(--accent); background:#e9f5f4; }
+.note { color:var(--ink-muted); font-size:.7rem; line-height:1.6; margin:10px 0 0; }
+.weighing { padding:10px 12px; border:1px solid #d3e4e7; background:#f0f7f7; border-radius:7px; color:var(--accent-hover); font-size:.85rem; font-weight:700; font-variant-numeric:tabular-nums; }
+.inspection { margin-top:12px; padding:14px; border:1px solid #bad5da; border-radius:8px; background:#f3f9f9; font-size:.78rem; }
+.inspection > div { display:flex; align-items:start; justify-content:space-between; gap:12px; }
+.inspection > div button { min-height:44px; padding:8px; border:1px solid var(--border); border-radius:6px; background:white; color:var(--ink-muted); }
+.inspection dl { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:8px 0 0; }
+.inspection dl > div { min-width:0; }
+.inspection dt { color:var(--ink-muted); font-size:.7rem; }
+.inspection dd { margin:4px 0 0; line-height:1.6; }
+@media(hover:hover) and (pointer:fine) { .sceneNav button:hover, .sampleCard:hover, .legend button:hover { background:#e9f4f5; border-color:#96bcc4; } .skip:hover { background:#d9edee; } }
+@media(max-width:600px) { .apparatus { padding-inline:14px; } .sampleGrid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; } .sceneNav button { font-size:.7rem; padding-inline:3px; } .sceneHeading { padding-top:14px; } .sceneHeading h3 { font-size:.94rem; } .sceneNav { padding:4px; } .inspection dl { grid-template-columns:1fr; } .tankArt, .weighArt { min-height:230px; } }
+@media(prefers-reduced-motion:reduce) { .apparatus [data-motion-particle], .apparatus [data-liquid-fill], .apparatus [data-stirrer], .apparatus [data-rotor], .apparatus [data-scene-reveal] { animation:none!important; transition:none!important; } }
+.sceneHeading > div:first-child { flex:1 1 230px; }
+.motionTools { flex:0 0 154px; min-height:44px; display:flex; align-items:center; justify-content:flex-end; }
+.settled { color:var(--ink-muted); font-size:.7rem; }
+@media(hover:hover) and (pointer:fine) { .apparatus [data-polymer] { cursor:pointer; } }

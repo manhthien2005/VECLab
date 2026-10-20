@@ -6,7 +6,7 @@ import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
 
 export const metadata: Metadata = {
   title: 'Thí nghiệm',
-  description: 'Thực hành Jar Test và chiết tách axit–bazơ. Hấp phụ xanh methylene chưa triển khai.',
+  description: 'Thực hành Jar Test, chiết tách axit–bazơ và phân loại nhựa nguyên sinh. Hấp phụ xanh methylene chưa triển khai.',
 }
 
 export default function ExperimentsPage() {

@@ -152,7 +152,7 @@ export function releaseScenarioKey(releaseId: string): ScenarioKey {
   // is, so adding a fourth would parse as unknown until someone remembered to edit
   // both. `(SCENARIO_KEYS as readonly string[])` widens only for the includes check;
   // the returned value is still narrowed by the guard.
-  if ((SCENARIO_KEYS as readonly string[]).includes(key)) {
+  if ((SCENARIO_KEYS as readonly string[]).includes(key) || key === 'plastic-separation') {
     return key as ScenarioKey
   }
 

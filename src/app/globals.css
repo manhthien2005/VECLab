@@ -3687,6 +3687,16 @@ td[data-numeric],
   .wb-concept-measurements { width: calc(100% - 2rem); margin-inline: 1rem; }
 }
 
+/* Experiment library and contextual navigation. */
+.page-breadcrumbs { margin: 0 0 1.75rem; font-size: 0.8125rem; line-height: 1.6; color: var(--ink-muted); }
+.page-breadcrumbs ol { display: flex; align-items: center; flex-wrap: wrap; gap: 0.45rem 0.6rem; list-style: none; padding: 0; margin: 0; }
+.page-breadcrumbs li { display: inline-flex; align-items: baseline; gap: 0.6rem; min-width: 0; overflow-wrap: anywhere; }
+.page-breadcrumbs a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink-muted); text-decoration: none; }
+.page-breadcrumbs a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 0.25em; }
+.page-breadcrumbs a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.page-breadcrumbs [aria-current='page'] { color: var(--ink); font-weight: 600; }
+.breadcrumb-divider { color: var(--ink-muted); }
+
 /* Reduced Motion Override (Landing, Showcase & Workbench scoped) */
 @media (prefers-reduced-motion: reduce) {
   .showcase-track {
