@@ -11,6 +11,7 @@ import { WaterTreatmentApparatus, type ApStatus, type AcidBase, type TreatmentCa
 import { SamplePreparationApparatus, type SampleApStatus, type SampleCalculation, type MetalSolution } from './sample-apparatus.js'
 import { DischargeApparatus } from './discharge-apparatus.js'
 import { WaterTreatmentLearningGoal } from './learning-goal.js'
+import { WaterTreatmentNotebook } from './notebook.js'
 import styles from './workbench.module.css'
 
 const EQUIPMENT_LIST = [
@@ -299,6 +300,8 @@ function WaterTreatmentWorkbenchSession({
   const [filterHistory, setFilterHistory] = useState<FilterHistoryEntry[]>([])
   /** Phase của Bàn 3 cân bằng pH — 'pending' = Bàn 2 chưa khóa, 'balancing' = Bàn 3, 'discharged' = đã thải */
   const [dischargePhase, setDischargePhase] = useState<'pending' | 'balancing' | 'discharged'>('pending')
+  /** pH hiện tại của Bàn 3 — được báo về từ DischargeApparatus qua onPHChange */
+  const [dischargePH, setDischargePH] = useState<number | null>(null)
   /** Bàn nào đang hiển thị: 'sample' → Bàn 1, 'treatment' → Bàn 2, 'discharge' → Bàn 3 */
   const [workPhase, setWorkPhase] = useState<'sample' | 'treatment' | 'discharge'>('sample')
   /** Dữ liệu Bàn 2 tại thời điểm khóa — dùng cho Bàn 3 */
@@ -459,16 +462,7 @@ function WaterTreatmentWorkbenchSession({
     pHSyncedRef.current = false
   }, [])
   
-  useEffect(() => {
-    // Simulate load
-    const timer = setTimeout(() => {
-      setLoadState('ready')
-      setReady(true)
-      setIssue(null)
-    }, 500)
-    
-    return () => clearTimeout(timer)
-  }, [])
+
 
   const header = <>
     <Link href="/" className={styles.brand} aria-label="Trang chủ VECLab">
@@ -566,6 +560,7 @@ function WaterTreatmentWorkbenchSession({
               filterHistory={ban2LockedData.filterHistory}
               onDischarge={handleDischarge}
               phase={dischargePhase as 'balancing' | 'discharged'}
+              onPHChange={setDischargePH}
             />
           </section>
         ) : null}
@@ -584,7 +579,7 @@ function WaterTreatmentWorkbenchSession({
           }}
           disabled={busy}
         >
-          {busy ? 'Đang tạo lượt…' : 'Bắt đầu lượt Xử lý nước'}
+          {busy ? 'Đang tạo lượt…' : 'Bắt đầu lượt xử lý nước'}
         </button>
       </div>
     ) : loadState === 'loading' ? (
@@ -659,9 +654,27 @@ function WaterTreatmentWorkbenchSession({
     )}
   </>
 
-  const notebook = <section tabIndex={-1} className={styles.notebook} aria-label="Sổ đo Water Treatment">
-    <p className={styles.empty}>Sổ thực hành sẽ hiển thị sau khi bắt đầu lượt.</p>
-  </section>
+  const notebook = ready ? (
+    <WaterTreatmentNotebook
+      sampleStatus={sampleApStatus}
+      sampleCalculation={sampleCalculation}
+      treatmentStatus={apStatus}
+      treatmentCalculation={treatmentCalculation}
+      filterHistory={filterHistory}
+      dischargePhase={dischargePhase}
+      dischargePH={dischargePH}
+      ban2LockedData={ban2LockedData}
+      currentStation={workPhase}
+      onStationClick={(station) => {
+        setWorkPhase(station)
+        setPane('simulation')
+      }}
+    />
+  ) : (
+    <section tabIndex={-1} className={styles.notebook} aria-label="Sổ đo Water Treatment">
+      <p className={styles.empty}>Sổ thực hành sẽ hiển thị sau khi bắt đầu lượt.</p>
+    </section>
+  )
 
   const shelf = <div className={styles.shelfContent}>
     <div className={styles.inventory}>
