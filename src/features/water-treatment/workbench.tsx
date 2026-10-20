@@ -264,6 +264,8 @@ function WaterTreatmentWorkbenchSession({
     hclAddedMl: 0,
     settled: false,
     filtered: false,
+    composition: null,
+    filteredSolid: { Fe: 0, Zn: 0, Pb: 0 },
   })
 
   // Apparatus animation state for SAMPLE PREPARATION
@@ -323,16 +325,27 @@ function WaterTreatmentWorkbenchSession({
   }, [])
 
   /* Bước lắng: kết tủa đã hình thành ở pH hiện tại. Engine trả về
-     `precipitated_mgPerL` + `filtrate_mgPerL` — đưa vào bảng kết quả. */
+     `precipitated_mgPerL` + `filtrate_mgPerL` — đưa vào bảng kết quả.
+     Lắng không đổi tổng kim loại trong cốc nên composition giữ nguyên. */
   const settleSample = useCallback((result: TreatmentCalculation) => {
     setTreatmentCalculation(result)
     setApStatus((prev) => ({ ...prev, settled: true }))
   }, [])
 
-  /* Bước lọc: pha rắn tách khỏi cốc, composition mới = filtrate. */
+  /* Bước lọc: pha rắn tách khỏi cốc → composition trong cốc là filtrate, và
+     lượng kết tủa giữ lại trên giấy lọc để hiển thị. */
   const filterSample = useCallback((result: TreatmentCalculation) => {
     setTreatmentCalculation(result)
-    setApStatus((prev) => ({ ...prev, filtered: true }))
+    setApStatus((prev) => ({
+      ...prev,
+      filtered: true,
+      composition: { Fe: result.composition.Fe, Zn: result.composition.Zn, Pb: result.composition.Pb },
+      filteredSolid: {
+        Fe: result.precipitated_mgPerL.Fe,
+        Zn: result.precipitated_mgPerL.Zn,
+        Pb: result.precipitated_mgPerL.Pb,
+      },
+    }))
   }, [])
 
   const toggleSampleStir = useCallback(() => {
