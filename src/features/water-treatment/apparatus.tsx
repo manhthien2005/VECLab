@@ -11,6 +11,30 @@ import styles from './workbench.module.css'
 const ATOMIC_WEIGHT = { Fe: 55.845, Zn: 65.38, Pb: 207.2 } as const
 
 /**
+ * Màu kết tủa theo thành phần rắn chiếm ưu thế. Kết tủa trắng (Zn/Pb) cần
+ * viền xám để không chìm vào dung dịch trong/nhợt.
+ */
+const SOLID_STYLE: Record<keyof MetalComposition, { fill: string; edge: string }> = {
+  Fe: { fill: '#A56535', edge: '#7d4522' },   // Fe(OH)₃ nâu đỏ
+  Pb: { fill: '#EFE6D2', edge: '#8a7d5e' },   // Pb trắng kem
+  Zn: { fill: '#F4F2EA', edge: '#7b858a' },   // Zn(OH)₂ trắng ngà
+}
+
+function colorForSolid(solid: MetalComposition): string | null {
+  if (solid.Fe > 0) return SOLID_STYLE.Fe.fill
+  if (solid.Pb > 0) return SOLID_STYLE.Pb.fill
+  if (solid.Zn > 0) return SOLID_STYLE.Zn.fill
+  return null
+}
+
+function EDGE_FOR_SOLID(solid: MetalComposition): string | null {
+  if (solid.Fe > 0) return SOLID_STYLE.Fe.edge
+  if (solid.Pb > 0) return SOLID_STYLE.Pb.edge
+  if (solid.Zn > 0) return SOLID_STYLE.Zn.edge
+  return null
+}
+
+/**
  * Apparatus for Water Treatment — magnetic stirrer version.
  *
  * Layout (top → bottom):
@@ -26,6 +50,9 @@ const ATOMIC_WEIGHT = { Fe: 55.845, Zn: 65.38, Pb: 207.2 } as const
  */
 export type AcidBase = 'naoh' | 'hcl'
 
+/** Tổng kim loại đang có trong cốc (mg/L) — cả phần hòa tan lẫn phần rắn. */
+export type MetalComposition = { Fe: number; Zn: number; Pb: number }
+
 export type ApStatus = {
   pH: number
   volumeMl: number
@@ -36,6 +63,14 @@ export type ApStatus = {
   settled: boolean
   /** Đã lọc — pha rắn đã tách, cốc chỉ còn pha lỏng (filtrate). */
   filtered: boolean
+  /**
+   * Tổng kim loại trong cốc (mg/L). Mặc định `null` → kế thừa tổng của mẫu Bàn 1
+   * (đã hòa tan + kết tủa mang sang). Sau bước Lọc, giá trị này là filtrate —
+   * pha rắn đã ra khỏi cốc nên không còn nằm trong tổng.
+   */
+  composition: MetalComposition | null
+  /** Lượng kết tủa (mg/L) của từng kim loại đang nằm trên giấy lọc sau bước Lọc. */
+  filteredSolid: MetalComposition
 }
 
 const BEAKER_CAPACITY_ML = 2000
@@ -68,6 +103,8 @@ const INITIAL_STATUS: ApStatus = {
   hclAddedMl: 0,
   settled: false,
   filtered: false,
+  composition: null,
+  filteredSolid: { Fe: 0, Zn: 0, Pb: 0 },
 }
 
 function volumeY(volumeMl: number) {
@@ -236,13 +273,27 @@ export function WaterTreatmentApparatus({
   const hasZn = Boolean(sampleStatus && sampleStatus.znAddedMl > 0)
   const hasPb = Boolean(sampleStatus && sampleStatus.pbAddedMl > 0)
 
-  /** Nồng độ kim loại đang trong cốc (mg/L) — lấy từ kết quả pha mẫu ở Bàn 1.
-   *  Không có mẫu thì cốc Bàn 2 là nước cất → không có kim loại nào để xử lý. */
-  const treatmentComposition = useMemo(() => {
-    const dissolved = sampleCalculation?.dissolvedMgL
-    if (!dissolved) return null
-    return { Fe: dissolved.fe, Zn: dissolved.zn, Pb: dissolved.pb }
+  /**
+   * Tổng kim loại đang ở trong cốc Bàn 2 (mg/L) — gồm cả phần đã hòa tan lẫn
+   * phần kết tửa mang sang từ Bàn 1, vì cả hai cùng nằm trong cốc.
+   *
+   * Bàn 1 trả về `dissolvedMgL` (mg/L) và `precipitateMg` (mg tuyệt đối), nên
+   * phần rắn phải quy đổi sang mg/L bằng `totalVolumeMl` trước khi cộng. Sau bước
+   * Lọc, `status.composition` là filtrate và ghi đè giá trị này.
+   */
+  const inheritedComposition = useMemo<MetalComposition | null>(() => {
+    if (!sampleCalculation) return null
+    const { dissolvedMgL, precipitateMg, totalVolumeMl } = sampleCalculation
+    const volumeL = totalVolumeMl / 1000
+    if (!Number.isFinite(volumeL) || volumeL <= 0) return null
+    return {
+      Fe: dissolvedMgL.fe + precipitateMg.fe / volumeL,
+      Zn: dissolvedMgL.zn + precipitateMg.zn / volumeL,
+      Pb: dissolvedMgL.pb + precipitateMg.pb / volumeL,
+    }
   }, [sampleCalculation])
+
+  const treatmentComposition = status.composition ?? inheritedComposition
   const hasTreatmentSample = treatmentComposition !== null
 
   // Tính màu dung dịch và kết tủa phản ánh mẫu đang được xử lý ở Bàn 2
@@ -252,81 +303,67 @@ export function WaterTreatmentApparatus({
     // Mẫu chưa pha ở Bàn 1 → cốc Bàn 2 vẫn là nước cất
     if (!hasFe && !hasZn && !hasPb) return noSample
 
-    // Kết tủa đã có ở Bàn 1 (lúc pha mẫu)
-    const fePpt = sampleCalculation?.precipitateMg?.fe || 0
-    const znPpt = sampleCalculation?.precipitateMg?.zn || 0
-    const pbPpt = sampleCalculation?.precipitateMg?.pb || 0
-
-    // Kết tủa do xử lý ở Bàn 2. Ưu tiên số đo đã commit; nếu người học chưa
-    // bấm Tính/Lắng/Lọc thì dùng cùng công thức capacity để dự báo kết tủa
-    // đang hình thành — đây là hiện tượng quan sát được, không phải số đo mới.
-    const measuredPpt = calculation?.precipitated_mgPerL
-    let est = { Fe: 0, Zn: 0, Pb: 0 }
-    if (!calculation && treatmentComposition) {
+    /**
+     * Phân bố pha tại pH HIỆN TẠI, tính trên tổng kim loại đang ở trong cốc.
+     *
+     * Cùng công thức với `computeFiltrate` ở server action: pha hòa tan giữ
+     * `min(tổng, capacity)` và phần rắn là phần dư. Vì bước này chạy lại mỗi
+     * lần pH đổi, kết tủa mang sang từ Bàn 1 sẽ tan lại khi thêm HCl và kết
+     * tủa lại khi thêm NaOH — đúng cân bằng Fe(OH)₃ ⇌ Fe³⁺ + 3OH⁻.
+     */
+    const splitPhases = (total: MetalComposition): { dissolved: MetalComposition; solid: MetalComposition } => {
+      if (!total) return { dissolved: { Fe: 0, Zn: 0, Pb: 0 }, solid: { Fe: 0, Zn: 0, Pb: 0 } }
       const cap = capacityAtSaturation(status.pH)
       const capMgL = {
         Fe: cap.Fe * ATOMIC_WEIGHT.Fe * 1000,
         Zn: cap.Zn * ATOMIC_WEIGHT.Zn * 1000,
         Pb: cap.Pb * ATOMIC_WEIGHT.Pb * 1000,
       }
-      // Lượng kết tủa = input − lượng còn hòa tan (min(input, capacity)),
-      // đúng công thức mà server action dùng cho `settle`.
-      est = {
-        Fe: Math.max(0, treatmentComposition.Fe - Math.min(treatmentComposition.Fe, capMgL.Fe)),
-        Zn: Math.max(0, treatmentComposition.Zn - Math.min(treatmentComposition.Zn, capMgL.Zn)),
-        Pb: Math.max(0, treatmentComposition.Pb - Math.min(treatmentComposition.Pb, capMgL.Pb)),
+      const dissolved = {
+        Fe: Math.min(total.Fe, capMgL.Fe),
+        Zn: Math.min(total.Zn, capMgL.Zn),
+        Pb: Math.min(total.Pb, capMgL.Pb),
       }
-    }
-    const treatedFe = measuredPpt?.Fe || est.Fe
-    const treatedZn = measuredPpt?.Zn || est.Zn
-    const treatedPb = measuredPpt?.Pb || est.Pb
-
-    const totalPpt = fePpt + znPpt + pbPpt + treatedFe + treatedZn + treatedPb
-
-    // Màu dung dịch: Fe³⁺ vàng nâu, Zn²⁺/Pb²⁺ gần như trong
-    const liquidColor = hasFe ? '#F1DFA0' : '#F4F6F8'
-
-    // Màu kết tủa theo thành phần kết tủa chiếm ưu thế. Kết tủa trắng
-    // (Zn/Pb) vẽ thêm viền xám để không chìm vào dung dịch trong/nhợt.
-    const feTotal = fePpt + treatedFe
-    const pbTotal = pbPpt + treatedPb
-    let precipitateColor: string | null = null
-    let precipitateEdge: string | null = null
-    if (totalPpt > 0) {
-      if (feTotal > 0) {
-        precipitateColor = '#A56535'                  // Fe(OH)₃ nâu đỏ
-        precipitateEdge = '#7d4522'
-      } else if (pbTotal > 0) {
-        precipitateColor = '#EFE6D2'                  // Pb trắng kem
-        precipitateEdge = '#8a7d5e'
-      } else {
-        precipitateColor = '#F4F2EA'                  // Zn(OH)₂ trắng ngà
-        // Kết túa trắng trên dung dịch trong cần viền đậm hơn mới thấy;
-        // đây là ranh giới hạt, không phải màu của kết túa.
-        precipitateEdge = '#7b858a'
+      return {
+        dissolved,
+        solid: {
+          Fe: Math.max(0, total.Fe - dissolved.Fe),
+          Zn: Math.max(0, total.Zn - dissolved.Zn),
+          Pb: Math.max(0, total.Pb - dissolved.Pb),
+        },
       }
     }
 
-    // Đã lọc → pha rắn nằm trên giấy lọc, cốc chỉ còn filtrate trong
+    // Đã lọc → pha rắn nằm trên giấy lọc, cốc chỉ còn filtrate trong.
+    // Lượng trên giấy lọc lấy từ số đo đã commit lúc Lọc, không suy lại từ
+    // composition hiện tại (sau khi lọc thì pha rắn đã ra khỏi cốc).
     if (status.filtered) {
+      const onFilter = status.filteredSolid
       return {
         liquidColor: '#dbe8ee',
         precipitateColor: null as string | null,
         precipitateEdge: null as string | null,
         pptMg: 0,
-        precipitateColorOnFilter: precipitateColor,
-        precipitatedOnFilter: totalPpt > 0,
+        precipitateColorOnFilter: colorForSolid(onFilter),
+        precipitatedOnFilter: onFilter.Fe + onFilter.Zn + onFilter.Pb > 0,
       }
     }
+
+    const { dissolved, solid } = splitPhases(treatmentComposition ?? { Fe: 0, Zn: 0, Pb: 0 })
+    const totalPpt = solid.Fe + solid.Zn + solid.Pb
+
+    // Màu dung dịch theo pha hòa tan: Fe³⁺ vàng nâu, Zn²⁺/Pb²⁺ gần như trong.
+    const liquidColor = dissolved.Fe > 0.005 ? '#F1DFA0' : '#F4F6F8'
+
     return {
       liquidColor,
-      precipitateColor,
-      precipitateEdge,
+      precipitateColor: colorForSolid(solid),
+      precipitateEdge: EDGE_FOR_SOLID(solid),
       pptMg: totalPpt,
       precipitateColorOnFilter: null as string | null,
       precipitatedOnFilter: false,
     }
-  }, [sampleCalculation, calculation, treatmentComposition, status.pH, status.filtered, hasFe, hasZn, hasPb])
+  }, [treatmentComposition, status.pH, status.filtered, status.filteredSolid, hasFe, hasZn, hasPb])
 
   // Gỡ gợi ý pH cho Zn theo yêu cầu — phạm vi pH phải dựa trên bảng kết quả
   // và capacity (`capacityAtSaturation`), không hiển thị overlay cố định.
