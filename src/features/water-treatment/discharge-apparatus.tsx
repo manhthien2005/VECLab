@@ -14,7 +14,7 @@ interface DischargeApparatusProps {
   phase: 'balancing' | 'discharged'
 }
 
-// ─── Fixed apparatus geometry (matching Bàn 2 apparatus.tsx) ───────────────────
+// ─── Fixed apparatus geometry ───────────────────
 const BEAKER_LEFT_X = 130
 const BEAKER_RIGHT_X = 250
 const BEAKER_TOP_Y = 252
@@ -40,7 +40,10 @@ const PLATFORM_HEIGHT = 22
 
 const uid = 'discharge'
 
-/** Fixed liquid depth — no animation, no change after adding reagent */
+/** Drop step options for pH burets */
+const STEP_ML_OPTIONS = [0.01, 0.05, 0.1, 0.5, 1.0] as const
+
+/** Fixed liquid depth in beaker */
 const FIXED_LIQUID_DEPTH = BEAKER_HEIGHT * 0.65
 const FIXED_LIQUID_TOP_Y = BEAKER_BOTTOM_Y - FIXED_LIQUID_DEPTH
 
@@ -51,23 +54,31 @@ export type PHMeasurement = {
   pH: number
   naohMl: number
   hclMl: number
-  /** pH in range [pH_min, pH_max] per QCVN 40:2025 */
   phOk: boolean
 }
 
-/**
- * Simplified Buret visual — matches Bàn 2 (apparatus.tsx) style.
- * No drop animation, no fill-level change.
- */
+/** Buret with liquid fill that goes down as reagent is dispensed */
 function BuretVisual({
   cx, color, labelColor,
+  currentMl,
+  isDropping,
+  dropColor,
 }: {
   cx: number
   color: string
   labelColor: string
+  currentMl: number
+  isDropping: boolean
+  dropColor: string
 }) {
   const leftX = cx - BURET_WIDTH / 2
   const rightX = cx + BURET_WIDTH / 2
+
+  // Fill from bottom up; empty when currentMl === 0
+  const fillRatio = Math.max(0, Math.min(1, currentMl / BURET_CAPACITY))
+  const fillHeight = BURET_BODY_HEIGHT * fillRatio
+  const fillTop = BURET_BODY_BOTTOM - fillHeight
+
   return (
     <g aria-label="Buret">
       {/* Clamp */}
@@ -76,12 +87,25 @@ function BuretVisual({
       <path d={`M${leftX - 2} ${BURET_BODY_TOP - 6} h${BURET_WIDTH + 4} v6 h-${BURET_WIDTH + 4} Z`} fill="#a7bcc8" stroke="#7591a0" strokeWidth=".6" />
       <rect x={cx - 1.5} y={BURET_BODY_TOP - 4} width="3" height="3" fill="#7591a0" />
 
-      {/* Body tube */}
+      {/* Body tube — glass background */}
       <rect
         x={leftX} y={BURET_BODY_TOP}
         width={BURET_WIDTH} height={BURET_BODY_HEIGHT}
         fill={`url(#${uid}glass)`} stroke={color} strokeWidth="1.4"
       />
+
+      {/* Liquid fill — from bottom upward, shrinks as currentMl decreases */}
+      {fillRatio > 0 && (
+        <>
+          <rect
+            x={leftX + 1} y={fillTop}
+            width={BURET_WIDTH - 2} height={fillHeight}
+            fill={dropColor} fillOpacity=".45"
+          />
+          {/* Liquid surface ellipse */}
+          <ellipse cx={cx} cy={fillTop + 1} rx={(BURET_WIDTH - 2) / 2} ry="2.5" fill={dropColor} fillOpacity=".6" stroke={color} strokeWidth=".5" />
+        </>
+      )}
 
       {/* Tick marks: 0 at top → 50 at bottom */}
       {Array.from({ length: 11 }, (_, i) => {
@@ -90,12 +114,12 @@ function BuretVisual({
         const major = i % 2 === 0
         return (
           <g key={ml}>
-            <line x1={rightX} x2={rightX + (major ? 6 : 3)} y1={y} y2={y} stroke={labelColor} strokeWidth={major ? 0.8 : 0.5} />
-            {major && <text x={rightX + 8} y={y + 2.5} fontSize="6" fill={labelColor}>{ml}</text>}
+            <line x1={leftX} x2={leftX - (major ? 6 : 3)} y1={y} y2={y} stroke={labelColor} strokeWidth={major ? 0.8 : 0.5} />
+            {major && <text x={leftX - 8} y={y + 2.5} fontSize="6" fill={labelColor} textAnchor="end">{ml}</text>}
           </g>
         )
       })}
-      <text x={leftX - 1} y={BURET_BODY_TOP - 2} fontSize="6" fill={labelColor} textAnchor="end">mL</text>
+      <text x={rightX + 1} y={BURET_BODY_TOP - 2} fontSize="6" fill={labelColor} textAnchor="start">mL</text>
 
       {/* Stopcock */}
       <rect x={leftX - 3} y={BURET_BODY_BOTTOM} width={BURET_WIDTH + 6} height={BURET_STOPCOCK_H} rx="1" fill="#456475" stroke="#2c4654" strokeWidth=".6" />
@@ -103,7 +127,107 @@ function BuretVisual({
 
       {/* Delivery tip */}
       <path d={`M${cx - 3} ${BURET_BODY_BOTTOM + BURET_STOPCOCK_H} h6 v${BURET_TIP_H} h-6 Z`} fill="#9bb0bc" stroke="#365964" strokeWidth=".5" />
+
+      {/* Drop animation — shown while dispensing */}
+      {isDropping && (
+        <>
+          <circle cx={cx} cy={BURET_BODY_BOTTOM + BURET_STOPCOCK_H + BURET_TIP_H + 6} r="2.2" fill={dropColor} opacity=".85" />
+          <circle cx={cx} cy={BURET_BODY_BOTTOM + BURET_STOPCOCK_H + BURET_TIP_H + 14} r="1.8" fill={dropColor} opacity=".55" />
+        </>
+      )}
     </g>
+  )
+}
+
+/** Beaker with measurement tick marks */
+function BeakerMarks() {
+  // Tick marks every 20 mL, up to 2000 mL beaker capacity
+  const marks = [0, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
+  return (
+    <g aria-label="Beaker markings">
+      {marks.map((ml) => {
+        const ratio = ml / 2000
+        const y = BEAKER_BOTTOM_Y - BEAKER_HEIGHT * ratio
+        const major = ml % 400 === 0
+        return (
+          <g key={ml}>
+            {/* Tick on LEFT wall */}
+            <line
+              x1={BEAKER_LEFT_X - 2} x2={BEAKER_LEFT_X - (major ? 8 : 5)}
+              y1={y} y2={y}
+              stroke="#78909c" strokeWidth={major ? 0.9 : 0.5}
+            />
+            {/* Tick on RIGHT wall */}
+            <line
+              x1={BEAKER_RIGHT_X + 2} x2={BEAKER_RIGHT_X + (major ? 8 : 5)}
+              y1={y} y2={y}
+              stroke="#78909c" strokeWidth={major ? 0.9 : 0.5}
+            />
+            {major && (
+              <>
+                <text x={BEAKER_LEFT_X - 11} y={y + 2.5} fontSize="5.5" fill="#607486" textAnchor="end">{ml}</text>
+                <text x={BEAKER_RIGHT_X + 11} y={y + 2.5} fontSize="5.5" fill="#607486" textAnchor="start">{ml}</text>
+              </>
+            )}
+          </g>
+        )
+      })}
+      <text x={BEAKER_LEFT_X - 2} y={BEAKER_TOP_Y + 8} fontSize="5" fill="#90a4ae" textAnchor="end">mL</text>
+    </g>
+  )
+}
+
+/** Dropdown menu to choose the volume dispensed per press (mL) */
+function DoseStepMenu({
+  label,
+  value,
+  disabled,
+  onChange,
+}: {
+  label: string
+  value: number
+  disabled: boolean
+  onChange: (value: number) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const menuId = `dose-step-${label.toLowerCase().replace(/\s/g, '-')}`
+
+  return (
+    <div className={styles.doseStepMenu}>
+      <button
+        type="button"
+        className={styles.doseStepTrigger}
+        aria-label={`Bước thêm ${label}`}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={menuId}
+        disabled={disabled}
+        onClick={() => setOpen((current) => !current)}
+        onBlur={() => setTimeout(() => setOpen(false), 120)}
+      >
+        {value} mL
+      </button>
+      {open ? (
+        <div id={menuId} className={styles.doseStepMenuList} role="listbox" aria-label={`Chọn bước thêm ${label}`}>
+          {STEP_ML_OPTIONS.map((step) => (
+            <button
+              type="button"
+              role="option"
+              aria-selected={step === value}
+              className={styles.doseStepOption}
+              key={step}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                onChange(step)
+                setOpen(false)
+              }}
+            >
+              {step} mL
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
   )
 }
 
@@ -114,37 +238,39 @@ export function DischargeApparatus({
   onDischarge,
   phase,
 }: DischargeApparatusProps) {
-  /** pH chưa xác nhận — thay đổi ngay khi thêm reagent nhưng chưa đo */
+  /** pH chưa xác nhận */
   const [pendingPH, setPendingPH] = useState(initialPH)
-  /** Lần đo pH gần nhất đã xác nhận (sau khi khuấy + bấm Đo) */
+  /** pH đo được cuối cùng (sau khi khuấy + bấm Đo) */
   const [measuredPH, setMeasuredPH] = useState(initialPH)
-  /** Lịch sử các lần đo pH */
+  /** Lịch sử đo pH */
   const [phHistory, setPhHistory] = useState<PHMeasurement[]>([])
-  /** Tổng NaOH / HCl đã thêm */
+  /** Mực hiện tại trong mỗi buret (tính từ dưới lên) */
   const [naohMl, setNaohMl] = useState(0)
   const [hclMl, setHclMl] = useState(0)
-  /** Đã khuấy chưa sau lần thêm gần nhất */
+  /** Drop animation states */
+  const [naohDropping, setNaohDropping] = useState(false)
+  const [hclDropping, setHclDropping] = useState(false)
+  /** Khuấy */
   const [stirring, setStirring] = useState(false)
   const [hasStirredSinceLastAdd, setHasStirredSinceLastAdd] = useState(false)
-  const [dropStep, setDropStep] = useState<number>(1)
-  /** Trạng thái khóa — đã khóa Bàn 3 rồi */
+  const [stepMl, setStepMl] = useState<number>(0.1)
+  /** Đã khóa Bàn 3 */
   const [locked, setLocked] = useState(false)
 
   const stirringTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const measureCountRef = useRef(0)
+  const naohDropTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hclDropTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const composition = calculation.filtrate_mgPerL
 
-  /** Có thể đo pH khi: đang ở phase balancing, chưa khóa, và đã khuấy sau lần thêm gần nhất */
   const canMeasure = phase === 'balancing' && !locked && hasStirredSinceLastAdd
 
-  /** Bật/tắt khuấy — mỗi lần bật khuấy reset cờ để buộc phải khuấy trước khi đo */
   const toggleStir = useCallback(() => {
     setStirring((prev) => {
       const next = !prev
       if (next) {
-        // Bật khuấy → reset cờ buộc khuấy trước khi đo
-        setHasStirredSinceLastAdd(false)
+        setHasStirredSinceLastAdd(true)
         if (stirringTimerRef.current) {
           clearTimeout(stirringTimerRef.current)
           stirringTimerRef.current = null
@@ -153,20 +279,15 @@ export function DischargeApparatus({
       return next
     })
     if (stirring) {
-      // Dừng khuấy → có thể đo
       if (stirringTimerRef.current) {
         clearTimeout(stirringTimerRef.current)
         stirringTimerRef.current = null
       }
     } else {
-      // Bật khuấy → tự dừng sau 8s
-      stirringTimerRef.current = setTimeout(() => {
-        setStirring(false)
-      }, 8000)
+      stirringTimerRef.current = setTimeout(() => setStirring(false), 8000)
     }
   }, [stirring])
 
-  /** Đo pH — chỉ hoạt động sau khi đã khuấy */
   const measurePH = useCallback(() => {
     if (!canMeasure) return
     measureCountRef.current += 1
@@ -183,67 +304,50 @@ export function DischargeApparatus({
         phOk,
       },
     ])
-    // Sau khi đo xong → chưa thể đo lại cho đến khi thêm reagent + khuấy
     setHasStirredSinceLastAdd(false)
   }, [canMeasure, pendingPH, naohMl, hclMl])
 
-  /** Thêm NaOH — cập nhật pendingPH ngay, buộc phải khuấy trước khi đo */
+  /** Thêm NaOH — mực trong buret giảm, hiệu ứng giọt nhỏ */
   const addNaoh = useCallback(() => {
     if (locked) return
-    const drops = dropStep
-    const ml = drops / 60
+    const ml = stepMl
     setNaohMl((m) => m + ml)
-    setPendingPH((p) => Math.min(14, p + drops / 8))
-    setHasStirredSinceLastAdd(false)
-  }, [dropStep, locked])
+    setPendingPH((p) => Math.min(14, p + ml / 8))
+    setHasStirredSinceLastAdd(stirring)
+    setNaohDropping(true)
+    if (naohDropTimerRef.current) clearTimeout(naohDropTimerRef.current)
+    naohDropTimerRef.current = setTimeout(() => setNaohDropping(false), 700)
+  }, [stepMl, locked, stirring])
 
-  /** Thêm HCl — cập nhật pendingPH ngay, buộc phải khuấy trước khi đo */
+  /** Thêm HCl — mực trong buret giảm, hiệu ứng giọt nhỏ */
   const addHcl = useCallback(() => {
     if (locked) return
-    const drops = dropStep
-    const ml = drops / 60
+    const ml = stepMl
     setHclMl((m) => m + ml)
-    setPendingPH((p) => Math.max(0, p - drops / 8))
-    setHasStirredSinceLastAdd(false)
-  }, [dropStep, locked])
+    setPendingPH((p) => Math.max(0, p - ml / 8))
+    setHasStirredSinceLastAdd(stirring)
+    setHclDropping(true)
+    if (hclDropTimerRef.current) clearTimeout(hclDropTimerRef.current)
+    hclDropTimerRef.current = setTimeout(() => setHclDropping(false), 700)
+  }, [stepMl, locked, stirring])
 
-  /** Khóa Bàn 3 — chốt kết quả hiện tại */
   const lockResults = useCallback(() => {
     setLocked(true)
   }, [])
 
-  const reset = useCallback(() => {
-    if (locked) return
-    setPendingPH(initialPH)
-    setMeasuredPH(initialPH)
-    setNaohMl(0)
-    setHclMl(0)
-    setStirring(false)
-    setHasStirredSinceLastAdd(false)
-    setPhHistory([])
-    measureCountRef.current = 0
-    if (stirringTimerRef.current) {
-      clearTimeout(stirringTimerRef.current)
-      stirringTimerRef.current = null
-    }
-  }, [initialPH, locked])
-
   useEffect(() => {
     return () => {
       if (stirringTimerRef.current) clearTimeout(stirringTimerRef.current)
+      if (naohDropTimerRef.current) clearTimeout(naohDropTimerRef.current)
+      if (hclDropTimerRef.current) clearTimeout(hclDropTimerRef.current)
     }
   }, [])
 
-  // pH trong bảng = measuredPH (lần đo cuối cùng đã xác nhận)
   const currentPhOk = measuredPH >= WT_QCVN_COLUMN_A.pH_min && measuredPH <= WT_QCVN_COLUMN_A.pH_max
   const feOk = composition.Fe <= WT_QCVN_COLUMN_A.Fe_mgPerL
   const znOk = composition.Zn <= WT_QCVN_COLUMN_A.Zn_mgPerL
   const pbOk = composition.Pb <= WT_QCVN_COLUMN_A.Pb_mgPerL
   const allOk = feOk && znOk && pbOk && currentPhOk
-
-  const cycleDropStep = () => {
-    setDropStep((d) => (d >= 10 ? 1 : d === 1 ? 2 : d === 2 ? 5 : 10))
-  }
 
   return (
     <div className={styles.apparatus}>
@@ -255,7 +359,7 @@ export function DischargeApparatus({
         </div>
       </div>
 
-      {/* Stage: apparatus SVG + volume model */}
+      {/* Stage */}
       <div className={styles.apparatusStage}>
         {/* SVG apparatus */}
         <svg viewBox="0 0 380 470" className={styles.apparatusSvg} role="img" aria-label="Sơ đồ bàn cân bằng pH">
@@ -296,9 +400,9 @@ export function DischargeApparatus({
           <rect x="18" y="18" width="6" height="14" fill={`url(#${uid}steel)`} />
           <rect x="356" y="18" width="6" height="14" fill={`url(#${uid}steel)`} />
 
-          {/* Burets */}
-          <BuretVisual cx={BURET_NAOH_CX} color="#1f8a99" labelColor="#0e3a45" />
-          <BuretVisual cx={BURET_HCL_CX} color="#b26516" labelColor="#5a3208" />
+          {/* Burets with fill level and drop animation */}
+          <BuretVisual cx={BURET_NAOH_CX} color="#1f8a99" labelColor="#0e3a45" currentMl={naohMl} isDropping={naohDropping} dropColor="#1f8a99" />
+          <BuretVisual cx={BURET_HCL_CX} color="#b26516" labelColor="#5a3208" currentMl={hclMl} isDropping={hclDropping} dropColor="#b26516" />
 
           {/* Beaker — flat bottom */}
           <path
@@ -312,7 +416,10 @@ export function DischargeApparatus({
           <path d={`M${BEAKER_LEFT_X - 1} ${BEAKER_TOP_Y - 1} l-6 -3 l7 -2`} fill="none" stroke="#8da9b8" strokeWidth="1.4" strokeLinecap="round" />
           <path d={`M${BEAKER_RIGHT_X + 1} ${BEAKER_TOP_Y - 1} l6 -3 l-7 -2`} fill="none" stroke="#8da9b8" strokeWidth="1.4" strokeLinecap="round" />
 
-          {/* Liquid — fixed level, no animation */}
+          {/* Beaker tick marks — 0 mL at bottom, 2000 mL at top */}
+          <BeakerMarks />
+
+          {/* Liquid — fixed level */}
           <path
             d={`M${BEAKER_LEFT_X + 2} ${FIXED_LIQUID_TOP_Y}
                H${BEAKER_RIGHT_X - 2} V${BEAKER_BOTTOM_Y - 1} H${BEAKER_LEFT_X + 2} Z`}
@@ -368,7 +475,7 @@ export function DischargeApparatus({
             <div className={styles.volumeModelRow}>
               <span className={styles.volumeModelLabel}>
                 <span className={styles.volumeDotGray} />
-                Tổng chất thêm
+                Tổng đã nhỏ
               </span>
               <span className={styles.volumeModelValue}>{(naohMl + hclMl).toFixed(2)} mL</span>
             </div>
@@ -404,7 +511,6 @@ export function DischargeApparatus({
           {stirring ? 'Dừng khuấy' : 'Bật khuấy'}
         </button>
 
-        {/* Nút Đo pH — chỉ hoạt động sau khi khuấy */}
         <button
           type="button"
           className={styles.measureButton}
@@ -416,28 +522,25 @@ export function DischargeApparatus({
         </button>
 
         <div className={styles.buretControls}>
-          {(['naoh', 'hcl'] as const).map((reagent) => {
+          {([['naoh', naohMl, naohDropping, addNaoh, '#1f8a99'], ['hcl', hclMl, hclDropping, addHcl, '#b26516']] as const).map(([reagent, , isDropping, onAdd, color]) => {
             const label = reagent === 'naoh' ? 'NaOH' : 'HCl'
             return (
               <div className={styles.buretControl} key={reagent}>
                 <span>{label}</span>
-                <div className={styles.doseStepMenu}>
-                  <button
-                    type="button"
-                    className={styles.doseStepTrigger}
-                    onClick={cycleDropStep}
-                    disabled={locked || phase === 'discharged'}
-                    title="Chọn số giọt mỗi lần thêm"
-                  >
-                    {dropStep} giọt
-                  </button>
-                </div>
+                <DoseStepMenu
+                  label={label}
+                  value={stepMl}
+                  disabled={locked || phase === 'discharged'}
+                  onChange={setStepMl}
+                />
                 <button
                   type="button"
                   className={styles.buretAdd}
-                  onClick={reagent === 'naoh' ? addNaoh : addHcl}
+                  onClick={onAdd}
                   disabled={locked || phase === 'discharged'}
-                  title={reagent === 'naoh' ? 'Thêm NaOH' : 'Thêm HCl'}
+                  title={`Nhỏ ${label}`}
+                  data-dropping={isDropping}
+                  data-color={color}
                 >
                   <PlusIcon /> <span>Thêm</span>
                 </button>
@@ -445,28 +548,20 @@ export function DischargeApparatus({
             )
           })}
         </div>
-        <button
-          type="button"
-          className={styles.buretReset}
-          onClick={reset}
-          disabled={locked || phase === 'discharged'}
-          title="Đặt lại pH về ban đầu"
-        >
-          ↺ Đặt lại
-        </button>
       </div>
 
-      {/* Data panel */}
+      {/* Data panel — chỉ hiện sau khi khóa kết quả để học sinh tự đánh giá */}
       <section className={styles.calculationPanel} aria-label="Bảng kiểm tra cột A QCVN 40:2025">
-        <div className={styles.calculationHeader}>
-          <div>
-            <strong>Kết quả kiểm tra</strong>
-            <span className={styles.calculationHeaderNote}>Cân bằng pH trước khi thải</span>
-          </div>
-          <span>Đơn vị: mg/L (pH không đơn vị)</span>
-        </div>
+        {locked ? (
+          <>
+            <div className={styles.calculationHeader}>
+              <div>
+                <strong>Kết quả kiểm tra</strong>
+                <span className={styles.calculationHeaderNote}>Cân bằng pH trước khi thải</span>
+              </div>
+              <span>Đơn vị: mg/L (pH không đơn vị)</span>
+            </div>
 
-        {/* Bảng chính — dùng measuredPH */}
         <div className={styles.tableScroll}>
           <table className={styles.table}>
             <caption className={styles.tableCaption}>
@@ -509,39 +604,6 @@ export function DischargeApparatus({
           </table>
         </div>
 
-        {/* Lịch sử đo pH */}
-        {phHistory.length > 0 && (
-          <div className={styles.tableScroll} style={{ marginTop: '12px' }}>
-            <table className={styles.table}>
-              <caption className={styles.tableCaption}>
-                Lịch sử đo pH — NaOH/HCl tích lũy và kết quả từng lần đo
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Lần</th>
-                  <th scope="col">Thời gian</th>
-                  <th scope="col">pH đo được</th>
-                  <th scope="col">NaOH (mL)</th>
-                  <th scope="col">HCl (mL)</th>
-                  <th scope="col">pH đạt</th>
-                </tr>
-              </thead>
-              <tbody>
-                {phHistory.map((entry) => (
-                  <tr key={entry.index}>
-                    <td>{entry.index}</td>
-                    <td>{entry.timestamp.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td>
-                    <td>{entry.pH.toFixed(2)}</td>
-                    <td>{entry.naohMl.toFixed(2)}</td>
-                    <td>{entry.hclMl.toFixed(2)}</td>
-                    <td className={entry.phOk ? styles.pass : styles.fail}>{entry.phOk ? '✓' : '✗'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
         {/* Lịch sử lọc từ Bàn 2 */}
         {filterHistory.length > 0 && (
           <div className={styles.tableScroll} style={{ marginTop: '12px' }}>
@@ -578,12 +640,47 @@ export function DischargeApparatus({
             </table>
           </div>
         )}
+          </>
+        ) : null}
 
-        {/* Hành động — Khóa hoặc Thải */}
+        {/* Lịch sử đo pH — nằm riêng bên dưới, hiện ngay sau mỗi lần đo */}
+        {phHistory.length > 0 && (
+          <div className={styles.tableScroll} style={{ marginTop: '12px' }}>
+            <table className={styles.table}>
+              <caption className={styles.tableCaption}>
+                Lịch sử đo pH — NaOH/HCl tích lũy và kết quả từng lần đo
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Lần</th>
+                  <th scope="col">Thời gian</th>
+                  <th scope="col">pH đo được</th>
+                  <th scope="col">NaOH (mL)</th>
+                  <th scope="col">HCl (mL)</th>
+                  <th scope="col">pH đạt</th>
+                </tr>
+              </thead>
+              <tbody>
+                {phHistory.map((entry) => (
+                  <tr key={entry.index}>
+                    <td>{entry.index}</td>
+                    <td>{entry.timestamp.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td>
+                    <td>{entry.pH.toFixed(2)}</td>
+                    <td>{entry.naohMl.toFixed(2)}</td>
+                    <td>{entry.hclMl.toFixed(2)}</td>
+                    <td className={entry.phOk ? styles.pass : styles.fail}>{entry.phOk ? '✓' : '✗'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Hành động */}
         {phase === 'balancing' ? (
           locked ? (
             <div className={styles.dischargeSuccess}>
-              <p>✓ Đã khóa kết quả Bàn 3.</p>
+              <p>✓ Đã khóa kết quả Bàn 3 — Đạt cột A, sẵn sàng thải.</p>
               <button
                 type="button"
                 className={styles.primary}
@@ -596,17 +693,15 @@ export function DischargeApparatus({
             </div>
           ) : (
             <div className={styles.dischargeActions}>
-              <p className={allOk ? styles.dischargeReady : styles.dischargeNotReady}>
-                {allOk
-                  ? '✓ Đạt cột A — sẵn sàng khóa và thải.'
-                  : '⚠ Chưa đạt cột A — cần điều chỉnh pH thêm.'}
+              <p className={styles.dischargeNotReady}>
+                Cân bằng pH trong khoảng 6–9 rồi bấm <strong>Khóa kết quả</strong>.
               </p>
               <button
                 type="button"
                 className={styles.lockButton}
                 onClick={lockResults}
                 disabled={!allOk}
-                title={allOk ? 'Khóa kết quả cân bằng pH' : 'Chưa đạt cột A'}
+                title="Khóa kết quả cân bằng pH"
               >
                 <LockIcon /> Khóa kết quả
               </button>

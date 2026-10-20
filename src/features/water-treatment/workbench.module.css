@@ -1011,8 +1011,16 @@
 .buretAdd:hover { background:#e6f3f5; }
 .buretAdd:disabled { opacity:.55; cursor:default; background:#edf2f5; border-color:#c8d5dc; color:#607486; }
 .buretAdd:disabled span { color:#607486; }
+.buretAdd[data-dropping='true'] { animation:buretPulse 0.35s ease-in-out; }
 .buretAdd svg { width:13px; height:13px; }
 .buretAdd span { color:inherit; font-weight:650; font-size:.7rem; }
+
+@keyframes buretPulse {
+  0%   { transform:scale(1); }
+  40%  { transform:scale(0.92); background:#d0eef2; }
+  70%  { transform:scale(1.04); }
+  100% { transform:scale(1); }
+}
 .buretReset { display:inline-flex; align-items:center; gap:8px; padding:0 11px; height:38px; min-height:38px; border-radius:8px; border:1px solid #a9c4ce; background:white; color:var(--ink); cursor:pointer; font:inherit; font-weight:700; line-height:1; }
 .buretReset:hover { background:#f4f8fa; color:var(--ink); }
 .buretReset svg { width:13px; height:13px; }
