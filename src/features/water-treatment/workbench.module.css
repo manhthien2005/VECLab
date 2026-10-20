@@ -1016,6 +1016,12 @@
 .buretReset { display:inline-flex; align-items:center; gap:8px; padding:0 11px; height:38px; min-height:38px; border-radius:8px; border:1px solid #a9c4ce; background:white; color:var(--ink); cursor:pointer; font:inherit; font-weight:700; line-height:1; }
 .buretReset:hover { background:#f4f8fa; color:var(--ink); }
 .buretReset svg { width:13px; height:13px; }
+
+/* Nút Đo pH — chỉ hoạt động sau khi khuấy */
+.measureButton { display:inline-flex; align-items:center; justify-content:center; height:38px; min-height:38px; padding:0 14px; border-radius:8px; border:1px solid #4a8c6a; background:#2a6f42; color:#fff; font:inherit; font-size:.8rem; font-weight:750; cursor:pointer; transition:background 180ms, border-color 180ms; }
+.measureButton:hover:not(:disabled) { background:#236138; border-color:#236138; }
+.measureButton:disabled { opacity:.45; cursor:not-allowed; }
+
 .calculateButton { border:1px solid #6b4e8a; background:#f6f1fb; color:#4a3566; cursor:pointer; transition:background 180ms, border-color 180ms; }
 .calculateButton:hover:not(:disabled) { background:#eadff5; border-color:#4a3566; }
 .calculateButton:disabled { opacity:.5; cursor:not-allowed; }
@@ -1082,7 +1088,8 @@
 
 /* ===== Bàn 3: Khóa Bàn 2 ===== */
 .lockButton { display:inline-flex; align-items:center; justify-content:center; gap:6px; height:38px; min-height:38px; padding:0 14px; border-radius:8px; border:1px solid #1f8a99; background:#0e3a45; color:#fff; font:inherit; font-size:.82rem; font-weight:700; cursor:pointer; transition:background 180ms, border-color 180ms; }
-.lockButton:hover { background:#164b57; border-color:#165a65; }
+.lockButton:hover:not(:disabled) { background:#164b57; border-color:#165a65; }
+.lockButton:disabled { opacity:.45; cursor:not-allowed; }
 .lockButton svg { width:15px; height:15px; flex:0 0 auto; }
 
 /* ===== Bàn 3: Discharge table ===== */
