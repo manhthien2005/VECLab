@@ -10,7 +10,7 @@ import styles from './workbench.module.css'
  *
  * Layout (top → bottom):
  *   • Top support bar carrying three metal-ion burets
- *   • Three burets hang from the bar: Fe 50 mL · Zn 100 mL · Pb 10 mL
+ *   • Three burets hang from the bar: Fe 100 mL · Zn 100 mL · Pb 10 mL
  *   • Flat-bottom 2.5 L beaker sitting on a magnetic stirrer hotplate
  *   • Stir bar stays fixed while the liquid and suspended particles move
  *
@@ -19,8 +19,14 @@ import styles from './workbench.module.css'
  */
 
 export type MetalSolution = 'fe' | 'zn' | 'pb'
-type DropStepMl = 0.01 | 0.05 | 0.1 | 0.5 | 1
+type DropStepMl = 0.01 | 0.05 | 0.1 | 0.5 | 1 | 5
 const DROP_STEPS: readonly DropStepMl[] = [0.01, 0.05, 0.1, 0.5, 1]
+/** Buret Fe 50 mL và Zn 100 mL cần bước lớn hơn; buret Pb 10 mL chỉ dùng bước nhỏ. */
+const DROP_STEPS_LARGE: readonly DropStepMl[] = [...DROP_STEPS, 5]
+
+function dropStepsFor(solution: MetalSolution): readonly DropStepMl[] {
+  return solution === 'pb' ? DROP_STEPS : DROP_STEPS_LARGE
+}
 
 export type SampleApStatus = {
   pH: number
@@ -38,7 +44,7 @@ const BEAKER_TOP_Y = 252
 const BEAKER_BOTTOM_Y = 425
 const BEAKER_HEIGHT = BEAKER_BOTTOM_Y - BEAKER_TOP_Y
 
-const BURET_CAPACITY_FE = 50    // Fe — nâng để đủ Fe(OH)₃ kết tủa ở pH 2–4
+const BURET_CAPACITY_FE = 100   // Fe — nâng để đủ Fe(OH)₃ kết tủa ở pH 2–4
 const BURET_CAPACITY_ZN = 100   // Zn — nâng để đủ Zn(OH)₂ kết tủa ở pH 8.5–9.5
 const BURET_CAPACITY_PB = 10    // Pb — giữ nguyên 10 mL
 const BURET_BODY_TOP = 36
@@ -128,7 +134,7 @@ function Buret({
         </g>
       )}
 
-      {/* Tick marks: 0 at top → capacity at bottom. Zn (50 mL) uses 5-mL steps; Fe/Pb (10 mL) use 1-mL steps. */}
+      {/* Tick marks: 0 at top → capacity at bottom. Fe/Zn (≥50 mL) use 5-mL steps; Pb (10 mL) uses 1-mL steps. */}
       {Array.from(
         { length: Math.floor(capacityMl / (capacityMl >= 30 ? 5 : 1)) + 1 },
         (_, i) => (capacityMl >= 30 ? 5 : 1) * i,
@@ -209,13 +215,14 @@ function DoseStepMenu({
 }) {
   const [open, setOpen] = useState(false)
   const menuId = `dose-step-${solution}`
+  const solutionLabel = METAL_COLORS[solution].fullLabel
 
   return (
     <div className={styles.doseStepMenu}>
       <button
         type="button"
         className={styles.doseStepTrigger}
-        aria-label={`Bước thêm ${solution}`}
+        aria-label={`Bước thêm ${solutionLabel}`}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={menuId}
@@ -226,8 +233,8 @@ function DoseStepMenu({
         {value} mL
       </button>
       {open ? (
-        <div id={menuId} className={styles.doseStepMenuList} role="listbox" aria-label={`Chọn bước thêm ${solution}`}>
-          {DROP_STEPS.map((step) => (
+        <div id={menuId} className={styles.doseStepMenuList} role="listbox" aria-label={`Chọn bước thêm ${solutionLabel}`}>
+          {dropStepsFor(solution).map((step) => (
             <button
               type="button"
               role="option"
@@ -349,7 +356,7 @@ export function SamplePreparationApparatus({
   const [dropSteps, setDropSteps] = useState<Record<MetalSolution, DropStepMl>>({ fe: 1, zn: 1, pb: 1 })
   const setDropStep = (solution: MetalSolution, value: string) => {
     const amount = Number(value) as DropStepMl
-    if (DROP_STEPS.includes(amount)) {
+    if (dropStepsFor(solution).includes(amount)) {
       setDropSteps((current) => ({ ...current, [solution]: amount }))
     }
   }
@@ -811,9 +818,16 @@ export function SamplePreparationApparatus({
               className={styles.buretAdd}
               data-testid="sample-add-fe"
               onClick={() => onAddDrop('fe', dropSteps.fe)}
-              disabled={feEmpty || dropSteps.fe > feRemaining || isCalculated}
+              disabled={feEmpty || isCalculated}
             >
-              <PlusIcon /> <span>{feEmpty ? 'Đã hết' : 'Thêm'}</span>
+              <PlusIcon />{' '}
+              <span>
+                {feEmpty
+                  ? 'Đã hết'
+                  : dropSteps.fe > feRemaining
+                    ? 'Trút hết'
+                    : 'Thêm'}
+              </span>
             </button>
           </div>
           <div className={styles.buretControl}>
@@ -829,9 +843,16 @@ export function SamplePreparationApparatus({
               className={styles.buretAdd}
               data-testid="sample-add-zn"
               onClick={() => onAddDrop('zn', dropSteps.zn)}
-              disabled={znEmpty || dropSteps.zn > znRemaining || isCalculated}
+              disabled={znEmpty || isCalculated}
             >
-              <PlusIcon /> <span>{znEmpty ? 'Đã hết' : 'Thêm'}</span>
+              <PlusIcon />{' '}
+              <span>
+                {znEmpty
+                  ? 'Đã hết'
+                  : dropSteps.zn > znRemaining
+                    ? 'Trút hết'
+                    : 'Thêm'}
+              </span>
             </button>
           </div>
           <div className={styles.buretControl}>
@@ -847,9 +868,16 @@ export function SamplePreparationApparatus({
               className={styles.buretAdd}
               data-testid="sample-add-pb"
               onClick={() => onAddDrop('pb', dropSteps.pb)}
-              disabled={pbEmpty || dropSteps.pb > pbRemaining || isCalculated}
+              disabled={pbEmpty || isCalculated}
             >
-              <PlusIcon /> <span>{pbEmpty ? 'Đã hết' : 'Thêm'}</span>
+              <PlusIcon />{' '}
+              <span>
+                {pbEmpty
+                  ? 'Đã hết'
+                  : dropSteps.pb > pbRemaining
+                    ? 'Trút hết'
+                    : 'Thêm'}
+              </span>
             </button>
           </div>
           <button
@@ -898,7 +926,7 @@ export function SamplePreparationApparatus({
       ) : null}
 
       <p className={styles.apparatusNote}>
-        Dung dịch gốc 100 mg/L · buret Fe chứa 50 mL, buret Zn 100 mL, buret Pb 10 mL; không tự nạp lại. Màu dung dịch là minh họa trước khi chỉnh pH.
+        Dung dịch gốc 100 mg/L · buret Fe chứa 100 mL, buret Zn 100 mL, buret Pb 10 mL; không tự nạp lại. Màu dung dịch là minh họa trước khi chỉnh pH.
       </p>
       <div className={styles.precipitateGuide} aria-label="Màu và pH tham khảo của kết tủa">
         <strong>Màu kết tủa và pH tham khảo</strong>
