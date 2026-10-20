@@ -10,7 +10,7 @@ import { EXPERIMENT_OVERVIEWS } from '@/features/experiment-catalog/overviews.js
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
 import { ScienceBackdrop } from '@/shared/ui/science-backdrop.js'
 import { JarLessonVideos } from '@/features/jar-test/lesson-videos.js'
-import { WaterTreatmentVideos } from '@/features/water-treatment/lesson-videos.js'
+import { WaterTreatmentLessonVideos } from '@/features/water-treatment/lesson-videos.js'
 import { ArrowRightIcon, CheckCircleIcon, FlaskIcon, LayersIcon, ShieldCheckIcon, BookIcon, RepeatIcon } from '@/features/landing/icons.js'
 
 export async function generateMetadata({ params }: { params: Promise<{ scenarioKey: string }> }): Promise<Metadata> {
@@ -42,7 +42,7 @@ export default async function ExperimentDetailPage({ params }: { params: Promise
 function WaterTreatmentDetail({ overview }: { overview: (typeof EXPERIMENT_OVERVIEWS)[number] }) {
   const profile = WATER_TREATMENT_PROFILE
   return <>
-    <WaterTreatmentVideos />
+    <WaterTreatmentLessonVideos />
     <div className="experiment-detail-grid">
       <section className="experiment-detail-panel experiment-detail-goal"><h2><CheckCircleIcon />Mục tiêu bài thực hành</h2><p>Khảo sát ảnh hưởng của pH và các bước kết tủa, lắng, lọc đến nồng độ Fe, Zn, Pb; sau đó cân bằng pH và đối chiếu từng chỉ tiêu.</p><dl className="experiment-detail-brief"><div><dt>Bạn được quyết định</dt><dd>Thành phần và thể tích mẫu; lượng NaOH/HCl thêm theo từng giọt; thời điểm khuấy, lắng, lọc và đo.</dd></div><div><dt>Bạn cần kiểm tra</dt><dd>Nồng độ từng kim loại sau lọc và pH cuối trong phạm vi mục tiêu.</dd></div><div><dt>Cách đọc kết quả</dt><dd>Phân biệt chỉ tiêu pH với nồng độ kim loại; đối chiếu riêng từng ngưỡng.</dd></div></dl><div className="experiment-detail-learning"><CheckCircleIcon /><p>Liên hệ cân bằng hydroxide với xử lý nước và nhận biết giới hạn của mô hình.</p></div></section>
       <section className="experiment-detail-panel experiment-detail-sample"><div className="experiment-detail-sample-image"><Image src="/assets/experiments/water-treatment/FeCl3.jpg" alt="Sắt(III) chloride dùng làm muối cấp sắt cho mẫu mô phỏng" fill sizes="(max-width: 60rem) 90vw, 30vw" /></div><div className="experiment-detail-sample-body"><h2><FlaskIcon />Mẫu đầu vào</h2><dl className="experiment-detail-values"><div><dt>Sắt (Fe)</dt><dd>{profile.feRange.min}–{profile.feRange.max} mg/L</dd></div><div><dt>Kẽm (Zn)</dt><dd>{profile.znRange.min}–{profile.znRange.max} mg/L</dd></div><div><dt>Chì (Pb)</dt><dd>{profile.pbRange.min}–{profile.pbRange.max} mg/L</dd></div><div><dt>Thể tích</dt><dd>{profile.volumeRange.min.toLocaleString('vi-VN')}–{profile.volumeRange.max.toLocaleString('vi-VN')} mL</dd></div></dl><p className="experiment-detail-note">Mẫu tổng hợp phục vụ học tập, không đại diện cho mọi loại nước thải.</p></div></section>

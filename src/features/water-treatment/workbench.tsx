@@ -618,9 +618,8 @@ function WaterTreatmentWorkbenchSession({
           onToggle={() => setGroup(group === 'composition' ? null : 'composition')}
         >
           <OperationHelp 
-            topics={WATER_TREATMENT_OPERATION_HELP.topics}
+            topic={WATER_TREATMENT_OPERATION_HELP.compose}
             guideBaseHref={GUIDE_BASE_HREF}
-            targetTopic="sample-preparation"
           />
           <p>Nhập nồng độ Fe, Zn, Pb (mg/L) và thể tích (mL).</p>
           <ActionButton 
@@ -640,9 +639,8 @@ function WaterTreatmentWorkbenchSession({
           onToggle={() => setGroup(group === 'treatment' ? null : 'treatment')}
         >
           <OperationHelp 
-            topics={WATER_TREATMENT_OPERATION_HELP.topics}
+            topic={WATER_TREATMENT_OPERATION_HELP.kwh}
             guideBaseHref={GUIDE_BASE_HREF}
-            targetTopic="treatment-process"
           />
           <p>Thêm NaOH để nâng pH, sau đó khuấy, lắng, lọc.</p>
           <ActionButton 
@@ -662,9 +660,8 @@ function WaterTreatmentWorkbenchSession({
           onToggle={() => setGroup(group === 'results' ? null : 'results')}
         >
           <OperationHelp 
-            topics={WATER_TREATMENT_OPERATION_HELP.topics}
+            topic={WATER_TREATMENT_OPERATION_HELP.check}
             guideBaseHref={GUIDE_BASE_HREF}
-            targetTopic="measurement-verification"
           />
           <p>Đo lại pH và nồng độ Kim loại sau xử lý. So sánh với QCVN 40:2025 Cột A.</p>
           <ActionButton 

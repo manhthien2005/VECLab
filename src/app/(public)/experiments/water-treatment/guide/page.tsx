@@ -5,6 +5,7 @@ import { parseUUID } from '@/shared/ids.js'
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
 import { WATER_TREATMENT_SOURCES } from '@/content/evidence/water-treatment.js'
 import { ArrowRightIcon } from '@/features/landing/icons.js'
+import { WaterTreatmentLessonVideos } from '@/features/water-treatment/lesson-videos.js'
 import styles from '@/features/experiment-guide/article.module.css'
 
 /** Dữ liệu dụng cụ — đồng bộ với equipment-panel.tsx */
@@ -16,7 +17,7 @@ const EQUIPMENT = [
     facts: [
       ['Các cation', 'Fe³⁺ · Zn²⁺ · Pb²⁺'],
       ['Anion đi kèm', 'Cl⁻ · SO₄²⁻ · NO₃⁻'],
-      ['Thể tích', '500–2.000 mL'],
+      ['Thể tích', '1000 mL'],
     ],
     steps: [
       'Chọn nồng độ Fe, Zn, Pb trong Thao tác → Chọn mẫu.',
@@ -238,6 +239,8 @@ export default async function WaterTreatmentGuidePage({
         </Link>
       </header>
 
+      <WaterTreatmentLessonVideos />
+
       <div className={styles.readingLayout}>
         <aside className={styles.rail}>
           <nav className={styles.contents} aria-label="Tra nhanh các bước">
@@ -356,22 +359,72 @@ export default async function WaterTreatmentGuidePage({
 
           {/* Tổng quan bàn làm việc */}
           <figure className={styles.overview}>
-            {/* placeholder */}
-            <div
-              style={{
-                width: '100%',
-                height: 320,
-                background: '#eaf1f6',
-                border: '1px solid var(--border)',
-                borderRadius: 8,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '.85rem',
-                color: 'var(--ink-muted)',
-              }}
-            >
-              Ảnh tổng quan ba bàn làm việc — sẽ bổ sung
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+              gap: '1.5rem',
+              marginBottom: '1rem'
+            }}>
+              <div>
+                <img 
+                  src="/assets/experiments/water-treatment/ban_1.png" 
+                  alt="Bàn 1 - Pha nước tổng hợp"
+                  style={{ 
+                    width: '100%', 
+                    height: 'auto',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)'
+                  }}
+                />
+                <p style={{ 
+                  marginTop: '0.5rem', 
+                  fontSize: '0.875rem',
+                  color: 'var(--ink-muted)',
+                  textAlign: 'center'
+                }}>
+                  <strong>Bàn 1:</strong> Pha nước
+                </p>
+              </div>
+              <div>
+                <img 
+                  src="/assets/experiments/water-treatment/ban_2.png" 
+                  alt="Bàn 2 - Xử lý, khuấy, lắng, lọc"
+                  style={{ 
+                    width: '100%', 
+                    height: 'auto',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)'
+                  }}
+                />
+                <p style={{ 
+                  marginTop: '0.5rem', 
+                  fontSize: '0.875rem',
+                  color: 'var(--ink-muted)',
+                  textAlign: 'center'
+                }}>
+                  <strong>Bàn 2:</strong> Xử lý
+                </p>
+              </div>
+              <div>
+                <img 
+                  src="/assets/experiments/water-treatment/ban_3.png" 
+                  alt="Bàn 3 - Cân bằng pH"
+                  style={{ 
+                    width: '100%', 
+                    height: 'auto',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)'
+                  }}
+                />
+                <p style={{ 
+                  marginTop: '0.5rem', 
+                  fontSize: '0.875rem',
+                  color: 'var(--ink-muted)',
+                  textAlign: 'center'
+                }}>
+                  <strong>Bàn 3:</strong> Cân bằng pH
+                </p>
+              </div>
             </div>
             <figcaption>
               Ba bàn làm việc trên VECLab: Bàn 1 Pha nước · Bàn 2 Xử lý (khuấy,
