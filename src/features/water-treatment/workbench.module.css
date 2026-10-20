@@ -958,6 +958,8 @@
 .volumeModelDivider { height:1px; background:#dde9ee; margin:1px 0; }
 .volumeDot { display:inline-block; flex:0 0 5px; width:5px; height:5px; border-radius:50%; }
 .volumeDot[data-solution='water'] { background:#a8cfe0; }
+.volumeDot[data-solution='naoh'] { background:#1f8a99; }
+.volumeDot[data-solution='hcl'] { background:#b26516; }
 .volumeDot[data-solution='fe'] { background:#d6a928; }
 .volumeDot[data-solution='zn'] { background:#4f9663; }
 .volumeDot[data-solution='pb'] { background:#7568a8; }
@@ -978,7 +980,7 @@
 .stirButton[data-active]:hover { background:#9a4a09; }
 .stirButton svg { width:14px; height:14px; }
 .buretControls { display:flex; flex:1 1 auto; min-width:0; align-items:center; gap:6px; flex-wrap:nowrap; justify-content:flex-start; }
-.buretControl { display:flex; flex:1 1 0; min-width:0; align-items:center; gap:4px; padding:4px; border:1px solid #d7e3e9; border-radius:9px; background:#f8fbfc; color:var(--ink); font:inherit; font-size:.7rem; font-weight:650; }
+.buretControl { display:flex; flex:0 0 auto; min-width:0; align-items:center; gap:4px; padding:4px; border:1px solid #d7e3e9; border-radius:9px; background:#f8fbfc; color:var(--ink); font:inherit; font-size:.7rem; font-weight:650; }
 .buretControl > span { min-width:25px; white-space:nowrap; }
 .doseStepMenu { position:relative; width:64px; }
 .doseStepTrigger { display:flex; align-items:center; justify-content:space-between; width:100%; min-height:32px; border:1px solid #a9c4ce; border-radius:7px; padding:4px 7px; background:#fff; color:var(--ink); font:inherit; font-size:.68rem; font-variant-numeric:tabular-nums; cursor:pointer; }
@@ -995,7 +997,7 @@
 .buretAdd:disabled span { color:#607486; }
 .buretAdd svg { width:13px; height:13px; }
 .buretAdd span { color:inherit; font-weight:650; font-size:.7rem; }
-.buretReset { display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:8px; border:1px solid var(--border); background:white; color:var(--ink-muted); cursor:pointer; font:inherit; }
+.buretReset { display:inline-flex; align-items:center; gap:8px; padding:0 11px; height:38px; min-height:38px; border-radius:8px; border:1px solid #a9c4ce; background:white; color:var(--ink); cursor:pointer; font:inherit; font-weight:700; line-height:1; }
 .buretReset:hover { background:#f4f8fa; color:var(--ink); }
 .buretReset svg { width:13px; height:13px; }
 .calculateButton { border:1px solid #6b4e8a; background:#f6f1fb; color:#4a3566; cursor:pointer; transition:background 180ms, border-color 180ms; }

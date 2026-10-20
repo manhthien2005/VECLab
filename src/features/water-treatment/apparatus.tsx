@@ -2,7 +2,7 @@
 
 import { useId, useRef, useState, useEffect } from 'react'
 import { runWaterTreatmentAction, type WaterTreatmentResult } from '@/app/simulate/water-treatment/actions.js'
-import { PlayIcon, StopIcon, PlusIcon, ResetIcon, BeakerIcon } from './icons.js'
+import { PlayIcon, StopIcon, PlusIcon, BeakerIcon } from './icons.js'
 import styles from './workbench.module.css'
 
 /**
@@ -139,18 +139,68 @@ function Buret({
   </g>
 }
 
+function DoseStepMenu({
+  solution,
+  value,
+  disabled,
+  onChange,
+}: {
+  solution: AcidBase
+  value: TreatmentStepMl
+  disabled: boolean
+  onChange: (value: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const menuId = `treatment-dose-step-${solution}`
+
+  return (
+    <div className={styles.doseStepMenu}>
+      <button
+        type="button"
+        className={styles.doseStepTrigger}
+        aria-label={`Bước thêm ${solution === 'naoh' ? 'NaOH' : 'HCl'}`}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={menuId}
+        disabled={disabled}
+        onClick={() => setOpen((current) => !current)}
+        onBlur={() => setTimeout(() => setOpen(false), 120)}
+      >
+        {value} mL
+      </button>
+      {open ? (
+        <div id={menuId} className={styles.doseStepMenuList} role="listbox" aria-label={`Chọn bước thêm ${solution === 'naoh' ? 'NaOH' : 'HCl'}`}>
+          {TREATMENT_STEPS.map((step) => (
+            <button
+              type="button"
+              role="option"
+              aria-selected={step === value}
+              className={styles.doseStepOption}
+              key={step}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                onChange(String(step))
+                setOpen(false)
+              }}
+            >
+              {step} mL
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  )
+}
 export function WaterTreatmentApparatus({
   status: external,
   onAddDrop,
   onToggleStir,
-  onReset,
   onCalculate,
   calculation,
 }: {
   status?: Partial<ApStatus>
   onAddDrop: (reagent: AcidBase, amountMl: number) => void
   onToggleStir: () => void
-  onReset: () => void
   onCalculate: (result: TreatmentCalculation) => void
   calculation: TreatmentCalculation | null
 }) {
@@ -186,8 +236,11 @@ export function WaterTreatmentApparatus({
   }, [activeDrop])
 
   useEffect(() => {
-    if (status.stirring) setHasBeenStirred(true)
-    if (status.naohAddedMl === 0 && status.hclAddedMl === 0) setHasBeenStirred(false)
+    const shouldBeMarkedStirred = status.stirring || status.naohAddedMl > 0 || status.hclAddedMl > 0
+    setHasBeenStirred((current) => {
+      const next = shouldBeMarkedStirred ? current || status.stirring : false
+      return next === current ? current : next
+    })
   }, [status.stirring, status.naohAddedMl, status.hclAddedMl])
 
   const hasFinishedStirring = hasBeenStirred && !status.stirring
@@ -197,6 +250,7 @@ export function WaterTreatmentApparatus({
   }
   const [calculationBusy, setCalculationBusy] = useState(false)
   const [calculationError, setCalculationError] = useState<string | null>(null)
+  const [treatmentComposition, setTreatmentComposition] = useState({ Fe: 100, Zn: 100, Pb: 100 })
   const calculateTreatment = async () => {
     if (!hasFinishedStirring || calculationBusy) return
     setCalculationBusy(true)
@@ -204,7 +258,7 @@ export function WaterTreatmentApparatus({
     try {
       const result = await runWaterTreatmentAction({
         action: 'measure-final',
-        composition: { Fe: 100, Zn: 100, Pb: 100 },
+        composition: treatmentComposition,
         pH: status.pH,
         volume_mL: status.volumeMl,
       })
@@ -225,6 +279,50 @@ export function WaterTreatmentApparatus({
     </div>
 
     <div className={styles.apparatusStage} aria-label="Bàn thí nghiệm với máy khuấy từ, cốc 2L đế bằng và hai buret treo phía trên">
+      <div className={styles.volumeModel} aria-label="Mô hình thể tích dung dịch trong cốc">
+        <div className={styles.volumeModelHeader}>
+          <strong>Thể tích trong cốc</strong>
+        </div>
+        <div className={styles.volumeModelGrid}>
+          <div className={styles.volumeModelRow}>
+            <span className={styles.volumeModelLabel}>
+              <span className={styles.volumeDot} data-solution="water" />
+              Nước mẫu
+            </span>
+            <span className={styles.volumeModelValue}>{INITIAL_STATUS.volumeMl} mL</span>
+          </div>
+          <div className={styles.volumeModelDivider} />
+          <div className={styles.volumeModelRow}>
+            <span className={styles.volumeModelLabel}>
+              <span className={styles.volumeDot} data-solution="naoh" />
+              NaOH 1 M
+            </span>
+            <span className={styles.volumeModelValue}>{status.naohAddedMl} mL</span>
+          </div>
+          <div className={styles.volumeModelRow}>
+            <span className={styles.volumeModelLabel}>
+              <span className={styles.volumeDot} data-solution="hcl" />
+              HCl 1 M
+            </span>
+            <span className={styles.volumeModelValue}>{status.hclAddedMl} mL</span>
+          </div>
+          <div className={styles.volumeModelDivider} />
+          <div className={styles.volumeModelRow}>
+            <span className={styles.volumeModelLabel}>
+              <span className={styles.volumeDotGray} />
+              Tổng chất thêm
+            </span>
+            <span className={styles.volumeModelValue}>{status.naohAddedMl + status.hclAddedMl} mL</span>
+          </div>
+          <div className={styles.volumeModelRow} data-total>
+            <span className={styles.volumeModelLabel}>
+              <span className={styles.volumeDotAccent} />
+              Tổng cộng
+            </span>
+            <span className={styles.volumeModelValue}>{status.volumeMl} mL</span>
+          </div>
+        </div>
+      </div>
       <svg viewBox="0 0 380 470" className={styles.apparatusSvg} role="img" aria-label="Sơ đồ bàn xử lý nước: hai buret NaOH và HCl 1M treo trên giá, máy khuấy từ dưới đáy cốc, cốc 2L đế bằng ở giữa">
         <defs>
           <linearGradient id={uid + 'glass'}>
@@ -362,15 +460,17 @@ export function WaterTreatmentApparatus({
           const label = reagent === 'naoh' ? 'NaOH' : 'HCl'
           return <div className={styles.buretControl} key={reagent}>
             <span>{label}</span>
-            <select className={styles.doseStepTrigger} value={dropSteps[reagent]} onChange={(event) => setDropStep(reagent, event.target.value)} disabled={empty} aria-label={`Bước thêm ${label}`}>
-              {TREATMENT_STEPS.map((step) => <option key={step} value={step}>{step} mL</option>)}
-            </select>
+            <DoseStepMenu
+              solution={reagent}
+              value={dropSteps[reagent]}
+              onChange={(value) => setDropStep(reagent, value)}
+              disabled={empty}
+            />
             <button type="button" className={styles.buretAdd} data-testid={`wt-add-${reagent}`} onClick={() => onAddDrop(reagent, dropSteps[reagent])} disabled={empty}>
               <PlusIcon /> <span>{empty ? 'Đã hết' : 'Thêm'}</span>
             </button>
           </div>
         })}
-        <button type="button" className={styles.buretReset} onClick={onReset} aria-label="Đặt lại bàn thực hành"><ResetIcon /> Đặt lại</button>
       </div>
     </div>
     {calculationError ? <p className={styles.calculationError} role="alert">{calculationError}</p> : null}

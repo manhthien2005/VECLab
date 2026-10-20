@@ -282,12 +282,12 @@ function WaterTreatmentWorkbenchSession({
         const added = prev.naohAddedMl + amountMl
         const target = 12
         const pH = +(prev.pH + (target - prev.pH) * Math.min(1, amountMl * 0.18)).toFixed(6)
-        return { ...prev, naohAddedMl: added, pH }
+        return { ...prev, naohAddedMl: added, volumeMl: prev.volumeMl + amountMl, pH }
       } else {
         const added = prev.hclAddedMl + amountMl
         const target = 1.5
         const pH = +(prev.pH + (target - prev.pH) * Math.min(1, amountMl * 0.18)).toFixed(6)
-        return { ...prev, hclAddedMl: added, pH }
+        return { ...prev, hclAddedMl: added, volumeMl: prev.volumeMl + amountMl, pH }
       }
     })
   }, [])
@@ -319,11 +319,6 @@ function WaterTreatmentWorkbenchSession({
 
   const toggleSampleStir = useCallback(() => {
     setSampleApStatus((prev) => ({ ...prev, stirring: !prev.stirring }))
-  }, [])
-
-  const resetApparatus = useCallback(() => {
-    setTreatmentCalculation(null)
-    setApStatus({ pH: 5.4, volumeMl: 1000, stirring: false, naohAddedMl: 0, hclAddedMl: 0 })
   }, [])
 
   const resetSampleApparatus = useCallback(() => {
@@ -413,7 +408,6 @@ function WaterTreatmentWorkbenchSession({
             status={apStatus}
             onAddDrop={addDrop}
             onToggleStir={toggleStir}
-            onReset={resetApparatus}
             onCalculate={(result) => setTreatmentCalculation(result)}
             calculation={treatmentCalculation}
           />
