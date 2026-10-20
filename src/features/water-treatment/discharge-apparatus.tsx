@@ -681,15 +681,17 @@ export function DischargeApparatus({
           locked ? (
             <div className={styles.dischargeSuccess}>
               <p>✓ Đã khóa kết quả Bàn 3 — Đạt cột A, sẵn sàng thải.</p>
-              <button
-                type="button"
-                className={styles.primary}
-                onClick={onDischarge}
-                disabled={!allOk}
-                title={allOk ? 'Thải nước đã xử lý ra môi trường' : 'Chưa đạt cột A'}
-              >
-                Thải ra môi trường
-              </button>
+              <div className={styles.dischargeButtonWrap}>
+                <button
+                  type="button"
+                  className={styles.primary}
+                  onClick={onDischarge}
+                  disabled={!allOk}
+                  title={allOk ? 'Thải nước đã xử lý ra môi trường' : 'Chưa đạt cột A'}
+                >
+                  Thải ra môi trường
+                </button>
+              </div>
             </div>
           ) : (
             <div className={styles.dischargeActions}>
