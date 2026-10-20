@@ -2,9 +2,13 @@
 
 import { useId, useRef, useState, useEffect, useMemo } from 'react'
 import { runWaterTreatmentAction, type WaterTreatmentResult } from '@/app/simulate/water-treatment/actions.js'
+import { capacityAtSaturation } from '@/features/water-treatment/capacity.js'
 import type { SampleCalculation } from './sample-apparatus.js'
 import { PlayIcon, StopIcon, PlusIcon, BeakerIcon, SettleIcon, FilterIcon } from './icons.js'
 import styles from './workbench.module.css'
+
+/** Khối lượng nguyên tử để đổi mol/L của solver sang mg/L (khớp server action). */
+const ATOMIC_WEIGHT = { Fe: 55.845, Zn: 65.38, Pb: 207.2 } as const
 
 /**
  * Apparatus for Water Treatment — magnetic stirrer version.
@@ -232,33 +236,75 @@ export function WaterTreatmentApparatus({
   const hasZn = Boolean(sampleStatus && sampleStatus.znAddedMl > 0)
   const hasPb = Boolean(sampleStatus && sampleStatus.pbAddedMl > 0)
 
+  /** Nồng độ kim loại đang trong cốc (mg/L) — lấy từ kết quả pha mẫu ở Bàn 1.
+   *  Không có mẫu thì cốc Bàn 2 là nước cất → không có kim loại nào để xử lý. */
+  const treatmentComposition = useMemo(() => {
+    const dissolved = sampleCalculation?.dissolvedMgL
+    if (!dissolved) return null
+    return { Fe: dissolved.fe, Zn: dissolved.zn, Pb: dissolved.pb }
+  }, [sampleCalculation])
+  const hasTreatmentSample = treatmentComposition !== null
+
   // Tính màu dung dịch và kết tủa phản ánh mẫu đang được xử lý ở Bàn 2
   const sampleMeta = useMemo(() => {
-    const noSample = { liquidColor: '#bcd5e0', precipitateColor: null as string | null, pptMg: 0, precipitateColorOnFilter: null as string | null, precipitatedOnFilter: false }
+    const noSample = { liquidColor: '#bcd5e0', precipitateColor: null as string | null, precipitateEdge: null as string | null, pptMg: 0, precipitateColorOnFilter: null as string | null, precipitatedOnFilter: false }
 
     // Mẫu chưa pha ở Bàn 1 → cốc Bàn 2 vẫn là nước cất
     if (!hasFe && !hasZn && !hasPb) return noSample
 
-    // Kết tủa ở Bàn 2 đến từ hai nguồn: kết tủa đã có ở Bàn 1 và kết tủa tạo ra khi xử lý
-    const samplePpt = sampleCalculation
-      ? (sampleCalculation.precipitateMg?.fe || 0) + (sampleCalculation.precipitateMg?.zn || 0) + (sampleCalculation.precipitateMg?.pb || 0)
-      : 0
-    const treatedPpt = calculation
-      ? (calculation.precipitated_mgPerL?.Fe || 0) + (calculation.precipitated_mgPerL?.Zn || 0) + (calculation.precipitated_mgPerL?.Pb || 0)
-      : 0
-    const totalPpt = samplePpt + treatedPpt
+    // Kết tủa đã có ở Bàn 1 (lúc pha mẫu)
+    const fePpt = sampleCalculation?.precipitateMg?.fe || 0
+    const znPpt = sampleCalculation?.precipitateMg?.zn || 0
+    const pbPpt = sampleCalculation?.precipitateMg?.pb || 0
+
+    // Kết tủa do xử lý ở Bàn 2. Ưu tiên số đo đã commit; nếu người học chưa
+    // bấm Tính/Lắng/Lọc thì dùng cùng công thức capacity để dự báo kết tủa
+    // đang hình thành — đây là hiện tượng quan sát được, không phải số đo mới.
+    const measuredPpt = calculation?.precipitated_mgPerL
+    let est = { Fe: 0, Zn: 0, Pb: 0 }
+    if (!calculation && treatmentComposition) {
+      const cap = capacityAtSaturation(status.pH)
+      const capMgL = {
+        Fe: cap.Fe * ATOMIC_WEIGHT.Fe * 1000,
+        Zn: cap.Zn * ATOMIC_WEIGHT.Zn * 1000,
+        Pb: cap.Pb * ATOMIC_WEIGHT.Pb * 1000,
+      }
+      // Lượng kết tủa = input − lượng còn hòa tan (min(input, capacity)),
+      // đúng công thức mà server action dùng cho `settle`.
+      est = {
+        Fe: Math.max(0, treatmentComposition.Fe - Math.min(treatmentComposition.Fe, capMgL.Fe)),
+        Zn: Math.max(0, treatmentComposition.Zn - Math.min(treatmentComposition.Zn, capMgL.Zn)),
+        Pb: Math.max(0, treatmentComposition.Pb - Math.min(treatmentComposition.Pb, capMgL.Pb)),
+      }
+    }
+    const treatedFe = measuredPpt?.Fe || est.Fe
+    const treatedZn = measuredPpt?.Zn || est.Zn
+    const treatedPb = measuredPpt?.Pb || est.Pb
+
+    const totalPpt = fePpt + znPpt + pbPpt + treatedFe + treatedZn + treatedPb
 
     // Màu dung dịch: Fe³⁺ vàng nâu, Zn²⁺/Pb²⁺ gần như trong
     const liquidColor = hasFe ? '#F1DFA0' : '#F4F6F8'
 
-    // Màu kết tủa theo thành phần kết tủa chiếm ưu thế
-    const fePpt = (sampleCalculation?.precipitateMg?.fe || 0) + (calculation?.precipitated_mgPerL?.Fe || 0)
-    const pbPpt = (sampleCalculation?.precipitateMg?.pb || 0) + (calculation?.precipitated_mgPerL?.Pb || 0)
+    // Màu kết tủa theo thành phần kết tủa chiếm ưu thế. Kết tủa trắng
+    // (Zn/Pb) vẽ thêm viền xám để không chìm vào dung dịch trong/nhợt.
+    const feTotal = fePpt + treatedFe
+    const pbTotal = pbPpt + treatedPb
     let precipitateColor: string | null = null
+    let precipitateEdge: string | null = null
     if (totalPpt > 0) {
-      if (fePpt > 0) precipitateColor = '#A56535'        // Fe(OH)₃ nâu đỏ
-      else if (pbPpt > 0) precipitateColor = '#F2EBDD'  // Pb trắng kem
-      else precipitateColor = '#F1F1ED'                // Zn(OH)₂ trắng
+      if (feTotal > 0) {
+        precipitateColor = '#A56535'                  // Fe(OH)₃ nâu đỏ
+        precipitateEdge = '#7d4522'
+      } else if (pbTotal > 0) {
+        precipitateColor = '#EFE6D2'                  // Pb trắng kem
+        precipitateEdge = '#8a7d5e'
+      } else {
+        precipitateColor = '#F4F2EA'                  // Zn(OH)₂ trắng ngà
+        // Kết túa trắng trên dung dịch trong cần viền đậm hơn mới thấy;
+        // đây là ranh giới hạt, không phải màu của kết túa.
+        precipitateEdge = '#7b858a'
+      }
     }
 
     // Đã lọc → pha rắn nằm trên giấy lọc, cốc chỉ còn filtrate trong
@@ -266,13 +312,31 @@ export function WaterTreatmentApparatus({
       return {
         liquidColor: '#dbe8ee',
         precipitateColor: null as string | null,
+        precipitateEdge: null as string | null,
         pptMg: 0,
         precipitateColorOnFilter: precipitateColor,
         precipitatedOnFilter: totalPpt > 0,
       }
     }
-    return { liquidColor, precipitateColor, pptMg: totalPpt, precipitateColorOnFilter: null as string | null, precipitatedOnFilter: false }
-  }, [sampleCalculation, calculation, hasFe, hasZn, hasPb, status.filtered])
+    return {
+      liquidColor,
+      precipitateColor,
+      precipitateEdge,
+      pptMg: totalPpt,
+      precipitateColorOnFilter: null as string | null,
+      precipitatedOnFilter: false,
+    }
+  }, [sampleCalculation, calculation, treatmentComposition, status.pH, status.filtered, hasFe, hasZn, hasPb])
+
+  // Gợi ý vùng pH kết tủa để người học hiểu vì sao pH 7 chưa có kết tủa nhưng
+  // pH 9 thì có, và vì sao tăng pH quá cao kết tủa lại tan bớt.
+  const znAdvice = (() => {
+    if (!hasZn || !hasFe && !hasPb) return null
+    if (sampleMeta.pptMg <= 0) return 'Zn chưa kết tủa ở pH này — thử pH 8–10.'
+    if (status.pH >= 11) return 'Zn(OH)₂ là base lưỡng phân: pH quá cao thì kết tủa tan lại.'
+    if (status.pH >= 9.5) return 'Gần đỉnh kết tủa Zn. Tăng pH thêm sẽ làm kết tủa tan dần.'
+    return null
+  })()
 
   const liquidColor = sampleMeta.liquidColor
 
@@ -317,15 +381,6 @@ export function WaterTreatmentApparatus({
   }
   const [calculationBusy, setCalculationBusy] = useState(false)
   const [calculationError, setCalculationError] = useState<string | null>(null)
-
-  /** Nồng độ kim loại đang trong cốc (mg/L) — lấy từ kết quả pha mẫu ở Bàn 1.
-   *  Không có mẫu thì cốc Bàn 2 là nước cất → không có kim loại nào để xử lý. */
-  const treatmentComposition = useMemo(() => {
-    const dissolved = sampleCalculation?.dissolvedMgL
-    if (!dissolved) return null
-    return { Fe: dissolved.fe, Zn: dissolved.zn, Pb: dissolved.pb }
-  }, [sampleCalculation])
-  const hasTreatmentSample = treatmentComposition !== null
 
   const runStep = async (
     action: 'measure-final' | 'settle' | 'filter',
@@ -512,6 +567,7 @@ export function WaterTreatmentApparatus({
             Vị trí do React đặt; chuyển động do .pptSwirl trên từng hạt. */}
         {(() => {
           const pptColor = sampleMeta.precipitateColor
+          const pptEdge = sampleMeta.precipitateEdge ?? '#7d6a52'
           if (!pptColor || liquidDepth <= 8) return null
           const cx = (BEAKER_LEFT_X + BEAKER_RIGHT_X) / 2
           const floorY = BEAKER_BOTTOM_Y - 2
@@ -527,8 +583,8 @@ export function WaterTreatmentApparatus({
               {/* Lớp kết tủa lắng đáy — luôn hiện, dày dần theo lượng kết tủa */}
               <path
                 d={'M' + (BEAKER_LEFT_X + 3) + ' ' + floorY + ' Q' + cx + ' ' + (floorY - bedHeight - 4) + ' ' + (BEAKER_RIGHT_X - 3) + ' ' + floorY + ' Z'}
-                fill={pptColor} fillOpacity=".82"
-                stroke={pptColor} strokeOpacity=".35" strokeWidth=".5"
+                fill={pptColor} fillOpacity=".9"
+                stroke={pptEdge} strokeOpacity=".9" strokeWidth="1"
               />
 
               {status.stirring ? (
@@ -546,7 +602,7 @@ export function WaterTreatmentApparatus({
                       cx={cx}
                       cy={y}
                       rx={size} ry={size * 0.72}
-                      fill={pptColor}
+                      fill={pptColor} stroke={pptEdge} strokeOpacity=".7" strokeWidth=".55"
                       className={styles.pptSwirl}
                       style={{
                         ['--swirl-a' as string]: orbitRx.toFixed(2) + 'px',
@@ -567,7 +623,7 @@ export function WaterTreatmentApparatus({
                   const size = 1.3 + ((s1 + s2) % 5) * 0.3
                   return (
                     <ellipse key={i} cx={x} cy={y} rx={size} ry={size * 0.72}
-                      fill={pptColor} fillOpacity=".9" />
+                      fill={pptColor} stroke={pptEdge} strokeOpacity=".75" strokeWidth=".5" fillOpacity=".95" />
                   )
                 })
               )}
@@ -681,6 +737,7 @@ export function WaterTreatmentApparatus({
         })}
       </div>
     </div>
+    {znAdvice ? <p className={styles.pptAdvice} role="status">{znAdvice}</p> : null}
     {calculationError ? <p className={styles.calculationError} role="alert">{calculationError}</p> : null}
     {calculation ? (
       <section className={styles.calculationPanel} aria-label="Bảng tổng hợp kết quả bàn xử lý nước">
