@@ -349,6 +349,8 @@ export function SamplePreparationApparatus({
   const hasFinishedStirring = hasBeenStirred && !status.stirring
   const [calculationBusy, setCalculationBusy] = useState(false)
   const [localCalculationError, setLocalCalculationError] = useState<string | null>(null)
+  const [isCalculated, setIsCalculated] = useState(false)
+  
   const calculateSample = async () => {
     if (!hasFinishedStirring || calculationBusy) return
     setCalculationBusy(true)
@@ -361,6 +363,7 @@ export function SamplePreparationApparatus({
         pbAddedMl,
         sourceMgL: 100,
       })
+      setIsCalculated(true)
       onCalculate(result)
     } catch (error) {
       setLocalCalculationError(error instanceof Error ? error.message : 'Không thể chạy PHREEQC.')
@@ -368,6 +371,13 @@ export function SamplePreparationApparatus({
       setCalculationBusy(false)
     }
   }
+  
+  // Reset calculated state when user resets the experiment
+  useEffect(() => {
+    if (!feAddedMl && !znAddedMl && !pbAddedMl) {
+      setIsCalculated(false)
+    }
+  }, [feAddedMl, znAddedMl, pbAddedMl])
 
   return (
     <div className={styles.apparatus}>
@@ -759,6 +769,7 @@ export function SamplePreparationApparatus({
           className={styles.stirButton}
           data-active={status.stirring}
           onClick={onToggleStir}
+          disabled={isCalculated}
           data-testid="sample-toggle-stir"
         >
           {status.stirring ? <StopIcon /> : <PlayIcon />}
@@ -768,11 +779,11 @@ export function SamplePreparationApparatus({
           type="button"
           className={styles.calculateButton}
           onClick={calculateSample}
-          disabled={!hasFinishedStirring || calculationBusy}
-          title={hasFinishedStirring ? 'Chạy PHREEQC để tính pH, ion còn tan và pha rắn' : 'Hãy khuấy xong rồi dừng máy trước khi tính'}
+          disabled={!hasFinishedStirring || calculationBusy || isCalculated}
+          title={isCalculated ? 'Đã tính toán. Nhấn "Đặt lại" để bắt đầu lại' : hasFinishedStirring ? 'Chạy PHREEQC để tính pH, ion còn tan và pha rắn' : 'Hãy khuấy xong rồi dừng máy trước khi tính'}
           data-testid="sample-calculate"
         >
-          <BeakerIcon /> {calculationBusy ? 'Đang chạy PHREEQC…' : 'Tính bằng PHREEQC'}
+          <BeakerIcon /> {calculationBusy ? 'Đang tính…' : 'Tính toán'}
         </button>
         <div className={styles.buretControls}>
           <div className={styles.buretControl}>
@@ -781,14 +792,14 @@ export function SamplePreparationApparatus({
               solution="fe"
               value={dropSteps.fe}
               onChange={(value) => setDropStep('fe', value)}
-              disabled={feEmpty}
+              disabled={feEmpty || isCalculated}
             />
             <button
               type="button"
               className={styles.buretAdd}
               data-testid="sample-add-fe"
               onClick={() => onAddDrop('fe', dropSteps.fe)}
-              disabled={feEmpty || dropSteps.fe > feRemaining}
+              disabled={feEmpty || dropSteps.fe > feRemaining || isCalculated}
             >
               <PlusIcon /> <span>{feEmpty ? 'Đã hết' : 'Thêm'}</span>
             </button>
@@ -799,14 +810,14 @@ export function SamplePreparationApparatus({
               solution="zn"
               value={dropSteps.zn}
               onChange={(value) => setDropStep('zn', value)}
-              disabled={znEmpty}
+              disabled={znEmpty || isCalculated}
             />
             <button
               type="button"
               className={styles.buretAdd}
               data-testid="sample-add-zn"
               onClick={() => onAddDrop('zn', dropSteps.zn)}
-              disabled={znEmpty || dropSteps.zn > znRemaining}
+              disabled={znEmpty || dropSteps.zn > znRemaining || isCalculated}
             >
               <PlusIcon /> <span>{znEmpty ? 'Đã hết' : 'Thêm'}</span>
             </button>
@@ -817,14 +828,14 @@ export function SamplePreparationApparatus({
               solution="pb"
               value={dropSteps.pb}
               onChange={(value) => setDropStep('pb', value)}
-              disabled={pbEmpty}
+              disabled={pbEmpty || isCalculated}
             />
             <button
               type="button"
               className={styles.buretAdd}
               data-testid="sample-add-pb"
               onClick={() => onAddDrop('pb', dropSteps.pb)}
-              disabled={pbEmpty || dropSteps.pb > pbRemaining}
+              disabled={pbEmpty || dropSteps.pb > pbRemaining || isCalculated}
             >
               <PlusIcon /> <span>{pbEmpty ? 'Đã hết' : 'Thêm'}</span>
             </button>
