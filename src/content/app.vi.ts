@@ -79,7 +79,7 @@ export const APP_STRINGS = {
         scenarioKey: 'water-treatment',
         title: 'Xử lý nước Fe, Zn và Pb',
         summary: 'Thiết kế chuỗi hydroxide route cho nước nhiều kim loại nặng.',
-        available: false,
+        available: true,
       },
       {
         scenarioKey: 'methylene-blue-adsorption',
