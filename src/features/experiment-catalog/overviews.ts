@@ -29,6 +29,19 @@ const PRESENTATION = {
     outcome: 'Độ đục sau lắng, hiệu suất xử lý',
     procedure: ['Chuẩn bị các cốc, đo mẫu đầu và chọn liều phèn', 'Khuấy nhanh 60 giây, khuấy chậm 20 phút và lắng 30 phút mô phỏng', 'Đo độ đục, tự tính hiệu suất và chọn phương án nộp'],
   },
+  'cold-process-soap': {
+    image: '/assets/experiments/soap.jpg',
+    imageAlt: 'Cốc kiềm, cốc dầu, cốc trộn và khuôn silicone trên bàn xà phòng',
+    category: 'Xà phòng hóa',
+    question: 'Lượng NaOH, nước và dầu cần tỉ lệ nào để bánh xà phòng đạt chất lượng?',
+    learning: 'Tính lượng NaOH và nước, pha kiềm đúng chiều, trộn với dầu, đợi dung dịch đặc lại và đọc pH sau ủ.',
+    tools: 'Cốc chịu nhiệt, cân, máy khuấy và khuôn silicone.',
+    prerequisites: 'Hiểu tỏa nhiệt khi hòa tan kiềm và vì sao không đổ nước vào NaOH rắn.',
+    input: 'Một loại dầu (ô liu / dừa / cọ) · NaOH · nước cất',
+    parameters: 'Khối lượng dầu, thể tích nước, khối lượng NaOH, khuấy máy hoặc tay',
+    outcome: 'Tối đa 3 mẫu thử với chỉ số kiềm, dầu, hỗn hợp, pH và khối lượng. Một mẫu đạt mọi yêu cầu là đạt',
+    procedure: ['Rót nước, rót NaOH vào nước và chờ kiềm nguội; chọn loại dầu và rót dầu', 'Rót kiềm và dầu vào cốc trộn, khuấy rồi đợi dung dịch đặc lại', 'Đổ khuôn, chờ 24 giờ, tháo khuôn, đợi 4 tuần rồi đo pH và cân'],
+  },
   'methylene-blue-adsorption': {
     image: '/assets/experiments/adsorption.webp',
     imageAlt: 'Dung dịch xanh methylene và than hoạt tính',
@@ -64,10 +77,17 @@ const HOME_OVERVIEWS = APP_STRINGS.home.showcaseCards.map(({ scenarioKey, title 
   scenarioKey, title, ...PRESENTATION[scenarioKey],
 }))
 
+const SOAP_OVERVIEW = {
+  scenarioKey: 'cold-process-soap' as const,
+  title: 'Xà phòng hóa (cold process)',
+  ...PRESENTATION['cold-process-soap'],
+}
+
 /** Library lessons can expand without changing the approved landing picker. */
 export const EXPERIMENT_OVERVIEWS = [
   ...HOME_OVERVIEWS.filter(item => item.scenarioKey !== 'methylene-blue-adsorption'),
   PLASTIC_OVERVIEW,
+  SOAP_OVERVIEW,
   ...HOME_OVERVIEWS.filter(item => item.scenarioKey === 'methylene-blue-adsorption'),
 ]
 

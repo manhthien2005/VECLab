@@ -1,0 +1,16 @@
+---
+description: Canonical units, normalize vs display, reject invalid units.
+globs: domain/units/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Domain units
+
+Canonical (engine/state only): volume `L`, mass `g`, amount `mol`, molar conc `mol/L`, mass conc `g/L`, equivalent conc `eq/L`, temperature `degC`, density `g/cm3`, pH none.
+
+- Normalize user unit → canonical before engine. Never compute with display units.
+- Keep `originalValue`/`originalUnit` in input metadata only.
+- Same-dimension convert by exact factor (mL→L = /1000). `mg/L`→`mol/L` needs molar-mass bundle (Cu 63.546 g/mol).
+- Reject unknown unit or wrong dimension with typed validation error; do not run engine.
+- Domain module: no React, DOM, or Supabase.
+- Vitest colocated; golden/full precision; UI rounding is presentation, not this module.

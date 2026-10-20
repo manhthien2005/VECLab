@@ -1,0 +1,14 @@
+.cupMap { margin: 0; }
+.cupMap > div { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 20px; padding: 13px 0; border-bottom: 1px solid var(--border); }
+.cupMap dt { font-size: .85rem; line-height: 1.8; font-weight: 650; }
+.cupMap dd { margin: 0; }
+.routes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 24px 0; }
+.routes > div { padding-top: 14px; border-top: 2px solid var(--border-strong); }
+.tableScroll { overflow-x: auto; margin: 14px 0; }
+.tableScroll table { width: 100%; border-collapse: collapse; font-size: .8rem; font-variant-numeric: tabular-nums; }
+.tableScroll th, .tableScroll td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; }
+.tableScroll caption { text-align: left; margin-bottom: 10px; font-weight: 650; color: var(--ink); }
+@media (max-width: 600px) {
+  .cupMap > div, .routes { grid-template-columns: 1fr; gap: 5px; }
+  .routes { gap: 18px; }
+}

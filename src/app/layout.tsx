@@ -71,7 +71,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
       </head>
-      <body className={manrope.variable}>
+      <body className={manrope.variable} suppressHydrationWarning>
         {/* First tab stop on every page: the workbench has many controls before the
             content, and a keyboard user must be able to skip the header. */}
         <a className="skip-link" href="#main">

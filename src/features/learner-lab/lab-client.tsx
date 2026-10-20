@@ -10,6 +10,7 @@ import type { JarState } from '@/domain/experiments/jar-test/model.js'
 import { listJarLabRows, removeJarLabAttempt, type JarLabRow } from './jar-attempts.js'
 import { ExtractionLabSection } from './extraction-section.js'
 import { PlasticLabSection } from './plastic-section.js'
+import { SoapLabSection } from './soap-section.js'
 import { EXPERIMENT_OVERVIEWS } from '@/features/experiment-catalog/overviews.js'
 import { ArrowRightIcon, FlaskIcon, GuestIcon, ShieldCheckIcon, WarningIcon } from '@/features/landing/icons.js'
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
@@ -100,6 +101,7 @@ export function LabClient({ storageMode }: { storageMode: StorageMode }) {
       <LabStorageNotice storageMode={storageMode} />
       <ExtractionLabSection />
       <PlasticLabSection />
+      <SoapLabSection />
 
       <section aria-labelledby="jar-lab-heading"><div className="learner-lab-group-heading"><div><h2 id="jar-lab-heading">Jar Test</h2><p>Các lượt chuẩn bị mẫu, so sánh cốc và ghi kết quả.</p></div></div>
       {deleteError && <p className="learner-lab-error" role="alert">Chưa xóa được lượt thực hành. Dữ liệu vẫn hiển thị bên dưới; bạn có thể thử lại.</p>}

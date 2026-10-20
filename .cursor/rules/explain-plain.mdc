@@ -1,0 +1,17 @@
+---
+description: Explain to the user in plain Vietnamese; no jargon unless translated.
+alwaysApply: true
+---
+
+# Giải thích dễ hiểu
+
+When talking to the user (chat replies, bug reports, plans, after-work reports):
+
+- Write in Vietnamese unless they wrote in another language.
+- Lead with what they see or can do. Then why. Then what happens next.
+- Do not open with file paths, function names, or spec section numbers.
+- If a technical word is needed, say it in everyday words first, then the name in parentheses if useful.
+- Prefer short sentences. One idea per sentence.
+- Do not dump code as the explanation. A code citation is only for showing the exact line after the plain-language point is already clear.
+- Bad: "`resolveNextGuidedAction` still returns `select_route` because the probe keeps it available."
+- Good: "Bạn đã chọn NaOH xong. Nút trên màn hình không chịu đổi sang bước hiệu chuẩn."

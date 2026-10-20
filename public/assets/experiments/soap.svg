@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img">
+  <title>Bàn xà phòng cold process</title>
+  <rect width="640" height="400" fill="#f3f7fb"/>
+  <rect x="40" y="300" width="560" height="18" rx="4" fill="#d5e2ee"/>
+  <g fill="#e8f4f4" stroke="#7aa3b0" stroke-width="3">
+    <path d="M90 120h90l12 160H78Z"/>
+    <path d="M250 140h100l10 140H240Z"/>
+    <path d="M420 100h120l14 180H406Z"/>
+  </g>
+  <path d="M96 220h78l6 54H90Z" fill="#7ec8c4"/>
+  <path d="M258 210h84l6 64H252Z" fill="#e6c56e"/>
+  <path d="M430 200h96l8 72H422Z" fill="#c5ddd0"/>
+  <rect x="470" y="268" width="110" height="32" rx="8" fill="#f2d9b0" stroke="#c9a06a" stroke-width="2"/>
+  <circle cx="140" cy="88" r="10" fill="#38bdf8"/>
+  <circle cx="300" cy="108" r="8" fill="#f59e0b"/>
+</svg>
