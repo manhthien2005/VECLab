@@ -9,6 +9,7 @@ import { GuestAttemptRepository } from '@/application/attempts/guest-repository.
 import type { JarState } from '@/domain/experiments/jar-test/model.js'
 import { listJarLabRows, removeJarLabAttempt, type JarLabRow } from './jar-attempts.js'
 import { ExtractionLabSection } from './extraction-section.js'
+import { PlasticLabSection } from './plastic-section.js'
 import { EXPERIMENT_OVERVIEWS } from '@/features/experiment-catalog/overviews.js'
 import { ArrowRightIcon, FlaskIcon, GuestIcon, ShieldCheckIcon, WarningIcon } from '@/features/landing/icons.js'
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
@@ -98,6 +99,7 @@ export function LabClient({ storageMode }: { storageMode: StorageMode }) {
       </header>
       <LabStorageNotice storageMode={storageMode} />
       <ExtractionLabSection />
+      <PlasticLabSection />
 
       <section aria-labelledby="jar-lab-heading"><div className="learner-lab-group-heading"><div><h2 id="jar-lab-heading">Jar Test</h2><p>Các lượt chuẩn bị mẫu, so sánh cốc và ghi kết quả.</p></div></div>
       {deleteError && <p className="learner-lab-error" role="alert">Chưa xóa được lượt thực hành. Dữ liệu vẫn hiển thị bên dưới; bạn có thể thử lại.</p>}
@@ -136,8 +138,8 @@ export function LabStorageNotice({ storageMode }: { storageMode: StorageMode }) 
       <Icon />
       <div className="learner-lab-storage-copy">
         <div className="learner-lab-storage-title"><h2>Lưu trên trình duyệt này</h2><span>{local ? 'Chưa đăng nhập' : 'Đã đăng nhập'}</span></div>
-        <p>Các lượt Jar Test và chiết tách bên dưới được lưu trên thiết bị này, kể cả khi đã đăng nhập. Dữ liệu không đồng bộ sang thiết bị khác và có thể mất khi xóa dữ liệu web hoặc đóng cửa sổ riêng tư.</p>
-        <p className="learner-lab-storage-hint">Jar Test hiện chưa hỗ trợ lưu vào tài khoản. Bài chiết tách cũng chỉ lưu trên trình duyệt. Dùng cùng trình duyệt để tiếp tục lượt.</p>
+        <p>Các lượt thực hành bên dưới được lưu trên thiết bị này, kể cả khi đã đăng nhập. Dữ liệu không đồng bộ sang thiết bị khác và có thể mất khi xóa dữ liệu web hoặc đóng cửa sổ riêng tư.</p>
+        <p className="learner-lab-storage-hint">Các bài thực hành hiện lưu trên trình duyệt, chưa đồng bộ vào tài khoản. Dùng cùng trình duyệt để tiếp tục lượt.</p>
       </div>
       <Link href={local ? '/sign-in' : '/account'}>{local ? 'Đăng nhập' : 'Quản lý tài khoản'}<ArrowRightIcon /></Link>
     </section>
