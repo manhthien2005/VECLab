@@ -71,13 +71,9 @@ function volumeOf(state: SoapState, vessel: SoapVessel): number {
   return vesselVolumeMl(vessel, state.oilType)
 }
 
-function capacityOf(_state: SoapState, id: SoapVesselId): number {
-  return cupCapacityMl(id)
-}
-
 function overflow(state: SoapState, id: SoapVesselId, addedMl: number): DomainError | null {
   const volume = volumeOf(state, state.vessels[id]) + addedMl
-  const capacity = capacityOf(state, id)
+  const capacity = cupCapacityMl(id)
   if (volume > capacity + SOAP_PROFILE.volumeToleranceMl) {
     return rejected('ERR_OVERFLOW', { volumeMl: volume, capacityMl: capacity, vessel: id })
   }

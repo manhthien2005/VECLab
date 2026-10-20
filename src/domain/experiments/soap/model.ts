@@ -1,7 +1,7 @@
 /**
  * Cold-process soap teaching profile.
  *
- * SAP midpoints, per-oil limits, thermal and curing coefficients are game-locked
+ * SAP midpoints, oil densities, thermal and curing coefficients are game-locked
  * assumptions. They are not experimental validation. See content/evidence/soap.ts.
  */
 
@@ -27,7 +27,6 @@ export const SOAP_PROFILE = {
   residualWaterFraction: 0.2,
   waterDensityGPerMl: 1,
   naohDensityGPerMl: 2.13,
-  defaultOilMassG: 500,
   lyePourWarnC: 50,
   seizingMixtureC: 55,
   seizingMachineMin: 10,
@@ -49,9 +48,9 @@ export const SOAP_PROFILE = {
     ph: { min: 9, max: 10 },
   },
   oils: {
-    olive: { densityGPerMl: 0.91, minMassG: 50, maxMassG: 1000 },
-    coconut: { densityGPerMl: 0.92, minMassG: 50, maxMassG: 600 },
-    palm: { densityGPerMl: 0.91, minMassG: 50, maxMassG: 800 },
+    olive: { densityGPerMl: 0.91 },
+    coconut: { densityGPerMl: 0.92 },
+    palm: { densityGPerMl: 0.91 },
   },
   sap: {
     olive: { min: 0.131, mid: 0.136, max: 0.14, sapKohMin: 184, sapKohMid: 190, sapKohMax: 196 },
@@ -59,8 +58,6 @@ export const SOAP_PROFILE = {
     palm: { min: 0.136, mid: 0.142, max: 0.149, sapKohMin: 190, sapKohMid: 199.5, sapKohMax: 209 },
   },
 } as const
-
-export type SoapProfile = typeof SOAP_PROFILE
 
 export type SoapPhase = 'working' | 'hazard' | 'completed'
 export type SoapFailure = 'WATER_INTO_NAOH'
@@ -139,10 +136,6 @@ export type SoapState = {
 }
 
 const EPS = 1e-9
-
-export function isSoapVesselId(value: unknown): value is SoapVesselId {
-  return SOAP_VESSEL_IDS.some((id) => id === value)
-}
 
 export function isSoapOil(value: unknown): value is SoapOil {
   return SOAP_OILS.some((id) => id === value)

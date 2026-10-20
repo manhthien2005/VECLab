@@ -70,7 +70,7 @@ export const SOAP_SOURCES = [
     alternativeUrl: null,
     location: 'Bảng Palm yağı',
     use: 'Khoảng 0,891–0,899 g/mL theo bảng này.',
-    limit: 'Engine đang dùng ρ cọ = 0,92 — lệch khoảng này. Điều kiện nhiệt trên bảng không rõ.',
+    limit: 'Engine đang dùng ρ cọ = ' + SOAP_PROFILE.oils.palm.densityGPerMl + ' g/mL — lệch khoảng này. Điều kiện nhiệt trên bảng không rõ.',
   },
   {
     key: 'ugm-soap-ph',
@@ -143,39 +143,16 @@ export const SOAP_SOURCED_FORMULAS = [
     cups: ['W'] as const,
   },
   {
-    key: 'dissolution-heat',
-    title: 'Nhiệt hòa tan NaOH',
-    lines: [
-      'ΔT = η × (n × ΔH) / (m(nước) × c)',
-      'ΔH ≈ 44,5 kJ/mol (vô hạn loãng, 25 °C)',
-      'η = ' + SOAP_PROFILE.heatRetentionEta + ' là hiệu chỉnh game, không có trong nguồn ΔH',
-    ],
-    sourceKeys: ['libretexts-naoh-enthalpy'] as const,
-    /** Temporarily hidden on the lye cup; keep citation in SOAP_SOURCES. */
-    cups: [] as const,
-  },
-  {
     key: 'oil-density',
     title: 'Mật độ dầu',
     lines: [
       'm (g) = V (mL) × ρ',
       'ρ ô liu ≈ 0,91 (nguồn 0,910–0,916 ở 20/20 °C)',
       'ρ dừa ≈ 0,92 (nguồn 0,908–0,921 ở 40 °C/nước 20 °C)',
-      'ρ cọ trong engine = 0,92 — lệch khoảng 0,891–0,899 của nguồn TSE',
+      'ρ cọ trong engine = ' + SOAP_PROFILE.oils.palm.densityGPerMl + ' g/mL — lệch khoảng 0,891–0,899 của nguồn TSE',
     ],
     sourceKeys: ['canada-olive-sap-density', 'codex-coconut-sap-density', 'turkish-palm-density'] as const,
     cups: ['O'] as const,
-  },
-  {
-    key: 'lye-density',
-    title: 'Mật độ dung dịch NaOH',
-    lines: [
-      'Ở 20 °C (bảng Vinnolit): 24% → 1,263; 28% → 1,306; 32% → 1,343 g/mL',
-      'Engine chưa dùng bảng này cho thể tích dung dịch (vẫn dùng ρ rắn 2,13 khi ước NaOH rắn)',
-    ],
-    sourceKeys: ['vinnolit-naoh-density'] as const,
-    /** Temporarily hidden on the lye cup; keep citation in SOAP_SOURCES. */
-    cups: [] as const,
   },
   {
     key: 'ph-cured',
@@ -194,6 +171,6 @@ export const SOAP_LIMITS = [
   'Công thức nồng độ % khối lượng gắn IUPAC Gold Book (mass fraction). Các mục chưa có URL đáng tin (khoảng đạt 24–33 %, superfat 1–10 %, ΔT ≤ 15 °C, seizing, thời gian trace, nước còn sau ủ, Exp. 718) không hiện như đã xác nhận.',
   'η = ' + SOAP_PROFILE.heatRetentionEta + ', τ nguội/ủ, đường cong pH theo S và dung tích cốc cố định là giả định game.',
   'SAP mid: ô liu ' + SOAP_PROFILE.sap.olive.mid + ' · dừa ' + SOAP_PROFILE.sap.coconut.mid + ' · cọ ' + SOAP_PROFILE.sap.palm.mid + ' g NaOH/g dầu.',
-  'ρ dầu cọ trong engine (0,92) lệch khoảng TSE (0,891–0,899). ρ dung dịch NaOH chưa thay ρ rắn 2,13.',
+  'ρ dầu cọ trong engine (' + SOAP_PROFILE.oils.palm.densityGPerMl + ' g/mL) lệch khoảng TSE (0,891–0,899). ρ dung dịch NaOH chưa thay ρ rắn 2,13.',
   'Không dùng kết quả mô phỏng để tắm, bán hoặc thiết kế công thức thật.',
 ] as const

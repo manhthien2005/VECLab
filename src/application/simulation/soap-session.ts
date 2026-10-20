@@ -348,8 +348,7 @@ export function createSoapSession(repository: AttemptRepository<SoapState>): Soa
         occurredAt: new Date(),
       })
       if (!result.ok) return { ok: false, error: result.error }
-      const records = await repository.getAttemptEventRecords(attemptId)
-      const report = buildSoapReport(result.stateAfter, result.ledgerAfter, records, result.occurredAt)
+      const report = buildSoapReport(result.stateAfter, result.occurredAt)
       const written = await repository.completeAttempt({
         attemptId,
         scenarioReleaseId: SOAP_PROFILE.releaseId,

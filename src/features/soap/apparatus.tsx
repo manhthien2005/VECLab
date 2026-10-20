@@ -82,7 +82,7 @@ export function SoapApparatus({ projection, selected, onSelect, cue }: {
     <div className={styles.scene} data-empty={vessel ? 'false' : 'true'}>
       {vessel && selected
         ? <>
-          <SoapFormulas id={selected} projection={projection}/>
+          <SoapFormulas id={selected}/>
           <div className={styles.sceneArt} data-kind={artKind(cue, selected)}>
             {cue?.kind === 'pour' && <PourScene key={cue.seq} cue={cue}/>}
             <div className={styles.cupArt + (vessel.hasLye && vessel.temperatureC > SOAP_PROFILE.lyePourWarnC ? ' ' + styles.hot : '')}>

@@ -36,7 +36,7 @@ export function SoapLearningGoal() {
       <div className={bench.goalIntro}><p className={bench.goalTitle}><strong>Làm ra bánh xà phòng đạt chất lượng</strong></p><p className={bench.goalSubtitle}>Làm tối đa {SOAP_PROFILE.maxSamples} mẫu thử. Chỉ cần một mẫu đạt mọi yêu cầu là thí nghiệm đạt. Công thức bên dưới chỉ hiện mục đã gắn nguồn A.</p></div>
       <div className={bench.goalPanelGrid}>
         <section><h3>Yêu cầu để đạt</h3><ul>{REQUIREMENTS.map((item) => <li key={item}>{item}</li>)}</ul></section>
-        <section><h3>Công thức đã gắn nguồn</h3><ul>{SOAP_SOURCED_FORMULAS.filter((item) => item.cups.length > 0).map((item) => <li key={item.key}>{item.title}: {item.lines[0]}</li>)}</ul></section>
+        <section><h3>Công thức đã gắn nguồn</h3><ul>{SOAP_SOURCED_FORMULAS.map((item) => <li key={item.key}>{item.title}: {item.lines[0]}</li>)}</ul></section>
         <section><h3>Bạn được chọn</h3><ul><li>Loại dầu và thể tích dầu rót.</li><li>Thể tích nước và khối lượng NaOH.</li><li>Lượng kiềm, dầu rót vào cốc trộn.</li><li>Khuấy tay hoặc khuấy máy.</li></ul></section>
         <section><h3>Điều kiện cố định</h3><dl><div><dt>Nhiệt phòng</dt><dd>{SOAP_PROFILE.roomTemperatureC} °C</dd></div><div><dt>Nhiệt dầu</dt><dd>{SOAP_PROFILE.oilTemperatureC} °C</dd></div><div><dt>Kính và găng</dt><dd>Đã đeo sẵn</dd></div><div><dt>Thứ tự an toàn</dt><dd>NaOH vào nước</dd></div></dl></section>
         <section><h3>Giới hạn mô phỏng</h3><p>Chỉ số game (η, ủ, đường cong pH theo S) không gắn nguồn A. Hình cốc minh họa trạng thái đã lưu, không tạo phép đo.</p></section>

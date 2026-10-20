@@ -253,7 +253,7 @@ export function SoapGuide({ attemptId }: { attemptId: string | undefined }) {
           <h2 id="soap-calculation">Công thức đã gắn nguồn</h2>
           <p>Chỉ hiện mục trạng thái A. Các giả định game (η, nước còn sau ủ, đường cong pH theo S, …) không gắn như đã xác nhận.</p>
           <div className={styles.calculation}>
-            {SOAP_SOURCED_FORMULAS.filter((item) => item.cups.length > 0).map((item) => (
+            {SOAP_SOURCED_FORMULAS.map((item) => (
               <div key={item.key}>
                 <h3>{item.title}</h3>
                 {item.lines.map((line) => <p key={line} className={line === item.lines[0] ? styles.formula : styles.small}>{line}</p>)}

@@ -47,7 +47,7 @@ const EQUIPMENT: Record<SoapEquipmentKind, {
     file: 'oils.webp',
     alt: 'Rót chất lỏng vàng từ cốc thủy tinh vào cốc đong',
     caption: 'Ảnh minh họa rót dầu. Loại dầu và khối lượng do bạn chọn trên bàn.',
-    purpose: 'Nguyên liệu béo cho xà phòng hóa. Mỗi loại có SAP, mật độ và giới hạn khối lượng riêng.',
+    purpose: 'Nguyên liệu béo cho xà phòng hóa. Mỗi loại có SAP và mật độ riêng để quy đổi thể tích sang khối lượng.',
     facts: [
       ['Loại dầu', 'Ô liu · dừa · cọ'],
       ['Nhiệt dầu', SOAP_PROFILE.oilTemperatureC + ' °C (cố định)'],

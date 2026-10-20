@@ -55,7 +55,6 @@ export function OilPanel({ projection, fields, lockReason, onField, onRun }: Pan
           onChange={(event) => {
             const next = event.target.value
             if (isSoapOil(next) && next !== oilType) {
-              onField('oilType', next)
               onRun('set_oil', { oilType: next })
             }
           }}>

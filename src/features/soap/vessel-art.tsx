@@ -114,7 +114,7 @@ export function SoapVesselArt({ vessel, mix = null, compact = false, cue = null 
   const surfaceY = BOTTOM - Math.max(vessel.hasSolidNaoh ? 10 : 0, vessel.fill * MAX_HEIGHT)
   return <svg viewBox="0 0 180 250" aria-hidden="true" className={styles.vesselArt}>
     <Beaker uid={uid} fill={vessel.fill} layers={layers} solid={vessel.hasSolidNaoh && !vessel.hasWater}
-      broken={vessel.broken} capacityMl={compact ? undefined : vessel.capacityMl}>
+      broken={vessel.broken} {...(compact ? {} : { capacityMl: vessel.capacityMl })}>
       {!compact && (cue === 'hand' || cue === 'machine') && <g>
         {cue === 'hand'
           ? <g className={styles.spoon}><path d="M108 28 L78 150" stroke="#8a6a3a" strokeWidth="4" strokeLinecap="round"/><ellipse cx="74" cy="162" rx="14" ry="8" fill="#c4a06a" stroke="#8a6a3a"/></g>

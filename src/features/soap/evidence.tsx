@@ -29,7 +29,7 @@ export function SoapEvidence() {
     </section>
     <section className="evidence-model-details">
       <h2><CalculatorIcon />Công thức đã gắn nguồn</h2>
-      <ul>{SOAP_SOURCED_FORMULAS.filter((item) => item.cups.length > 0).map((item) => <li key={item.key}><strong>{item.title}</strong> — {item.lines[0]}</li>)}</ul>
+      <ul>{SOAP_SOURCED_FORMULAS.map((item) => <li key={item.key}><strong>{item.title}</strong> — {item.lines[0]}</li>)}</ul>
     </section>
     <section className="evidence-model-details">
       <h2><CalculatorIcon />Phạm vi mô hình</h2>

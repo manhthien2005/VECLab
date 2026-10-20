@@ -1,7 +1,5 @@
-import type { ResourceLedger } from '@/domain/process/contracts.js'
-import type { StoredAttemptEventRecord } from '@/application/attempts/repository.js'
 import {
-  SOAP_PROFILE, actualSuperfat, classifySoap, cupCapacityMl, hasLyeIn, hasOilIn, lyeConcentration,
+  SOAP_PROFILE, SOAP_VESSEL_IDS, actualSuperfat, classifySoap, cupCapacityMl, hasLyeIn, hasOilIn, lyeConcentration,
   vesselVolumeMl,
   type SoapFailure, type SoapGrade, type SoapMoldStage, type SoapOil, type SoapPhase,
   type SoapSample, type SoapState, type SoapStirMode, type SoapVessel, type SoapVesselId,
@@ -117,7 +115,7 @@ export function projectSoap(state: SoapState): SoapProjection {
     oilType: state.oilType,
     oilInCup: hasOilIn(state.vessels.O) || hasOilIn(state.vessels.M),
     lyeHot: hasLyeIn(lye) && lye.temperatureC > SOAP_PROFILE.lyePourWarnC,
-    vessels: (['W', 'O', 'M', 'D'] as const).map((id) => viewVessel(state, state.vessels[id])),
+    vessels: SOAP_VESSEL_IDS.map((id) => viewVessel(state, state.vessels[id])),
     mix: viewMix(state),
     moldStage: state.mold.stage,
     samples: state.samples,
@@ -140,8 +138,6 @@ export type SoapReportSnapshot = {
 
 export function buildSoapReport(
   state: SoapState,
-  _ledger: ResourceLedger,
-  _records: readonly StoredAttemptEventRecord<SoapState>[],
   generatedAt: Date,
 ): SoapReportSnapshot {
   const projection = projectSoap(state)

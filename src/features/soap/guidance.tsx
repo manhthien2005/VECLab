@@ -96,7 +96,7 @@ function formulas(id: SoapVesselId): { title: string; lines: string[]; sources: 
     .map((item) => ({ title: item.title, lines: [...item.lines], sources: sourceTitles(item.sourceKeys) }))
 }
 
-export function SoapFormulas({ id }: { id: SoapVesselId; projection: SoapProjection }) {
+export function SoapFormulas({ id }: { id: SoapVesselId }) {
   const groups = formulas(id)
   return <aside className={styles.guide} aria-label="Công thức có nguồn">
     <h3>Công thức có nguồn</h3>

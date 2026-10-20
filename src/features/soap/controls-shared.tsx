@@ -9,11 +9,11 @@ export type SoapRun = (
 ) => void
 
 export type SoapFields = Record<
-  'waterMl' | 'naohG' | 'oilType' | 'oilPourMl' | 'lyeToMixMl' | 'oilToMixMl' | 'returnMl', string
+  'waterMl' | 'naohG' | 'oilPourMl' | 'lyeToMixMl' | 'oilToMixMl' | 'returnMl', string
 >
 
 export const INITIAL_FIELDS: SoapFields = {
-  waterMl: '', naohG: '', oilType: 'olive', oilPourMl: '', lyeToMixMl: '', oilToMixMl: '', returnMl: '',
+  waterMl: '', naohG: '', oilPourMl: '', lyeToMixMl: '', oilToMixMl: '', returnMl: '',
 }
 
 export type PanelProps = {
