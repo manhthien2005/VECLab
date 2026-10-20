@@ -62,6 +62,11 @@ interface Props {
   ban2LockedData: { pH: number; calculation: TreatmentCalculation; filterHistory: FilterHistoryEntry[] } | null
   onStationClick: (station: 'sample' | 'treatment' | 'discharge') => void
   currentStation: 'sample' | 'treatment' | 'discharge'
+  /** Submission state */
+  status: 'active' | 'completed'
+  busy?: boolean
+  onSubmit?: () => void
+  onReport?: () => void
 }
 
 export function WaterTreatmentNotebook({
@@ -75,6 +80,10 @@ export function WaterTreatmentNotebook({
   ban2LockedData,
   onStationClick,
   currentStation,
+  status,
+  busy = false,
+  onSubmit,
+  onReport,
 }: Props) {
   const [activeTab, setActiveTab] = useState<'composition' | 'treatment' | 'results'>('composition')
 
@@ -82,6 +91,7 @@ export function WaterTreatmentNotebook({
   const compDone = sampleCalculation !== null
   const treatDone = ban2LockedData !== null
   const dischargeDone = dischargePhase === 'discharged'
+  const done = status === 'completed'
 
   // Sample composition
   const totalMetals = sampleStatus.feAddedMl + sampleStatus.znAddedMl + sampleStatus.pbAddedMl
@@ -407,6 +417,34 @@ export function WaterTreatmentNotebook({
             <p className={styles.hint}>
               Nhấn &ldquo;Khóa Bàn 2 &amp; sang Bàn 3&rdquo; ở Bàn 2 để cố định kết quả và kiểm tra cột A.
             </p>
+          )}
+        </section>
+      )}
+
+      {/* Lịch sử thao tác */}
+      <details className={styles.history}>
+        <summary>Lịch sử thao tác</summary>
+        <div className={styles.historyContent}>
+          <p className={styles.hint}>
+            Lịch sử thao tác chi tiết (khuấy, lắng, lọc, thêm hóa chất) sẽ được bổ sung trong phiên bản tiếp theo.
+          </p>
+          <p className={styles.note}>
+            Hiện tại bạn có thể xem lại các lần lọc trong tab &ldquo;Xử lý hydroxide&rdquo;.
+          </p>
+        </div>
+      </details>
+
+      {/* Completed section */}
+      {done && (
+        <section className={styles.completed} aria-label="Kết quả lưu sau khi hoàn thành">
+          <h2>Đã hoàn thành và lưu lượt</h2>
+          <p>
+            Đã lưu kết quả xử lý: {filterHistory.length} lần lọc, pH cuối {finalPH !== null ? fmtp(finalPH) : '—'}.
+          </p>
+          {onReport && (
+            <button type="button" onClick={onReport} disabled={busy}>
+              Xem báo cáo & đối chiếu QCVN
+            </button>
           )}
         </section>
       )}

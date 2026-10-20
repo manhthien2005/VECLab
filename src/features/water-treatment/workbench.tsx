@@ -14,6 +14,10 @@ import { SamplePreparationApparatus, type SampleApStatus, type SampleCalculation
 import { DischargeApparatus } from './discharge-apparatus.js'
 import { WaterTreatmentLearningGoal } from './learning-goal.js'
 import { WaterTreatmentNotebook } from './notebook.js'
+import { WaterTreatmentSubmitDialog, WaterTreatmentReportDialog } from './completion.js'
+import { generateWaterTreatmentReport } from './generate-report.js'
+import { saveReport, getReport } from './storage.js'
+import type { WaterTreatmentReportSnapshot } from './report-types.js'
 import type { WorkbenchTourStep } from '@/features/workbench/tour.js'
 import styles from './workbench.module.css'
 
@@ -274,6 +278,10 @@ function WaterTreatmentWorkbenchSession({
   const [group, setGroup] = useState<string | null>('composition')
   const [busy, setBusy] = useState(false)
   const [tourOpen, setTourOpen] = useState(false)
+  const [submitDialogOpen, setSubmitDialogOpen] = useState(false)
+  const [reportDialogOpen, setReportDialogOpen] = useState(_openReport)
+  const [report, setReport] = useState<WaterTreatmentReportSnapshot | null>(null)
+  const [submitted, setSubmitted] = useState(false)
   const submitTrigger = useRef<HTMLButtonElement>(null)
   const tourTrigger = useRef<HTMLButtonElement>(null)
   
@@ -283,6 +291,20 @@ function WaterTreatmentWorkbenchSession({
 
   // Placeholder state — will replace with real session later
   const [ready, setReady] = useState(false)
+
+  // Load saved report if attemptId is provided
+  useEffect(() => {
+    if (attemptId) {
+      const savedReport = getReport(attemptId)
+      if (savedReport) {
+        setReport(savedReport)
+        setSubmitted(true)
+        if (_openReport) {
+          setReportDialogOpen(true)
+        }
+      }
+    }
+  }, [attemptId, _openReport])
 
   // Apparatus animation state for WATER TREATMENT
   const [apStatus, setApStatus] = useState<ApStatus>({
@@ -471,6 +493,59 @@ function WaterTreatmentWorkbenchSession({
     setSampleApStatus({ pH: 7.0, targetVolumeMl: 1000, stirring: false, feAddedMl: 0, znAddedMl: 0, pbAddedMl: 0 })
     pHSyncedRef.current = false
   }, [])
+
+  const handleSubmitConfirm = useCallback(() => {
+    setBusy(true)
+    
+    // Generate report
+    const snapshot = generateWaterTreatmentReport({
+      attemptId: attemptId ?? 'local-' + Date.now(),
+      sampleStatus: sampleApStatus,
+      sampleCalculation,
+      treatmentStatus: apStatus,
+      treatmentCalculation,
+      filterHistory,
+      dischargePhase,
+      dischargePH,
+      ban2LockedData,
+      operationCount: filterHistory.length + 5, // Approximate operation count
+    })
+
+    // Save to localStorage
+    saveReport(snapshot)
+    
+    setReport(snapshot)
+    setSubmitted(true)
+    setSubmitDialogOpen(false)
+    setBusy(false)
+    
+    // Open report dialog
+    setTimeout(() => {
+      setReportDialogOpen(true)
+    }, 100)
+  }, [attemptId, sampleApStatus, sampleCalculation, apStatus, treatmentCalculation, filterHistory, dischargePhase, dischargePH, ban2LockedData])
+
+  const handleOpenReport = useCallback(() => {
+    if (report) {
+      setReportDialogOpen(true)
+    } else if (sampleCalculation || ban2LockedData) {
+      // Generate report on demand
+      const snapshot = generateWaterTreatmentReport({
+        attemptId: attemptId ?? 'local-' + Date.now(),
+        sampleStatus: sampleApStatus,
+        sampleCalculation,
+        treatmentStatus: apStatus,
+        treatmentCalculation,
+        filterHistory,
+        dischargePhase,
+        dischargePH,
+        ban2LockedData,
+        operationCount: filterHistory.length + 5,
+      })
+      setReport(snapshot)
+      setReportDialogOpen(true)
+    }
+  }, [report, sampleCalculation, ban2LockedData, attemptId, sampleApStatus, apStatus, treatmentCalculation, filterHistory, dischargePhase, dischargePH])
   
 
 
@@ -493,15 +568,25 @@ function WaterTreatmentWorkbenchSession({
         <CheckCircleIcon />
         {busy ? 'Đang lưu…' : ready ? 'Đã lưu trên thiết bị' : 'Lưu trên thiết bị'}
       </span>
+      {submitted && report && (
+        <button 
+          className={styles.button} 
+          type="button" 
+          aria-label="Xem báo cáo kết quả"
+          onClick={handleOpenReport}
+        >
+          📊 Báo cáo
+        </button>
+      )}
       <button 
         ref={submitTrigger}
         className={styles.primary} 
         type="button" 
-        disabled={!ready || busy}
+        disabled={!ready || busy || submitted}
         aria-label="Hoàn thành và lưu lượt"
-        onClick={() => setBusy(true)}
+        onClick={() => setSubmitDialogOpen(true)}
       >
-        <SubmitIcon />Nộp bài
+        <SubmitIcon />{submitted ? 'Đã nộp bài' : 'Nộp bài'}
       </button>
     </div>
   </>
@@ -691,6 +776,10 @@ function WaterTreatmentWorkbenchSession({
         setWorkPhase(station)
         setPane('simulation')
       }}
+      status={submitted ? 'locked' : 'active'}
+      busy={busy}
+      onSubmit={() => setSubmitDialogOpen(true)}
+      onReport={handleOpenReport}
     />
   ) : (
     <section tabIndex={-1} className={styles.notebook} aria-label="Sổ đo Water Treatment">
@@ -777,6 +866,26 @@ function WaterTreatmentWorkbenchSession({
       <EquipmentInfoDialog 
         item={equipmentItem} 
         onClose={() => setEquipmentItem(null)} 
+      />
+    )}
+    {submitDialogOpen && (
+      <WaterTreatmentSubmitDialog
+        sampleCalculation={sampleCalculation}
+        ban2LockedData={ban2LockedData}
+        dischargePhase={dischargePhase}
+        busy={busy}
+        onClose={() => setSubmitDialogOpen(false)}
+        onConfirm={handleSubmitConfirm}
+      />
+    )}
+    {reportDialogOpen && report && (
+      <WaterTreatmentReportDialog
+        report={report}
+        onClose={() => setReportDialogOpen(false)}
+        onNotebook={() => {
+          setReportDialogOpen(false)
+          setPane('notebook')
+        }}
       />
     )}
   </>
