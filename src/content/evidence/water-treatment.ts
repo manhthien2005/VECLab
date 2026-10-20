@@ -64,6 +64,17 @@ export const WATER_TREATMENT_SOURCES = [
     use: 'Tham khảo giá trị Ksp cho các hydroxide Fe(III), Zn(II), Pb(II) và nguyên tắc cân bằng pH.',
     limit: 'Giá trị lý thuyết; điều kiện thực tế phụ thuộc nhiều yếu tố ngoài mô hình cân bằng.',
   },
+  {
+    key: 'phreeqc-usgs',
+    title: 'PHREEQC (Version 3) — A Computer Program for Speciation, Batch-Reaction, One-Dimensional Transport, and Inverse Geochemical Calculations',
+    author: 'D. L. Parkhurst & C. A. J. Appelo · U.S. Geological Survey · 2013',
+    kind: 'Phần mềm tính toán địa hóa',
+    url: 'https://www.usgs.gov/software/phreeqc-version-3',
+    alternativeUrl: 'https://doi.org/10.3133/tm6A43',
+    location: 'USGS Techniques and Methods 6-A43 · 497 pages',
+    use: 'Công cụ tính toán cân bằng hóa học, speciation và phản ứng pH-dependent precipitation; sử dụng để xác minh kết quả mô hình kết tủa hydroxide kim loại.',
+    limit: 'PHREEQC là công cụ tính toán độc lập; kết quả mô phỏng VECLab không tương đương với kết quả phân tích PHREEQC đầy đủ cho hệ nước thải thực.',
+  },
 ] as const
 
 export const WATER_TREATMENT_LIMITS = [
