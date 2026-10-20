@@ -79,12 +79,6 @@ const METAL_COLORS = {
 
 export type SampleCalculation = Pick<SampleChemistryResult, 'pH' | 'totalVolumeMl' | 'inputMassMg' | 'dissolvedMgL' | 'dissolvedMassMg' | 'precipitateMg' | 'totalPrecipitateMg' | 'diagnostics' | 'database' | 'configuredPhases' | 'convergence' | 'massBalance' | 'engine'>
 
-const PRECIPITATE_GUIDANCE = [
-  { label: 'Fe(OH)₃ · nâu đỏ #A56535', ph: 'pH tham khảo 2–4' },
-  { label: 'Zn(OH)₂ · trắng #F1F1ED', ph: 'pH tham khảo 7–8,5; có thể tan lại trong kiềm dư' },
-  { label: 'Chất rắn chứa Pb · trắng kem #F2EBDD', ph: 'pH phụ thuộc cân bằng; Pb(OH)₂ chỉ là giả định đơn giản' },
-] as const
-
 function Buret({
   uid, cx, topY, theme, remainingMl, isDripping, remainingDisplay, capacityMl,
 }: {
@@ -928,13 +922,6 @@ export function SamplePreparationApparatus({
       <p className={styles.apparatusNote}>
         Dung dịch gốc 100 mg/L · buret Fe chứa 100 mL, buret Zn 100 mL, buret Pb 10 mL; không tự nạp lại. Màu dung dịch là minh họa trước khi chỉnh pH.
       </p>
-      <div className={styles.precipitateGuide} aria-label="Màu và pH tham khảo của kết tủa">
-        <strong>Màu kết tủa và pH tham khảo</strong>
-        {PRECIPITATE_GUIDANCE.map((item) => (
-          <span key={item.label}>{item.label} · {item.ph}</span>
-        ))}
-        <span>ZnSO₄ + Pb(NO₃)₂: PbSO₄ có thể tạo chất rắn trắng, không cần tăng pH.</span>
-      </div>
     </div>
   )
 }

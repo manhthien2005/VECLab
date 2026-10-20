@@ -92,6 +92,13 @@ const TREATMENT_STEPS: readonly TreatmentStepMl[] = [0.1, 0.5, 1, 2, 5]
 
 export type TreatmentCalculation = Pick<WaterTreatmentResult, 'pH' | 'composition' | 'capacity_mgPerL' | 'filtrate_mgPerL' | 'precipitated_mgPerL' | 'goalStatus' | 'verificationStatus'>
 
+/** Màu kết tủa và khoảng pH tham khảo khi chỉnh pH bằng NaOH/HCl */
+const PRECIPITATE_GUIDANCE = [
+  { label: 'Fe(OH)₃ · nâu đỏ #A56535', ph: 'pH tham khảo 2–4' },
+  { label: 'Zn(OH)₂ · trắng #F1F1ED', ph: 'pH tham khảo 7–8,5; có thể tan lại trong kiềm dư' },
+  { label: 'Chất rắn chứa Pb · trắng kem #F2EBDD', ph: 'pH phụ thuộc cân bằng; Pb(OH)₂ chỉ là giả định đơn giản' },
+] as const
+
 /** Một bản ghi trong lịch sử lọc */
 export type FilterHistoryEntry = {
   /** Thứ tự lần lọc (bắt đầu từ 1) */
@@ -1005,6 +1012,14 @@ export function WaterTreatmentApparatus({
         )}
       </section>
     ) : null}
+
+      <div className={styles.precipitateGuide} aria-label="Màu và pH tham khảo của kết tủa">
+        <strong>Màu kết tủa và pH tham khảo</strong>
+        {PRECIPITATE_GUIDANCE.map((item) => (
+          <span key={item.label}>{item.label} · {item.ph}</span>
+        ))}
+        <span>ZnSO₄ + Pb(NO₃)₂: PbSO₄ có thể tạo chất rắn trắng, không cần tăng pH.</span>
+      </div>
 
     <p className={styles.apparatusNote}>Mực buret, tốc độ khuấy và pH chỉ mang tính minh họa; giá trị thật lưu ở bảng dưới.</p>
   </div>
