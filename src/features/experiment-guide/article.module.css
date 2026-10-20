@@ -42,6 +42,18 @@
 .equipment figcaption strong { font-size:.9rem; }
 .equipment figcaption p { margin:6px 0; font-size:.82rem; line-height:1.7; }
 .equipment small { display:block; color:var(--ink-muted); font-size:.73rem; line-height:1.7; }
+/* Equipment guide (water-treatment) */
+.equipmentGuide { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; margin-bottom:20px; }
+.equipmentItem { min-width:0; padding:20px; background:var(--surface-2); border-radius:6px; }
+.equipmentItem h3 { font-size:.95rem; margin:0 0 10px; color:var(--ink); }
+.equipmentPurpose { font-size:.825rem; margin:0 0 14px; line-height:1.75; }
+.equipmentFacts { margin:0 0 14px; }
+.equipmentFacts > div { display:grid; grid-template-columns:1fr 1.4fr; gap:8px; padding:5px 0; border-bottom:1px solid var(--border); }
+.equipmentFacts dt { font-size:.75rem; color:var(--ink-muted); }
+.equipmentFacts dd { font-size:.75rem; color:var(--ink); font-weight:600; }
+.equipmentSteps { margin:0 0 14px; padding-left:20px; }
+.equipmentSteps li { font-size:.78rem; line-height:1.7; margin-bottom:5px; }
+.equipmentNote { font-size:.73rem; color:var(--ink-muted); margin:0; line-height:1.7; }
 .overview { margin:0 0 40px; }
 .overview img { display:block; width:100%; height:auto; border:1px solid var(--border); border-radius:8px; }
 .article figcaption { color:var(--ink-muted); font-size:.76rem; line-height:1.75; }
@@ -100,4 +112,4 @@
 .guide :focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
 @media(max-width:1050px) { .readingLayout { grid-template-columns:185px minmax(0,1fr); gap:24px; }.article { padding:24px; }.stepBody[data-illustrated='true'] { grid-template-columns:minmax(0,1fr) 200px; gap:20px; }.preparation { grid-template-columns:1fr; gap:24px; } }
 @media(max-width:850px) { .header { flex-direction:column; align-items:flex-start; gap:22px; }.readingLayout { grid-template-columns:minmax(0,1fr); gap:28px; }.rail { position:static; }.rail > p { display:none; }.contents ol { display:grid; grid-template-columns:1fr 1fr; gap:0 28px; }.article { padding:28px; }.stepBody[data-illustrated='true'] { grid-template-columns:minmax(0,1fr) 240px; gap:26px; }.preparation { grid-template-columns:1fr 1fr; } }
-@media(max-width:600px) { .header { padding:22px 0 28px; }.header h1 { font-size:1.8rem; }.header p { font-size:.925rem; }.article { padding:22px 18px; }.article h2 { font-size:1.25rem; }.stepHeading h3 { font-size:1.1rem; }.stepBody[data-illustrated='true'], .preparation { grid-template-columns:minmax(0,1fr); }.screenshot { max-width:300px; margin:0 auto; }.article .location { margin-left:0; }.equipment { grid-template-columns:minmax(0,1fr); gap:22px; }.equipment figure { display:grid; grid-template-columns:100px minmax(0,1fr); gap:16px; }.equipmentPhoto { height:110px; }.equipment figcaption { margin-top:0; }.phases { grid-template-columns:1fr; gap:16px; }.phases li { display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; }.phases p { grid-column:1/-1; }.terms > div { grid-template-columns:1fr; gap:4px; }.calculation, .reportNotes { padding:16px; }.contents ol { gap:0 20px; }.overview { margin-bottom:32px; } }
+@media(max-width:600px) { .header { padding:22px 0 28px; }.header h1 { font-size:1.8rem; }.header p { font-size:.925rem; }.article { padding:22px 18px; }.article h2 { font-size:1.25rem; }.stepHeading h3 { font-size:1.1rem; }.stepBody[data-illustrated='true'], .preparation { grid-template-columns:minmax(0,1fr); }.screenshot { max-width:300px; margin:0 auto; }.article .location { margin-left:0; }.equipment { grid-template-columns:minmax(0,1fr); gap:22px; }.equipment figure { display:grid; grid-template-columns:100px minmax(0,1fr); gap:16px; }.equipmentPhoto { height:110px; }.equipment figcaption { margin-top:0; }.phases { grid-template-columns:1fr; gap:16px; }.phases li { display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; }.phases p { grid-column:1/-1; }.terms > div { grid-template-columns:1fr; gap:4px; }.calculation, .reportNotes { padding:16px; }.contents ol { gap:0 20px; }.overview { margin-bottom:32px; }.equipmentGuide { grid-template-columns:minmax(0,1fr); } }

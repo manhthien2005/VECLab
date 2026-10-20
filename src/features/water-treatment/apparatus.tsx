@@ -542,8 +542,7 @@ export function WaterTreatmentApparatus({
   return <div className={styles.apparatus}>
     <div className={styles.apparatusHeader}>
       <div>
-        <h2>Bàn xử lý nước</h2>
-        <p>Máy khuấy từ · 2 buret NaOH/HCl 1 M · cốc 2 L đế bằng</p>
+
       </div>
     </div>
 

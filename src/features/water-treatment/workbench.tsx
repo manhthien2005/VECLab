@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.js'
 import { ActionButton } from '@/features/workbench/action-button.js'
 import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/icons.js'
-import { SubmitIcon, CloseIcon, InfoIcon, ControlIcon } from '@/features/workbench/icons.js'
+import { SubmitIcon, CloseIcon, InfoIcon, ControlIcon, GuideIcon, TheoryIcon, SourcesIcon } from '@/features/workbench/icons.js'
 import { WaterTreatmentApparatus, type ApStatus, type AcidBase, type TreatmentCalculation, type FilterHistoryEntry } from './apparatus.js'
 import { SamplePreparationApparatus, type SampleApStatus, type SampleCalculation, type MetalSolution } from './sample-apparatus.js'
 import { DischargeApparatus } from './discharge-apparatus.js'
@@ -248,9 +249,11 @@ function WaterTreatmentWorkbenchSession({
   const [group, setGroup] = useState<string | null>('composition')
   const [busy, setBusy] = useState(false)
   const submitTrigger = useRef<HTMLButtonElement>(null)
+  const tourTrigger = useRef<HTMLButtonElement>(null)
   
   // Equipment dialog state (hoisted so header can render the trigger)
   const [equipmentItem, setEquipmentItem] = useState<EquipmentId | null>(null)
+  const router = useRouter()
 
   // Placeholder state — will replace with real session later
   const [ready, setReady] = useState(false)
@@ -668,6 +671,13 @@ function WaterTreatmentWorkbenchSession({
     </div>
     <div className={styles.shelfHelp}>
       <p className={styles.shelfNote}>Mẫu tổng hợp chứa Fe, Zn, Pb. Lượt lưu trên trình duyệt.</p>
+      <button ref={tourTrigger} type="button" className={styles.guideButton}><GuideIcon />Hướng dẫn thao tác</button>
+      <Link className={styles.theoryLink} href="/experiments/water-treatment/guide" target="_blank" rel="noopener noreferrer"><TheoryIcon /><span>Lý thuyết & cách làm bài</span></Link>
+      <details><summary><SourcesIcon />Nguồn & giới hạn</summary>
+        <p>Mẫu nước tổng hợp chứa Fe, Zn, Pb dạng ion hòa tan; không đại diện cho mọi loại nước thải thực tế. Hình ảnh kết tủa không dùng để suy ra hiệu suất.</p>
+        <Link href="/evidence" target="_blank" rel="noopener noreferrer">Xem nguồn &amp; giới hạn đầy đủ <ArrowRightIcon /></Link>
+        <p>Không suy liều cho mẫu nước thật từ kết quả này.</p>
+      </details>
     </div>
   </div>
 
@@ -683,7 +693,7 @@ function WaterTreatmentWorkbenchSession({
       notebook={notebook} 
       pane={pane}
       onPaneChange={setPane}
-      onShelfInfo={() => setEquipmentItem('distilled-water')}
+      onShelfInfo={() => router.push('/experiments/water-treatment/guide')}
     />
     {equipmentItem && (
       <EquipmentInfoDialog 
