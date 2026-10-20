@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState, useEffect, useMemo } from 'react'
 import { runWaterTreatmentAction, type WaterTreatmentResult } from '@/app/simulate/water-treatment/actions.js'
+import { WT_QCVN_COLUMN_A } from './constants.js'
 import type { SampleCalculation } from './sample-apparatus.js'
 import { PlayIcon, StopIcon, PlusIcon, BeakerIcon, SettleIcon, FilterIcon } from './icons.js'
 import styles from './workbench.module.css'
@@ -90,6 +91,23 @@ type TreatmentStepMl = 0.1 | 0.5 | 1 | 2 | 5
 const TREATMENT_STEPS: readonly TreatmentStepMl[] = [0.1, 0.5, 1, 2, 5]
 
 export type TreatmentCalculation = Pick<WaterTreatmentResult, 'pH' | 'composition' | 'capacity_mgPerL' | 'filtrate_mgPerL' | 'precipitated_mgPerL' | 'goalStatus' | 'verificationStatus'>
+
+/** Một bản ghi trong lịch sử lọc */
+export type FilterHistoryEntry = {
+  /** Thứ tự lần lọc (bắt đầu từ 1) */
+  index: number
+  /** Thời điểm lọc */
+  timestamp: Date
+  /** Kết quả tính toán lần lọc này */
+  calculation: TreatmentCalculation
+  /** Tổng Fe/Zn/Pb còn lại sau lọc (mg/L) */
+  cumulativeRemaining: { Fe: number; Zn: number; Pb: number }
+  /**
+   * Tổng Fe/Zn/Pb đã lọc tích lũy (mg/L).
+   * `null` khi chưa có mốc nồng độ ban đầu ở Bàn 1 để so sánh.
+   */
+  cumulativeFiltered: { Fe: number; Zn: number; Pb: number } | null
+}
 
 const INITIAL_STATUS: ApStatus = {
   pH: 5.4,
@@ -243,6 +261,7 @@ export function WaterTreatmentApparatus({
   onFilter,
   onCalculate,
   calculation,
+  filterHistory,
   sampleCalculation,
   sampleStatus: externalSampleStatus,
 }: {
@@ -255,6 +274,8 @@ export function WaterTreatmentApparatus({
   onFilter: (result: TreatmentCalculation) => void
   onCalculate: (result: TreatmentCalculation) => void
   calculation: TreatmentCalculation | null
+  /** Lịch sử các lần lọc cộng dồn */
+  filterHistory?: FilterHistoryEntry[]
   sampleCalculation?: SampleCalculation | null
   sampleStatus?: { feAddedMl: number; znAddedMl: number; pbAddedMl: number } | null
 }) {
@@ -484,6 +505,22 @@ export function WaterTreatmentApparatus({
   )
   const settleSample = () => runStep('settle', onSettle, 'Không thể thực hiện bước lắng.')
   const filterSample = () => runStep('filter', onFilter, 'Không thể thực hiện bước lọc.')
+
+  /**
+   * Đếm số chỉ tiêu Fe/Zn/Pb trong filtrate đạt giới hạn Cột A QCVN 40:2025.
+   * Dùng cùng ngưỡng với `deriveGoalStatus` ở server action
+   * (`WT_QCVN_COLUMN_A`), nên bảng tổng hợp và trạng thái luôn khớp nhau.
+   */
+  const columnAMetCount = useMemo(() => {
+    if (!calculation) return 0
+    const { filtrate_mgPerL } = calculation
+    const met = [
+      filtrate_mgPerL.Fe <= WT_QCVN_COLUMN_A.Fe_mgPerL,
+      filtrate_mgPerL.Zn <= WT_QCVN_COLUMN_A.Zn_mgPerL,
+      filtrate_mgPerL.Pb <= WT_QCVN_COLUMN_A.Pb_mgPerL,
+    ]
+    return met.filter(Boolean).length
+  }, [calculation])
 
   // Điều kiện mở/đóng nút theo đúng trình tự: khuấy → lắng → lọc
   const canSettle = hasTreatmentSample && hasFinishedStirring && !status.settled && !status.filtered && !calculationBusy
@@ -945,9 +982,27 @@ export function WaterTreatmentApparatus({
         <div className={styles.tableScroll}><table className={styles.table}><caption className={styles.tableCaption}>Kết quả Fe, Zn và Pb sau xử lý.</caption><thead><tr><th scope="col">Đại lượng</th><th scope="col">Fe</th><th scope="col">Zn</th><th scope="col">Pb</th></tr></thead><tbody>
           <tr><th scope="row">Còn hòa tan</th><td>{calculation.filtrate_mgPerL.Fe.toFixed(6)}</td><td>{calculation.filtrate_mgPerL.Zn.toFixed(6)}</td><td>{calculation.filtrate_mgPerL.Pb.toFixed(6)}</td></tr>
           <tr><th scope="row">Đã kết tủa</th><td>{calculation.precipitated_mgPerL.Fe.toFixed(6)}</td><td>{calculation.precipitated_mgPerL.Zn.toFixed(6)}</td><td>{calculation.precipitated_mgPerL.Pb.toFixed(6)}</td></tr>
-          <tr><th scope="row">Giới hạn Cột A</th><td>2.000000</td><td>1.000000</td><td>0.100000</td></tr>
+          <tr><th scope="row">Giới hạn Cột A</th><td>{WT_QCVN_COLUMN_A.Fe_mgPerL.toFixed(6)}</td><td>{WT_QCVN_COLUMN_A.Zn_mgPerL.toFixed(6)}</td><td>{WT_QCVN_COLUMN_A.Pb_mgPerL.toFixed(6)}</td></tr>
         </tbody></table></div>
-        <div className={styles.calculationSummary}><span>pH sau xử lý <strong>{calculation.pH.toFixed(6)}</strong></span><span>Trạng thái <strong>{calculation.goalStatus}</strong></span></div>
+        <div className={styles.calculationSummary}><span>pH sau xử lý <strong>{calculation.pH.toFixed(6)}</strong></span><span>Đạt <strong>{columnAMetCount}/3</strong></span></div>
+
+        {/* Bảng lịch sử lọc cộng dồn — hiện sau khi đã lọc ít nhất 1 lần */}
+        {filterHistory && filterHistory.length > 0 && (
+          <div className={styles.tableScroll} style={{ marginTop: '12px' }}><table className={styles.table}><caption className={styles.tableCaption}>Lịch sử lọc — kết quả tích lũy Fe, Zn và Pb. Cột “đã lọc” so với nồng độ ban đầu ở Bàn 1.</caption><thead><tr><th scope="col">Lần</th><th scope="col">pH</th><th scope="col">Fe còn lại</th><th scope="col">Zn còn lại</th><th scope="col">Pb còn lại</th><th scope="col">Fe đã lọc</th><th scope="col">Zn đã lọc</th><th scope="col">Pb đã lọc</th></tr></thead><tbody>
+            {filterHistory.map((entry) => (
+              <tr key={entry.index}>
+                <th scope="row">{entry.index}</th>
+                <td>{entry.calculation.pH.toFixed(2)}</td>
+                <td>{entry.cumulativeRemaining.Fe.toFixed(4)}</td>
+                <td>{entry.cumulativeRemaining.Zn.toFixed(4)}</td>
+                <td>{entry.cumulativeRemaining.Pb.toFixed(4)}</td>
+                <td>{entry.cumulativeFiltered ? entry.cumulativeFiltered.Fe.toFixed(4) : '—'}</td>
+                <td>{entry.cumulativeFiltered ? entry.cumulativeFiltered.Zn.toFixed(4) : '—'}</td>
+                <td>{entry.cumulativeFiltered ? entry.cumulativeFiltered.Pb.toFixed(4) : '—'}</td>
+              </tr>
+            ))}
+          </tbody></table></div>
+        )}
       </section>
     ) : null}
 
