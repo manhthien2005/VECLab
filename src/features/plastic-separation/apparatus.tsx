@@ -104,6 +104,7 @@ function WeighScene({ p, onInspect }: { p: PlasticProjection; onInspect: (id: Po
   const fractions = Object.entries(p.weighedFractions)
   const split = fractions.length > 1
   const ids = p.weighedPolymerIds
+  const scaleYs = split ? [92, 270] : [215]
   return <svg viewBox="0 0 600 410" className={styles.weighArt} role="img" aria-label="Trạm ly tâm và cân khối lượng quy đổi" onPointerUp={event => inspectParticle(event, onInspect)}>
     <title>Ly tâm tách ẩm, sau đó cân từng phân đoạn</title>
     <defs><linearGradient id={uid}><stop stopColor="#c1d1dc" /><stop offset=".35" stopColor="#f4f9fb" /><stop offset="1" stopColor="#b3c8d5" /></linearGradient></defs>
@@ -127,10 +128,10 @@ function WeighScene({ p, onInspect }: { p: PlasticProjection; onInspect: (id: Po
     <rect x="106" y="241" width="98" height="27" rx="5" fill="#254b5c" /><text x="155" y="260" textAnchor="middle" fill="#d9eee7" fontSize="14">2.950 rpm</text>
     <circle cx="225" cy="254" r="7" fill="#387f83" />
     <text x="155" y="340" textAnchor="middle" fill="#496778" fontSize="13">Rotor · mặt cắt minh họa</text>
-    {split ? fractions.map(([id, value], index) => <Scale key={id} x={351} y={index === 0 ? 112 : 263} label={id + ' · cân riêng'} mass={value?.massKg ?? null} />) : <Scale x={351} y={215} label={p.weighedLabelVi ? p.weighedPolymerIds.join(' + ') : 'Chưa ghi nhận cân'} mass={p.weighedMassKg} />}
+    {split ? fractions.map(([id, value], index) => <Scale key={id} x={351} y={scaleYs[index]!} label={id + ' · cân riêng'} mass={value?.massKg ?? null} />) : <Scale x={351} y={scaleYs[0]!} label={p.weighedLabelVi ? p.weighedPolymerIds.join(' + ') : 'Chưa ghi nhận cân'} mass={p.weighedMassKg} />}
     {ids.flatMap((id, groupIndex) => Array.from({ length: 8 }, (_, index) => {
       const x = 423 + (index % 4) * 10
-      const y = (split ? groupIndex === 0 ? 87 : 238 : 190) + Math.floor(index / 4) * 9
+      const y = scaleYs[split ? groupIndex : 0]! - 25 + Math.floor(index / 4) * 9
       return <g key={id + index} transform={`translate(${x},${y})`} data-polymer={id} data-location="weighed">
         <g data-motion-particle data-from-x={64 + (split ? groupIndex * 60 : 0) + (index % 4) * 8 - x} data-from-y={110 + Math.floor(index / 4) * 8 - y} data-via-x={147 + (index % 4) * 5 - x} data-via-y={162 + Math.floor(index / 4) * 7 - y}><Pellet id={id} /></g>
       </g>
