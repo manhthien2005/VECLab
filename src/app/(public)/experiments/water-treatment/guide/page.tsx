@@ -568,6 +568,8 @@ export default async function WaterTreatmentGuidePage({
                       {source.author} · {source.kind}
                     </p>
                     <p>{source.location}</p>
+                    <p>{source.use}</p>
+                    <p>{source.limit}</p>
                   </li>
                 ))}
               </ul>

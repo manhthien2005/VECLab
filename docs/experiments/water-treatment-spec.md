@@ -3559,6 +3559,60 @@ cho tới khi mục đóng.
 - ✅ Viết skeleton ngay: types §4.1+§4.2, action handler §5, event log §5.3, pH solver skeleton §6.1.1, initial pH skeleton §6.1.2, precipitation skeleton §6.5, HCl/NaOH controller §5.2.1, Pre-treatment Assessment component §5.1.1, UI skeleton.
 - ⏸ Hoãn: measurement với noise (cần P0-E), scoring với trọng số (cần P0-G), release config (cần P0-F).
 
+## 11. Nguồn và phạm vi căn cứ
+
+Các thông số, workflow và yêu cầu đánh giá của bài lấy từ hồ sơ scenario,
+model constants và giao diện VECLab hiện có. Các tài liệu dưới đây hỗ trợ
+nguyên lý và bối cảnh; chúng không xác nhận các hằng số, kết quả hay hiệu lực
+thực nghiệm của mô phỏng VECLab.
+
+### Nguồn nguyên lý và phương pháp
+
+1. Qasem, N. A. A., Mohammed, R. H., & Lawal, D. U. (2021). “Removal of heavy
+   metal ions from wastewater: a comprehensive and critical review.” *npj Clean
+   Water*, 4(1), Article 36. [DOI: 10.1038/s41545-021-00127-0](https://doi.org/10.1038/s41545-021-00127-0).
+   Tổng quan các phương pháp xử lý ion kim loại trong nước thải, gồm kết tủa
+   hóa học và các phương pháp cạnh tranh; hỗ trợ bối cảnh lựa chọn công nghệ,
+   không cung cấp xác nhận riêng cho model VECLab.
+2. Baltpurvins, K. A., Burns, R. C., Lawrance, G. A., & Stuart, A. D. (1996).
+   “Use of the Solubility Domain Approach for the Modeling of the Hydroxide
+   Precipitation of Heavy Metals from Wastewater.” *Environmental Science &
+   Technology*, 30(5), 1493–1499. [DOI: 10.1021/es950421u](https://doi.org/10.1021/es950421u).
+   Nguồn về mô hình miền độ tan cho kết tủa hydroxide kim loại, phụ thuộc pH
+   và hành vi lưỡng tính. Kết quả/hằng số của hệ được nghiên cứu không được
+   chuyển thẳng thành hằng số cho Fe/Zn/Pb trong VECLab.
+3. U.S. Environmental Protection Agency. (2000). *Wastewater Technology Fact
+   Sheet: Chemical Precipitation*, EPA 832-F-00-018.
+   [EPA NEPIS fact sheet](https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=P1001QTR.TXT).
+   Mô tả kết tủa hóa học, keo tụ-tạo bông, jar test và các cân nhắc vận hành;
+   tài liệu lưu ý liều tối ưu cần được xác định theo từng trường hợp. Đây là
+   hướng dẫn công nghệ, không phải validation của mô hình VECLab.
+
+### Căn cứ quy chuẩn Việt Nam
+
+4. Bộ Tài nguyên và Môi trường. (2025). *Thông tư 06/2025/TT-BTNMT*, ban hành
+   QCVN 40:2025/BTNMT — Quy chuẩn kỹ thuật quốc gia về nước thải công nghiệp.
+   [Bản PDF đã lưu trong hồ sơ](Thong-tu-06-2025-TT-BTNMT.pdf); đối chiếu pháp lý
+   và SHA-256 được ghi trong [evidence register](water-treatment-evidence.md),
+   mục 5.1. Bảng 2 (trang 5–6) ghi giới hạn Fe, Zn, Pb và pH theo cột; mục
+   1.3.3.1 (trang 3) định nghĩa Cột A.
+
+   Cột A trong bài là **mục tiêu học tập mô phỏng**. QCVN này điều chỉnh nước
+   thải công nghiệp theo điều kiện áp dụng của quy chuẩn; không dùng nó để
+   chứng nhận mẫu tổng hợp trong mô phỏng hoặc nước thật đạt chuẩn. Hệ Fe/Zn/Pb
+   được chọn làm tình huống học tập của VECLab, không phải danh sách khẳng định
+   áp dụng pháp lý cho mọi ngành và cơ sở.
+
+### Phạm vi bằng chứng
+
+Các nguồn trên hỗ trợ nguyên lý hydroxide precipitation, sự phụ thuộc pH,
+amphoteric behavior và vai trò của jar test/batch experiment. QCVN 40:2025/BTNMT
+là căn cứ quy định của Việt Nam, không phải nguồn cho các nguyên lý quốc tế.
+Model constants và các giả định pha rắn phải được truy về database/nguồn cụ thể
+trong evidence register; kiểm tra số học hoặc đối chiếu database không tương
+đương kiểm chứng thực nghiệm độc lập. Mô phỏng không phải tư vấn thiết kế hay
+hướng dẫn xử lý/xả thải nước thật.
+
 ## 17. Phần thực hành đã chốt
 
 Các quyết định dưới đây đã đủ rõ để chuẩn bị skeleton code, contract và test harness.
