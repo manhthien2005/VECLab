@@ -1,7 +1,8 @@
 'use client'
 
-import { useId, useRef, useState, useEffect } from 'react'
+import { useId, useRef, useState, useEffect, useMemo } from 'react'
 import { runWaterTreatmentAction, type WaterTreatmentResult } from '@/app/simulate/water-treatment/actions.js'
+import type { SampleCalculation } from './sample-apparatus.js'
 import { PlayIcon, StopIcon, PlusIcon, BeakerIcon } from './icons.js'
 import styles from './workbench.module.css'
 
@@ -197,17 +198,60 @@ export function WaterTreatmentApparatus({
   onToggleStir,
   onCalculate,
   calculation,
+  sampleCalculation,
+  sampleStatus: externalSampleStatus,
 }: {
   status?: Partial<ApStatus>
   onAddDrop: (reagent: AcidBase, amountMl: number) => void
   onToggleStir: () => void
   onCalculate: (result: TreatmentCalculation) => void
   calculation: TreatmentCalculation | null
+  sampleCalculation?: SampleCalculation | null
+  sampleStatus?: { feAddedMl: number; znAddedMl: number; pbAddedMl: number } | null
 }) {
   const uid = useId().replaceAll(':', '')
   const status: ApStatus = { ...INITIAL_STATUS, ...external }
   const waterY = volumeY(status.volumeMl)
   const liquidDepth = BEAKER_BOTTOM_Y - waterY
+
+  // Thông tin mẫu từ Bàn 1: dùng cho màu dung dịch + kết tủa ở Bàn 2
+  const sampleStatus = externalSampleStatus ?? null
+  const hasFe = Boolean(sampleStatus && sampleStatus.feAddedMl > 0)
+  const hasZn = Boolean(sampleStatus && sampleStatus.znAddedMl > 0)
+  const hasPb = Boolean(sampleStatus && sampleStatus.pbAddedMl > 0)
+
+  // Tính màu dung dịch và kết tủa phản ánh mẫu đang được xử lý ở Bàn 2
+  const sampleMeta = useMemo(() => {
+    // Kết tủa ở Bàn 2 đến từ hai nguồn: kết tủa đã có ở Bàn 1 và kết tủa tạo ra khi xử lý
+    const samplePpt = sampleCalculation
+      ? (sampleCalculation.precipitateMg?.fe || 0) + (sampleCalculation.precipitateMg?.zn || 0) + (sampleCalculation.precipitateMg?.pb || 0)
+      : 0
+    const treatedPpt = calculation
+      ? (calculation.precipitated_mgPerL?.Fe || 0) + (calculation.precipitated_mgPerL?.Zn || 0) + (calculation.precipitated_mgPerL?.Pb || 0)
+      : 0
+    const totalPpt = samplePpt + treatedPpt
+
+    // Mẫu chưa pha ở Bàn 1 → cốc Bàn 2 vẫn là nước cất
+    if (!hasFe && !hasZn && !hasPb) {
+      return { liquidColor: '#bcd5e0', precipitateColor: null as string | null, pptMg: 0 }
+    }
+
+    // Màu dung dịch: Fe³⁺ vàng nâu, Zn²⁺/Pb²⁺ gần như trong
+    const liquidColor = hasFe ? '#F1DFA0' : '#F4F6F8'
+
+    // Màu kết tủa theo thành phần kết tủa chiếm ưu thế
+    const fePpt = (sampleCalculation?.precipitateMg?.fe || 0) + (calculation?.precipitated_mgPerL?.Fe || 0)
+    const pbPpt = (sampleCalculation?.precipitateMg?.pb || 0) + (calculation?.precipitated_mgPerL?.Pb || 0)
+    let precipitateColor: string | null = null
+    if (totalPpt > 0) {
+      if (fePpt > 0) precipitateColor = '#A56535'        // Fe(OH)₃ nâu đỏ
+      else if (pbPpt > 0) precipitateColor = '#F2EBDD'  // Pb trắng kem
+      else precipitateColor = '#F1F1ED'                // Zn(OH)₂ trắng
+    }
+    return { liquidColor, precipitateColor, pptMg: totalPpt }
+  }, [sampleCalculation, calculation, hasFe, hasZn, hasPb])
+
+  const liquidColor = sampleMeta.liquidColor
 
   // Buret remaining volume — wrap after draining a full buret
   const wrapMod = (n: number) => n % (BURET_CAPACITY + 1)
@@ -395,8 +439,35 @@ export function WaterTreatmentApparatus({
         <path d={'M' + (BEAKER_RIGHT_X + 1) + ' ' + (BEAKER_TOP_Y - 1) + ' l6 -3 l-7 -2'} fill="none" stroke="#8da9b8" strokeWidth="1.4" strokeLinecap="round" />
 
         {/* Liquid — flat bottom */}
-        <path d={'M' + (BEAKER_LEFT_X + 2) + ' ' + waterY + ' H' + (BEAKER_RIGHT_X - 2) + ' V' + (BEAKER_BOTTOM_Y - 1) + ' H' + (BEAKER_LEFT_X + 2) + ' Z'} fill="#bcd5e0" fillOpacity=".78" />
-        <ellipse cx={(BEAKER_LEFT_X + BEAKER_RIGHT_X) / 2} cy={waterY} rx={(BEAKER_RIGHT_X - BEAKER_LEFT_X - 4) / 2} ry="3.5" fill="#dceaf1" stroke="#6b8a99" strokeWidth="1" />
+        <path d={'M' + (BEAKER_LEFT_X + 2) + ' ' + waterY + ' H' + (BEAKER_RIGHT_X - 2) + ' V' + (BEAKER_BOTTOM_Y - 1) + ' H' + (BEAKER_LEFT_X + 2) + ' Z'} fill={liquidColor} fillOpacity=".78" />
+        <ellipse cx={(BEAKER_LEFT_X + BEAKER_RIGHT_X) / 2} cy={waterY} rx={(BEAKER_RIGHT_X - BEAKER_LEFT_X - 4) / 2} ry="3.5" fill={liquidColor} stroke="#6b8a99" strokeWidth="1" />
+
+        {/* Kết tủa - hiển thị các hạt nhỏ lắng đáy cốc khi có mẫu */}
+        {(() => {
+          const pptColor = sampleMeta.precipitateColor
+          if (!pptColor || liquidDepth <= 8) return null
+          // Số hạt dựa trên tổng kết tủa (từ Bàn 1 + Bàn 2)
+          const numParticles = Math.min(24, Math.max(4, Math.round(sampleMeta.pptMg * 1.5)))
+          const centerX = (BEAKER_LEFT_X + BEAKER_RIGHT_X) / 2
+          const halfWidth = (BEAKER_RIGHT_X - BEAKER_LEFT_X) / 2 - 4
+          const baseY = BEAKER_BOTTOM_Y - 1.5
+          // Sinh vị trí hạt (deterministic - không random mỗi render)
+          const particles = Array.from({ length: numParticles }, (_, i) => {
+            const seed = (i * 7 + 3) % 11
+            const seed2 = (i * 13 + 5) % 13
+            const xJitter = ((seed / 11) - 0.5) * 2 * (halfWidth - 3)
+            const yJitter = -((seed2 / 13) * 3)
+            const size = 1.2 + ((seed + seed2) % 5) * 0.35
+            return { x: centerX + xJitter, y: baseY + yJitter, size }
+          })
+          return (
+            <g data-testid="wt-precipitate">
+              {particles.map((p, i) => (
+                <ellipse key={i} cx={p.x} cy={p.y} rx={p.size} ry={p.size * 0.7} fill={pptColor} fillOpacity=".78" stroke={pptColor} strokeOpacity=".4" strokeWidth=".3" />
+              ))}
+            </g>
+          )
+        })()}
 
         {/* Stir bar (nam châm khuấy) — sits on the flat bottom, spins when stirring */}
         {status.volumeMl > 50 && liquidDepth > 6 && <g>

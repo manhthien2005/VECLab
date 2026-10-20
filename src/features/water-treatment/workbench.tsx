@@ -410,6 +410,8 @@ function WaterTreatmentWorkbenchSession({
             onToggleStir={toggleStir}
             onCalculate={(result) => setTreatmentCalculation(result)}
             calculation={treatmentCalculation}
+            sampleCalculation={sampleCalculation}
+            sampleStatus={sampleApStatus}
           />
         </section>
       </>
