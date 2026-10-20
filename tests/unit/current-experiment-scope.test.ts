@@ -6,7 +6,7 @@ import { EXPERIMENT_OVERVIEWS } from '@/features/experiment-catalog/overviews.js
 describe('current experiment scope', () => {
   it('serves current lessons including virgin plastic separation and cold-process soap', () => {
     expect([...SCENARIO_KEYS].sort()).toEqual(['acid-base-extraction', 'cold-process-soap', 'jar-test'])
-    expect(listCatalog().map(entry => entry.scenarioKey).sort()).toEqual(['acid-base-extraction', 'cold-process-soap', 'jar-test', 'plastic-density-separation'])
+    expect(listCatalog().map(entry => entry.scenarioKey).sort()).toEqual(['acid-base-extraction', 'cold-process-soap', 'jar-test', 'plastic-density-separation', 'water-treatment'])
   })
 
   it('keeps the adsorption introduction without inventing a runnable lesson', () => {

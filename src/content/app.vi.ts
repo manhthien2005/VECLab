@@ -58,7 +58,7 @@ export const APP_STRINGS = {
 
     showcaseEyebrow: 'Khám phá ngay',
     showcaseHeading: '4 thí nghiệm mô phỏng',
-    showcaseLede: 'Jar Test đã mở thực hành. Ba bài còn lại chưa triển khai.',
+    showcaseLede: 'Thực hành Jar Test, chiết tách axit–bazơ và xử lý nước Fe, Zn, Pb. Bài hấp phụ đang được xây dựng.',
     showcaseCtaLabel: 'Thử ngay',
     comingSoonBadge: 'Sắp ra mắt',
     comingSoonCta: 'Xem trước',

@@ -85,9 +85,9 @@ export function WaterTreatmentNotebook({
 
   // Sample composition
   const totalMetals = sampleStatus.feAddedMl + sampleStatus.znAddedMl + sampleStatus.pbAddedMl
-  const feCalc = sampleCalculation?.fe_mgPerL ?? null
-  const znCalc = sampleCalculation?.zn_mgPerL ?? null
-  const pbCalc = sampleCalculation?.pb_mgPerL ?? null
+  const feCalc = sampleCalculation?.dissolvedMgL.fe ?? null
+  const znCalc = sampleCalculation?.dissolvedMgL.zn ?? null
+  const pbCalc = sampleCalculation?.dissolvedMgL.pb ?? null
 
   // Treatment results
   const latestCalc = treatmentCalculation

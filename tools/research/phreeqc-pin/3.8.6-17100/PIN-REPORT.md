@@ -35,7 +35,7 @@ Kết quả (xem `pin.log` đầy đủ):
 | `minteq.dat` | `b098ba653279256c05e7ac2ffa698529442f06d0bbb82a6f3ef2b8c309101f7a` |
 | `wateq4f.dat` | `7816c92eadd28f7e4703efa467a038a197748cd38f410d9aa7909fde1c8912f` |
 
-22 file đầy đủ có trong `PIN.json`.
+Bốn database liên quan còn được giữ trong `database/`, cùng SHA-256 và đường dẫn tương đối trong `PIN.json`. Gói ZIP và bản giải nén trùng được gỡ khỏi source; metadata gói gốc vẫn được giữ.
 
 ---
 
@@ -165,7 +165,7 @@ Kết quả (xem `pin.log` đầy đủ):
 - `tools/research/phreeqc-pin/3.8.6-17100/verify-output.txt` — output của verify-claims.ps1
 - `tools/research/phreeqc-pin/3.8.6-17100/verify-claims.ps1`, `verify-aq.ps1`, `verify-logk.ps1` — script verify
 - `tools/research/phreeqc-pin/3.8.6-17100/PIN-REPORT.md` — báo cáo này
-- `tools/research/phreeqc-pin/3.8.6-17100/extracted/phreeqc-3.8.6-17100/database/` — 19 file database + 3 file ví dụ
+- `tools/research/phreeqc-pin/3.8.6-17100/database/` — bốn database tham chiếu được giữ
 
 ### 3.4. Registry đã cập nhật
 
@@ -173,3 +173,6 @@ Kết quả (xem `pin.log` đầy đủ):
 - `docs/scientific-evidence-register.md` §5.1.3 — bảng 6 claim với database hashes, line references, và chemistry owner findings
 - `docs/scientific-evidence-register.md` §5.1.3 Discrepancy log — cập nhật với giá trị verify từ databases đã pin
 - `docs/scientific-evidence-register.md` §5.1.3 Database pin & version lock — đã chốt giá trị (zip hash, dat hashes, pinnedAt, pinnedBy)
+## Phạm vi sau dọn source (20/10/2026)
+
+Các lệnh và đường dẫn ổ D ở trên ghi lại lần đối chiếu gốc, không phải hướng dẫn chạy trên checkout mới. Các script `verify-*.ps1` hiện dùng đường dẫn tương đối. Giữ `cases/`, `actual/`, các báo cáo đối chiếu và output được đặc tả trích dẫn. Không commit ZIP, `extracted/` hoặc ví dụ phân phối chung. `bin/phreeqc.exe` là chương trình Windows mà server action `runSampleChemistry` và test chẩn đoán hiện dùng; chưa có bản Linux trong nhánh này. Việc dọn source không xác nhận chạy được action này trên CI/hosting Linux.

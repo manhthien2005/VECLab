@@ -155,11 +155,7 @@ const WATER_TREATMENT_EQUIPMENT = {
 
 function EquipmentInfoDialog({ item, onClose }: { item: EquipmentId; onClose: () => void }) {
   const equipment = EQUIPMENT_LIST.find(e => e.id === item)
-  if (!equipment) return null
-
-  const details = WATER_TREATMENT_EQUIPMENT[item as keyof typeof WATER_TREATMENT_EQUIPMENT]
-  if (!details) return null
-
+  const details = WATER_TREATMENT_EQUIPMENT[item]
   const dialogRef = useRef<HTMLDialogElement>(null)
 
   useLayoutEffect(() => {
@@ -167,6 +163,8 @@ function EquipmentInfoDialog({ item, onClose }: { item: EquipmentId; onClose: ()
     element?.showModal()
     return () => element?.close()
   }, [])
+
+  if (!equipment || !details) return null
 
   return (
     <dialog ref={dialogRef} className={styles.equipmentPanel} 
@@ -258,7 +256,7 @@ function WaterTreatmentWorkbenchSession({
   initialPane = 'simulation'
 }: Props) {
   const [loadState, setLoadState] = useState<LoadState>(attemptId === null ? 'idle' : 'loading')
-  const [issue, setIssue] = useState<Issue | null>(null)
+  const [issue] = useState<Issue | null>(null)
   const [pane, setPane] = useState<WorkbenchPane>(initialPane)
   const [group, setGroup] = useState<string | null>('composition')
   const [busy, setBusy] = useState(false)

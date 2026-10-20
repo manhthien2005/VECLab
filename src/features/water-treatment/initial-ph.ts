@@ -64,24 +64,6 @@ function mgPerLToMolPerL(mgPerL: number, M: number): number {
 }
 
 /**
- * Tính [Fe³⁺]_free từ pH và T_Fe theo mass balance:
- *   T_Fe = [Fe³⁺] + [FeOH²⁺]
- *   [FeOH²⁺] = K_FeOH × [Fe³⁺] / [H⁺]
- *   ⟹ [Fe³⁺] = T_Fe / (1 + K_FeOH / [H⁺])
- */
-function freeFe3(T_Fe: number, pH: number): number {
-  const logK = K_FE_OH_LOG
-  const logH = -pH
-  // log(K_FeOH / [H⁺]) = logK - logH
-  const ratio = Math.pow(10, logK - logH)
-  return T_Fe / (1 + ratio)
-}
-
-function freeFeOH2(T_Fe: number, pH: number): number {
-  return T_Fe - freeFe3(T_Fe, pH)
-}
-
-/**
  * Tính [Zn²⁺]_free từ pH và T_Zn theo mass balance:
  *   T_Zn = [Zn²⁺] + [ZnOH⁺]
  *   [ZnOH⁺] = K_ZnOH × [Zn²⁺] / [H⁺]
@@ -90,10 +72,6 @@ function freeFeOH2(T_Fe: number, pH: number): number {
 function freeZn2(T_Zn: number, pH: number): number {
   const ratio = Math.pow(10, K_ZN_OH_LOG + pH) // K_ZnOH / [H⁺]
   return T_Zn / (1 + ratio)
-}
-
-function freeZnOH(T_Zn: number, pH: number): number {
-  return T_Zn - freeZn2(T_Zn, pH)
 }
 
 /**
@@ -105,10 +83,6 @@ function freeZnOH(T_Zn: number, pH: number): number {
 function freePb2(T_Pb: number, pH: number): number {
   const ratio = Math.pow(10, K_PB_OH_LOG + pH) // K_PbOH / [H⁺]
   return T_Pb / (1 + ratio)
-}
-
-function freePbOH(T_Pb: number, pH: number): number {
-  return T_Pb - freePb2(T_Pb, pH)
 }
 
 /**
@@ -123,10 +97,6 @@ function freeSO4(T_S: number, pH: number): number {
   // log(K_HSO4 × [H⁺]) = logK + logH
   const ratio = Math.pow(10, logK + logH)
   return T_S / (1 + ratio)
-}
-
-function freeHSO4(T_S: number, pH: number): number {
-  return T_S - freeSO4(T_S, pH)
 }
 
 /**
@@ -291,8 +261,8 @@ export function solveInitialPh(
     return 7
   }
   // Chuyển mg/L → mol/L
-  let T_Fe = mgPerLToMolPerL(composition.Fe, MOLAR_MASS.Fe)
-  let T_Zn = mgPerLToMolPerL(composition.Zn, MOLAR_MASS.Zn)
+  const T_Fe = mgPerLToMolPerL(composition.Fe, MOLAR_MASS.Fe)
+  const T_Zn = mgPerLToMolPerL(composition.Zn, MOLAR_MASS.Zn)
   const T_Pb = mgPerLToMolPerL(composition.Pb, MOLAR_MASS.Pb)
 
   // Vòng lặp kết tủa Fe: nếu pH tăng quá cao → Fe(OH)₃ kết tủa, giải

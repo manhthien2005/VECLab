@@ -128,7 +128,7 @@ miền khối lượng tương ứng là Fe `0,5–20 mg`, Zn `0,2–10 mg` và 
 >
 > Bảng dưới và bảng "đường giới hạn pháp lý" ở §3.2.4 đã được đối chiếu với bản
 > chính thức **Thông tư 06/2025/TT-BTNMT** ban hành ngày 01/3/2025 (QCVN 40:2025/BTNMT).
-> Xem chi tiết trong `docs/scientific-evidence-register.md` mục "Register — Xử lý nước
+> Xem chi tiết trong `docs/experiments/water-treatment-evidence.md` mục "Register — Xử lý nước
 > Fe/Zn/Pb" và `docs/experiments/Thong-tu-06-2025-TT-BTNMT.pdf` (SHA-256:
 > `1fb859f91af39c31c32936fd8988f69b4d2f25805a9689afff578be4050ac5da`).
 >
@@ -1742,7 +1742,7 @@ route là cách duy nhất được bật trong MVP; carbonate và adsorption đ
 > **⚠️ Cập nhật baseline Ksp 16/10/2026 (chemistry owner chốt D1–D5, P0-D đã đóng):**
 >
 > Giá trị Ksp và phase rắn trong §6.5.1, §6.5.2 đã được thay bằng **baseline model
-> assumptions** chốt bởi chemistry owner ngày 16/10/2026 (xem `docs/scientific-evidence-register.md`
+> assumptions** chốt bởi chemistry owner ngày 16/10/2026 (xem `docs/experiments/water-treatment-evidence.md`
 > §5.1.3 "Approved baseline model assumptions (D1–D5)" và "Discrepancy log vs current
 > spec §6.5"):
 >
@@ -1939,7 +1939,7 @@ gần đúng".
 > **Mọi thay đổi giá trị bảng phải chạy script để verify** trước khi commit.
 >
 > **Legacy values** −38,6 / −16,9 / −15,3 từ Smith-Martell 2004 chỉ giữ trong
-> `docs/scientific-evidence-register.md` §5.1.3 “Discrepancy log vs current spec §6.5”
+> `docs/experiments/water-treatment-evidence.md` §5.1.3 “Discrepancy log vs current spec §6.5”
 > để truy ngược — KHÔNG dùng cho mô phỏng khi chưa qua PHREEQC verification.
 >
 > **Lưu ý về Zn/Pb ở pH thấp:** Giá trị Zn²⁺ ~3 mol/L và Pb²⁺ ~1,4×10⁻⁴ mol/L tại pH
@@ -3355,7 +3355,7 @@ dấu "chưa xác minh" trong bảng.
 
 Nguồn tham chiếu:
 
-- **Source key:** `QCVN40-2025-BTNMT` — xem [Sổ đăng ký bằng chứng khoa học](scientific-evidence-register.md#6-register--xử-lý-nước-feznpb)
+- **Source key:** `QCVN40-2025-BTNMT` — xem [Sổ đăng ký bằng chứng khoa học](water-treatment-evidence.md)
 - [Thông tư 06/2025/TT-BTNMT và QCVN 40:2025/BTNMT — PDF nguồn do người dùng cung cấp](https://qcvn.com.vn/wp-content/uploads/2025/03/Thong-tu-06-2025-TT-BTNMT.pdf)
 - [QCVN 40:2025/BTNMT trên cổng thông tin văn bản pháp luật](https://vbpl.vn/FileData/TW/Lists/vbpq/Attachments/176985/VanBanGoc_06-2025-tt-btnmt.pdf)
 - [Thông tin QCVN 40:2025/BTNMT của cơ quan thuộc Bộ](https://vukhcn.monre.gov.vn/tin-khoa-hoc-cong-nghe-cua-bo/quy-chuan-ky-thuat-quoc-gia-qcvn-402025-btnmt-ve-nuoc-thai-cong-nghiep/tt-9067)
@@ -3534,9 +3534,9 @@ cho tới khi mục đóng.
 | # | P0 | Phụ thuộc | Chặn | Output kỳ vọng | Chủ sở hữu đề xuất | Sẵn sàng skeleton? |
 | --- | --- | --- | --- | --- | --- | --- |
 | P0-A | **QCVN 40:2025/BTNMT: ✅ ĐÃ ĐÓNG** (đối chiếu với Thông tư 06/2025/TT-BTNMT ngày 01/3/2025) | — | RELEASE ✅ | Bảng §2.2 và §3.2.4 đã thống nhất về cùng một bảng số từ Bảng 2, Thông tư 06/2025/TT-BTNMT (trang 5–6): Fe 2/10/10, Zn 1/5/5, Pb 0,1/0,5/0,5, pH 6–9 cho cả 3 cột. PDF + SHA-256 lưu tại `docs/experiments/Thong-tu-06-2025-TT-BTNMT.pdf` (SHA-256: `1fb859f91af39c31c32936fd8988f69b4d2f25805a9689afff578be4050ac5da`). Mục 1.3.3.1 (định nghĩa Cột A) đã được trích dẫn trong §2.2. Evidence register mục "Register — Xử lý nước Fe/Zn/Pb" đã có source key `QCVN-40-2025-BTNMT`. **Mục tiêu mô phỏng** Fe ≤ 2,0; Zn ≤ 1,0; Pb ≤ 0,1 mg/L; pH 6–9 đã được xác minh pháp lý. | Khoa học + product owner | **Có** — code dùng giá trị đã xác minh, không còn placeholder |
-| P0-B | **Precursor salt bundle** (mục 1) | ✅ Đã chốt design-assumed 16/10/2026 | CHEM | Stock + dose cap giả định: FeCl₃·6H₂O 1,00 M / 5 mL×V=1 L (5 mmol Fe/lần); ZnSO₄·7H₂O 1,00 M / 5 mL/lần (5 mmol Zn); Pb(NO₃)₂ 0,10 M / 5 mL/lần (0,5 mmol Pb). Xem `docs/scientific-evidence-register.md` §5.1.5 (O6). Khi có SDS/vendor thật, thay bằng `WT-SALT-*-VENDOR`. | Khoa học (an toàn hoá chất) | **Đã chốt design-assumed** — types + số đã có; spec ghi rõ đây là giả định thiết kế, không từ SDS |
+| P0-B | **Precursor salt bundle** (mục 1) | ✅ Đã chốt design-assumed 16/10/2026 | CHEM | Stock + dose cap giả định: FeCl₃·6H₂O 1,00 M / 5 mL×V=1 L (5 mmol Fe/lần); ZnSO₄·7H₂O 1,00 M / 5 mL/lần (5 mmol Zn); Pb(NO₃)₂ 0,10 M / 5 mL/lần (0,5 mmol Pb). Xem `docs/experiments/water-treatment-evidence.md` §5.1.5 (O6). Khi có SDS/vendor thật, thay bằng `WT-SALT-*-VENDOR`. | Khoa học (an toàn hoá chất) | **Đã chốt design-assumed** — types + số đã có; spec ghi rõ đây là giả định thiết kế, không từ SDS |
 | P0-C | **Capacity model 3 KL đồng thời** (mục 4) | P0-B | CHEM | Biểu thức định lượng cho 3 cơ chế tương tác (Ksp order, OH⁻ budget chung, ionic strength); cross-check PHREEQC cho ≥ 1 case | Chemistry owner | **Không** — chưa thể viết solver 3 KL |
-| P0-D | **6 claim Ksp/hydrolysis/solid-phase** (mục 3 + 9) | P0-B | CHEM + RELEASE | ✅ **ĐÃ ĐÓNG 16/10/2026**: Evidence register đã nộp 6/6 claim số học + 1 baseline assumption (D1–D5, chốt 16/10/2026 — xem `docs/scientific-evidence-register.md` §5.1.3 và banner §6.5). 7 case chuyên biệt (§5.1.3 "Specialized cross-check cases") đã chạy thành công trong PHREEQC 3.8.6-17100 trên database đã pin (SHA-256 `a93914e63b0c616f8506cc92739188e50c5b9a15c33b111979652f308457f4ac`) ngày 16/10/2026 với sai số ≤ 0,004 đơn vị log. `verificationStatus = 'cross-checked'` cho cả 6 claim. Discrepancy legacy −15,3 / −16,9 / −38,6 đã phân giải. | Khoa học + reviewer | **Đạt** — solver dùng baseline đã cross-check trong chế độ `validated` |
+| P0-D | **6 claim Ksp/hydrolysis/solid-phase** (mục 3 + 9) | P0-B | CHEM + RELEASE | ✅ **ĐÃ ĐÓNG 16/10/2026**: Evidence register đã nộp 6/6 claim số học + 1 baseline assumption (D1–D5, chốt 16/10/2026 — xem `docs/experiments/water-treatment-evidence.md` §5.1.3 và banner §6.5). 7 case chuyên biệt (§5.1.3 "Specialized cross-check cases") đã chạy thành công trong PHREEQC 3.8.6-17100 trên database đã pin (SHA-256 `a93914e63b0c616f8506cc92739188e50c5b9a15c33b111979652f308457f4ac`) ngày 16/10/2026 với sai số ≤ 0,004 đơn vị log. `verificationStatus = 'cross-checked'` cho cả 6 claim. Discrepancy legacy −15,3 / −16,9 / −38,6 đã phân giải. | Khoa học + reviewer | **Đạt** — solver dùng baseline đã cross-check trong chế độ `validated` |
 | P0-E | **LOD/accuracy/rounding** (mục 6) | ⏸ Deferred 16/10/2026 (O7) | MEAS | `WaterMeasurement` chưa thể định nghĩa xong vì chưa chọn analytical method, chưa có validation data. UI dùng schema `referenceBenchmark` (spec §6.1.3) với EPA reference MDL (Method 200.8/300.0) + caveat rõ; **không** được label là LOD/LOQ dự án. Bằng chứng experimental về kinetics/sorption (Water Research 1995, Dyer et al.) đã thêm vào evidence register §5.1.4 để giới hạn narrative. Reopen khi có method + matrix + validation data. | Measurement owner | **Deferred** — EPA reference có, dự án validation chưa có |
 | P0-F | **Golden cases ≥ 3** (mục 8) | P0-B + P0-C + P0-D | CHEM (verify) | Tối thiểu: (a) mẫu đạt không cần xử lý; (b) mẫu hydroxide route đạt Fe+Zn nhưng Pb fail; (c) mẫu vượt pH guard / dose cap | Chemistry owner + QA | **Không** — cần P0-C đóng trước |
 | P0-G | **Rubric + trọng số + N/A** (mục 7) | ✅ Đã chốt O8 16/10/2026 | SCORE | Trọng số chính thức **40/30/15/15** (kết quả / quy trình / hiệu quả hóa chất–bùn / báo cáo & truy vết) + quy tắc N/A chuẩn hóa mẫu số (xem §10) | Product owner + giáo dục | **Đã chốt** — rubric ready; scoring có thể implement với type đầy đủ |
@@ -3547,7 +3547,7 @@ cho tới khi mục đóng.
 
 1. **P0-A** (khoá QCVN) — 1-2 ngày, chờ đối chiếu bản chính thức QCVN 40:2025/BTNMT. Không chặn gì ngoài §3.2.4.
 2. **P0-B** (precursor salt bundle) — 2-3 ngày, khoá số an toàn hoá chất. Cần trước P0-C, P0-D, P0-F.
-3. **P0-D** (6 claim evidence) — ✅ **ĐÃ ĐÓNG 16/10/2026**: 6/6 claim số học + 1 baseline assumption ở `cross-checked` sau khi chemistry owner chốt D1–D5 và 7 case PHREEQC chuyên biệt (P0-D step 6) chạy thành công ngày 16/10/2026 trên database đã pin (`docs/scientific-evidence-register.md` §5.1.3; xem `tools/research/phreeqc-pin/3.8.6-17100/cases/P0-D-CROSSCHECK-REPORT.md`). Solver dùng baseline mới trong chế độ `validated` cho chemistry. Limitation về pha rắn (Pb(OH)₂ assumption, không bao gồm anglesite/cerussite/hydrocerussite) và activity correction (γ = 1) vẫn áp dụng.
+3. **P0-D** (6 claim evidence) — ✅ **ĐÃ ĐÓNG 16/10/2026**: 6/6 claim số học + 1 baseline assumption ở `cross-checked` sau khi chemistry owner chốt D1–D5 và 7 case PHREEQC chuyên biệt (P0-D step 6) chạy thành công ngày 16/10/2026 trên database đã pin (`docs/experiments/water-treatment-evidence.md` §5.1.3; xem `tools/research/phreeqc-pin/3.8.6-17100/cases/P0-D-CROSSCHECK-REPORT.md`). Solver dùng baseline mới trong chế độ `validated` cho chemistry. Limitation về pha rắn (Pb(OH)₂ assumption, không bao gồm anglesite/cerussite/hydrocerussite) và activity correction (γ = 1) vẫn áp dụng.
 4. **P0-C** (capacity 3 KL) — 5-7 ngày sau khi P0-B + P0-D xong. Cần PHREEQC cross-check.
 5. **P0-E** (LOD/accuracy) — 2-3 ngày, độc lập với chemistry.
 6. **P0-F** (golden cases) — 3-5 ngày sau P0-C, cần solver 3 KL chạy được.

@@ -42,7 +42,7 @@ export const WT_QCVN_COLUMN_A = {
 /**
  * Mass-balance tolerance ±2% (P0-J) cho sample-level check, theo
  * `docs/experiments/water-treatment-spec.md` §6.6 step 5 + §7.4.5 và
- * `docs/scientific-evidence-register.md` §5.1.4 (đã chốt O9 ngày 16/10/2026).
+ * `docs/experiments/water-treatment-evidence.md` §5.1.4 (đã chốt O9 ngày 16/10/2026).
  *
  * Công thức: `pct = |input - filtrate - precipitated| / max(input, 1e-9) × 100`
  * cho Fe/Zn/Pb. Nếu pct > tolerance ở bất kỳ nguyên tố nào →
@@ -56,7 +56,7 @@ export const WT_MASS_BALANCE_TOLERANCE_PCT = 2 as const
 // P0-A (QCVN legal) và P0-D (chemistry pin) đóng ngày 16/10/2026. P0-C (capacity
 // 3 KL closed-form) đóng 17/10/2026. P0-F (≥ 3 golden case) đóng 17/10/2026
 // (G1 AI-prepared + G2/G3 reuse `GC-SOLID-01` từ P0-D). Tất cả P0-A → P0-F
-// đã đóng — xem `docs/scientific-evidence-register.md` §5.1.3.
+// đã đóng — xem `docs/experiments/water-treatment-evidence.md` §5.1.3.
 //
 // Còn lại (không chặn release):
 //   - P0-E LOD/LOQ deferred theo register §5.1.4 — không tính là UI blocker.

@@ -1,173 +1,47 @@
-﻿{
-    "schemaVersion":  "1.0.0",
-    "release":  "3.8.6-17100",
-    "sourceUrl":  "https://water.usgs.gov/water-resources/software/PHREEQC/phreeqc-3.8.6-17100.zip",
-    "zipFileName":  "phreeqc-3.8.6-17100.zip",
-    "zipSha256":  "91BF4998CFB5ED33B1222E034E559A9845F592F0F4F79A11819EFE229B65A847",
-    "zipSizeBytes":  13154618,
-    "pinnedAt":  "2026-10-16T18:12:10.4292471+07:00",
-    "pinnedBy":  "agent (Cursor Assistant) at chemistry owner request, 2026-10-16",
-    "extractedDir":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted",
-    "databaseFiles":  [
-                          {
-                              "sizeBytes":  52994,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\Amm.dat",
-                              "name":  "Amm.dat",
-                              "sha256":  "EAA4CEDE7A907447156F4B5FF53880AC693B2C7DE6765198EB048ADDB2DFCF83",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\Amm.dat"
-                          },
-                          {
-                              "sizeBytes":  13397,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\ColdChem.dat",
-                              "name":  "ColdChem.dat",
-                              "sha256":  "E03E02C35ED15796D7C85213AD6280E7585EE8C74909F739950F4D07E5337F7D",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\ColdChem.dat"
-                          },
-                          {
-                              "sizeBytes":  5429,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\Concrete_PHR.dat",
-                              "name":  "Concrete_PHR.dat",
-                              "sha256":  "FFE41089321B5BE71EB76BE57C0838F122E858E62DBF5EC5725E01ADEDCC2C02",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\Concrete_PHR.dat"
-                          },
-                          {
-                              "sizeBytes":  6685,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\Concrete_PZ.dat",
-                              "name":  "Concrete_PZ.dat",
-                              "sha256":  "EF0F8DE173B30609C50BB405C04F6447A6D0382F667536571EA62DDA953AEBAF",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\Concrete_PZ.dat"
-                          },
-                          {
-                              "sizeBytes":  172062,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\core10.dat",
-                              "name":  "core10.dat",
-                              "sha256":  "9492C1BD696141C5E2E6B17EEE66B9DCF8FDBB24E16F2A365DE19424248FCCA1",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\core10.dat"
-                          },
-                          {
-                              "sizeBytes":  20140,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\frezchem.dat",
-                              "name":  "frezchem.dat",
-                              "sha256":  "A22B63E73080D9A6666469C6A9EA0CAAADF4F2AEE5396C99FFBFA477C1099D7A",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\frezchem.dat"
-                          },
-                          {
-                              "sizeBytes":  238095,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\iso.dat",
-                              "name":  "iso.dat",
-                              "sha256":  "EE76B7CC9F12ADBF61226B0519DB3279EA875DF597A3BAA339985352D98B72C0",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\iso.dat"
-                          },
-                          {
-                              "sizeBytes":  370257,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\Kinec.v2.dat",
-                              "name":  "Kinec.v2.dat",
-                              "sha256":  "7EE972347F8791C900ADBF86CFFBB350E86CCFEC3A7AA7160683EE9864F516A8",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\Kinec.v2.dat"
-                          },
-                          {
-                              "sizeBytes":  380475,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\Kinec_v3.dat",
-                              "name":  "Kinec_v3.dat",
-                              "sha256":  "5AA68B4B86503D7EF592C36EF0B3D8534DDEC1DBECF0A9087E51164F0ADF2C77",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\Kinec_v3.dat"
-                          },
-                          {
-                              "sizeBytes":  635039,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\llnl.dat",
-                              "name":  "llnl.dat",
-                              "sha256":  "DBC108236B91B7618B5362E64C3968123BB7D969270CBC7129673B887397E78A",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\llnl.dat"
-                          },
-                          {
-                              "sizeBytes":  142729,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\minteq.dat",
-                              "name":  "minteq.dat",
-                              "sha256":  "B098BA653279256C05E7AC2FFA698529442F06D0BBB82A6F3EF2B8C309101F7A",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\minteq.dat"
-                          },
-                          {
-                              "sizeBytes":  320909,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\minteq.v4.dat",
-                              "name":  "minteq.v4.dat",
-                              "sha256":  "A93914E63B0C616F8506CC92739188E50C5B9A15C33B111979652F308457F4AC",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\minteq.v4.dat"
-                          },
-                          {
-                              "sizeBytes":  53211,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\phreeqc.dat",
-                              "name":  "phreeqc.dat",
-                              "sha256":  "59373961D648DFBF68A40744060C1D64F57ECBEC98F4F5FB89F3A1B4213CCD10",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\phreeqc.dat"
-                          },
-                          {
-                              "sizeBytes":  106269,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\phreeqc_rates.dat",
-                              "name":  "phreeqc_rates.dat",
-                              "sha256":  "8E348A8562BB5C43525722EE082CFB2CEA01909EBC6C39F1B82870B31353B7A0",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\phreeqc_rates.dat"
-                          },
-                          {
-                              "sizeBytes":  698065,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\PHREEQC_ThermoddemV1.10_15Dec2020.dat",
-                              "name":  "PHREEQC_ThermoddemV1.10_15Dec2020.dat",
-                              "sha256":  "CFB1DBE03BC2744E622EE9544BE628D051BEDA4F0DE8A218AFEDDD62AD781AEE",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\PHREEQC_ThermoddemV1.10_15Dec2020.dat"
-                          },
-                          {
-                              "sizeBytes":  36683,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\pitzer.dat",
-                              "name":  "pitzer.dat",
-                              "sha256":  "06AB2DEBC0CDB333598118DF953165499C2F762A79DE5F2DF55DEC6B78B02589",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\pitzer.dat"
-                          },
-                          {
-                              "sizeBytes":  446887,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\sit.dat",
-                              "name":  "sit.dat",
-                              "sha256":  "D7CBC6D459FD144B617EFCF4D4F18AE68C53ACD4AE873DF16A305B74EFAC4155",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\sit.dat"
-                          },
-                          {
-                              "sizeBytes":  92566,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\Tipping_Hurley.dat",
-                              "name":  "Tipping_Hurley.dat",
-                              "sha256":  "0725D7A31346E398D3B3361EB2EA19DFD3B6F0AAF8BAB2670C3AF7F42EA77006",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\Tipping_Hurley.dat"
-                          },
-                          {
-                              "sizeBytes":  88132,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\database\\wateq4f.dat",
-                              "name":  "wateq4f.dat",
-                              "sha256":  "7816C92EADD28F7E4703EFA467A038A197748CD38F410D81AA7909FDE1C8912F",
-                              "relativePath":  "phreeqc-3.8.6-17100\\database\\wateq4f.dat"
-                          },
-                          {
-                              "sizeBytes":  1138,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\examples\\co2.dat",
-                              "name":  "co2.dat",
-                              "sha256":  "FFAE33370FA1574666BAFB73D34ABA892E3DAEFF9D4C550B8EFDCB7BFCC583D0",
-                              "relativePath":  "phreeqc-3.8.6-17100\\examples\\co2.dat"
-                          },
-                          {
-                              "sizeBytes":  2058,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\examples\\co2_VP.dat",
-                              "name":  "co2_VP.dat",
-                              "sha256":  "903435CB927AE09A100C8B5688DEC7C1E096B6FD40403ED3A7F184ECAAF45979",
-                              "relativePath":  "phreeqc-3.8.6-17100\\examples\\co2_VP.dat"
-                          },
-                          {
-                              "sizeBytes":  2136,
-                              "absolutePath":  "D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\extracted\\phreeqc-3.8.6-17100\\examples\\ex15.dat",
-                              "name":  "ex15.dat",
-                              "sha256":  "C56818317B790589C43438332289CFCDF8F48EA7F858DE4B1F64883691DA6888",
-                              "relativePath":  "phreeqc-3.8.6-17100\\examples\\ex15.dat"
-                          }
-                      ],
-    "status":  "PINNED-EXTRACTED — verification pending; log: D:\\VECLab\\tools\\research\\phreeqc-pin\\3.8.6-17100\\pin.log",
-    "notes":  [
-                  "Downloaded and hashed on first attempt. Hashes are real, not assumed.",
-                  "Database version pinned but NO claim has been promoted to source-checked or cross-checked.",
-                  "Next step: chemistry owner to run the 7 specialized cross-check cases (see registry §5.1.3) on this pinned release and update verificationStatus only after PHREEQC output matches expected within tolerance."
-              ]
+{
+  "schemaVersion": "1.0.0",
+  "release": "3.8.6-17100",
+  "sourceUrl": "https://water.usgs.gov/water-resources/software/PHREEQC/phreeqc-3.8.6-17100.zip",
+  "zipFileName": "phreeqc-3.8.6-17100.zip",
+  "zipSha256": "91BF4998CFB5ED33B1222E034E559A9845F592F0F4F79A11819EFE229B65A847",
+  "zipSizeBytes": 13154618,
+  "pinnedAt": "2026-10-16T18:12:10.4292471+07:00",
+  "pinnedBy": "agent (Cursor Assistant) at chemistry owner request, 2026-10-16",
+  "databaseFiles": [
+    {
+      "sizeBytes": 142729,
+      "name": "minteq.dat",
+      "sha256": "B098BA653279256C05E7AC2FFA698529442F06D0BBB82A6F3EF2B8C309101F7A",
+      "relativePath": "database/minteq.dat"
+    },
+    {
+      "sizeBytes": 320909,
+      "name": "minteq.v4.dat",
+      "sha256": "A93914E63B0C616F8506CC92739188E50C5B9A15C33B111979652F308457F4AC",
+      "relativePath": "database/minteq.v4.dat"
+    },
+    {
+      "sizeBytes": 53211,
+      "name": "phreeqc.dat",
+      "sha256": "59373961D648DFBF68A40744060C1D64F57ECBEC98F4F5FB89F3A1B4213CCD10",
+      "relativePath": "database/phreeqc.dat"
+    },
+    {
+      "sizeBytes": 88132,
+      "name": "wateq4f.dat",
+      "sha256": "7816C92EADD28F7E4703EFA467A038A197748CD38F410D81AA7909FDE1C8912F",
+      "relativePath": "database/wateq4f.dat"
+    }
+  ],
+  "status": "Pinned reference databases retained; distribution archives, examples and duplicate extracted tree removed during cleanup.",
+  "notes": [
+    "Downloaded and hashed on first attempt. Hashes are real, not assumed.",
+    "Database version pinned but NO claim has been promoted to source-checked or cross-checked.",
+    "Next step: chemistry owner to run the 7 specialized cross-check cases (see registry §5.1.3) on this pinned release and update verificationStatus only after PHREEQC output matches expected within tolerance."
+  ],
+  "executable": {
+    "relativePath": "bin/phreeqc.exe",
+    "platform": "win32",
+    "sha256": "d1cc2ad3ae66af8a95c3fbb605affc4d22149c8d5aab4239919792c524635006"
+  }
 }

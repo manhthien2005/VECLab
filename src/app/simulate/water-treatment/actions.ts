@@ -10,7 +10,7 @@
  * Không persist DB (preview mode) — return result cho client lưu vào in-memory state.
  *
  * Xem `docs/experiments/water-treatment-spec.md` §6.5, §6.6, §7.4 và
- * `docs/scientific-evidence-register.md` §5.1.3 để biết baseline + giới hạn.
+ * `docs/experiments/water-treatment-evidence.md` §5.1.3 để biết baseline + giới hạn.
  */
 
 import { capacityAtSaturation } from '@/features/water-treatment/capacity.js'

@@ -1,4 +1,4 @@
-Set-Location 'D:\VECLab\tools\research\phreeqc-pin\3.8.6-17100\extracted\phreeqc-3.8.6-17100\database'
+Set-Location -LiteralPath (Join-Path $PSScriptRoot 'database')
 
 function Show-Lines($file, $pattern, $label, $max) {
   Write-Host ""

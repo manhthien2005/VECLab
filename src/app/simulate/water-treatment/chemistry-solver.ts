@@ -215,7 +215,7 @@ function ligandComplexConc(
   metal: Metal,
   freeM_mol: number,
   ligandTotal_mM: number,  // total ligand (mmol/L)
-  gammaL: number = 1,     // activity coeff of ligand anion
+  _gammaL: number = 1,    // reserved activity coeff of ligand anion
 ): number {
   const complexes = LIGAND_COMPLEXES[metal]
   let total = 0
@@ -255,7 +255,7 @@ function totalDissolvedAtPh(
   // Hydrolysis species (j = 1..4)
   let total = freeM  // j=0: free ion
   for (let j = 1; j <= 4; j++) {
-    const logK = logKs[j - 1]
+    const logK = logKs[j - 1]! // j is bounded by the four-entry tuple.
     // log[M(OH)_j] = log[M^n+] + logK_j + j·pH
     const logConcentration = Math.log10(freeM) + logK + j * pH
     total += Math.pow(10, logConcentration)
@@ -307,7 +307,7 @@ function avgMetalCharge(
   let totalConc = freeM
   let chargeSum = VALENCE[metal] * freeM
   for (let j = 1; j <= 4; j++) {
-    const logK = logKs[j - 1]
+    const logK = logKs[j - 1]! // j is bounded by the four-entry tuple.
     const logC = Math.log10(freeM) + logK + j * pH
     const conc = Math.pow(10, logC)
     totalConc += conc
@@ -316,8 +316,6 @@ function avgMetalCharge(
 
   // Ligand complexes
   const complexes = LIGAND_COMPLEXES[metal]
-  let ligandTotal = 0
-  let ligandCharge = 0
 
   for (const cpl of complexes) {
     const beta = Math.pow(10, cpl.logK)
@@ -331,8 +329,6 @@ function avgMetalCharge(
     }
     totalConc += ligandConc
     chargeSum += cpl.charge * ligandConc
-    ligandTotal += ligandConc
-    ligandCharge += cpl.charge * ligandConc
   }
 
   return totalConc > 0 ? chargeSum / totalConc : VALENCE[metal]
