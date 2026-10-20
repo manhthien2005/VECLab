@@ -175,4 +175,12 @@ Bốn database liên quan còn được giữ trong `database/`, cùng SHA-256 v
 - `docs/scientific-evidence-register.md` §5.1.3 Database pin & version lock — đã chốt giá trị (zip hash, dat hashes, pinnedAt, pinnedBy)
 ## Phạm vi sau dọn source (20/10/2026)
 
-Các lệnh và đường dẫn ổ D ở trên ghi lại lần đối chiếu gốc, không phải hướng dẫn chạy trên checkout mới. Các script `verify-*.ps1` hiện dùng đường dẫn tương đối. Giữ `cases/`, `actual/`, các báo cáo đối chiếu và output được đặc tả trích dẫn. Không commit ZIP, `extracted/` hoặc ví dụ phân phối chung. `bin/phreeqc.exe` là chương trình Windows mà server action `runSampleChemistry` và test chẩn đoán hiện dùng; chưa có bản Linux trong nhánh này. Việc dọn source không xác nhận chạy được action này trên CI/hosting Linux.
+Các lệnh và đường dẫn ổ D ở trên ghi lại lần đối chiếu gốc, không phải hướng dẫn chạy trên checkout mới. Các script `verify-*.ps1` hiện dùng đường dẫn tương đối. Giữ `cases/`, `actual/`, các báo cáo đối chiếu và output được đặc tả trích dẫn. Không commit ZIP, `extracted/` hoặc ví dụ phân phối chung.
+
+## Runtime Windows và Linux (21/10/2026)
+
+Giữ nguyên `bin/phreeqc.exe` cho Windows x64. Bổ sung `bin/phreeqc-linux-x64` (2.563.720 bytes), dựng từ source USGS **3.8.6-17100 không sửa đổi** bằng Zig 0.15.2, target `x86_64-linux-musl`, liên kết tĩnh. Source và compiler được kiểm SHA-256 trước build; metadata và hash executable ở `PIN.json`. Dựng lại bằng `bash scripts/build-phreeqc-linux.sh` từ thư mục gốc. `NOTICE-linux.txt` giữ thông báo USGS và giấy phép runtime đi kèm; không cần tải hay biên dịch khi chạy ứng dụng.
+
+Next.js đóng gói hai executable, `minteq.v4.dat` và notice cho route `/simulate/water-treatment`, chạy Node.js với giới hạn 30 giây. Mỗi phép tính dùng thư mục tạm riêng; Linux chép executable vào đó và đặt quyền chạy. Giới hạn bốn tiến trình đồng thời trên mỗi instance, dừng cưỡng bức sau 10 giây, từ chối đầu vào ngoài giới hạn/pha không được phép và kết quả không hội tụ. Không đổi công thức, pha mặc định, database, cách chọn dòng output hoặc giao diện.
+
+Đã kiểm tra phép tính thật trên Windows và Linux x64/Node 22, gồm mẫu kết tủa, không cấu hình pha rắn và mẫu không có kim loại. Các giá trị hồi quy pH, kết tủa Fe và Fe hòa tan khớp bản Windows đến 8 chữ số thập phân. Luồng trình duyệt qua pha mẫu → tính PHREEQC → xử lý → cân bằng pH đạt trên desktop/mobile ở local và preview Vercel. Đây là kiểm tra tính tương thích runtime; không nâng trạng thái xác nhận khoa học của mô hình. Production chưa được triển khai bởi tác vụ này.

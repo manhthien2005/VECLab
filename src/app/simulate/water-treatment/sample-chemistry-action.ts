@@ -3,10 +3,9 @@
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { spawn } from 'node:child_process'
+import { z } from 'zod'
+import { PHREEQC_DATABASE, runPhreeqc } from '@/server/phreeqc-runtime.js'
 
-const PHREEQC_BIN = join(process.cwd(), 'tools', 'research', 'phreeqc-pin', '3.8.6-17100', 'bin', 'phreeqc.exe')
-const PHREEQC_DATABASE = join(process.cwd(), 'tools', 'research', 'phreeqc-pin', '3.8.6-17100', 'database', 'minteq.v4.dat')
 const DATABASE_NAME = 'minteq.v4.dat'
 const ENGINE = 'PHREEQC 3.8.6-17100' as const
 const ATOMIC_MASS = { Fe: 55.845, Zn: 65.38, Pb: 207.2 } as const
@@ -57,15 +56,18 @@ const PHASES: readonly { name: SolidPhaseName; molarMassGPerMol: number }[] = [
   { name: 'Pb(OH)2', molarMassGPerMol: 241.214 },
 ]
 
-function runProcess(args: string[], cwd: string) {
-  return new Promise<{ code: number; stderr: string }>((resolve, reject) => {
-    const child = spawn(PHREEQC_BIN, args, { cwd, windowsHide: true })
-    let stderr = ''
-    child.stderr.on('data', (chunk) => { stderr += String(chunk) })
-    child.once('error', reject)
-    child.once('close', (code) => resolve({ code: code ?? -1, stderr }))
-  })
-}
+// Broad resource bounds preserve the current lesson inputs; phase names must
+// come from this allowlist because they are interpolated into native input.
+const inputSchema = z.object({
+  targetVolumeMl: z.number().positive().max(10_000),
+  feAddedMl: z.number().min(0).max(10_000),
+  znAddedMl: z.number().min(0).max(10_000),
+  pbAddedMl: z.number().min(0).max(10_000),
+  sourceMgL: z.number().min(0).max(100_000).optional(),
+  initialPh: z.number().min(0).max(14).optional(),
+  solidPhases: z.array(z.enum(['Ferrihydrite', 'Zn(OH)2(am)', 'Pb(OH)2']))
+    .max(3).refine((phases) => new Set(phases).size === phases.length).optional(),
+})
 
 function parseSelectedOutput(text: string) {
   const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0 && !line.startsWith('#'))
@@ -97,7 +99,7 @@ function phaseStatus(si: number | null): SolidPhaseStatus {
   return si < 0 ? 'undersaturated' : 'supersaturated'
 }
 
-function solutionInput(input: SampleChemistryInput, outputPath: string) {
+function solutionInput(input: z.infer<typeof inputSchema>, outputPath: string) {
   const sourceMgL = input.sourceMgL ?? 100
   const totalVolumeMl = input.targetVolumeMl + input.feAddedMl + input.znAddedMl + input.pbAddedMl
   const totalVolumeL = totalVolumeMl / 1000
@@ -113,20 +115,21 @@ function solutionInput(input: SampleChemistryInput, outputPath: string) {
   return `TITLE VECLab sample preparation\n\nSELECTED_OUTPUT 1\n    -high_precision true\n    -file ${outputPath}\n    -reset true\n    -pH true\n    -totals Fe Zn Pb\n    -si Ferrihydrite Zn(OH)2(am) Pb(OH)2\nEND\n\nSOLUTION 1\n    -temp 25\n    pH ${input.initialPh ?? 7} charge\n    Fe(3) ${molar.Fe}\n    Zn ${molar.Zn}\n    Pb ${molar.Pb}\n    Cl ${3 * molar.Fe}\n    S(6) ${molar.Zn}\n    N ${2 * molar.Pb}\nEND\n\n${equilibriumPhases}`
 }
 
-export async function runSampleChemistry(input: SampleChemistryInput): Promise<SampleChemistryResult> {
-  const values = [input.targetVolumeMl, input.feAddedMl, input.znAddedMl, input.pbAddedMl]
-  if (values.some((value) => !Number.isFinite(value) || value < 0) || input.targetVolumeMl <= 0) throw new Error('Thông số thể tích mẫu không hợp lệ.')
+export async function runSampleChemistry(rawInput: SampleChemistryInput): Promise<SampleChemistryResult> {
+  const parsed = inputSchema.safeParse(rawInput)
+  if (!parsed.success) throw new Error('Thông số mẫu không hợp lệ.')
+  const input = parsed.data
   const tempDir = await mkdtemp(join(tmpdir(), 'veclab-phreeqc-'))
   const inputPath = join(tempDir, 'sample.pqi')
   const outputPath = join(tempDir, 'selected.out')
   const reportPath = join(tempDir, 'report.out')
   try {
     await writeFile(inputPath, solutionInput(input, outputPath), 'utf8')
-    const process = await runProcess([inputPath, reportPath, PHREEQC_DATABASE], tempDir)
-    if (process.code !== 0) throw new Error(`PHREEQC không chạy thành công: ${process.stderr.trim()}`)
+    await runPhreeqc([inputPath, reportPath, PHREEQC_DATABASE], tempDir)
     const [selected, report] = await Promise.all([readFile(outputPath, 'utf8'), readFile(reportPath, 'utf8')])
     const values = parseSelectedOutput(selected)
     const reportData = parseReport(report)
+    if (!reportData.converged) throw new Error('PHREEQC không hội tụ. Vui lòng kiểm tra thông số mẫu.')
     const totalVolumeMl = input.targetVolumeMl + input.feAddedMl + input.znAddedMl + input.pbAddedMl
     const volumeL = totalVolumeMl / 1000
     const inputMassMg = { fe: (input.sourceMgL ?? 100) * input.feAddedMl / 1000, zn: (input.sourceMgL ?? 100) * input.znAddedMl / 1000, pb: (input.sourceMgL ?? 100) * input.pbAddedMl / 1000 }

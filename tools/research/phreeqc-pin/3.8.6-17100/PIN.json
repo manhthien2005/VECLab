@@ -43,5 +43,20 @@
     "relativePath": "bin/phreeqc.exe",
     "platform": "win32",
     "sha256": "d1cc2ad3ae66af8a95c3fbb605affc4d22149c8d5aab4239919792c524635006"
+  },
+  "linuxExecutable": {
+    "relativePath": "bin/phreeqc-linux-x64",
+    "platform": "linux",
+    "arch": "x64",
+    "sha256": "e983e34861d3ce816645bb2b32a6982c7ec426781c9feebf8909f37b713eab94",
+    "sizeBytes": 2563720,
+    "linking": "static musl / libc++",
+    "sourceUrl": "https://water.usgs.gov/water-resources/software/PHREEQC/phreeqc-3.8.6-17100.tar.gz",
+    "sourceSha256": "b5c4a6dfea1a6bb6a3436857a50346bb943904a49582714494b4f1b1e54e64e1",
+    "compiler": "Zig 0.15.2",
+    "compilerSha256": "02aa270f183da276e5b5920b1dac44a63f1a49e55050ebde3aecc9eb82f93239",
+    "buildScript": "scripts/build-phreeqc-linux.sh",
+    "notice": "NOTICE-linux.txt",
+    "sourceChanges": "none"
   }
 }

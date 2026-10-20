@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { WaterTreatmentWorkbench } from '@/features/water-treatment/workbench.js'
 
+export const runtime = 'nodejs'
+export const maxDuration = 30
+
 export const metadata: Metadata = {
   title: 'Xử lý nước Fe, Zn, Pb — Bàn thực hành',
   description: 'Mô phỏng xử lý nước chứa Fe, Zn, Pb bằng hydroxide route. Keo tụ, lắng, lọc.',
