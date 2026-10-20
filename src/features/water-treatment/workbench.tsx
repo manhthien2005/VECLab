@@ -10,6 +10,7 @@ import { SubmitIcon, CloseIcon, InfoIcon, ControlIcon, GuideIcon, TheoryIcon, So
 import { WaterTreatmentApparatus, type ApStatus, type AcidBase, type TreatmentCalculation, type FilterHistoryEntry } from './apparatus.js'
 import { SamplePreparationApparatus, type SampleApStatus, type SampleCalculation, type MetalSolution } from './sample-apparatus.js'
 import { DischargeApparatus } from './discharge-apparatus.js'
+import { WaterTreatmentLearningGoal } from './learning-goal.js'
 import styles from './workbench.module.css'
 
 const EQUIPMENT_LIST = [
@@ -43,9 +44,9 @@ const WATER_TREATMENT_EQUIPMENT = {
     alt: 'Lọ nước cất trong phòng thí nghiệm',
     caption: 'Nước cất được sản xuất bằng chưng cất hoặc khử ion. Dùng làm dung môi trung tính để tránh tạp chất ion.',
     author: 'Wikimedia Commons',
-    license: 'CC BY-SA 3.0',
-    source: 'https://commons.wikimedia.org/wiki/File:Bottles_in_laboratory_(1).jpg',
-    licenseUrl: 'https://commons.wikimedia.org/wiki/File:Bottles_in_laboratory_(1).jpg#Licensing',
+    license: '',
+    source: 'https://vi.wikipedia.org/wiki/N%C6%B0%E1%BB%9Bc_c%E1%BA%A5t',
+    licenseUrl: 'https://vi.wikipedia.org/wiki/N%C6%B0%E1%BB%9Bc_c%E1%BA%A5t',
     purpose: 'Làm dung môi trung tính để pha chế dung dịch chuẩn Fe, Zn, Pb. Tránh tạp chất ion từ nước máy ảnh hưởng đến kết quả.',
     facts: [['Mục đích', 'Dung môi khí giới'], ['Loại bỏ', 'Chất tan, khoáng chất'], ['Ứng dụng', 'Pha dung dịch chuẩn']],
     steps: ['Mở lọ nước cất và rót vào cốc thủy tinh.', 'Sử dụng để pha chế dung dịch ion Fe, Zn, Pb theo nồng độ yêu cầu.', 'Giữ lọ nước cất trong môi trường sạch để tránh ô nhiễm.'],
@@ -57,9 +58,9 @@ const WATER_TREATMENT_EQUIPMENT = {
     alt: 'Tinh thể chì nitrat trong phòng thí nghiệm',
     caption: 'Chì nitrat Pb(NO₃)₂ dạng tinh thể. Thao tác trong bài được biểu diễn bằng dung dịch chuẩn Pb²⁺.',
     author: 'Wikimedia Commons',
-    license: 'CC BY-SA 3.0',
-    source: 'https://commons.wikimedia.org/wiki/File:Lead_nitrate.jpg',
-    licenseUrl: 'https://commons.wikimedia.org/wiki/File:Lead_nitrate.jpg#Licensing',
+    license: '',
+    source: 'https://vi.wikipedia.org/wiki/Ch%C3%AC(II)_nitrat',
+    licenseUrl: 'https://vi.wikipedia.org/wiki/Ch%C3%AC(II)_nitrat',
     purpose: 'Tạo mẫu nước tổng hợp chứa ion Pb²⁺ ở nồng độ xác định. Khảo sát khả năng loại bỏ Pb bằng xử lý độ pH.',
     facts: [['Ion hoạt động', 'Pb²⁺'], ['Công thức', 'Pb(NO₃)₂ hoặc PbCl₂'], ['pH kết tủa', '8–9 (dạng Pb(OH)₂)'], ['Nồng độ', 'Mg/L (đơn vị khối lượng/thể tích)']],
     steps: ['Pha dung dịch Pb(NO₃)₂ với nước cất theo nồng độ thiết kế.', 'Pha vào mẫu nước để tạo mẫu chứa Pb²⁺.', 'Xử lý mẫu bằng cách tăng pH để quan sát kết tủa Pb(OH)₂.'],
@@ -71,9 +72,9 @@ const WATER_TREATMENT_EQUIPMENT = {
     alt: 'Tinh thể sắt(III) clorua trong phòng thí nghiệm',
     caption: 'Sắt(III) clorua FeCl₃ dạng tinh thể nâu. Dùng để tạo dung dịch chuẩn Fe³⁺ cho thí nghiệm xử lý nước.',
     author: 'Wikimedia Commons',
-    license: 'CC BY-SA 3.0',
-    source: 'https://commons.wikimedia.org/wiki/File:Iron(III)_chloride.jpg',
-    licenseUrl: 'https://commons.wikimedia.org/wiki/File:Iron(III)_chloride.jpg#Licensing',
+    license: '',
+    source: 'https://en.wikipedia.org/wiki/Iron(III)_chloride',
+    licenseUrl: 'https://en.wikipedia.org/wiki/Iron(III)_chloride',
     purpose: 'Tạo mẫu nước tổng hợp chứa ion Fe³⁺ (hoặc Fe²⁺ nếu dùng FeSO₄). Khảo sát khả năng loại bỏ Fe bằng xử lý độ pH.',
     facts: [['Ion hoạt động', 'Fe³⁺ (FeCl₃) hoặc Fe²⁺ (FeSO₄)'], ['Công thức Fe³⁺', 'FeCl₃ hoặc Fe(NO₃)₃'], ['pH kết tủa Fe³⁺', '> 3 (dạng Fe(OH)₃)'], ['pH kết tủa Fe²⁺', '> 8 (dạng Fe(OH)₂)']],
     steps: ['Pha dung dịch FeCl₃ (Fe³⁺) hoặc FeSO₄ (Fe²⁺) với nước cất.', 'Pha vào mẫu nước để tạo mẫu chứa Fe.', 'Tăng pH để quan sát kết tủa hydroxide sắt.'],
@@ -85,9 +86,9 @@ const WATER_TREATMENT_EQUIPMENT = {
     alt: 'Tinh thể kẽm sulfat xanh trong phòng thí nghiệm',
     caption: 'Kẽm sulfate ZnSO₄·7H₂O dạng tinh thể xanh nhạt. Dùng để tạo dung dịch chuẩn Zn²⁺.',
     author: 'Wikimedia Commons',
-    license: 'CC BY-SA 3.0',
-    source: 'https://commons.wikimedia.org/wiki/File:Zinc_sulfate.jpg',
-    licenseUrl: 'https://commons.wikimedia.org/wiki/File:Zinc_sulfate.jpg#Licensing',
+    license: '',
+    source: 'https://vi.wikipedia.org/wiki/K%E1%BA%BDm_sulfat',
+    licenseUrl: 'https://vi.wikipedia.org/wiki/K%E1%BA%BDm_sulfat',
     purpose: 'Tạo mẫu nước tổng hợp chứa ion Zn²⁺ ở nồng độ xác định. Khảo sát khả năng loại bỏ Zn bằng xử lý độ pH.',
     facts: [['Ion hoạt động', 'Zn²⁺'], ['Công thức', 'ZnSO₄ hoặc ZnCl₂'], ['pH kết tủa', '8–9 (dạng Zn(OH)₂)'], ['Đặc tính', 'Amphoteric — Zn(OH)₂ hòa tan ở pH > 10']],
     steps: ['Pha dung dịch ZnSO₄ (hoặc ZnCl₂) với nước cất.', 'Pha vào mẫu nước để tạo mẫu chứa Zn²⁺.', 'Tăng pH để quan sát kết tủa Zn(OH)₂ ở pH 8–9.'],
@@ -99,9 +100,9 @@ const WATER_TREATMENT_EQUIPMENT = {
     alt: 'Cốc thủy tinh 2500 mL có vạch chia mL trong phòng thí nghiệm',
     caption: 'Cốc thủy tinh 2500 mL với vạch chia mL. Dụng cụ tiêu chuẩn cho đo lường thể tích mẫu và dung dịch.',
     author: 'Wikimedia Commons',
-    license: 'CC BY-SA 3.0',
-    source: 'https://commons.wikimedia.org/wiki/File:Laboratory_Beakers.jpg',
-    licenseUrl: 'https://commons.wikimedia.org/wiki/File:Laboratory_Beakers.jpg#Licensing',
+    license: '',
+    source: 'https://en.wikipedia.org/wiki/Beaker_(laboratory_equipment)',
+    licenseUrl: 'https://en.wikipedia.org/wiki/Beaker_(laboratory_equipment)',
     purpose: 'Chứa mẫu nước và các dung dịch, cho phép đo thể tích với vạch chia. Chịu nhiệt tốt, an toàn khi khuấy và đun nóng nhẹ.',
     facts: [['Dung tích', '2500 mL'], ['Độ chính xác', '±50 mL tại vạch'], ['Vạch chia', 'Từ 200–2400 mL'], ['Chịu nhiệt', 'Có thể dùng cho ứng dụng nhiệt nhẹ']],
     steps: ['Đổ mẫu nước ban đầu vào cốc theo thể tích thiết kế.', 'Dùng vạch chia để kiểm tra thể tích chính xác.', 'Khuấy đều mẫu bằng máy khuấy hoặc gậy.'],
@@ -113,9 +114,9 @@ const WATER_TREATMENT_EQUIPMENT = {
     alt: 'Buret 50 mL với van tam giác trong phòng thí nghiệm',
     caption: 'Buret 50 mL với van tam giác. Dùng để thêm từng giọt NaOH vào mẫu và kiểm soát tính theo từng mL.',
     author: 'Wikimedia Commons',
-    license: 'CC BY-SA 3.0',
-    source: 'https://commons.wikimedia.org/wiki/File:Burette.jpg',
-    licenseUrl: 'https://commons.wikimedia.org/wiki/File:Burette.jpg#Licensing',
+    license: '',
+    source: 'https://en.wikipedia.org/wiki/Burette',
+    licenseUrl: 'https://en.wikipedia.org/wiki/Burette',
     purpose: 'Thêm NaOH từng mL vào mẫu để tăng pH từng bước. Quan sát sự hình thành kết tủa hydroxide tại các pH khác nhau.',
     facts: [['Dung tích', '50 mL'], ['Vạch chia', '0,1 mL hoặc 0,05 mL'], ['Độ chính xác', '±0,05 mL'], ['Chất lỏng dùng', 'Dung dịch NaOH chuẩn']],
     steps: ['Làm sạch buret bằng nước cất.', 'Rót dung dịch NaOH vào buret từ phía trên.', 'Tính từng mL NaOH vào mẫu qua van, ghi lại thể tích tích lũy.'],
@@ -127,9 +128,9 @@ const WATER_TREATMENT_EQUIPMENT = {
     alt: 'Giấy lọc xếp nón và phúc hòa trắng trong phòng thí nghiệm',
     caption: 'Giấy lọc định lượng (trái) và giấy lọc thường (phải). Lựa chọn giấy lọc phù hợp tùy độ chính xác yêu cầu.',
     author: 'Wikimedia Commons',
-    license: 'CC BY-SA 3.0',
-    source: 'https://commons.wikimedia.org/wiki/File:Filter_papers.jpg',
-    licenseUrl: 'https://commons.wikimedia.org/wiki/File:Filter_papers.jpg#Licensing',
+    license: '',
+    source: 'https://en.wikipedia.org/wiki/Filter_paper',
+    licenseUrl: 'https://en.wikipedia.org/wiki/Filter_paper',
     purpose: 'Tách pha rắn (kết tủa hydroxide Fe, Zn, Pb) khỏi pha lỏng (nước xử lý sau pH tăng). Cho phép phân tích khối lượng.',
     facts: [['Loại', 'Định lượng (quantitative) hoặc bán định lượng'], ['Độ chính xác', 'Định lượng: ±0,5 mg (hỗn dịch kết tủa)'], ['Kích thước', '9 cm hoặc 7 cm đường kính'], ['Cấp độ', '10 μm, 25 μm, 45 μm (tốc độ lọc khác)']],
     steps: ['Xếp giấy lọc nón vào phễu lọc.', 'Rót mẫu chứa kết tủa qua phễu; để kết tủa trên giấy.', 'Rửa giấy lọc với nước cất để loại bỏ tạp ion.'],
@@ -141,9 +142,9 @@ const WATER_TREATMENT_EQUIPMENT = {
     alt: 'Máy khuấy từ với thanh khuấy từ trong cốc thủy tinh',
     caption: 'Máy khuấy từ với cánh chim từ (trái) và thanh khuấy từ trong cốc (phải). Dùng để khuấy đều mẫu khi tăng pH.',
     author: 'Wikimedia Commons',
-    license: 'CC BY-SA 3.0',
-    source: 'https://commons.wikimedia.org/wiki/File:Magnetic_stirrer.jpg',
-    licenseUrl: 'https://commons.wikimedia.org/wiki/File:Magnetic_stirrer.jpg#Licensing',
+    license: '',
+    source: 'https://vi.wikipedia.org/wiki/M%C3%A1y_khu%E1%BA%A5y_t%E1%BB%AB',
+    licenseUrl: 'https://vi.wikipedia.org/wiki/M%C3%A1y_khu%E1%BA%A5y_t%E1%BB%AB',
     purpose: 'Khuấy đều mẫu nước và NaOH, đẩy nhanh quá trình kết tủa, đạt cân bằng hóa học. Kiểm soát tốc độ khuấy để tránh tạo bọt.',
     facts: [['Loại', 'Máy khuấy từ (magnetic stirrer)'], ['Tốc độ', '0–1500 rpm (điều chỉnh được)'], ['Thanh khuấy', 'Thanh từ dạng "chân quỷ" hoặc "cánh chim"'], ['Chất liệu', 'Nhựa hoặc thép không gỉ']],
     steps: ['Đặt thanh khuấy từ vào cốc thủy tinh chứa mẫu.', 'Để cốc lên bàn máy khuấy từ.', 'Chọn tốc độ khuấy (50–150 rpm là phổ biến) và khởi động.'],
@@ -188,7 +189,19 @@ function EquipmentInfoDialog({ item, onClose }: { item: EquipmentId; onClose: ()
         
         <figure>
           <div className={styles.equipmentPhoto}>
-            <img src={`/assets/water-treatment/equipment/${details.image}.webp`} alt={details.alt} />
+            <img src={(() => {
+              const imagePathMap: Record<string, string> = {
+                'distilled-water': '/assets/experiments/water-treatment/Nuoc_cat.JPG',
+                'lead-nitrate': '/assets/experiments/water-treatment/Chi_nitrat.jpg',
+                'iron-chloride': '/assets/experiments/water-treatment/FeCl3.jpg',
+                'zinc-sulfate': '/assets/experiments/water-treatment/ZnSO4.jpg',
+                'beaker-marked': '/assets/experiments/water-treatment/coc_dong.jpg',
+                'burette': '/assets/experiments/water-treatment/burette.jpg',
+                'filter-paper': '/assets/experiments/water-treatment/giay_loc.jpg',
+                'magnetic-stirrer': '/assets/experiments/water-treatment/may_khuay_tu.JPG',
+              }
+              return imagePathMap[details.image] ?? ''
+            })()} alt={details.alt} />
           </div>
           <figcaption>
             {details.caption}
@@ -470,6 +483,7 @@ function WaterTreatmentWorkbenchSession({
       <h1>Xử lý nước Fe, Zn, Pb</h1>
       <p>Hydroxide route · Mẫu tổng hợp ảo</p>
     </div>
+    <WaterTreatmentLearningGoal />
     <div className={styles.headerActions}>
       <span className={styles.saveState} role="status" aria-live="polite">
         <CheckCircleIcon />
@@ -651,23 +665,46 @@ function WaterTreatmentWorkbenchSession({
 
   const shelf = <div className={styles.shelfContent}>
     <div className={styles.inventory}>
-      {EQUIPMENT_LIST.map(({ id, title, description }) => (
-        <button 
-          key={id}
-          type="button" 
-          className={styles.equipment}
-          aria-haspopup="dialog" 
-          aria-label={'Tìm hiểu ' + title} 
-          onClick={() => setEquipmentItem(id)}
-        >
-          <div className={styles.equipmentIcon} />
-          <span className={styles.equipmentText}>
-            <strong>{title}</strong>
-            <span>{description}</span>
-          </span>
-          <span className={styles.equipmentInfo}><InfoIcon /></span>
-        </button>
-      ))}
+      {EQUIPMENT_LIST.map(({ id, title, description }) => {
+        const imageMap: Record<string, string> = {
+          'distilled-water': '/assets/experiments/water-treatment/Nuoc_cat.JPG',
+          'lead-chemical': '/assets/experiments/water-treatment/Chi_nitrat.jpg',
+          'iron-chemical': '/assets/experiments/water-treatment/FeCl3.jpg',
+          'zinc-chemical': '/assets/experiments/water-treatment/ZnSO4.jpg',
+          'beaker': '/assets/experiments/water-treatment/coc_dong.jpg',
+          'burette': '/assets/experiments/water-treatment/burette.jpg',
+          'filter-paper': '/assets/experiments/water-treatment/giay_loc.jpg',
+          'stirrer': '/assets/experiments/water-treatment/may_khuay_tu.JPG',
+        }
+        const src = imageMap[id]
+        return (
+          <button
+            key={id}
+            type="button"
+            className={styles.equipment}
+            aria-haspopup="dialog"
+            aria-label={'Tìm hiểu ' + title}
+            onClick={() => setEquipmentItem(id)}
+          >
+            {src ? (
+              <img
+                src={src}
+                alt={title}
+                className={styles.equipmentIcon}
+                style={{ objectFit: 'cover', width: '40px', height: '40px', borderRadius: '6px' }}
+                loading="lazy"
+              />
+            ) : (
+              <div className={styles.equipmentIcon} />
+            )}
+            <span className={styles.equipmentText}>
+              <strong>{title}</strong>
+              <span>{description}</span>
+            </span>
+            <span className={styles.equipmentInfo}><InfoIcon /></span>
+          </button>
+        )
+      })}
     </div>
     <div className={styles.shelfHelp}>
       <p className={styles.shelfNote}>Mẫu tổng hợp chứa Fe, Zn, Pb. Lượt lưu trên trình duyệt.</p>
