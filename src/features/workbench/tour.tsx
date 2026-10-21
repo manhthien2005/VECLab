@@ -8,6 +8,10 @@ export const WORKBENCH_TOUR = [
   { area: 'shelf', title: 'Mẫu & dụng cụ', description: 'Kệ bên trái giới thiệu mẫu, hóa chất và thiết bị của bài. Bạn thao tác với chúng qua bảng Thao tác, không cần kéo thả. Có thể mở lại hướng dẫn này bất cứ lúc nào.' },
   { area: 'simulation', title: 'Khu vực thực hành', description: 'Chọn một cốc trên dàn để làm việc với cốc đó. Các nhịp phía trên mở nhóm thao tác tương ứng. Chuyển động giúp quan sát quy trình; độ đục phải được đo bằng thiết bị.' },
   { area: 'notebook', title: 'Sổ đo & lịch sử', description: 'Đo mẫu ban đầu tại đây. Sổ đo giữ số liệu từng cốc và đáp số bạn tự tính; tab Lịch sử thao tác giúp xem lại những gì đã làm. Chưa đo khác với N/A: N/A là phép đo không hợp lệ, không phải bằng 0.' },
+  { area: 'controls', selector: '[data-testid="jar-control-baseline"] .primary', title: 'Đo mẫu ban đầu', description: 'Bước đầu tiên: đo độ đục mẫu chưa xử lý. Số này dùng chung để tính hiệu suất giảm đục cho tất cả cốc.' },
+  { area: 'controls', selector: '[data-testid="jar-control-prepare"] .primary', title: 'Chuẩn bị cốc', description: 'Chọn pH ban đầu, sau đó chuẩn bị cốc. Các cốc chuẩn bị sẽ được đánh dấu và sẵn sàng để bạn cấp hóa chất.' },
+  { area: 'controls', selector: '[data-testid="jar-control-dose"] .primary', title: 'Cấp hóa chất', description: 'Chọn liều tăng (mg/L) và thêm vào cốc. Mỗi cốc có thể nhận các liều khác nhau để so sánh hiệu quả.' },
+  { area: 'controls', selector: '[data-testid="jar-control-program"] .primary', title: 'Chạy chương trình', description: 'Ba pha khuấy được chạy chung cho tất cả cốc: khuấy nhanh, khuấy chậm, lắng. Chỉ nhấn một lần để bắt đầu.' },
 ] as const
 
 type Box = { x: number; y: number; width: number; height: number }
