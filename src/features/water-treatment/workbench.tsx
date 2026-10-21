@@ -68,6 +68,11 @@ const DISCHARGE_TABLE_TOUR: readonly WorkbenchTourStep[] = [
   { area: 'controls', title: 'Step 6: Khóa bàn 3 & xả thải', description: 'Cuối cùng, bấm nút "Khóa kết quả" để hoàn thành Bàn 3. Nếu pH đạt tiêu chuẩn (6–9), nước sẽ được xả thải an toàn vào môi trường. Bạn đã hoàn thành toàn bộ quy trình xử lý nước!', selector: '[data-testid="wt-discharge-lock"]' },
 ] as const
 
+const CHECK_AND_SUBMIT_TOUR: readonly WorkbenchTourStep[] = [
+  { area: 'notebook', title: 'Step 1: Xem Sổ đo & Lịch sử', description: 'Sổ đo ghi lại pH ban đầu, nồng độ ion kim loại (Fe, Zn, Pb) từng giai đoạn xử lý. Kiểm tra xem các giá trị có đạt tiêu chuẩn QCVN 40:2025 không: Fe ≤ 2,0 mg/L, Zn ≤ 1,0 mg/L, Pb ≤ 0,1 mg/L, pH 6–9. Tab "Lịch sử thao tác" giúp bạn xem lại tất cả những gì đã thực hiện.' },
+  { area: 'header', title: 'Step 2: Nộp bài', description: 'Sau khi xem sổ đo, bấm "Nộp bài" ở đầu workbench để kết thúc lượt và lưu kết quả. Bạn vẫn có thể xem lại số liệu sau khi nộp.', selector: 'button[aria-label="Hoàn thành và lưu lượt"]' },
+] as const
+
 const EQUIPMENT_LIST = [
   { id: 'distilled-water', title: 'Nước cất', description: 'Dùng để pha dung dịch' },
   { id: 'lead-chemical', title: 'Hóa chất chứa ion Chì (Pb²⁺)', description: 'Để tạo mẫu nước' },
@@ -320,6 +325,7 @@ function WaterTreatmentWorkbenchSession({
   const [sampleTourOpen, setSampleTourOpen] = useState(false)
   const [ban2TourOpen, setBan2TourOpen] = useState(false)
   const [ban3TourOpen, setBan3TourOpen] = useState(false)
+  const [checkTourOpen, setCheckTourOpen] = useState(false)
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false)
   const [reportDialogOpen, setReportDialogOpen] = useState(_openReport)
   const [report, setReport] = useState<WaterTreatmentReportSnapshot | null>(() => attemptId ? getReport(attemptId) : null)
@@ -328,6 +334,8 @@ function WaterTreatmentWorkbenchSession({
   const tourTrigger = useRef<HTMLButtonElement>(null)
   const sampleTourTrigger = useRef<HTMLButtonElement>(null)
   const ban2TourTrigger = useRef<HTMLButtonElement>(null)
+  const ban3TourTrigger = useRef<HTMLButtonElement>(null)
+  const checkTourTrigger = useRef<HTMLButtonElement>(null)
   
   // Equipment dialog state (hoisted so header can render the trigger)
   const [equipmentItem, setEquipmentItem] = useState<EquipmentId | null>(null)
@@ -854,6 +862,15 @@ function WaterTreatmentWorkbenchSession({
             topic={WATER_TREATMENT_OPERATION_HELP.check}
             guideBaseHref={GUIDE_BASE_HREF}
           />
+          <button
+            ref={checkTourTrigger}
+            type="button"
+            className={styles.guideButton}
+            disabled={dischargePhase !== 'discharged'}
+            onClick={() => setCheckTourOpen(true)}
+          >
+            <GuideIcon />Cách đối chiếu QCVN
+          </button>
           <p>Đo lại pH và nồng độ Kim loại sau xử lý. So sánh với QCVN 40:2025 Cột A.</p>
           <ActionButton 
             className={styles.button}
@@ -965,7 +982,7 @@ function WaterTreatmentWorkbenchSession({
       pane={pane}
       onPaneChange={setPane}
       onShelfInfo={() => router.push('/experiments/water-treatment/guide')}
-      tourOpen={sampleTourOpen || ban2TourOpen || ban3TourOpen ? true : tourOpen}
+      tourOpen={sampleTourOpen || ban2TourOpen || ban3TourOpen || checkTourOpen ? true : tourOpen}
       onTourClose={() => {
         if (sampleTourOpen) {
           setSampleTourOpen(false)
@@ -975,12 +992,15 @@ function WaterTreatmentWorkbenchSession({
           requestAnimationFrame(() => ban2TourTrigger.current?.focus({ preventScroll: true }))
         } else if (ban3TourOpen) {
           setBan3TourOpen(false)
+        } else if (checkTourOpen) {
+          setCheckTourOpen(false)
+          requestAnimationFrame(() => checkTourTrigger.current?.focus({ preventScroll: true }))
         } else {
           setTourOpen(false)
           requestAnimationFrame(() => tourTrigger.current?.focus({ preventScroll: true }))
         }
       }}
-      tourSteps={sampleTourOpen ? SAMPLE_PREPARATION_SIMPLE_TOUR : ban2TourOpen ? TREATMENT_TABLE_TOUR : ban3TourOpen ? DISCHARGE_TABLE_TOUR : WATER_TREATMENT_TOUR}
+      tourSteps={checkTourOpen ? CHECK_AND_SUBMIT_TOUR : sampleTourOpen ? SAMPLE_PREPARATION_SIMPLE_TOUR : ban2TourOpen ? TREATMENT_TABLE_TOUR : ban3TourOpen ? DISCHARGE_TABLE_TOUR : WATER_TREATMENT_TOUR}
     />
     {equipmentItem && (
       <EquipmentInfoDialog 
