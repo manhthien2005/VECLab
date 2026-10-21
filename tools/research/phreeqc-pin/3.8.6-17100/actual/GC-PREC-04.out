@@ -1,0 +1,445 @@
+   Input file: cases\GC-PREC-04.pqi
+  Output file: actual\GC-PREC-04.out
+Database file: database\minteq.v4.dat
+
+------------------
+Reading data base.
+------------------
+
+	SOLUTION_MASTER_SPECIES
+	SOLUTION_SPECIES
+	SOLUTION_SPECIES
+	PHASES
+	PHASES
+	SURFACE_MASTER_SPECIES
+	SURFACE_SPECIES
+	END
+------------------------------------
+Reading input data for simulation 1.
+------------------------------------
+
+	SELECTED_OUTPUT 1
+	    high_precision true
+	    file actual/GC-PREC-04.select.out
+	    reset false
+	    totals Zn Pb
+	    molalities Zn+2 ZnOH+ Zn(OH)2 Zn(OH)3- Zn(OH)4-2 Pb+2 PbOH+ Pb(OH)2 Pb(OH)3- Pb(OH)4-2
+	    ph true
+	    si Zn(OH)2(am) Pb(OH)2
+	END
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 2.
+------------------------------------
+
+	SOLUTION 1
+	    temp 25
+	    pH 9
+	    Zn 0.0765
+	    Pb 0.00483
+	END
+-------------------------------------------
+Beginning of initial solution calculations.
+-------------------------------------------
+
+Initial solution 1.	
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Pb                4.830e-06   4.830e-06
+	Zn                7.650e-05   7.650e-05
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   9.000    
+                                       pe  =   4.000    
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   6.078e-05
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   1.075e-04
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   5.517e-05
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =  69.95
+                               Iterations  =   7
+                                  Total H  = 1.110138e+02
+                                  Total O  = 5.550694e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             1.016e-05   1.007e-05    -4.993    -4.997    -0.004     (0)  
+   H+              1.009e-09   1.000e-09    -8.996    -9.000    -0.004      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          1.416e-29
+   H2              7.079e-30   7.079e-30   -29.150   -29.150     0.000     (0)  
+O(0)          2.023e-34
+   O2              1.011e-34   1.011e-34   -33.995   -33.995     0.000     (0)  
+Pb            4.830e-06
+   PbOH+           3.545e-06   3.513e-06    -5.450    -5.454    -0.004     (0)  
+   Pb(OH)2         1.119e-06   1.119e-06    -5.951    -5.951     0.000     (0)  
+   Pb+2            1.440e-07   1.389e-07    -6.842    -6.857    -0.016     (0)  
+   Pb(OH)3-        1.137e-08   1.126e-08    -7.944    -7.948    -0.004     (0)  
+   Pb3(OH)4+2      3.597e-09   3.467e-09    -8.444    -8.460    -0.016     (0)  
+   Pb(OH)4-2       2.881e-11   2.778e-11   -10.540   -10.556    -0.016     (0)  
+   Pb2OH+3         8.397e-12   7.733e-12   -11.076   -11.112    -0.036     (0)  
+   Pb4(OH)4+4      4.429e-12   3.825e-12   -11.354   -11.417    -0.064     (0)  
+Zn            7.650e-05
+   Zn(OH)2         3.285e-05   3.285e-05    -4.483    -4.483     0.000     (0)  
+   Zn+2            2.120e-05   2.044e-05    -4.674    -4.689    -0.016     (0)  
+   ZnOH+           2.078e-05   2.059e-05    -4.682    -4.686    -0.004     (0)  
+   Zn(OH)3-        1.673e-06   1.658e-06    -5.776    -5.780    -0.004     (0)  
+   Zn(OH)4-2       6.894e-10   6.646e-10    -9.162    -9.177    -0.016     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Litharge         -1.55     11.14   12.69  PbO
+  Massicot         -1.75     11.14   12.89  PbO
+  Minium          -14.09     59.43   73.52  Pb3O4
+  O2(g)           -31.09     52.00   83.09  O2
+  Pb(OH)2           2.99     11.14    8.15  Pb(OH)2
+  Pb2O(OH)2        -3.90     22.29   26.19  Pb2O(OH)2
+  Pb2O3           -12.75     48.29   61.04  Pb2O3
+  Pbmetal         -19.10    -14.86    4.25  Pb
+  PbO:0.3H2O       -1.84     11.14   12.98  PbO:0.33H2O
+  Plattnerite     -12.46     37.14   49.60  PbO2
+  Zincite           1.98     13.31   11.33  ZnO
+  Zn(OH)2           1.11     13.31   12.20  Zn(OH)2
+  Zn(OH)2(am)       0.84     13.31   12.47  Zn(OH)2
+  Zn(OH)2(beta)     1.56     13.31   11.75  Zn(OH)2
+  Zn(OH)2(epsilon)   1.78     13.31   11.53  Zn(OH)2
+  Zn(OH)2(gamma)    1.58     13.31   11.73  Zn(OH)2
+  Znmetal         -38.48    -12.69   25.79  Zn
+  ZnO(active)       2.12     13.31   11.19  ZnO
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 3.
+------------------------------------
+
+	USE solution 1
+	EQUILIBRIUM_PHASES 1
+	    Zn(OH)2(am) 0 0
+	    Pb(OH)2 0 0
+	END
+-----------------------------------------
+Beginning of batch-reaction calculations.
+-----------------------------------------
+
+Reaction step 1.
+
+Using solution 1.	
+Using pure phase assemblage 1.	
+
+-------------------------------Phase assemblage--------------------------------
+
+                                                      Moles in assemblage
+Phase               SI  log IAP  log K(T, P)   Initial       Final       Delta
+
+Pb(OH)2           0.00     8.15      8.15    0.000e+00   4.817e-06   4.817e-06
+Zn(OH)2(am)       0.00    12.47     12.47    0.000e+00   3.791e-05   3.791e-05
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Pb                1.261e-08   1.261e-08
+	Zn                3.859e-05   3.859e-05
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   8.545      Charge balance
+                                       pe  =   9.206      Adjusted to redox equilibrium
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   5.632e-05
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   2.203e-05
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   5.517e-05
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =  88.32
+                               Iterations  =   9
+                                  Total H  = 1.110137e+02
+                                  Total O  = 5.550685e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             3.562e-06   3.531e-06    -5.448    -5.452    -0.004     (0)  
+   H+              2.877e-09   2.852e-09    -8.541    -8.545    -0.004      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          4.452e-39
+   H2              2.226e-39   2.226e-39   -38.653   -38.652     0.000     (0)  
+O(0)          2.046e-15
+   O2              1.023e-15   1.023e-15   -14.990   -14.990     0.000     (0)  
+Pb            1.261e-08
+   PbOH+           1.028e-08   1.019e-08    -7.988    -7.992    -0.004     (0)  
+   Pb+2            1.190e-09   1.149e-09    -8.925    -8.940    -0.015     (0)  
+   Pb(OH)2         1.138e-09   1.138e-09    -8.944    -8.944     0.000     (0)  
+   Pb(OH)3-        4.052e-12   4.017e-12   -11.392   -11.396    -0.004     (0)  
+   Pb(OH)4-2       3.598e-15   3.473e-15   -14.444   -14.459    -0.015     (0)  
+   Pb2OH+3         2.008e-16   1.855e-16   -15.697   -15.732    -0.034     (0)  
+   Pb3(OH)4+2      3.073e-17   2.967e-17   -16.512   -16.528    -0.015     (0)  
+   Pb4(OH)4+4      3.117e-22   2.707e-22   -21.506   -21.567    -0.061     (0)  
+Zn            3.859e-05
+   Zn+2            2.508e-05   2.422e-05    -4.601    -4.616    -0.015     (0)  
+   ZnOH+           8.629e-06   8.553e-06    -5.064    -5.068    -0.004     (0)  
+   Zn(OH)2         4.786e-06   4.786e-06    -5.320    -5.320     0.000     (0)  
+   Zn(OH)3-        8.545e-08   8.470e-08    -7.068    -7.072    -0.004     (0)  
+   Zn(OH)4-2       1.233e-11   1.191e-11   -10.909   -10.924    -0.015     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Litharge         -4.54      8.15   12.69  PbO
+  Massicot         -4.74      8.15   12.89  PbO
+  Minium          -13.57     59.95   73.52  Pb3O4
+  O2(g)           -12.08     71.00   83.09  O2
+  Pb(OH)2           0.00      8.15    8.15  Pb(OH)2
+  Pb2O(OH)2        -9.89     16.30   26.19  Pb2O(OH)2
+  Pb2O3            -9.24     51.80   61.04  Pb2O3
+  Pbmetal         -31.60    -27.35    4.25  Pb
+  PbO:0.3H2O       -4.83      8.15   12.98  PbO:0.33H2O
+  Plattnerite      -5.95     43.65   49.60  PbO2
+  Zincite           1.14     12.47   11.33  ZnO
+  Zn(OH)2           0.27     12.47   12.20  Zn(OH)2
+  Zn(OH)2(am)       0.00     12.47   12.47  Zn(OH)2
+  Zn(OH)2(beta)     0.72     12.47   11.75  Zn(OH)2
+  Zn(OH)2(epsilon)   0.94     12.47   11.53  Zn(OH)2
+  Zn(OH)2(gamma)    0.74     12.47   11.73  Zn(OH)2
+  Znmetal         -48.82    -23.03   25.79  Zn
+  ZnO(active)       1.29     12.47   11.19  ZnO
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 4.
+------------------------------------
+
+	SOLUTION 2
+	    temp 25
+	    pH 9.5
+	    Zn 0.0765
+	    Pb 0.00483
+	END
+-------------------------------------------
+Beginning of initial solution calculations.
+-------------------------------------------
+
+Initial solution 2.	
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Pb                4.830e-06   4.830e-06
+	Zn                7.650e-05   7.650e-05
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   9.500    
+                                       pe  =   4.000    
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   3.388e-05
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   1.834e-04
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =  -2.078e-05
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  = -34.18
+                               Iterations  =   6
+                                  Total H  = 1.110138e+02
+                                  Total O  = 5.550702e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             3.206e-05   3.184e-05    -4.494    -4.497    -0.003     (0)  
+   H+              3.184e-10   3.162e-10    -9.497    -9.500    -0.003      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          1.416e-30
+   H2              7.079e-31   7.079e-31   -30.150   -30.150     0.000     (0)  
+O(0)          2.023e-32
+   O2              1.011e-32   1.011e-32   -31.995   -31.995     0.000     (0)  
+Pb            4.830e-06
+   Pb(OH)2         2.357e-06   2.357e-06    -5.628    -5.628     0.000     (0)  
+   PbOH+           2.357e-06   2.341e-06    -5.628    -5.631    -0.003     (0)  
+   Pb(OH)3-        7.556e-08   7.505e-08    -7.122    -7.125    -0.003     (0)  
+   Pb+2            3.007e-08   2.927e-08    -7.522    -7.534    -0.012     (0)  
+   Pb3(OH)4+2      3.334e-09   3.244e-09    -8.477    -8.489    -0.012     (0)  
+   Pb(OH)4-2       6.015e-10   5.853e-10    -9.221    -9.233    -0.012     (0)  
+   Pb2OH+3         1.155e-12   1.086e-12   -11.938   -11.964    -0.027     (0)  
+   Pb4(OH)4+4      8.412e-13   7.541e-13   -12.075   -12.123    -0.047     (0)  
+Zn            7.650e-05
+   Zn(OH)2         5.371e-05   5.371e-05    -4.270    -4.270     0.000     (0)  
+   ZnOH+           1.072e-05   1.064e-05    -4.970    -4.973    -0.003     (0)  
+   Zn(OH)3-        8.630e-06   8.571e-06    -5.064    -5.067    -0.003     (0)  
+   Zn+2            3.434e-06   3.342e-06    -5.464    -5.476    -0.012     (0)  
+   Zn(OH)4-2       1.117e-08   1.087e-08    -7.952    -7.964    -0.012     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Litharge         -1.23     11.47   12.69  PbO
+  Massicot         -1.43     11.47   12.89  PbO
+  Minium          -12.12     61.40   73.52  Pb3O4
+  O2(g)           -29.09     54.00   83.09  O2
+  Pb(OH)2           3.32     11.47    8.15  Pb(OH)2
+  Pb2O(OH)2        -3.26     22.93   26.19  Pb2O(OH)2
+  Pb2O3           -11.11     49.93   61.04  Pb2O3
+  Pbmetal         -19.78    -15.53    4.25  Pb
+  PbO:0.3H2O       -1.51     11.47   12.98  PbO:0.33H2O
+  Plattnerite     -11.13     38.47   49.60  PbO2
+  Zincite           2.19     13.52   11.33  ZnO
+  Zn(OH)2           1.32     13.52   12.20  Zn(OH)2
+  Zn(OH)2(am)       1.05     13.52   12.47  Zn(OH)2
+  Zn(OH)2(beta)     1.77     13.52   11.75  Zn(OH)2
+  Zn(OH)2(epsilon)   1.99     13.52   11.53  Zn(OH)2
+  Zn(OH)2(gamma)    1.79     13.52   11.73  Zn(OH)2
+  Znmetal         -39.26    -13.48   25.79  Zn
+  ZnO(active)       2.34     13.52   11.19  ZnO
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 5.
+------------------------------------
+
+	USE solution 2
+	EQUILIBRIUM_PHASES 2
+	    Zn(OH)2(am) 0 0
+	    Pb(OH)2 0 0
+	END
+-----------------------------------------
+Beginning of batch-reaction calculations.
+-----------------------------------------
+
+Reaction step 1.
+
+Using solution 2.	
+Using pure phase assemblage 2.	
+
+-------------------------------Phase assemblage--------------------------------
+
+                                                      Moles in assemblage
+Phase               SI  log IAP  log K(T, P)   Initial       Final       Delta
+
+Pb(OH)2           0.00     8.15      8.15    0.000e+00   4.827e-06   4.827e-06
+Zn(OH)2(am)       0.00    12.47     12.47    0.000e+00   6.923e-05   6.923e-05
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Pb                2.786e-09   2.786e-09
+	Zn                7.269e-06   7.269e-06
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   9.352      Charge balance
+                                       pe  =   8.789      Adjusted to redox equilibrium
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   1.352e-05
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   3.532e-05
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =  -2.078e-05
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  = -80.38
+                               Iterations  =   9
+                                  Total H  = 1.110137e+02
+                                  Total O  = 5.550687e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             2.277e-05   2.267e-05    -4.643    -4.645    -0.002     (0)  
+   H+              4.461e-10   4.442e-10    -9.351    -9.352    -0.002      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          7.365e-40
+   H2              3.683e-40   3.683e-40   -39.434   -39.434     0.000     (0)  
+O(0)          7.476e-14
+   O2              3.738e-14   3.738e-14   -13.427   -13.427     0.000     (0)  
+Pb            2.786e-09
+   PbOH+           1.594e-09   1.587e-09    -8.798    -8.799    -0.002     (0)  
+   Pb(OH)2         1.138e-09   1.138e-09    -8.944    -8.944     0.000     (0)  
+   Pb+2            2.835e-11   2.787e-11   -10.547   -10.555    -0.007     (0)  
+   Pb(OH)3-        2.590e-11   2.579e-11   -10.587   -10.589    -0.002     (0)  
+   Pb(OH)4-2       1.457e-13   1.432e-13   -12.837   -12.844    -0.008     (0)  
+   Pb3(OH)4+2      7.321e-19   7.196e-19   -18.135   -18.143    -0.008     (0)  
+   Pb2OH+3         7.286e-19   7.008e-19   -18.138   -18.154    -0.017     (0)  
+   Pb4(OH)4+4      1.707e-25   1.593e-25   -24.768   -24.798    -0.030     (0)  
+Zn            7.269e-06
+   Zn(OH)2         4.786e-06   4.786e-06    -5.320    -5.320     0.000     (0)  
+   ZnOH+           1.338e-06   1.332e-06    -5.874    -5.875    -0.002     (0)  
+   Zn+2            5.978e-07   5.876e-07    -6.223    -6.231    -0.007     (0)  
+   Zn(OH)3-        5.462e-07   5.438e-07    -6.263    -6.265    -0.002     (0)  
+   Zn(OH)4-2       4.994e-10   4.908e-10    -9.302    -9.309    -0.008     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Litharge         -4.54      8.15   12.69  PbO
+  Massicot         -4.74      8.15   12.89  PbO
+  Minium          -12.79     60.73   73.52  Pb3O4
+  O2(g)           -10.52     72.57   83.09  O2
+  Pb(OH)2           0.00      8.15    8.15  Pb(OH)2
+  Pb2O(OH)2        -9.89     16.30   26.19  Pb2O(OH)2
+  Pb2O3            -8.46     52.58   61.04  Pb2O3
+  Pbmetal         -32.38    -28.13    4.25  Pb
+  PbO:0.3H2O       -4.83      8.15   12.98  PbO:0.33H2O
+  Plattnerite      -5.17     44.43   49.60  PbO2
+  Zincite           1.14     12.47   11.33  ZnO
+  Zn(OH)2           0.27     12.47   12.20  Zn(OH)2
+  Zn(OH)2(am)       0.00     12.47   12.47  Zn(OH)2
+  Zn(OH)2(beta)     0.72     12.47   11.75  Zn(OH)2
+  Zn(OH)2(epsilon)   0.94     12.47   11.53  Zn(OH)2
+  Zn(OH)2(gamma)    0.74     12.47   11.73  Zn(OH)2
+  Znmetal         -49.60    -23.81   25.79  Zn
+  ZnO(active)       1.29     12.47   11.19  ZnO
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 6.
+------------------------------------
+
+-------------------------------
+End of Run after 0.033 Seconds.
+-------------------------------
+

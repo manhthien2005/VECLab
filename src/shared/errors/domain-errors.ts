@@ -8,7 +8,7 @@ import type { DomainError, DomainErrorCategory } from '@/domain/process/contract
  * resolves in the content layer; the domain never renders user-facing strings.
  */
 
-export function domainError(
+function domainError(
   category: DomainErrorCategory,
   code: string,
   messageKey: string,
@@ -33,14 +33,6 @@ export function modelInvalid(code: string, messageKey: string, data: DomainError
   return domainError('model_invalid', code, messageKey, data)
 }
 
-export function solverNotConverged(
-  code: string,
-  messageKey: string,
-  data: DomainError['data'] = {},
-): DomainError {
-  return domainError('solver_not_converged', code, messageKey, data)
-}
-
 export function unsupportedRelease(releaseId: string): DomainError {
   return domainError('unsupported_release', 'UNSUPPORTED_SCENARIO_RELEASE', 'errors.unsupportedRelease', {
     releaseId,
@@ -49,15 +41,4 @@ export function unsupportedRelease(releaseId: string): DomainError {
 
 export function revisionConflict(data: DomainError['data']): DomainError {
   return domainError('conflict', 'REVISION_CONFLICT', 'errors.revisionConflict', data)
-}
-
-/** Thrown only for programmer errors; user-facing failures return DomainError. */
-export class InvariantViolation extends Error {
-  constructor(
-    readonly code: string,
-    message: string,
-  ) {
-    super(message)
-    this.name = 'InvariantViolation'
-  }
 }

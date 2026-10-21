@@ -1,0 +1,42 @@
+# GC-PREC-04 — Zn(OH)₂(am) + Pb(OH)₂ cùng tồn tại ở pH 9 — verify OH⁻ budget chung
+# Verify: WT-CHEM-Ksp-Zn + WT-CHEM-Ksp-Pb tương tác qua OH⁻ chung
+# Input: Zn 5 mg/L (0,0765 mmol/kgw) + Pb 1 mg/L (0,00483 mmol/kgw) ở pH 9
+# Cả 2 pha Zn(OH)₂(am) và Pb(OH)₂ cùng có thể tạo/ tiêu thụ OH⁻
+# Mục đích: xác nhận solver xử lý đúng OH⁻ budget chung khi nhiều KL cạnh tranh
+# Path: chạy từ D:\VECLab\tools\research\phreeqc-pin\3.8.6-17100\
+
+SELECTED_OUTPUT 1
+    -high_precision true
+    -file actual/GC-PREC-04.select.out
+    -reset false
+    -totals Zn Pb
+    -molalities Zn+2 ZnOH+ Zn(OH)2 Zn(OH)3- Zn(OH)4-2 Pb+2 PbOH+ Pb(OH)2 Pb(OH)3- Pb(OH)4-2
+    -pH true
+    -si Zn(OH)2(am) Pb(OH)2
+END
+
+# Sim 1: pH 9, cả Zn(OH)₂(am) và Pb(OH)₂ đều có thể kết tủa
+SOLUTION 1
+    -temp 25
+    pH 9
+    Zn 0.0765
+    Pb 0.00483
+END
+USE solution 1
+EQUILIBRIUM_PHASES 1
+    Zn(OH)2(am) 0 0
+    Pb(OH)2 0 0
+END
+
+# Sim 2: pH 9.5 (buffer mạnh hơn) — test cả 2 pha cùng SI = 0
+SOLUTION 2
+    -temp 25
+    pH 9.5
+    Zn 0.0765
+    Pb 0.00483
+END
+USE solution 2
+EQUILIBRIUM_PHASES 2
+    Zn(OH)2(am) 0 0
+    Pb(OH)2 0 0
+END

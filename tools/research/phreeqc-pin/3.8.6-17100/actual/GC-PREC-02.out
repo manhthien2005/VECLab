@@ -1,0 +1,524 @@
+   Input file: cases\GC-PREC-02.pqi
+  Output file: actual\GC-PREC-02.out
+Database file: database\minteq.v4.dat
+
+------------------
+Reading data base.
+------------------
+
+	SOLUTION_MASTER_SPECIES
+	SOLUTION_SPECIES
+	SOLUTION_SPECIES
+	PHASES
+	PHASES
+	SURFACE_MASTER_SPECIES
+	SURFACE_SPECIES
+	END
+------------------------------------
+Reading input data for simulation 1.
+------------------------------------
+
+	SELECTED_OUTPUT 1
+	    high_precision true
+	    file actual/GC-PREC-02.select.out
+	    reset false
+	    totals Zn
+	    molalities Zn+2 ZnOH+ Zn(OH)2 Zn(OH)3- Zn(OH)4-2
+	    ph true
+	    si Zn(OH)2(am)
+	END
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 2.
+------------------------------------
+
+	SOLUTION 1
+	    temp 25
+	    pH 8
+	    Zn 0.0765
+	END
+-------------------------------------------
+Beginning of initial solution calculations.
+-------------------------------------------
+
+Initial solution 1.	
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Zn                7.650e-05   7.650e-05
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   8.000    
+                                       pe  =   4.000    
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   1.414e-04
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   9.769e-06
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   1.432e-04
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =  98.59
+                               Iterations  =   4
+                                  Total H  = 1.110137e+02
+                                  Total O  = 5.550684e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             1.021e-06   1.007e-06    -5.991    -5.997    -0.006     (0)  
+   H+              1.014e-08   1.000e-08    -7.994    -8.000    -0.006      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          1.416e-27
+   H2              7.079e-28   7.079e-28   -27.150   -27.150     0.000     (0)  
+O(0)          2.023e-38
+   O2              1.011e-38   1.011e-38   -37.995   -37.995     0.000     (0)  
+Zn            7.650e-05
+   Zn+2            6.880e-05   6.512e-05    -4.162    -4.186    -0.024     (0)  
+   ZnOH+           6.649e-06   6.557e-06    -5.177    -5.183    -0.006     (0)  
+   Zn(OH)2         1.046e-06   1.046e-06    -5.980    -5.980     0.000     (0)  
+   Zn(OH)3-        5.355e-09   5.281e-09    -8.271    -8.277    -0.006     (0)  
+   Zn(OH)4-2       2.238e-13   2.117e-13   -12.650   -12.674    -0.024     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  O2(g)           -35.09     48.00   83.09  O2
+  Zincite           0.48     11.81   11.33  ZnO
+  Zn(OH)2          -0.39     11.81   12.20  Zn(OH)2
+  Zn(OH)2(am)      -0.66     11.81   12.47  Zn(OH)2
+  Zn(OH)2(beta)     0.06     11.81   11.75  Zn(OH)2
+  Zn(OH)2(epsilon)   0.28     11.81   11.53  Zn(OH)2
+  Zn(OH)2(gamma)    0.08     11.81   11.73  Zn(OH)2
+  Znmetal         -37.97    -12.19   25.79  Zn
+  ZnO(active)       0.63     11.81   11.19  ZnO
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 3.
+------------------------------------
+
+	USE solution 1
+	EQUILIBRIUM_PHASES 1
+	    Zn(OH)2(am) 0 0
+	END
+-----------------------------------------
+Beginning of batch-reaction calculations.
+-----------------------------------------
+
+Reaction step 1.
+
+Using solution 1.	
+Using pure phase assemblage 1.	
+
+-------------------------------Phase assemblage--------------------------------
+
+                                                      Moles in assemblage
+Phase               SI  log IAP  log K(T, P)   Initial       Final       Delta
+
+Zn(OH)2(am)      -0.66    11.81     12.47    0.000e+00           0   0.000e+00
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Zn                7.650e-05   7.650e-05
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   8.000      Charge balance
+                                       pe  =   5.300      Adjusted to redox equilibrium
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   1.414e-04
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   9.769e-06
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   1.432e-04
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =  98.59
+                               Iterations  =   1
+                                  Total H  = 1.110137e+02
+                                  Total O  = 5.550684e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             1.021e-06   1.007e-06    -5.991    -5.997    -0.006     (0)  
+   H+              1.014e-08   1.000e-08    -7.994    -8.000    -0.006      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          3.556e-30
+   H2              1.778e-30   1.778e-30   -29.750   -29.750     0.000     (0)  
+O(0)          3.206e-33
+   O2              1.603e-33   1.603e-33   -32.795   -32.795     0.000     (0)  
+Zn            7.650e-05
+   Zn+2            6.880e-05   6.512e-05    -4.162    -4.186    -0.024     (0)  
+   ZnOH+           6.649e-06   6.557e-06    -5.177    -5.183    -0.006     (0)  
+   Zn(OH)2         1.046e-06   1.046e-06    -5.980    -5.980     0.000     (0)  
+   Zn(OH)3-        5.355e-09   5.281e-09    -8.271    -8.277    -0.006     (0)  
+   Zn(OH)4-2       2.238e-13   2.117e-13   -12.650   -12.674    -0.024     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  O2(g)           -29.89     53.20   83.09  O2
+  Zincite           0.48     11.81   11.33  ZnO
+  Zn(OH)2          -0.39     11.81   12.20  Zn(OH)2
+  Zn(OH)2(am)      -0.66     11.81   12.47  Zn(OH)2
+  Zn(OH)2(beta)     0.06     11.81   11.75  Zn(OH)2
+  Zn(OH)2(epsilon)   0.28     11.81   11.53  Zn(OH)2
+  Zn(OH)2(gamma)    0.08     11.81   11.73  Zn(OH)2
+  Znmetal         -40.57    -14.79   25.79  Zn
+  ZnO(active)       0.63     11.81   11.19  ZnO
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 4.
+------------------------------------
+
+	SOLUTION 2
+	    temp 25
+	    pH 8.5
+	    Zn 0.0765
+	END
+-------------------------------------------
+Beginning of initial solution calculations.
+-------------------------------------------
+
+Initial solution 2.	
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Zn                7.650e-05   7.650e-05
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   8.500    
+                                       pe  =   4.000    
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   1.143e-04
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   3.566e-05
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   1.173e-04
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =  94.59
+                               Iterations  =   4
+                                  Total H  = 1.110137e+02
+                                  Total O  = 5.550687e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             3.224e-06   3.184e-06    -5.492    -5.497    -0.005     (0)  
+   H+              3.202e-09   3.162e-09    -8.495    -8.500    -0.005      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          1.416e-28
+   H2              7.079e-29   7.079e-29   -28.150   -28.150     0.000     (0)  
+O(0)          2.023e-36
+   O2              1.011e-36   1.011e-36   -35.995   -35.995     0.000     (0)  
+Zn            7.650e-05
+   Zn+2            5.232e-05   4.979e-05    -4.281    -4.303    -0.022     (0)  
+   ZnOH+           1.605e-05   1.585e-05    -4.794    -4.800    -0.005     (0)  
+   Zn(OH)2         8.001e-06   8.001e-06    -5.097    -5.097     0.000     (0)  
+   Zn(OH)3-        1.293e-07   1.277e-07    -6.888    -6.894    -0.005     (0)  
+   Zn(OH)4-2       1.702e-11   1.619e-11   -10.769   -10.791    -0.022     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  O2(g)           -33.09     50.00   83.09  O2
+  Zincite           1.36     12.70   11.33  ZnO
+  Zn(OH)2           0.50     12.70   12.20  Zn(OH)2
+  Zn(OH)2(am)       0.22     12.70   12.47  Zn(OH)2
+  Zn(OH)2(beta)     0.94     12.70   11.75  Zn(OH)2
+  Zn(OH)2(epsilon)   1.16     12.70   11.53  Zn(OH)2
+  Zn(OH)2(gamma)    0.96     12.70   11.73  Zn(OH)2
+  Znmetal         -38.09    -12.30   25.79  Zn
+  ZnO(active)       1.51     12.70   11.19  ZnO
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 5.
+------------------------------------
+
+	USE solution 2
+	EQUILIBRIUM_PHASES 2
+	    Zn(OH)2(am) 0 0
+	END
+-----------------------------------------
+Beginning of batch-reaction calculations.
+-----------------------------------------
+
+Reaction step 1.
+
+Using solution 2.	
+Using pure phase assemblage 2.	
+
+-------------------------------Phase assemblage--------------------------------
+
+                                                      Moles in assemblage
+Phase               SI  log IAP  log K(T, P)   Initial       Final       Delta
+
+Zn(OH)2(am)      -0.00    12.47     12.47    0.000e+00   5.441e-06   5.441e-06
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Zn                7.106e-05   7.106e-05
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   8.383      Charge balance
+                                       pe  =   9.946      Adjusted to redox equilibrium
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   1.148e-04
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   2.478e-05
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   1.173e-04
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =  95.88
+                               Iterations  =  10
+                                  Total H  = 1.110137e+02
+                                  Total O  = 5.550686e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             2.463e-06   2.432e-06    -5.609    -5.614    -0.005     (0)  
+   H+              4.191e-09   4.140e-09    -8.378    -8.383    -0.005      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          3.111e-40
+   H2              1.556e-40   1.556e-40   -39.808   -39.808     0.000     (0)  
+O(0)          4.189e-13
+   O2              2.095e-13   2.095e-13   -12.679   -12.679     0.000     (0)  
+Zn            7.106e-05
+   Zn+2            5.364e-05   5.104e-05    -4.271    -4.292    -0.022     (0)  
+   ZnOH+           1.257e-05   1.242e-05    -4.901    -4.906    -0.005     (0)  
+   Zn(OH)2         4.786e-06   4.786e-06    -5.320    -5.320     0.000     (0)  
+   Zn(OH)3-        5.909e-08   5.835e-08    -7.229    -7.234    -0.005     (0)  
+   Zn(OH)4-2       5.942e-12   5.650e-12   -11.226   -11.248    -0.022     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  O2(g)            -9.77     73.32   83.09  O2
+  Zincite           1.14     12.47   11.33  ZnO
+  Zn(OH)2           0.27     12.47   12.20  Zn(OH)2
+  Zn(OH)2(am)      -0.00     12.47   12.47  Zn(OH)2
+  Zn(OH)2(beta)     0.72     12.47   11.75  Zn(OH)2
+  Zn(OH)2(epsilon)   0.94     12.47   11.53  Zn(OH)2
+  Zn(OH)2(gamma)    0.74     12.47   11.73  Zn(OH)2
+  Znmetal         -49.97    -24.18   25.79  Zn
+  ZnO(active)       1.29     12.47   11.19  ZnO
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 6.
+------------------------------------
+
+	SOLUTION 3
+	    temp 25
+	    pH 9
+	    Zn 0.0765
+	END
+-------------------------------------------
+Beginning of initial solution calculations.
+-------------------------------------------
+
+Initial solution 3.	
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Zn                7.650e-05   7.650e-05
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   9.000    
+                                       pe  =   4.000    
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   5.869e-05
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   1.017e-04
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   5.132e-05
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =  68.44
+                               Iterations  =   4
+                                  Total H  = 1.110138e+02
+                                  Total O  = 5.550693e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             1.016e-05   1.007e-05    -4.993    -4.997    -0.004     (0)  
+   H+              1.009e-09   1.000e-09    -8.996    -9.000    -0.004      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          1.416e-29
+   H2              7.079e-30   7.079e-30   -29.150   -29.150     0.000     (0)  
+O(0)          2.023e-34
+   O2              1.011e-34   1.011e-34   -33.995   -33.995     0.000     (0)  
+Zn            7.650e-05
+   Zn(OH)2         3.286e-05   3.286e-05    -4.483    -4.483     0.000     (0)  
+   Zn+2            2.119e-05   2.045e-05    -4.674    -4.689    -0.015     (0)  
+   ZnOH+           2.078e-05   2.059e-05    -4.682    -4.686    -0.004     (0)  
+   Zn(OH)3-        1.673e-06   1.658e-06    -5.776    -5.780    -0.004     (0)  
+   Zn(OH)4-2       6.891e-10   6.648e-10    -9.162    -9.177    -0.016     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  O2(g)           -31.09     52.00   83.09  O2
+  Zincite           1.98     13.31   11.33  ZnO
+  Zn(OH)2           1.11     13.31   12.20  Zn(OH)2
+  Zn(OH)2(am)       0.84     13.31   12.47  Zn(OH)2
+  Zn(OH)2(beta)     1.56     13.31   11.75  Zn(OH)2
+  Zn(OH)2(epsilon)   1.78     13.31   11.53  Zn(OH)2
+  Zn(OH)2(gamma)    1.58     13.31   11.73  Zn(OH)2
+  Znmetal         -38.48    -12.69   25.79  Zn
+  ZnO(active)       2.12     13.31   11.19  ZnO
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 7.
+------------------------------------
+
+	USE solution 3
+	EQUILIBRIUM_PHASES 3
+	    Zn(OH)2(am) 0 0
+	END
+-----------------------------------------
+Beginning of batch-reaction calculations.
+-----------------------------------------
+
+Reaction step 1.
+
+Using solution 3.	
+Using pure phase assemblage 3.	
+
+-------------------------------Phase assemblage--------------------------------
+
+                                                      Moles in assemblage
+Phase               SI  log IAP  log K(T, P)   Initial       Final       Delta
+
+Zn(OH)2(am)      -0.00    12.47     12.47    0.000e+00   3.991e-05   3.991e-05
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Zn                3.659e-05   3.659e-05
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   8.560      Charge balance
+                                       pe  =  -2.684      Adjusted to redox equilibrium
+                        Activity of water  =   1.000
+                 Ionic strength (mol/kgw)  =   5.282e-05
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =   2.185e-05
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   5.132e-05
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =  87.18
+                               Iterations  =  11
+                                  Total H  = 1.110137e+02
+                                  Total O  = 5.550685e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   OH-             3.686e-06   3.655e-06    -5.433    -5.437    -0.004     (0)  
+   H+              2.778e-09   2.755e-09    -8.556    -8.560    -0.004      0.00
+   H2O             5.551e+01   1.000e+00     1.744    -0.000     0.000     18.07
+H(0)          2.508e-15
+   H2              1.254e-15   1.254e-15   -14.902   -14.902     0.000     (0)  
+O(0)          0.000e+00
+   O2              0.000e+00   0.000e+00   -62.492   -62.492     0.000     (0)  
+Zn            3.659e-05
+   Zn+2            2.338e-05   2.260e-05    -4.631    -4.646    -0.015     (0)  
+   ZnOH+           8.333e-06   8.262e-06    -5.079    -5.083    -0.004     (0)  
+   Zn(OH)2         4.786e-06   4.786e-06    -5.320    -5.320     0.000     (0)  
+   Zn(OH)3-        8.843e-08   8.768e-08    -7.053    -7.057    -0.004     (0)  
+   Zn(OH)4-2       1.320e-11   1.276e-11   -10.879   -10.894    -0.015     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  O2(g)           -59.59     23.50   83.09  O2
+  Zincite           1.14     12.47   11.33  ZnO
+  Zn(OH)2           0.27     12.47   12.20  Zn(OH)2
+  Zn(OH)2(am)      -0.00     12.47   12.47  Zn(OH)2
+  Zn(OH)2(beta)     0.72     12.47   11.75  Zn(OH)2
+  Zn(OH)2(epsilon)   0.94     12.47   11.53  Zn(OH)2
+  Zn(OH)2(gamma)    0.74     12.47   11.73  Zn(OH)2
+  Znmetal         -25.07      0.72   25.79  Zn
+  ZnO(active)       1.29     12.47   11.19  ZnO
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 8.
+------------------------------------
+
+-------------------------------
+End of Run after 0.033 Seconds.
+-------------------------------
+

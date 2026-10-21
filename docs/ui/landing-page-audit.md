@@ -16,7 +16,7 @@ Ngày 14/10/2026. Owner: TL2 / coder 2. Người dùng yêu cầu giữ cấu tr
 
 | Ưu tiên | Bằng chứng | Sửa trong UI-02 |
 | --- | --- | --- |
-| P1 — Sai danh sách bài | `experiment-showcase.tsx:27` và `app.vi.ts:66` vẫn là acid/Cu/nhựa; metadata trùng ở hai nơi. Nhựa ghi sắp ra mắt nhưng dẫn vào route mô phỏng. | Landing có đúng pH, Jar Test, hấp phụ xanh methylene. Dùng một nguồn metadata landing; không sửa registry/release cũ để đổi tên engine. |
+| P1 — Sai danh sách bài | `experiment-showcase.tsx:27` và `app.vi.ts:66` vẫn là acid/Cu/nhựa; metadata trùng ở hai nơi. Nhựa ghi sắp ra mắt nhưng dẫn vào route mô phỏng. | Danh sách hiện hành gồm năm bài tại current-experiments.md. Dùng một nguồn metadata landing; không sửa registry/release cũ để đổi tên engine. |
 | P1 — Demo diễn đạt như phép đo | `workbench-preview.tsx:52,179,333`: chỉ tăng thể tích, pH cố định; nút là “Thêm và đo”, lời dẫn “đo thật”, trạng thái “pH tăng dần”. | Đặt tên thao tác đúng việc diễn ra. Nhãn minh họa luôn nhìn thấy; pH chưa đo là “Chưa đo”, bỏ đồ thị/kết luận giả. Không gắn engine vào landing để chữa demo. |
 | P1 — Cơ sở khoa học bị quảng bá quá mức | `evidence-section.tsx:70,107`, `book-stack-visual.tsx:36`: Ksp của bài Cu cũ và “19 nguồn kiểm chứng”; disclosure thực có 15 nguồn của release acid. | Bỏ Ksp và số nguồn cố định, bỏ ngụ ý IUPAC/EPA thẩm định sản phẩm. Nói rõ mô hình, điều kiện và tài liệu; link vào evidence thật. |
 | P2 — Lời văn chung chung, lặp | `app.vi.ts:34–54,89–120`: nhiều câu “khám phá”, “có căn cứ”, “nền tảng vững chắc”; hidden learningValues còn nói điểm luôn hiển thị. | Dùng copy deck bên dưới. Bỏ badge lợi ích, eyebrow/intro chỉ nhắc lại tiêu đề và hidden marketing text lỗi thời. Nội dung trợ năng phải khớp nội dung nhìn thấy. |
@@ -30,11 +30,7 @@ Ngày 14/10/2026. Owner: TL2 / coder 2. Người dùng yêu cầu giữ cấu tr
 Dùng tiếng Việt trực tiếp, có đối tượng/hành động cụ thể. Các câu dưới là copy mục tiêu, được chỉnh ngắt dòng cho đẹp nhưng không đổi nghĩa hoặc thêm claim.
 
 - Hero: **“Thực hành / xử lý nước.”** Lede: “Chọn điều kiện, thao tác trên dụng cụ và dùng số đo để giải thích kết quả.” CTA chính **“Chọn bài thực hành”** → `#showcase`; phụ **“Xem bàn mô phỏng”** → `#workbench-preview`. Một ghi chú ngắn: “Mô phỏng phục vụ học tập; không dùng kết quả để xử lý mẫu nước thật.” Bỏ trust strip và eyebrow sáo rỗng.
-- Ba thẻ: tiêu đề chương **“Ba bài thực hành”**; một dòng trạng thái cần thiết: “Hiện có bản thực hành pH; Jar Test và hấp phụ đang phát triển.”
-  - **Điều chỉnh pH** — “Khảo sát lượng NaOH cần thêm cho mẫu HCl tổng hợp.” Nhãn **“Bản hiện có”**; CTA **“Thử bài pH”** → `/simulate/acid-neutralization`. Không tuyên bố đã phát hành bản refactor pH mới.
-  - **Jar Test** — “So sánh độ đục theo pH và liều alum sau khuấy, lắng.” Nhãn **“Đang phát triển”**; chưa có Start/route Jar. Hình minh họa hai cốc/hai cánh khuấy, không bịa số đo.
-  - **Hấp phụ xanh methylene** — “Khảo sát khả năng loại màu bằng than hoạt tính theo mẻ.” Nhãn **“Đang phát triển”**; chưa có Start/route mới. Hình cốc tiếp xúc và than, không phải cột lọc.
-  - Hai thẻ chưa mở có thể có native details **“Nội dung bài”** với mục tiêu ngắn nếu cần; không dẫn người dùng về catalog cũ như thể đó là preview mới.
+- Bộ chọn bài: danh sách và trạng thái hiện hành theo [current-experiments.md](current-experiments.md); chỉ mở route đang được catalog phục vụ. Copy deck ba bài cũ đã được thay thế bởi quyết định 21/10/2026.
 - Chương trải nghiệm: **“Làm việc trên bàn mô phỏng”**. “Chọn dụng cụ, thực hiện thao tác và ghi lại số đo.” Demo pH hiện có ghi **“Minh họa thao tác”**; nút **“Xem thao tác thêm 1 mL”**; reset **“Đặt lại minh họa”**. Thể tích có thể thay đổi cục bộ nhưng không tạo pH/độ đục/hiệu suất hay lượt học. Phản hồi ngắn: “Đã minh họa thêm 1 mL. Mở bài pH để thực hành.” Link **“Mở bài pH”** dẫn route hiện hữu. Không lưu attempt, gọi API hoặc hứa đây là Jar workbench đã hoàn thành.
 - Evidence: **“Mô hình, điều kiện và tài liệu”**. Ba mục **“Phạm vi áp dụng”**, **“Cách tính”**, **“Tài liệu tham khảo”**, mỗi mục tối đa một câu có thông tin; một link rõ **“Xem cơ sở mô phỏng”** → `/evidence`. Bỏ Ksp/Cu, assurance pill và ảnh sách nếu chỉ làm cảnh.
 - Closing: **“Chọn bài để bắt đầu.”**, CTA **“Chọn bài thực hành”** → `#showcase`; không cần thêm đoạn kêu gọi chung chung.

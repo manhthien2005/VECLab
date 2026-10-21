@@ -132,7 +132,7 @@ function deriveWeighingReadout(state: PlasticSeparationState) {
   }
 }
 
-export function derivePolymerLocation(
+function derivePolymerLocation(
   polymerId: PolymerId,
   state: PlasticSeparationState,
 ): { location: PolymerVisualLocation; recovered: boolean; recoveryPercent: number | null } {

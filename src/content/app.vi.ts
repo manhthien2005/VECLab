@@ -57,8 +57,8 @@ export const APP_STRINGS = {
     ],
 
     showcaseEyebrow: 'Khám phá ngay',
-    showcaseHeading: '3 thí nghiệm mô phỏng',
-    showcaseLede: 'Thực hành Jar Test và chiết tách axit–bazơ. Bài hấp phụ đang được xây dựng.',
+    showcaseHeading: '5 thí nghiệm mô phỏng',
+    showcaseLede: 'Từ xử lý nước đến phân tách và tổng hợp. Chọn một bài, tự tay thao tác và khám phá kết quả.',
     showcaseCtaLabel: 'Thử ngay',
     comingSoonBadge: 'Sắp ra mắt',
     comingSoonCta: 'Xem trước',
@@ -66,20 +66,37 @@ export const APP_STRINGS = {
       {
         scenarioKey: 'jar-test',
         title: 'Jar Test',
+        shortTitle: 'Jar Test',
         summary: 'So sánh liều keo tụ, khuấy và lắng để giảm độ đục.',
+        available: true,
+      },
+      {
+        scenarioKey: 'water-treatment',
+        title: 'Xử lý nước nhiễm kim loại Fe, Zn và Pb',
+        shortTitle: 'Xử lý nước',
+        summary: 'Điều chỉnh pH, tạo kết tủa và theo dõi từng kim loại trong nước.',
         available: true,
       },
       {
         scenarioKey: 'acid-base-extraction',
         title: 'Chiết tách axit–bazơ',
+        shortTitle: 'Chiết axit–bazơ',
         summary: 'Chọn hướng tách, thu từng phần mẫu và đối chiếu kết quả.',
         available: true,
       },
       {
-        scenarioKey: 'methylene-blue-adsorption',
-        title: 'Hấp phụ xanh methylene',
-        summary: 'Khảo sát khả năng loại màu bằng than hoạt tính.',
-        available: false,
+        scenarioKey: 'cold-process-soap',
+        title: 'Xà phòng hóa',
+        shortTitle: 'Xà phòng hóa',
+        summary: 'Tính tỉ lệ dầu và kiềm, pha trộn, đổ khuôn rồi kiểm tra sản phẩm.',
+        available: true,
+      },
+      {
+        scenarioKey: 'plastic-density-separation',
+        title: 'Phân loại nhựa nguyên sinh',
+        shortTitle: 'Phân loại nhựa',
+        summary: 'Khám phá khối lượng riêng qua các bước tách nhựa nổi–chìm.',
+        available: true,
       },
     ],
 
@@ -291,8 +308,3 @@ export const APP_STRINGS = {
     backHome: 'Về trang chủ',
   },
 } as const
-
-/** Storage-mode label a surface shows next to the save indicator. */
-export function storageModeLabel(mode: 'local' | 'cloud'): string {
-  return mode === 'local' ? APP_STRINGS.storage.localLabel : APP_STRINGS.storage.cloudLabel
-}

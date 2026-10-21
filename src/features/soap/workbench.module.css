@@ -1,0 +1,16 @@
+.toast { position:fixed; right:16px; bottom:16px; z-index:80; display:grid; gap:6px; width:min(400px, calc(100vw - 32px)); padding:12px 14px; border-radius:10px; box-shadow:0 12px 32px rgb(28 60 80 / 16%); }
+.toast { border:1px solid #e2b8bd; background:#fff2f2; color:#82272e; }
+.toast strong { font-size:.8rem; }
+.toast p { margin:0; font-size:.78rem; line-height:1.55; }
+.toast button { justify-self:end; border:0; background:transparent; color:#82272e; font:inherit; font-weight:650; cursor:pointer; min-height:36px; }
+.reportActions { margin-top:16px; }
+.reportLink { display:inline-flex; align-items:center; min-height:42px; padding:10px 14px; border-radius:8px; background:var(--accent); color:#fff; text-decoration:none; font-weight:650; }
+.achievement { text-align:center; padding:12px 8px 20px; }
+.achievement svg { width:min(280px, 80vw); height:auto; }
+.bar { transform-origin:center; animation: soap-pop 720ms var(--ease) both; }
+.grade { display:inline-block; margin-top:12px; padding:8px 16px; border-radius:999px; font-weight:750; }
+.grade[data-grade='pass'] { background:var(--ok-soft); color:var(--ok); }
+.grade[data-grade='fail'], .grade[data-grade='danger'] { background:var(--danger-soft); color:var(--danger); }
+.grade[data-grade='incomplete'] { background:var(--surface-2); }
+@keyframes soap-pop { from { transform:scale(.6); opacity:0; } to { transform:scale(1); opacity:1; } }
+@media (prefers-reduced-motion: reduce) { .bar { animation:none; } }

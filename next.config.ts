@@ -3,6 +3,13 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  outputFileTracingIncludes: {
+    '/simulate/water-treatment': [
+      './tools/research/phreeqc-pin/3.8.6-17100/bin/phreeqc*',
+      './tools/research/phreeqc-pin/3.8.6-17100/database/minteq.v4.dat',
+      './tools/research/phreeqc-pin/3.8.6-17100/NOTICE-linux.txt',
+    ],
+  },
   typescript: {
     // Type-check runs as its own gate (`npm run typecheck`); Vitest transforms
     // TypeScript without type-checking, per docs/system-architecture.md §3.4.

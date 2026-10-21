@@ -39,6 +39,9 @@ export function ScenarioCard({ overview, entry }: { overview: ExperimentOverview
           {available ? <>
             <Link className="btn experiment-library-start" href={`/simulate/${entry.scenarioKey}`}>Bắt đầu thực hành<ArrowRightIcon /></Link>
             <Link className="experiment-library-detail" href={`/experiments/${entry.scenarioKey}`}>Xem chi tiết<span className="sr-only"> — {overview.title}</span></Link>
+            {overview.scenarioKey === 'water-treatment' && (
+              <Link className="experiment-library-mylab" href="/experiments/water-treatment/my-lab">Lab của tôi</Link>
+            )}
           </> : (
             <p className="experiment-library-unavailable">Chưa triển khai bài thực hành.</p>
           )}

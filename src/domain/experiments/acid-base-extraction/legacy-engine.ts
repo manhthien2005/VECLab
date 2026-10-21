@@ -92,5 +92,5 @@ export function createLegacyExtractionModule(): DomainModule<ExtractionState> {
   }
 }
 
-export { LEGACY_EXTRACTION_PROFILE as EXTRACTION_PROFILE } from './model.js'
+
 export type { ExtractionState } from './model.js'

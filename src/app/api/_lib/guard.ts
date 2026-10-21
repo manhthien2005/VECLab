@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { currentLearner } from '@/features/auth/session.js'
-import { isUUID } from '@/shared/ids.js'
 import type { UUID } from '@/domain/process/contracts.js'
 
 /**
@@ -190,20 +189,5 @@ export async function requireLearner(): Promise<
   // already called `getUser()` to verify the session. A second call would be a second
   // round trip to Supabase for a value this function already holds.
   return { ok: true, userId: learner.id, email: learner.email, authHeaders }
-}
-
-/**
- * Validate a dynamic path segment as a UUID.
- *
- * Checked at the edge rather than inside a database call because an interpolated segment is
- * attacker-controlled text: passing it to a `uuid` column or parameter would surface as a
- * database error, and interpolating it into anything else would be worse.
- *
- * Named for what it does, not for the route that uses it: the simulation routes parse an
- * attempt id with it and the profile route has no dynamic segment at all, but any future
- * `[id]` route needs the same check and should not reinvent it.
- */
-export function parseUuidSegment(raw: string): UUID | null {
-  return isUUID(raw) ? raw : null
 }
 

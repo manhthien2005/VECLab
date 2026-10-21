@@ -12,18 +12,16 @@ export const PLASTIC_LESSON_VIDEOS = [
     playerLabel: 'Video bài học Phân loại nhựa nguyên sinh',
     poster: '/assets/plastic-separation/plastic-theory-overview-cover.jpg',
     source: lessonSource,
-    temporary: false,
   },
   {
     id: 'practice',
     title: 'Thao tác thực hành trên VECLab',
-    summary: 'Đang dùng video bài học để tham khảo',
+    summary: 'Thao tác phân loại nhựa theo khối lượng riêng',
     description:
-      'Mục này đang dùng tạm video bài học, chưa có video thao tác riêng trên VECLab. Để thực hành, làm theo hướng dẫn từng bước bên dưới trang Lý thuyết & cách làm bài.',
+      'Theo dõi thao tác phân loại nhựa theo khối lượng riêng và cách quan sát hiện tượng nổi–chìm trên VECLab.',
     playLabel: 'Phát video thực hành Phân loại nhựa',
-    playerLabel: 'Video bài học dùng tạm cho mục thực hành Phân loại nhựa',
+    playerLabel: 'Video thực hành Phân loại nhựa',
     poster: '/assets/plastic-separation/plastic-practice-overview-cover.jpg',
-    source: lessonSource,
-    temporary: true,
+    youtubeId: 'RJ-m-Y5uuXY',
   },
 ] as const

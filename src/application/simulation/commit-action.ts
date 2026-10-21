@@ -143,7 +143,7 @@ export function commitAction<State>(
  * Parsed rather than looked up so an unknown release fails loudly here instead of
  * reaching the domain as a key that matches no module.
  */
-export function releaseScenarioKey(releaseId: string): ScenarioKey {
+function releaseScenarioKey(releaseId: string): ScenarioKey {
   const separator = releaseId.indexOf('@')
   const key = separator === -1 ? releaseId : releaseId.slice(0, separator)
 

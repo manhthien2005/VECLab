@@ -6,6 +6,6 @@ export function savedAttemptHref(scenarioKey: string, attemptId: UUID, view: 'at
   if (scenarioKey === 'plastic-separation' && releaseId === PLASTIC_PROFILE.releaseId) {
     return `/simulate/plastic-density-separation?attempt=${attemptId}${view === 'report' ? '&view=report' : ''}`
   }
-  if (scenarioKey !== 'jar-test' && scenarioKey !== 'acid-base-extraction') return null
+  if (scenarioKey !== 'jar-test' && scenarioKey !== 'acid-base-extraction' && scenarioKey !== 'cold-process-soap') return null
   return `/simulate/${scenarioKey}?attempt=${attemptId}${view === 'report' ? '&view=report' : ''}`
 }

@@ -98,7 +98,7 @@ export const VIRGIN_POLYMERS = [
 
 export type PolymerId = (typeof VIRGIN_POLYMERS)[number]['id']
 
-export const POLYMER_IDS: readonly PolymerId[] = VIRGIN_POLYMERS.map((p) => p.id)
+const POLYMER_IDS: readonly PolymerId[] = VIRGIN_POLYMERS.map((p) => p.id)
 
 export function isPolymerId(value: unknown): value is PolymerId {
   return typeof value === 'string' && (POLYMER_IDS as readonly string[]).includes(value)

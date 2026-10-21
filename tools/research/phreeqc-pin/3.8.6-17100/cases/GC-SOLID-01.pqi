@@ -1,0 +1,48 @@
+# GC-SOLID-01 — Fe + Zn + Pb cùng kết tủa ở pH 9 (3 pha baseline đồng thời)
+# Verify: WT-CHEM-SOLID-PHASE (3 pha baseline: Fe=Ferrihydrite, Zn=Zn(OH)₂(am), Pb=Pb(OH)₂)
+# Cũng tự nhiên cho P0-C (capacity 3 KL): tương tác cạnh tranh OH⁻
+# Input: Fe 5 mg/L + Zn 5 mg/L + Pb 0,5 mg/L ở pH 9
+# Expected: cả 3 pha đều đạt SI = 0 sau equilibrate
+# Path: chạy từ D:\VECLab\tools\research\phreeqc-pin\3.8.6-17100\
+
+SELECTED_OUTPUT 1
+    -high_precision true
+    -file actual/GC-SOLID-01.select.out
+    -reset false
+    -totals Fe Zn Pb
+    -molalities Fe+3 FeOH+2 Fe(OH)2+ Zn+2 ZnOH+ Zn(OH)2 Pb+2 PbOH+ Pb(OH)2
+    -pH true
+    -si Ferrihydrite Zn(OH)2(am) Pb(OH)2
+END
+
+# Sim 1: pH 9, 3 pha baseline đồng thời
+SOLUTION 1
+    -temp 25
+    pH 9
+    Fe(3) 0.0895
+    Zn 0.0765
+    Pb 0.00241
+    Cl 0.537
+END
+USE solution 1
+EQUILIBRIUM_PHASES 1
+    Ferrihydrite 0 0
+    Zn(OH)2(am) 0 0
+    Pb(OH)2 0 0
+END
+
+# Sim 2: pH 9.5 (buffer mạnh hơn)
+SOLUTION 2
+    -temp 25
+    pH 9.5
+    Fe(3) 0.0895
+    Zn 0.0765
+    Pb 0.00241
+    Cl 0.537
+END
+USE solution 2
+EQUILIBRIUM_PHASES 2
+    Ferrihydrite 0 0
+    Zn(OH)2(am) 0 0
+    Pb(OH)2 0 0
+END

@@ -1,6 +1,6 @@
 import { sha256Hex } from './sha256.js'
 import { canonicalize } from './canonical-json.js'
-import type { ScenarioRef, SimulationAction, UUID } from './contracts.js'
+import type { UUID } from './contracts.js'
 
 /**
  * Integrity and idempotency hashes.
@@ -63,26 +63,6 @@ export type RequestFingerprintPayload = {
 export function requestFingerprint(payload: RequestFingerprintPayload): string {
   assertNoNonFinite(payload, '')
   return sha256Hex(canonicalize(payload))
-}
-
-/**
- * Build the fingerprint payload from a raw action plus the already-normalized
- * parameters and canonical unit selections. Normalization happens in the
- * Process Core before this call; the fingerprint only records the result.
- */
-export function fingerprintFromAction(
-  attemptId: UUID,
-  scenario: ScenarioRef,
-  action: SimulationAction,
-  normalizedParameters: Record<string, number | string | boolean>,
-): RequestFingerprintPayload {
-  return {
-    attemptId,
-    scenarioReleaseId: scenario.releaseId,
-    actionType: action.actionType,
-    normalizedParameters,
-    canonicalUnits: action.unitSelections,
-  }
 }
 
 /** State integrity hash used for `state_before_hash` / `state_after_hash`. */

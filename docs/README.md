@@ -1,6 +1,6 @@
 # Tài liệu VECLab
 
-Phạm vi hiện hành ngày 16/10/2026: **Jar Test** và **chiết tách axit–bazơ**. Thẻ hấp phụ xanh methylene được giữ như bài chưa triển khai. Xem [danh sách bài](ui/current-experiments.md).
+Phạm vi hiện hành ngày 21/10/2026: **Jar Test**, **xử lý nước Fe/Zn/Pb**, **chiết tách axit–bazơ**, **xà phòng hóa** và **phân loại nhựa nguyên sinh**. Xem [danh sách bài](ui/current-experiments.md).
 
 ## Thí nghiệm
 

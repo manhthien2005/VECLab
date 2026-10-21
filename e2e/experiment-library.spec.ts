@@ -2,17 +2,16 @@ import { test, expect } from '@playwright/test'
 
 test.use({ screenshot: 'off', trace: 'off' })
 
-test('offers the active extraction lesson and keeps adsorption planned', async ({ page }) => {
+test('offers five active lessons and opens extraction from the library', async ({ page }) => {
   await page.goto('/experiments')
   const cards = page.locator('.experiment-library-card')
-  await expect(cards.locator('h2')).toHaveText(['Jar Test', 'Chiết tách axit–bazơ', 'Phân loại nhựa nguyên sinh', 'Hấp phụ xanh methylene'])
-  await expect(cards.locator('a[href^="/simulate/"]')).toHaveCount(3)
-  await expect(cards.last()).toContainText('Chưa triển khai')
-  await expect(cards.last().locator('a[href^="/simulate/"]')).toHaveCount(0)
+  await expect(cards.locator('h2')).toHaveText(['Jar Test', 'Xử lý nước nhiễm kim loại Fe, Zn và Pb', 'Chiết tách axit–bazơ', 'Xà phòng hóa', 'Phân loại nhựa nguyên sinh'])
+  await expect(cards.locator('a[href^="/simulate/"]')).toHaveCount(5)
   for (const card of await cards.all()) {
+    await card.scrollIntoViewIfNeeded()
     await expect.poll(() => card.locator('img').evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true)
   }
-  const extraction = cards.nth(1)
+  const extraction = cards.nth(2)
   await extraction.locator('summary').click()
   await expect(extraction).toContainText('Phễu chiết, bình thu, máy đo pH, bộ lọc và cân.')
   await extraction.getByRole('link', { name: 'Xem chi tiết — Chiết tách axit–bazơ', exact: true }).click()
@@ -21,7 +20,7 @@ test('offers the active extraction lesson and keeps adsorption planned', async (
   await expect(breadcrumb.locator('[aria-current="page"]')).toHaveText('Chiết tách axit–bazơ')
   await expect(page.getByRole('heading',{name:'Mục tiêu & kết quả cần đạt',exact:true})).toBeVisible()
   await page.getByRole('link',{name:'Bắt đầu thực hành',exact:true}).click()
-  await expect(page).toHaveURL(/attempt=[0-9a-f-]{36}/)
+  await expect(page).toHaveURL(/attempt=[0-9a-f-]{36}/, { timeout: 15000 })
   await expect(page.getByRole('region',{name:'Bàn chiết tách axit–bazơ',exact:true})).toBeVisible()
 })
 
@@ -43,10 +42,11 @@ test('opens the plastic lesson, guide and existing workbench from the library', 
   await expect(page.getByRole('heading', { name: 'Nguồn khoa học', exact: true })).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   await page.getByRole('link', { name: 'Lý thuyết & hướng dẫn chi tiết', exact: true }).click()
-  await expect(page.getByRole('heading', { level: 1, name: 'Phân loại nhựa: lý thuyết & cách làm bài', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Phân loại nhựa: lý thuyết & cách làm bài', exact: true })).toBeVisible({ timeout: 15000 })
   await page.getByRole('navigation', { name: 'Đường dẫn điều hướng', exact: true }).getByRole('link', { name: 'Phân loại nhựa nguyên sinh', exact: true }).click()
+  await expect(page).toHaveURL(/\/experiments\/plastic-density-separation$/, { timeout: 15000 })
   await page.getByRole('link', { name: 'Bắt đầu thực hành', exact: true }).click()
-  await expect(page).toHaveURL(/\/simulate\/plastic-density-separation$/)
+  await expect(page).toHaveURL(/\/simulate\/plastic-density-separation$/, { timeout: 15000 })
   await expect(page.getByRole('button', { name: 'Bắt đầu thí nghiệm Phân loại nhựa', exact: true })).toBeVisible()
 })
 

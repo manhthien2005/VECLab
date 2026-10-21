@@ -29,18 +29,31 @@ const PRESENTATION = {
     outcome: 'Độ đục sau lắng, hiệu suất xử lý',
     procedure: ['Chuẩn bị các cốc, đo mẫu đầu và chọn liều phèn', 'Khuấy nhanh 60 giây, khuấy chậm 20 phút và lắng 30 phút mô phỏng', 'Đo độ đục, tự tính hiệu suất và chọn phương án nộp'],
   },
-  'methylene-blue-adsorption': {
-    image: '/assets/experiments/adsorption.webp',
-    imageAlt: 'Dung dịch xanh methylene và than hoạt tính',
-    category: 'Hấp phụ',
-    question: 'Liều than và thời gian tiếp xúc ảnh hưởng thế nào đến khả năng loại màu?',
-    learning: 'Liên hệ điều kiện xử lý với hiệu suất hấp phụ.',
-    tools: 'Cân, bình tiếp xúc, cuvet và máy đo quang.',
-    prerequisites: 'Hiểu nồng độ dung dịch và cách tính phần trăm.',
-    input: 'Xanh methylene, than hoạt tính',
-    parameters: 'Liều than và thời gian tiếp xúc',
-    outcome: 'Nồng độ màu, hiệu suất loại màu',
-    procedure: ['Chuẩn bị dung dịch và lượng than hoạt tính', 'Cho tiếp xúc theo điều kiện đã chọn', 'Đo nồng độ và tính hiệu suất loại màu'],
+  'cold-process-soap': {
+    image: '/assets/experiments/soap.jpg',
+    imageAlt: 'Cốc kiềm, cốc dầu, cốc trộn và khuôn silicone trên bàn xà phòng',
+    category: 'Xà phòng hóa',
+    question: 'Lượng NaOH, nước và dầu cần tỉ lệ nào để bánh xà phòng đạt chất lượng?',
+    learning: 'Tính lượng NaOH và nước, pha kiềm đúng chiều, trộn với dầu, đợi dung dịch đặc lại và đọc pH sau ủ.',
+    tools: 'Cốc chịu nhiệt, cân, máy khuấy và khuôn silicone.',
+    prerequisites: 'Hiểu tỏa nhiệt khi hòa tan kiềm và vì sao không đổ nước vào NaOH rắn.',
+    input: 'Một loại dầu (ô liu / dừa / cọ) · NaOH · nước cất',
+    parameters: 'Khối lượng dầu, thể tích nước, khối lượng NaOH, khuấy máy hoặc tay',
+    outcome: 'Tối đa 3 mẫu thử với chỉ số kiềm, dầu, hỗn hợp, pH và khối lượng. Một mẫu đạt mọi yêu cầu là đạt',
+    procedure: ['Rót nước, rót NaOH vào nước và chờ kiềm nguội; chọn loại dầu và rót dầu', 'Rót kiềm và dầu vào cốc trộn, khuấy rồi đợi dung dịch đặc lại', 'Đổ khuôn, chờ 24 giờ, tháo khuôn, đợi 4 tuần rồi đo pH và cân'],
+  },
+  'water-treatment': {
+    image: '/assets/auth-laboratory-v2.webp',
+    imageAlt: 'Phòng thí nghiệm ảo với bình khuấy, máy đo và giá đựng mẫu nước',
+    category: 'Kết tủa hydroxide · Xử lý nước',
+    question: 'pH và các bước xử lý ảnh hưởng thế nào đến Fe, Zn, Pb còn lại trong nước?',
+    learning: 'Theo dõi riêng nồng độ kim loại và pH, rồi đối chiếu kết quả mô phỏng với mục tiêu học tập.',
+    tools: 'Bình pha mẫu, máy khuấy, bộ lắng/lọc, NaOH, HCl và thiết bị đo.',
+    prerequisites: 'Hiểu pH, kết tủa hydroxide, tích số tan và đơn vị nồng độ mg/L.',
+    input: 'Mẫu nước tổng hợp Fe/Zn/Pb · 500–2.000 mL',
+    parameters: 'Thành phần kim loại · thể tích · lượng thuốc thử thêm từng giọt',
+    outcome: 'Nồng độ Fe/Zn/Pb sau lọc và pH cuối để đối chiếu riêng từng chỉ tiêu',
+    procedure: ['Pha mẫu và đo pH ban đầu', 'Thêm NaOH, khuấy, lắng và lọc kết tủa', 'Cân bằng pH rồi đối chiếu các chỉ tiêu học tập'],
   },
 } as const
 
@@ -60,15 +73,11 @@ export const PLASTIC_OVERVIEW = {
   procedure: ['Chuẩn bị mẫu, làm ướt và tách sơ bộ bằng nước máy', 'Ly tâm, cân và chọn nhánh ethanol hoặc NaCl để tách tiếp', 'Đọc tổng kết phân đoạn, sổ thực hành và báo cáo'],
 } as const
 
-const HOME_OVERVIEWS = APP_STRINGS.home.showcaseCards.map(({ scenarioKey, title }) => ({
-  scenarioKey, title, ...PRESENTATION[scenarioKey],
-}))
-
-/** Library lessons can expand without changing the approved landing picker. */
-export const EXPERIMENT_OVERVIEWS = [
-  ...HOME_OVERVIEWS.filter(item => item.scenarioKey !== 'methylene-blue-adsorption'),
-  PLASTIC_OVERVIEW,
-  ...HOME_OVERVIEWS.filter(item => item.scenarioKey === 'methylene-blue-adsorption'),
-]
+/** One overview per lesson, in the same order as the landing picker. */
+export const EXPERIMENT_OVERVIEWS = APP_STRINGS.home.showcaseCards.map(({ scenarioKey, title }) =>
+  scenarioKey === 'plastic-density-separation'
+    ? PLASTIC_OVERVIEW
+    : { scenarioKey, title, ...PRESENTATION[scenarioKey] },
+)
 
 export type ExperimentOverview = (typeof EXPERIMENT_OVERVIEWS)[number]

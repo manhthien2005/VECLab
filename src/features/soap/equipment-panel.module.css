@@ -1,0 +1,35 @@
+.panel { position:fixed; inset:0; margin:auto; width:640px; max-width:calc(100% - 24px); height:auto; max-height:min(850px, calc(100dvh - 48px)); padding:0; border:0; border-radius:14px; background:#fff; color:#153446; box-shadow:0 16px 60px rgb(13 36 52 / 22%); overflow:auto; color-scheme:light; }
+.panel::backdrop { background:rgb(13 36 52 / 35%); }
+.header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 22px 12px; }
+.header h2 { display:flex; align-items:center; gap:10px; font-size:1.1rem; margin:0; }
+.header svg { width:22px; height:22px; }
+.header button { width:40px; height:40px; display:grid; place-items:center; border:0; border-radius:8px; background:#e7eff4; color:#345566; cursor:pointer; }
+.header button:hover { background:#d6e6ed; }
+.tabs { display:flex; flex-wrap:wrap; gap:6px; padding:0 22px 16px; border-bottom:1px solid #cbdbe4; }
+.tabs button { flex:1 1 28%; min-height:44px; padding:9px 6px; border:1px solid #c1d3dd; border-radius:8px; background:#f3f7fa; color:#3e596b; font:inherit; font-size:.78rem; font-weight:650; cursor:pointer; }
+.tabs button[aria-pressed='true'] { color:#fff; background:#006f79; border-color:#006f79; }
+.body { padding:22px; }
+.body h3 { margin:0 0 16px; font-size:1.45rem; letter-spacing:-.02em; }
+.body figure { margin:0 0 24px; }
+.photo { position:relative; aspect-ratio:16/10; border-radius:10px; overflow:hidden; background:#e7eef2; }
+.photo img { object-fit:contain; }
+.body figcaption { font-size:.72rem; line-height:1.65; color:#516b7c; margin-top:9px; }
+.body section { margin-top:24px; }
+.body h4 { margin:0 0 8px; font-size:.95rem; }
+.body p, .body li { color:#3e596b; font-size:.875rem; line-height:1.8; }
+.body p { margin:0; }
+.body ol { padding-left:20px; margin:0; }
+.body li + li { margin-top:7px; }
+.facts { margin:20px 0 0; padding:14px 16px; border-radius:10px; background:#e8f2f4; }
+.facts > div { display:flex; justify-content:space-between; gap:16px; padding:6px 0; font-size:.8rem; }
+.facts dt { color:#3e596b; }
+.facts dd { margin:0; text-align:right; font-weight:650; font-variant-numeric:tabular-nums; }
+.body .note { margin-top:24px; border-top:1px solid #cbdbe4; padding-top:16px; font-size:.8rem; }
+.panel :focus-visible { outline:3px solid #007b80; outline-offset:3px; }
+@media (max-width:600px) {
+  .panel { width:calc(100% - 24px); max-height:calc(100dvh - 24px); }
+  .header, .body { padding:16px; }
+  .tabs { padding-inline:16px; }
+  .tabs button { flex:1 1 40%; font-size:.72rem; }
+  .facts > div { flex-wrap:wrap; gap:4px 12px; }
+}

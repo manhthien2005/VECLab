@@ -19,7 +19,7 @@ export type Component = typeof COMPONENTS[number]
 export const VESSEL_IDS = ['S', 'F', 'R1', 'R2', 'R3', 'W'] as const
 export type VesselId = typeof VESSEL_IDS[number]
 export type Amounts = Record<Component, number>
-export const PROPERTIES = Object.freeze({ A: { partition: 50, pKa: 4.2, solubility: .001 }, B: { partition: 30, pKa: 5, solubility: .001 }, N: { partition: 100, pKa: null, solubility: .0005 } })
+const PROPERTIES = Object.freeze({ A: { partition: 50, pKa: 4.2, solubility: .001 }, B: { partition: 30, pKa: 5, solubility: .001 }, N: { partition: 100, pKa: null, solubility: .0005 } })
 export const zeroAmounts = (): Amounts => ({ A: 0, B: 0, N: 0 })
 export type Vessel = { id: VesselId; waterMl: number; organicMl: number; acidEq: number; moles: Amounts; separated: boolean; vented: boolean; dry: boolean; needsMix?:boolean }
 export type Reading = { sequence: number; vesselId: VesselId; kind: 'ph' | 'mass'; value: number | null; valid: boolean }

@@ -1,7 +1,6 @@
 const lessonSource = 'https://rnreqrlrxhykbkjqbuil.supabase.co/storage/v1/object/public/lesson-videos/jar-test-intro-v1.mp4'
 const lessonCaptions = '/assets/jar-videos/lesson.auto.vi.vtt'
 
-// Replace the practice source and its captions together when the recording is ready.
 export const JAR_LESSON_VIDEOS = [
   {
     id: 'lesson',
@@ -13,18 +12,15 @@ export const JAR_LESSON_VIDEOS = [
     poster: '/assets/jar-videos/jar-test-lesson-cover.webp',
     source: lessonSource,
     captions: lessonCaptions,
-    temporary: false,
   },
   {
     id: 'practice',
     title: 'Thao tác thực hành trên VECLab',
     summary: 'Từ chuẩn bị mẫu đến nộp bài',
-    description: 'Dành cho video thực hiện trọn một lượt trên bàn thực hành, từ chuẩn bị mẫu đến đọc báo cáo.',
+    description: 'Theo dõi thao tác trên bàn thực hành, từ chuẩn bị mẫu đến đọc báo cáo Jar Test.',
     playLabel: 'Phát video thực hành Jar Test',
-    playerLabel: 'Video bài học dùng tạm cho mục thực hành Jar Test',
+    playerLabel: 'Video thực hành Jar Test',
     poster: '/assets/jar-videos/jar-test-practice-cover.webp',
-    source: lessonSource,
-    captions: lessonCaptions,
-    temporary: true,
+    youtubeId: 'fpwHE6tpT5g',
   },
 ] as const

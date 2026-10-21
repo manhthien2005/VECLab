@@ -2,6 +2,10 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { EXTRACTION_SOURCES } from '@/content/evidence/acid-base-extraction.js'
 import { ExtractionEvidence } from '@/features/extraction/evidence.js'
+import { SOAP_SOURCES } from '@/content/evidence/soap.js'
+import { SoapEvidence } from '@/features/soap/evidence.js'
+import { WATER_TREATMENT_SOURCES } from '@/content/evidence/water-treatment.js'
+import { WaterTreatmentEvidence } from '@/features/water-treatment/evidence.js'
 import { JAR_PROFILE } from '@/domain/experiments/jar-test/model.js'
 import { JAR_LIMITS, JAR_SOURCES } from '@/content/evidence/jar-test.js'
 import { PLASTIC_SOURCES } from '@/content/evidence/plastic-density-separation.js'
@@ -18,13 +22,13 @@ export const metadata: Metadata = {
 
 export default function EvidencePage() {
   const experiments = [...EXPERIMENT_OVERVIEWS].sort((a, b) => Number(b.scenarioKey === 'jar-test') - Number(a.scenarioKey === 'jar-test'))
-    .map(item => ({ key: item.scenarioKey, title: item.title, category: item.category, sourceCount: item.scenarioKey === 'jar-test' ? JAR_SOURCES.length : item.scenarioKey === 'acid-base-extraction' ? EXTRACTION_SOURCES.length : item.scenarioKey === 'plastic-density-separation' ? Object.keys(PLASTIC_SOURCES).length : null }))
+    .map(item => ({ key: item.scenarioKey, title: item.title, category: item.category, sourceCount: item.scenarioKey === 'jar-test' ? JAR_SOURCES.length : item.scenarioKey === 'acid-base-extraction' ? EXTRACTION_SOURCES.length : item.scenarioKey === 'plastic-density-separation' ? Object.keys(PLASTIC_SOURCES).length : item.scenarioKey === 'cold-process-soap' ? SOAP_SOURCES.length : item.scenarioKey === 'water-treatment' ? WATER_TREATMENT_SOURCES.length : null }))
   return <div className="page evidence-library">
     <ScienceBackdrop />
     <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: 'Nguồn khoa học' }]} />
     <header className="evidence-library-header"><h1>Nguồn khoa học</h1><p>Tài liệu được sử dụng cho từng bài, cách áp dụng và những giới hạn cần biết.</p></header>
     <EvidenceExperimentBrowser experiments={experiments}>
-      {experiments.map(experiment => experiment.key === 'acid-base-extraction' ? <ExtractionEvidence key={experiment.key}/> : experiment.key === 'plastic-density-separation' ? <div className="evidence-empty" key={experiment.key}><h2>{experiment.title}</h2><p>Thông số pilot, preset và giới hạn của bài được trình bày cùng tài liệu gốc tại trang bài học.</p><Link href="/experiments/plastic-density-separation#plastic-sources">Xem nguồn và phạm vi bài nhựa <ArrowRightIcon /></Link></div> : experiment.key !== 'jar-test' ? <div className="evidence-empty" key={experiment.key}><h2>{experiment.title}</h2><p>Chưa triển khai bài thực hành. Danh mục nguồn cho bài này chưa được công bố.</p><Link href="/experiments">Xem các bài thí nghiệm <ArrowRightIcon /></Link></div> : <div key={experiment.key}>
+      {experiments.map(experiment => experiment.key === 'acid-base-extraction' ? <ExtractionEvidence key={experiment.key}/> : experiment.key === 'cold-process-soap' ? <SoapEvidence key={experiment.key}/> : experiment.key === 'water-treatment' ? <WaterTreatmentEvidence key={experiment.key}/> : experiment.key === 'plastic-density-separation' ? <div className="evidence-empty" key={experiment.key}><h2>{experiment.title}</h2><p>Thông số pilot, preset và giới hạn của bài được trình bày cùng tài liệu gốc tại trang bài học.</p><Link href="/experiments/plastic-density-separation#plastic-sources">Xem nguồn và phạm vi bài nhựa <ArrowRightIcon /></Link></div> : experiment.key !== 'jar-test' ? <div className="evidence-empty" key={experiment.key}><h2>{experiment.title}</h2><p>Chưa triển khai bài thực hành. Danh mục nguồn cho bài này chưa được công bố.</p><Link href="/experiments">Xem các bài thí nghiệm <ArrowRightIcon /></Link></div> : <div key={experiment.key}>
         <div className="evidence-lesson-heading"><div><h2>Jar Test</h2><p>Một nguồn cho phương trình tính kết quả, một nguồn cho quy trình thực hành. Mở từng tài liệu để xem cách bài học sử dụng.</p></div><Link href="/experiments/jar-test">Xem bài thí nghiệm <ArrowRightIcon /></Link></div>
         <div className="evidence-source-groups"><section className="evidence-source-group"><h3><BookIcon />Tài liệu đang sử dụng <span>{JAR_SOURCES.length} nguồn</span></h3><div className="evidence-source-grid">{JAR_SOURCES.map(source => <article className="evidence-source-card" key={source.key} data-source-role={source.key === 'alateef-2024-rsm' ? 'model' : 'procedure'}>
           <div className="evidence-source-role"><span aria-hidden="true">{source.key === 'alateef-2024-rsm' ? <CalculatorIcon /> : <BookIcon />}</span><div><strong>{source.kind}</strong><p>{source.key === 'alateef-2024-rsm' ? 'Phương trình giảm độ đục cuối quy trình' : 'Thao tác Jar Test và an toàn phòng thí nghiệm'}</p></div></div>

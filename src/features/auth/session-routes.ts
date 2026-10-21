@@ -9,7 +9,7 @@
  * group name as the guard (docs/system-architecture.md).
  */
 
-export const SESSION_REQUIRED_PREFIXES = ['/account'] as const
+const SESSION_REQUIRED_PREFIXES = ['/account'] as const
 
 export function requiresSession(pathname: string): boolean {
   return SESSION_REQUIRED_PREFIXES.some(

@@ -1,6 +1,6 @@
 # Kiểm chứng và nghiệm thu
 
-Phạm vi hiện hành: [Jar Test và chiết tách axit–bazơ](ui/current-experiments.md). Thẻ hấp phụ chỉ kiểm tra nội dung/availability, không giả lập luồng thực hành.
+Phạm vi hiện hành: [năm bài đang phục vụ](ui/current-experiments.md). Kiểm tra khả dụng và luồng thực hành theo catalog của từng bài.
 
 ## Gates
 

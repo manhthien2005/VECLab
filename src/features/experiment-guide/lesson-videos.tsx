@@ -6,15 +6,21 @@ import { PlayIcon } from '@/features/landing/icons.js'
 import styles from './lesson-videos.module.css'
 
 export type LessonVideo = {
-  id: 'lesson' | 'practice'
+  id: 'lesson' | 'practice' | 'reference'
   title: string
   summary: string
   description: string
   playLabel: string
   playerLabel: string
   poster: string
-  source: string
+  posterFit?: 'contain'
+  /** Omit or leave empty while the recording is not ready. */
+  source?: string
+  /** YouTube practice recording; mounted only after an explicit play action. */
+  youtubeId?: string
   captions?: string
+  /** When true, the slot is visible but cannot be played. */
+  pending?: boolean
 }
 
 type Props = {
@@ -23,18 +29,20 @@ type Props = {
   videos: readonly [LessonVideo, ...LessonVideo[]]
 }
 
-function focusPlayer(element: HTMLVideoElement | null) {
+function focusPlayer(element: HTMLVideoElement | HTMLIFrameElement | null) {
   element?.focus()
 }
 
 export function LessonVideos({ id, title, videos }: Props) {
-  const [selectedId, setSelectedId] = useState<'lesson' | 'practice'>('lesson')
+  const [selectedId, setSelectedId] = useState<'lesson' | 'practice' | 'reference'>(videos[0].id)
   const [active, setActive] = useState(false)
   const [failed, setFailed] = useState(false)
   const [attempt, setAttempt] = useState(0)
   const selected = videos.find(video => video.id === selectedId) ?? videos[0]
+  const canPlay = !selected.pending && Boolean(selected.youtubeId || selected.source)
+  const youtubeUrl = selected.youtubeId ? `https://www.youtube.com/watch?v=${selected.youtubeId}` : undefined
 
-  function selectVideo(id: 'lesson' | 'practice') {
+  function selectVideo(id: 'lesson' | 'practice' | 'reference') {
     setSelectedId(id)
     setFailed(false)
     setActive(false)
@@ -48,7 +56,15 @@ export function LessonVideos({ id, title, videos }: Props) {
     <div className={styles.workspace}>
       <div className={styles.viewer}>
         <div className={styles.frame} id={`${id}-player`}>
-          {active ? <video
+          {active && canPlay ? selected.youtubeId ? <iframe
+            key={selected.id}
+            ref={focusPlayer}
+            src={`https://www.youtube-nocookie.com/embed/${selected.youtubeId}?autoplay=1&playsinline=1&rel=0&hl=vi`}
+            title={selected.playerLabel}
+            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+          /> : <video
             key={`${selected.id}-${attempt}`}
             ref={focusPlayer}
             src={selected.source}
@@ -64,14 +80,18 @@ export function LessonVideos({ id, title, videos }: Props) {
           >
             {selected.captions && <track kind="captions" src={selected.captions} srcLang="vi" label="Tiếng Việt (tự động)" />}
             Trình duyệt chưa hỗ trợ phát video. <a href={selected.source}>Mở video</a>.
-          </video> : <button className={styles.poster} type="button" aria-label={selected.playLabel} onClick={() => setActive(true)}>
-            <Image src={selected.poster} alt="" width={1280} height={720} sizes="(max-width: 850px) 92vw, 760px" />
+          </video> : canPlay ? <button className={styles.poster} type="button" aria-label={selected.playLabel} onClick={() => setActive(true)}>
+            <Image src={selected.poster} alt="" width={1280} height={720} sizes="(max-width: 850px) 92vw, 760px" style={selected.posterFit ? { objectFit: selected.posterFit } : undefined} />
             <span className={styles.play}><PlayIcon /><span>Phát video</span></span>
-          </button>}
+          </button> : <div className={`${styles.poster} ${styles.posterPending}`} role="img" aria-label={`${selected.playLabel}. Video sẽ được bổ sung.`}>
+            <Image src={selected.poster} alt="" width={1280} height={720} sizes="(max-width: 850px) 92vw, 760px" />
+            <span className={styles.play}><PlayIcon /><span>Sắp có</span></span>
+          </div>}
         </div>
         <div className={styles.current} aria-live="polite" aria-atomic="true">
           <h3>{selected.title}</h3>
           <p>{selected.description}</p>
+          {youtubeUrl && <a className={styles.externalLink} href={youtubeUrl} target="_blank" rel="noopener noreferrer">Mở trên YouTube</a>}
         </div>
         {failed && <div className={styles.error} role="alert">
           <p>Chưa tải được video. Kiểm tra kết nối rồi thử lại.</p>
@@ -91,7 +111,7 @@ export function LessonVideos({ id, title, videos }: Props) {
               aria-controls={`${id}-player`}
               onClick={() => selectVideo(video.id)}
             >
-              <span className={styles.thumbnail}><Image src={video.poster} alt="" width={160} height={90} sizes="96px" /><PlayIcon /></span>
+              <span className={styles.thumbnail}><Image src={video.poster} alt="" width={160} height={90} sizes="96px" style={video.posterFit ? { objectFit: video.posterFit } : undefined} /><PlayIcon /></span>
               <span className={styles.choiceText}>
                 <strong>{video.title}</strong>
                 <span>{video.summary}</span>
