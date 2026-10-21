@@ -1,6 +1,6 @@
 import { useId, useLayoutEffect, useRef, type ReactNode } from 'react'
 import type { WaterTreatmentReportSnapshot } from './report-types.js'
-import { CloseIcon, SubmitIcon, ReportIcon, InfoIcon } from '@/features/workbench/icons.js'
+import { CloseIcon, SubmitIcon, ReportIcon } from '@/features/workbench/icons.js'
 import { WaterTreatmentReport } from './report.js'
 import styles from './completion.module.css'
 

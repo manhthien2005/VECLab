@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.js'
 import { OperationHelp } from '@/features/workbench/operation-help.js'
@@ -259,11 +260,13 @@ function EquipmentInfoDialog({ item, onClose }: { item: EquipmentId; onClose: ()
  * Reuses Jar Test WorkbenchFrame structure for consistency.
  */
 
+const ClientWorkbenchSession = dynamic(() => Promise.resolve(WaterTreatmentWorkbenchSession), { ssr: false })
+
 export function WaterTreatmentWorkbench(props: Props) {
   const sessionKey = JSON.stringify([
-    props.storageMode, props.attemptId, props.invalidAttempt ?? false,
+    props.storageMode, props.attemptId, props.invalidAttempt ?? false, props.openReport ?? false,
   ])
-  return <WaterTreatmentWorkbenchSession key={sessionKey} {...props} />
+  return <ClientWorkbenchSession key={sessionKey} {...props} />
 }
 
 function WaterTreatmentWorkbenchSession({
@@ -280,8 +283,8 @@ function WaterTreatmentWorkbenchSession({
   const [tourOpen, setTourOpen] = useState(false)
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false)
   const [reportDialogOpen, setReportDialogOpen] = useState(_openReport)
-  const [report, setReport] = useState<WaterTreatmentReportSnapshot | null>(null)
-  const [submitted, setSubmitted] = useState(false)
+  const [report, setReport] = useState<WaterTreatmentReportSnapshot | null>(() => attemptId ? getReport(attemptId) : null)
+  const [submitted, setSubmitted] = useState(report !== null)
   const submitTrigger = useRef<HTMLButtonElement>(null)
   const tourTrigger = useRef<HTMLButtonElement>(null)
   
@@ -291,20 +294,6 @@ function WaterTreatmentWorkbenchSession({
 
   // Placeholder state — will replace with real session later
   const [ready, setReady] = useState(false)
-
-  // Load saved report if attemptId is provided
-  useEffect(() => {
-    if (attemptId) {
-      const savedReport = getReport(attemptId)
-      if (savedReport) {
-        setReport(savedReport)
-        setSubmitted(true)
-        if (_openReport) {
-          setReportDialogOpen(true)
-        }
-      }
-    }
-  }, [attemptId, _openReport])
 
   // Apparatus animation state for WATER TREATMENT
   const [apStatus, setApStatus] = useState<ApStatus>({

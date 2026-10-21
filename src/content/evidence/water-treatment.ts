@@ -1,5 +1,6 @@
 export const WATER_TREATMENT_SOURCES = [
   {
+    key: 'qcvn-40-2025-btnmt',
     title: 'QCVN 40:2025/BTNMT — Quy chuẩn kỹ thuật quốc gia về nước thải công nghiệp',
     author: 'Bộ Tài nguyên và Môi trường · Thông tư 06/2025/TT-BTNMT',
     kind: 'Căn cứ quy chuẩn Việt Nam',

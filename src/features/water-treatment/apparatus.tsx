@@ -121,7 +121,7 @@ export type ActionLogEntry = {
   timestamp: Date
   station: 'sample' | 'treatment' | 'discharge'
   action: string
-  details?: string
+  details?: string | undefined
 }
 
 const INITIAL_STATUS: ApStatus = {

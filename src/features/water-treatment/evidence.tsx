@@ -14,7 +14,7 @@ export function WaterTreatmentEvidence() {
     <section className="evidence-source-group">
       <h3><BookIcon />Tài liệu đang sử dụng <span>{WATER_TREATMENT_SOURCES.length} nguồn</span></h3>
       <div className="evidence-source-grid">{WATER_TREATMENT_SOURCES.map((source) => (
-        <article className="evidence-source-card" key={source.key ?? source.title}>
+        <article className="evidence-source-card" key={source.key}>
           <div className="evidence-source-role"><span aria-hidden="true"><BookIcon /></span><div><strong>{source.kind}</strong><p>{source.author}</p></div></div>
           <h4>{source.title}</h4>
           <div className="evidence-source-actions"><a href={source.url} target="_blank" rel="noopener noreferrer">Tài liệu gốc <ArrowRightIcon /></a></div>

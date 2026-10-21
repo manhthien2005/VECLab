@@ -6,61 +6,11 @@ import styles from './report.module.css'
 const fmt = (value: number | null, digits = 2): string =>
   value === null ? 'N/A' : value.toLocaleString('vi-VN', { maximumFractionDigits: digits })
 
-const QCVN_LIMITS = {
-  fe: 2.0,
-  zn: 1.0,
-  pb: 0.1,
-  phMin: 6,
-  phMax: 9,
-} as const
-
 const METAL_NAMES = {
   fe: 'Sắt (Fe)',
   zn: 'Kẽm (Zn)',
   pb: 'Chì (Pb)',
 } as const
-
-function MetricBar({
-  label,
-  value,
-  limit,
-  unit = 'mg/L',
-  inverse = false,
-}: {
-  label: string
-  value: number | null
-  limit: number
-  unit?: string
-  inverse?: boolean
-}) {
-  const met = value !== null && (inverse ? value <= limit : value >= limit)
-  const percentage = value !== null ? Math.min(100, (value / limit) * 100) : 0
-
-  return (
-    <div className={styles.metric} role="img" aria-label={`${label}: ${fmt(value)} ${unit}; giới hạn ${limit} ${unit}`}>
-      <div className={styles.metricLabel} aria-hidden="true">
-        <span>{label}</span>
-        <strong>
-          {fmt(value)}
-          {value !== null && ` ${unit}`}
-        </strong>
-      </div>
-      <div className={styles.metricTrack} aria-hidden="true">
-        {value !== null && (
-          <span
-            className={styles.metricFill}
-            data-met={met}
-            style={{ width: `${Math.max(0, Math.min(100, percentage))}%` }}
-          />
-        )}
-        <span className={styles.limitMarker} style={{ left: `${Math.min(100, (limit / (value ?? limit)) * 100)}%` }} />
-      </div>
-      <span className={styles.limitLabel} aria-hidden="true">
-        {inverse ? `≤ ${limit} ${unit}` : `≥ ${limit} ${unit}`}
-      </span>
-    </div>
-  )
-}
 
 function RemovalEfficiencySection({ report }: { report: WaterTreatmentReportSnapshot }) {
   if (!report.sampleCalculation || !report.ban2LockedData) {

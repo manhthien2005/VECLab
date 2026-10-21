@@ -63,7 +63,7 @@ interface Props {
   onStationClick: (station: 'sample' | 'treatment' | 'discharge') => void
   currentStation: 'sample' | 'treatment' | 'discharge'
   /** Submission state */
-  status: 'active' | 'completed'
+  status: 'active' | 'completed' | 'locked'
   busy?: boolean
   onSubmit?: () => void
   onReport?: () => void
@@ -84,7 +84,6 @@ export function WaterTreatmentNotebook({
   currentStation,
   status,
   busy = false,
-  onSubmit,
   onReport,
   actionLog,
 }: Props) {

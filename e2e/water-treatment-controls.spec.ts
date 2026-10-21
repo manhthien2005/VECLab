@@ -1,5 +1,18 @@
 import { expect, test } from '@playwright/test'
 
+test('a saved report reopens from the water-treatment lab', async ({ page }) => {
+  await page.goto('/simulate/water-treatment')
+  await page.getByRole('button', { name: 'Bắt đầu lượt xử lý nước', exact: true }).click()
+  await page.getByRole('button', { name: 'Hoàn thành và lưu lượt', exact: true }).click()
+  await page.getByRole('button', { name: 'Xác nhận nộp bài', exact: true }).click()
+  await expect(page.getByRole('dialog', { name: 'Báo cáo xử lý nước', exact: true })).toBeVisible()
+
+  await page.goto('/experiments/water-treatment/my-lab')
+  await page.getByRole('link', { name: 'Xem báo cáo', exact: true }).click()
+  await expect(page).toHaveURL(/\/simulate\/water-treatment\?attempt=.+&report=1$/)
+  await expect(page.getByRole('dialog', { name: 'Báo cáo xử lý nước', exact: true })).toBeVisible()
+})
+
 test('a changed or reset sample must be stirred again before calculation', async ({ page }) => {
   await page.goto('/simulate/water-treatment')
   await page.getByRole('button', { name: 'Bắt đầu lượt xử lý nước', exact: true }).click()

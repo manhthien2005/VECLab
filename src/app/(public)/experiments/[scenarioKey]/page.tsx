@@ -29,17 +29,16 @@ export default async function ExperimentDetailPage({ params }: { params: Promise
   const available = isJar || isWaterTreatment
   const title = overview.title
   const workbenchHref = isWaterTreatment ? '/simulate/water-treatment' : '/simulate/jar-test'
-  const guideHref = isWaterTreatment ? '/experiments/water-treatment/guide' : '/experiments/jar-test/guide'
 
   return <div className="page experiment-detail">
     <ScienceBackdrop />
     <Breadcrumbs items={[{ label: 'Trang chủ', href: '/' }, { label: 'Thí nghiệm', href: '/experiments' }, { label: title }]} />
     <header className="experiment-detail-header"><div><div className="experiment-detail-tags"><span className="experiment-topic">{overview.category}</span><span className={'experiment-availability' + (available ? ' is-available' : '')}>{available ? (isWaterTreatment ? 'Có bàn thực hành · Tiến trình trong bộ nhớ' : 'Có thể thực hành · Lưu trên trình duyệt') : 'Chưa triển khai'}</span></div><h1>{title}</h1><p>{overview.question}</p></div>{available && <Link className="btn experiment-library-start" href={workbenchHref}>Bắt đầu thực hành <ArrowRightIcon /></Link>}</header>
-    {!available ? <section className="experiment-detail-panel"><h2>Chưa triển khai bài thực hành</h2><p>{overview.learning} Đây là hướng nội dung dự kiến; chưa có mô hình và quy trình được khóa để mở thực hành.</p><Link href="/experiments">Quay lại danh sách thí nghiệm</Link></section> : isWaterTreatment ? <WaterTreatmentDetail overview={overview} /> : <><JarLessonVideos /><JarTestDetail overview={overview} /></>}
+    {!available ? <section className="experiment-detail-panel"><h2>Chưa triển khai bài thực hành</h2><p>{overview.learning} Đây là hướng nội dung dự kiến; chưa có mô hình và quy trình được khóa để mở thực hành.</p><Link href="/experiments">Quay lại danh sách thí nghiệm</Link></section> : isWaterTreatment ? <WaterTreatmentDetail /> : <><JarLessonVideos /><JarTestDetail overview={overview} /></>}
   </div>
 }
 
-function WaterTreatmentDetail({ overview }: { overview: (typeof EXPERIMENT_OVERVIEWS)[number] }) {
+function WaterTreatmentDetail() {
   const profile = WATER_TREATMENT_PROFILE
   return <>
     <WaterTreatmentLessonVideos />

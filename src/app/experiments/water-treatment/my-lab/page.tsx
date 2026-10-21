@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { getStoredReports, deleteReport, getReportStatistics, type StoredReport } from '@/features/water-treatment/storage.js'
 import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/icons.js'
@@ -109,7 +110,7 @@ function ReportCard({ stored, onDelete }: { stored: StoredReport; onDelete: () =
               Xóa
             </button>
             <Link
-              href={`/experiments/water-treatment/workbench?attemptId=${stored.id}&openReport=true`}
+              href={`/simulate/water-treatment?attempt=${encodeURIComponent(stored.id)}&report=1`}
               className={styles.primary}
             >
               <ReportIcon />
@@ -122,14 +123,15 @@ function ReportCard({ stored, onDelete }: { stored: StoredReport; onDelete: () =
   )
 }
 
-export default function WaterTreatmentMyLabPage() {
-  const [reports, setReports] = useState<StoredReport[]>([])
-  const [stats, setStats] = useState<ReturnType<typeof getReportStatistics> | null>(null)
+const ClientMyLab = dynamic(() => Promise.resolve(WaterTreatmentMyLabContent), { ssr: false })
 
-  useEffect(() => {
-    setReports(getStoredReports())
-    setStats(getReportStatistics())
-  }, [])
+export default function WaterTreatmentMyLabPage() {
+  return <ClientMyLab />
+}
+
+function WaterTreatmentMyLabContent() {
+  const [reports, setReports] = useState<StoredReport[]>(getStoredReports)
+  const [stats, setStats] = useState<ReturnType<typeof getReportStatistics>>(getReportStatistics)
 
   const handleDelete = (id: string) => {
     deleteReport(id)
@@ -191,7 +193,7 @@ export default function WaterTreatmentMyLabPage() {
             <InfoIcon />
             <h2>Chưa có lượt nào được lưu</h2>
             <p>Hoàn thành và nộp bài ở workbench để lưu báo cáo vào Lab của tôi.</p>
-            <Link href="/experiments/water-treatment/workbench" className={styles.cta}>
+            <Link href="/simulate/water-treatment" className={styles.cta}>
               Bắt đầu thực hành
             </Link>
           </div>
@@ -208,7 +210,7 @@ export default function WaterTreatmentMyLabPage() {
         <p className={styles.note}>
           Dữ liệu lưu trên trình duyệt này. Xóa cache hoặc dùng thiết bị khác sẽ mất dữ liệu.
         </p>
-        <Link href="/experiments/water-treatment/workbench" className={styles.newAttempt}>
+        <Link href="/simulate/water-treatment" className={styles.newAttempt}>
           + Tạo lượt mới
         </Link>
       </footer>

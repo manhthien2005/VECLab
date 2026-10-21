@@ -41,7 +41,7 @@ export function generateWaterTreatmentReport({
   } | null
   operationCount?: number
 }): WaterTreatmentReportSnapshot {
-  const diagnostics: WaterTreatmentReportSnapshot['diagnostics'] = []
+  const diagnostics: Array<WaterTreatmentReportSnapshot['diagnostics'][number]> = []
 
   // Check completion status
   if (!sampleCalculation) {
