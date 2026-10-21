@@ -1,0 +1,140 @@
+.controlGroup {
+  border: 1px solid #c3d4df;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color 180ms ease-out;
+}
+
+.controlGroup[open] {
+  border-color: #45929c;
+}
+
+.controlGroup[data-disabled='true'] summary {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.controlGroup summary {
+  padding: 14px 12px;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: white;
+}
+
+.controlGroup[open] summary {
+  background: #d6ecee;
+  border-radius: 9px 9px 0 0;
+  margin-bottom: 14px;
+}
+
+.controlGroup[open] summary strong {
+  color: #005d69;
+}
+
+.controlGroup summary::-webkit-details-marker {
+  display: none;
+}
+
+.controlGroup summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--ink-muted);
+  border-bottom: 1.5px solid var(--ink-muted);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+  margin-right: 3px;
+  transition: transform 180ms ease-out;
+}
+
+.controlGroup[open] summary::after {
+  transform: rotate(225deg);
+}
+
+.controlIcon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  background: #e2ebf2;
+  color: #416981;
+}
+
+.controlIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.controlGroup[open] .controlIcon {
+  background: #006f79;
+  color: white;
+}
+
+.controlText {
+  flex: 1;
+  min-width: 0;
+}
+
+.controlGroup summary strong {
+  font-size: 0.9rem;
+  display: block;
+}
+
+.controlGroup summary small {
+  font-size: 0.7rem;
+  display: block;
+  color: var(--ink-muted);
+  margin-top: 3px;
+  font-weight: 400;
+}
+
+.groupBody {
+  display: grid;
+  gap: 14px;
+  padding: 0 12px 14px;
+}
+
+.groupBody p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+}
+
+.groupBody strong {
+  color: var(--ink);
+}
+
+.groupNote {
+  font-size: 0.7rem !important;
+  text-align: center;
+  color: var(--ink-muted);
+}
+
+.popoverClose {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 7px;
+  background: #f0f5f8;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.popoverClose:hover {
+  background: #e2ecef;
+}
+
+.popoverClose svg {
+  width: 18px;
+  height: 18px;
+}

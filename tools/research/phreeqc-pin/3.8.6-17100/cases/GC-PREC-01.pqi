@@ -1,0 +1,25 @@
+# GC-PREC-01 — Fe(OH)3 Ferrihydrite at pH 7 (canonical form)
+# Cross-check WT-CHEM-Ksp-Fe (Ferrihydrite, log Ksp = -38,779)
+# Path: chạy từ D:\VECLab\tools\research\phreeqc-pin\3.8.6-17100\
+
+SELECTED_OUTPUT 1
+    -high_precision true
+    -file actual/GC-PREC-01.select.out
+    -reset false
+    -totals Fe
+    -molalities Fe+3 FeOH+2 Fe(OH)2+ Fe(OH)3 Fe(OH)4-
+    -pH true
+    -si Ferrihydrite
+END
+
+SOLUTION 1
+    -temp 25
+    pH 7.0
+    Fe(3) 0.179
+    Na     4.35
+    Cl     0.537 charge
+END
+USE solution 1
+EQUILIBRIUM_PHASES 1
+    Ferrihydrite 0 0
+END

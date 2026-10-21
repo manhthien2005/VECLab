@@ -16,6 +16,9 @@ export function ShowcaseCarouselTrack({ children, totalSlides, headingId }: Show
   const suppressClick = useRef(false)
   const wrap = (index: number) => ((index % totalSlides) + totalSlides) % totalSlides
   const activeIndex = wrap(activeStep)
+  // Ring step is shared by every slot so any slide count rotates without
+  // overlapping neighbours (e.g. 4 slides → 90° spacing, 3 slides → 120°).
+  const slotAngle = 360 / totalSlides
   const select = (index: number, focus = false) => {
     const next = wrap(index)
     setActiveStep((step) => {
@@ -72,7 +75,7 @@ export function ShowcaseCarouselTrack({ children, totalSlides, headingId }: Show
           const offset = wrap(idx - activeIndex)
           return cloneElement(child, {
             'data-active': String(idx === activeIndex),
-            style: { ...child.props.style as React.CSSProperties, '--ring-angle': `${(idx - activeStep) * 120}deg` } as React.CSSProperties,
+            style: { ...child.props.style as React.CSSProperties, '--ring-angle': `${(idx - activeStep) * slotAngle}deg` } as React.CSSProperties,
             'data-position': offset === 0 ? 'center' : offset === 1 ? 'right' : 'left',
           })
         })}

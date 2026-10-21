@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0.0",
+  "release": "3.8.6-17100",
+  "sourceUrl": "https://water.usgs.gov/water-resources/software/PHREEQC/phreeqc-3.8.6-17100.zip",
+  "zipFileName": "phreeqc-3.8.6-17100.zip",
+  "zipSha256": "91BF4998CFB5ED33B1222E034E559A9845F592F0F4F79A11819EFE229B65A847",
+  "zipSizeBytes": 13154618,
+  "pinnedAt": "2026-10-16T18:12:10.4292471+07:00",
+  "pinnedBy": "agent (Cursor Assistant) at chemistry owner request, 2026-10-16",
+  "databaseFiles": [
+    {
+      "sizeBytes": 142729,
+      "name": "minteq.dat",
+      "sha256": "B098BA653279256C05E7AC2FFA698529442F06D0BBB82A6F3EF2B8C309101F7A",
+      "relativePath": "database/minteq.dat"
+    },
+    {
+      "sizeBytes": 320909,
+      "name": "minteq.v4.dat",
+      "sha256": "A93914E63B0C616F8506CC92739188E50C5B9A15C33B111979652F308457F4AC",
+      "relativePath": "database/minteq.v4.dat"
+    },
+    {
+      "sizeBytes": 53211,
+      "name": "phreeqc.dat",
+      "sha256": "59373961D648DFBF68A40744060C1D64F57ECBEC98F4F5FB89F3A1B4213CCD10",
+      "relativePath": "database/phreeqc.dat"
+    },
+    {
+      "sizeBytes": 88132,
+      "name": "wateq4f.dat",
+      "sha256": "7816C92EADD28F7E4703EFA467A038A197748CD38F410D81AA7909FDE1C8912F",
+      "relativePath": "database/wateq4f.dat"
+    }
+  ],
+  "status": "Pinned reference databases retained; distribution archives, examples and duplicate extracted tree removed during cleanup.",
+  "notes": [
+    "Downloaded and hashed on first attempt. Hashes are real, not assumed.",
+    "Database version pinned but NO claim has been promoted to source-checked or cross-checked.",
+    "Next step: chemistry owner to run the 7 specialized cross-check cases (see registry §5.1.3) on this pinned release and update verificationStatus only after PHREEQC output matches expected within tolerance."
+  ],
+  "executable": {
+    "relativePath": "bin/phreeqc.exe",
+    "platform": "win32",
+    "sha256": "d1cc2ad3ae66af8a95c3fbb605affc4d22149c8d5aab4239919792c524635006"
+  },
+  "linuxExecutable": {
+    "relativePath": "bin/phreeqc-linux-x64",
+    "platform": "linux",
+    "arch": "x64",
+    "sha256": "e983e34861d3ce816645bb2b32a6982c7ec426781c9feebf8909f37b713eab94",
+    "sizeBytes": 2563720,
+    "linking": "static musl / libc++",
+    "sourceUrl": "https://water.usgs.gov/water-resources/software/PHREEQC/phreeqc-3.8.6-17100.tar.gz",
+    "sourceSha256": "b5c4a6dfea1a6bb6a3436857a50346bb943904a49582714494b4f1b1e54e64e1",
+    "compiler": "Zig 0.15.2",
+    "compilerSha256": "02aa270f183da276e5b5920b1dac44a63f1a49e55050ebde3aecc9eb82f93239",
+    "buildScript": "scripts/build-phreeqc-linux.sh",
+    "notice": "NOTICE-linux.txt",
+    "sourceChanges": "none"
+  }
+}

@@ -5544,7 +5544,6 @@ td[data-numeric],
 .experiment-detail-process > a, .evidence-model-details > a { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; font-size: .875rem; text-underline-offset: .25em; }
 .experiment-detail a > svg, .evidence-library a > svg { width: 1rem; height: 1rem; flex: 0 0 1rem; }
 
-/* Jar reading surfaces: compact summaries and clear citation roles. */
 .experiment-detail-brief { display:grid; gap:1rem; margin:.25rem 0 0; padding:1.25rem 0; border-block:1px solid color-mix(in srgb,var(--detail-tone) 18%,var(--border)); }
 .experiment-detail-brief dt { margin-bottom:.3rem; color:var(--detail-tone); font-size:.8125rem; font-weight:700; }
 .experiment-detail-brief dd { margin:0; color:var(--ink); font-size:.9rem; line-height:1.7; }

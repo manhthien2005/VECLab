@@ -6,7 +6,7 @@ import { PlayIcon } from '@/features/landing/icons.js'
 import styles from './lesson-videos.module.css'
 
 export type LessonVideo = {
-  id: 'lesson' | 'practice'
+  id: 'lesson' | 'practice' | 'reference'
   title: string
   summary: string
   description: string
@@ -31,14 +31,14 @@ function focusPlayer(element: HTMLVideoElement | null) {
 }
 
 export function LessonVideos({ id, title, videos }: Props) {
-  const [selectedId, setSelectedId] = useState<'lesson' | 'practice'>('lesson')
+  const [selectedId, setSelectedId] = useState<'lesson' | 'practice' | 'reference'>(videos[0].id)
   const [active, setActive] = useState(false)
   const [failed, setFailed] = useState(false)
   const [attempt, setAttempt] = useState(0)
   const selected = videos.find(video => video.id === selectedId) ?? videos[0]
   const canPlay = !selected.pending && Boolean(selected.source)
 
-  function selectVideo(id: 'lesson' | 'practice') {
+  function selectVideo(id: 'lesson' | 'practice' | 'reference') {
     setSelectedId(id)
     setFailed(false)
     setActive(false)

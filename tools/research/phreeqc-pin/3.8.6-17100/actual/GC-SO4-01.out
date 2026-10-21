@@ -1,0 +1,260 @@
+   Input file: cases\GC-SO4-01.pqi
+  Output file: actual\GC-SO4-01.out
+Database file: database\minteq.v4.dat
+
+------------------
+Reading data base.
+------------------
+
+	SOLUTION_MASTER_SPECIES
+	SOLUTION_SPECIES
+	SOLUTION_SPECIES
+	PHASES
+	PHASES
+	SURFACE_MASTER_SPECIES
+	SURFACE_SPECIES
+	END
+------------------------------------
+Reading input data for simulation 1.
+------------------------------------
+
+	SELECTED_OUTPUT 1
+	    high_precision true
+	    file actual/GC-SO4-01.select.out
+	    reset false
+	    totals S
+	    molalities SO4-2 HSO4-
+	    ph true
+	    activities SO4-2 HSO4- H+
+	END
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 2.
+------------------------------------
+
+	SOLUTION 1
+	    temp 25
+	    pH 2
+	    S(6) 100.0
+	    Na 200.0
+	END
+-------------------------------------------
+Beginning of initial solution calculations.
+-------------------------------------------
+
+Initial solution 1.	
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Na                2.000e-01   2.000e-01
+	S(6)              1.000e-01   1.000e-01
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   2.000    
+                                       pe  =   4.000    
+                        Activity of water  =   0.995
+                 Ionic strength (mol/kgw)  =   2.361e-01
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =  -3.749e-02
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   3.749e-02
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =  10.57
+                               Iterations  =   5
+                                  Total H  = 1.110512e+02
+                                  Total O  = 5.590683e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   H+              1.351e-02   1.000e-02    -1.869    -2.000    -0.131      0.00
+   OH-             1.445e-12   1.002e-12   -11.840   -11.999    -0.159     (0)  
+   H2O             5.551e+01   9.950e-01     1.744    -0.002     0.000     18.07
+H(0)          1.341e-15
+   H2              6.705e-16   7.079e-16   -15.174   -15.150     0.024     (0)  
+Na            2.000e-01
+   Na+             1.826e-01   1.352e-01    -0.738    -0.869    -0.131     (0)  
+   NaSO4-          1.737e-02   1.278e-02    -1.760    -1.893    -0.133     (0)  
+O(0)          0.000e+00
+   O2              0.000e+00   0.000e+00   -62.023   -61.999     0.024     (0)  
+S(6)          1.000e-01
+   SO4-2           5.865e-02   1.761e-02    -1.232    -1.754    -0.523     (0)  
+   HSO4-           2.398e-02   1.721e-02    -1.620    -1.764    -0.144     (0)  
+   NaSO4-          1.737e-02   1.278e-02    -1.760    -1.893    -0.133     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Mirabilite       -2.40     -3.51   -1.11  Na2SO4:10H2O
+  O2(g)           -59.09     24.00   83.09  O2
+  Thenardite       -3.81     -3.49    0.32  Na2SO4
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 3.
+------------------------------------
+
+	SOLUTION 2
+	    temp 25
+	    pH 3
+	    S(6) 100.0
+	    Na 200.0
+	END
+-------------------------------------------
+Beginning of initial solution calculations.
+-------------------------------------------
+
+Initial solution 2.	
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Na                2.000e-01   2.000e-01
+	S(6)              1.000e-01   1.000e-01
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   3.000    
+                                       pe  =   4.000    
+                        Activity of water  =   0.995
+                 Ionic strength (mol/kgw)  =   2.529e-01
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =  -4.419e-03
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   4.419e-03
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =   1.24
+                               Iterations  =   5
+                                  Total H  = 1.110181e+02
+                                  Total O  = 5.590683e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   H+              1.355e-03   1.000e-03    -2.868    -3.000    -0.132      0.00
+   OH-             1.457e-11   1.002e-11   -10.837   -10.999    -0.163     (0)  
+   H2O             5.551e+01   9.952e-01     1.744    -0.002     0.000     18.07
+H(0)          1.336e-17
+   H2              6.679e-18   7.079e-18   -17.175   -17.150     0.025     (0)  
+Na            2.000e-01
+   Na+             1.784e-01   1.317e-01    -0.749    -0.881    -0.132     (0)  
+   NaSO4-          2.159e-02   1.580e-02    -1.666    -1.801    -0.136     (0)  
+O(0)          0.000e+00
+   O2              0.000e+00   0.000e+00   -58.025   -57.999     0.025     (0)  
+S(6)          1.000e-01
+   SO4-2           7.535e-02   2.235e-02    -1.123    -1.651    -0.528     (0)  
+   NaSO4-          2.159e-02   1.580e-02    -1.666    -1.801    -0.136     (0)  
+   HSO4-           3.064e-03   2.184e-03    -2.514    -2.661    -0.147     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Mirabilite       -2.32     -3.43   -1.11  Na2SO4:10H2O
+  O2(g)           -55.09     28.00   83.09  O2
+  Thenardite       -3.73     -3.41    0.32  Na2SO4
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 4.
+------------------------------------
+
+	SOLUTION 3
+	    temp 25
+	    pH 4
+	    S(6) 100.0
+	    Na 200.0
+	END
+-------------------------------------------
+Beginning of initial solution calculations.
+-------------------------------------------
+
+Initial solution 3.	
+
+-----------------------------Solution composition------------------------------
+
+	Elements           Molality       Moles
+
+	Na                2.000e-01   2.000e-01
+	S(6)              1.000e-01   1.000e-01
+
+----------------------------Description of solution----------------------------
+
+                                       pH  =   4.000    
+                                       pe  =   4.000    
+                        Activity of water  =   0.995
+                 Ionic strength (mol/kgw)  =   2.553e-01
+                       Mass of water (kg)  =   1.000e+00
+                 Total alkalinity (eq/kg)  =  -4.508e-04
+                         Temperature (°C)  =  25.00
+                  Electrical balance (eq)  =   4.508e-04
+ Percent error, 100*(Cat-|An|)/(Cat+|An|)  =   0.13
+                               Iterations  =   5
+                                  Total H  = 1.110141e+02
+                                  Total O  = 5.590683e+01
+
+----------------------------Distribution of species----------------------------
+
+                                               Log       Log       Log    mole V
+   Species          Molality    Activity  Molality  Activity     Gamma   cm³/mol
+
+   H+              1.356e-04   1.000e-04    -3.868    -4.000    -0.132      0.00
+   OH-             1.459e-10   1.002e-10    -9.836    -9.999    -0.163     (0)  
+   H2O             5.551e+01   9.953e-01     1.744    -0.002     0.000     18.07
+H(0)          1.335e-19
+   H2              6.675e-20   7.079e-20   -19.176   -19.150     0.026     (0)  
+Na            2.000e-01
+   Na+             1.779e-01   1.312e-01    -0.750    -0.882    -0.132     (0)  
+   NaSO4-          2.213e-02   1.618e-02    -1.655    -1.791    -0.136     (0)  
+O(0)          0.000e+00
+   O2              0.000e+00   0.000e+00   -54.025   -53.999     0.026     (0)  
+S(6)          1.000e-01
+   SO4-2           7.756e-02   2.296e-02    -1.110    -1.639    -0.529     (0)  
+   NaSO4-          2.213e-02   1.618e-02    -1.655    -1.791    -0.136     (0)  
+   HSO4-           3.152e-04   2.244e-04    -3.501    -3.649    -0.148     (0)  
+
+------------------------------Saturation indices-------------------------------
+
+  Phase               SI** log IAP   log K(298 K,   1 atm)
+
+  Mirabilite       -2.31     -3.42   -1.11  Na2SO4:10H2O
+  O2(g)           -51.09     32.00   83.09  O2
+  Thenardite       -3.72     -3.40    0.32  Na2SO4
+
+**For a gas, SI = log10(fugacity). Fugacity = pressure * phi / 1 atm.
+  For ideal gases, phi = 1.
+
+------------------
+End of simulation.
+------------------
+
+------------------------------------
+Reading input data for simulation 5.
+------------------------------------
+
+-------------------------------
+End of Run after 0.033 Seconds.
+-------------------------------
+

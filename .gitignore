@@ -90,3 +90,13 @@ lerna-debug.log*
 
 # Impeccable engine binary (downloaded per-platform, never tracked per upstream)
 **/skills/impeccable/scripts/bin/
+
+# Water-treatment research downloads and one-off diagnostics
+/tools/research/phreeqc-pin/**/*.zip
+/tools/research/phreeqc-pin/*/extracted/
+/tools/research/phreeqc-pin/*/examples/
+/jest-out.txt
+/tsc_out.txt
+/tests.txt
+/tests/manual/home.html
+/tests/manual/api-smoke.json
