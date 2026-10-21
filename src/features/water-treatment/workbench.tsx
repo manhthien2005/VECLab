@@ -782,13 +782,6 @@ function WaterTreatmentWorkbenchSession({
             <GuideIcon />Cách pha mẫu nước
           </button>
           <p>Nhập nồng độ Fe, Zn, Pb (mg/L) và thể tích (mL).</p>
-          <ActionButton 
-            className={styles.button}
-            reason={null}
-            onClick={() => alert('Action: Measure initial pH')}
-          >
-            Đo pH ban đầu
-          </ActionButton>
         </ControlGroup>
 
         <ControlGroup 
@@ -812,13 +805,6 @@ function WaterTreatmentWorkbenchSession({
             <GuideIcon />Cách loại bỏ ion kim loại dư
           </button>
           <p>Thêm NaOH để nâng pH, sau đó khuấy, lắng, lọc.</p>
-          <ActionButton 
-            className={styles.button}
-            reason={null}
-            onClick={() => alert('Action: Add NaOH')}
-          >
-            + NaOH (kiềm hóa)
-          </ActionButton>
         </ControlGroup>
 
         <ControlGroup 
@@ -842,13 +828,6 @@ function WaterTreatmentWorkbenchSession({
             <GuideIcon />Cách khuấy với NaOH
           </button>
           <p>Điều chỉnh pH vào khoảng 6–9 để đạt tiêu chuẩn QCVN 40:2025 trước khi xả thải.</p>
-          <ActionButton 
-            className={styles.button}
-            reason={null}
-            onClick={() => alert('Action: Balance pH')}
-          >
-            Cân bằng pH
-          </ActionButton>
         </ControlGroup>
 
         <ControlGroup 
@@ -872,17 +851,21 @@ function WaterTreatmentWorkbenchSession({
             <GuideIcon />Cách đối chiếu QCVN
           </button>
           <p>Đo lại pH và nồng độ Kim loại sau xử lý. So sánh với QCVN 40:2025 Cột A.</p>
-          <ActionButton 
-            className={styles.button}
-            reason={null}
-            onClick={() => alert('Action: Measure final')}
-          >
-            Đo lại pH & nồng độ
-          </ActionButton>
         </ControlGroup>
       </>
     )}
   </>
+
+  const notebookRef = useRef<HTMLDivElement>(null)
+
+  const showNotebook = () => {
+    setReportDialogOpen(false)
+    setPane('notebook')
+    requestAnimationFrame(() => {
+      notebookRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      notebookRef.current?.focus({ preventScroll: true })
+    })
+  }
 
   const notebook = ready ? (
     <WaterTreatmentNotebook
@@ -978,7 +961,8 @@ function WaterTreatmentWorkbenchSession({
       shelf={shelf}
       simulation={simulation} 
       controls={controls} 
-      notebook={notebook} 
+      notebook={notebook}
+      notebookRef={notebookRef}
       pane={pane}
       onPaneChange={setPane}
       onShelfInfo={() => router.push('/experiments/water-treatment/guide')}
@@ -1022,10 +1006,7 @@ function WaterTreatmentWorkbenchSession({
       <WaterTreatmentReportDialog
         report={report}
         onClose={() => setReportDialogOpen(false)}
-        onNotebook={() => {
-          setReportDialogOpen(false)
-          setPane('notebook')
-        }}
+        onNotebook={showNotebook}
       />
     )}
   </>

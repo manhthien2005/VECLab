@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, useRef, useState, type ReactNode } from 'react'
+import { useId, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { WorkbenchTour, WORKBENCH_TOUR, type WorkbenchTourStep } from './tour.js'
 import { ToolsIcon } from './icons.js'
 import styles from './frame.module.css'
@@ -9,7 +9,7 @@ export type WorkbenchPane = 'simulation' | 'controls' | 'notebook'
 
 /** Presentation slots only. Each experiment owns its apparatus, actions and data. */
 export function WorkbenchFrame({ label, header, notices, shelf, simulation, controls, notebook,
-  pane, onPaneChange, tourOpen = false, onTourClose, onShelfInfo, tourSteps, contentSized = false }: {
+  pane, onPaneChange, notebookRef, tourOpen = false, onTourClose, onShelfInfo, tourSteps, contentSized = false }: {
   label: string
   header: ReactNode
   notices?: ReactNode
@@ -19,6 +19,7 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
   notebook: ReactNode
   pane: WorkbenchPane
   onPaneChange: (pane: WorkbenchPane) => void
+  notebookRef?: RefObject<HTMLDivElement | null>
   tourSteps?: readonly WorkbenchTourStep[]
   contentSized?: boolean
   tourOpen?: boolean
@@ -35,7 +36,7 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
   const displayedCollapsed = tourOpen ? false : collapsed
   const shelfId = useId()
   const simulationArea = <div className={styles.simulation} data-workbench-area="simulation">{simulation}</div>
-  const notebookArea = <div className={styles.notebook} data-workbench-area="notebook">{notebook}</div>
+  const notebookArea = <div ref={notebookRef} tabIndex={-1} className={styles.notebook} data-workbench-area="notebook">{notebook}</div>
   return (
     <section ref={root} className={styles.frame} aria-label={label}>
       <header className={styles.header} data-workbench-area="header">{header}</header>
