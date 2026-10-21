@@ -279,6 +279,7 @@ export function WaterTreatmentApparatus({
   filterHistory,
   sampleCalculation,
   sampleStatus: externalSampleStatus,
+  ban2Locked = false,
 }: {
   status?: Partial<ApStatus>
   onAddDrop: (reagent: AcidBase, amountMl: number) => void
@@ -294,6 +295,8 @@ export function WaterTreatmentApparatus({
   filterHistory?: FilterHistoryEntry[]
   sampleCalculation?: SampleCalculation | null
   sampleStatus?: { feAddedMl: number; znAddedMl: number; pbAddedMl: number } | null
+  /** Bàn 2 đã bị khóa - không cho thêm NaOH/HCl */
+  ban2Locked?: boolean
 }) {
   const uid = useId().replaceAll(':', '')
   const status: ApStatus = { ...INITIAL_STATUS, ...external }
@@ -678,6 +681,29 @@ export function WaterTreatmentApparatus({
         <path d={'M' + (BEAKER_LEFT_X + 2) + ' ' + waterY + ' H' + (BEAKER_RIGHT_X - 2) + ' V' + (BEAKER_BOTTOM_Y - 1) + ' H' + (BEAKER_LEFT_X + 2) + ' Z'} fill={liquidColor} fillOpacity=".78" />
         <ellipse cx={(BEAKER_LEFT_X + BEAKER_RIGHT_X) / 2} cy={waterY} rx={(BEAKER_RIGHT_X - BEAKER_LEFT_X - 4) / 2} ry="3.5" fill={liquidColor} stroke="#6b8a99" strokeWidth="1" />
 
+        {/* Hiệu ứng xoáy nước khi khuấy */}
+        {status.stirring && !status.filtered && liquidDepth > 10 && (
+          <g className={styles.vortex} aria-label="Lốc xoáy trên mặt nước">
+            <ellipse cx={STIRRER_CX} cy={waterY + 5} rx="54" ry="8" fill="#d8bd70" fillOpacity=".28" />
+            <path
+              d={'M' + (BEAKER_LEFT_X + 10) + ' ' + (waterY + 3) + ' Q190 ' + (waterY + 46) + ' ' + (BEAKER_RIGHT_X - 10) + ' ' + (waterY + 3) + ' Q190 ' + (waterY + 22) + ' ' + (BEAKER_LEFT_X + 10) + ' ' + (waterY + 3)}
+              fill="#d2ad54"
+              fillOpacity=".28"
+              stroke="#a88439"
+              strokeOpacity=".5"
+              strokeWidth="1.2"
+            />
+            <path
+              d={'M' + (STIRRER_CX - 21) + ' ' + (waterY + 4) + ' Q' + STIRRER_CX + ' ' + (waterY + 24) + ' ' + (STIRRER_CX + 21) + ' ' + (waterY + 4)}
+              fill="none"
+              stroke="#f5e6ad"
+              strokeOpacity=".75"
+              strokeWidth="2"
+            />
+            <ellipse cx={STIRRER_CX} cy={waterY + 35} rx="12" ry="4" fill="#a56535" fillOpacity=".35" />
+          </g>
+        )}
+
         {/* Kết tủa: tách lớp theo khối lượng riêng khi lắng, hạt bay lơ lửng khi khuấy.
             Fe(OH)₃ (ρ ≈ 4.3 g/cm³) nặng nhất → đáy dưới; Pb(OH)₂ (ρ ≈ 7.4 g/cm³)
             và Zn(OH)₂ (ρ ≈ 3.0 g/cm³) nằm trên. Fe nặng nên khuấy vẫn nằm thấp;
@@ -966,6 +992,7 @@ export function WaterTreatmentApparatus({
       <div className={styles.buretControls}>
         {(['naoh', 'hcl'] as const).map((reagent) => {
           const empty = reagent === 'naoh' ? naohEmpty : hclEmpty
+          const disabled = empty || ban2Locked
           const label = reagent === 'naoh' ? 'NaOH' : 'HCl'
           return <div className={styles.buretControl} key={reagent}>
             <span>{label}</span>
@@ -973,10 +1000,10 @@ export function WaterTreatmentApparatus({
               solution={reagent}
               value={dropSteps[reagent]}
               onChange={(value) => setDropStep(reagent, value)}
-              disabled={empty}
+              disabled={disabled}
             />
-            <button type="button" className={styles.buretAdd} data-testid={`wt-add-${reagent}`} onClick={() => onAddDrop(reagent, dropSteps[reagent])} disabled={empty}>
-              <PlusIcon /> <span>{empty ? 'Đã hết' : 'Thêm'}</span>
+            <button type="button" className={styles.buretAdd} data-testid={`wt-add-${reagent}`} onClick={() => onAddDrop(reagent, dropSteps[reagent])} disabled={disabled}>
+              <PlusIcon /> <span>{ban2Locked ? 'Đã khóa' : empty ? 'Đã hết' : 'Thêm'}</span>
             </button>
           </div>
         })}

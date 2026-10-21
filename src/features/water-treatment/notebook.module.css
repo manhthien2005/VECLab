@@ -1,7 +1,7 @@
 /* Water Treatment Notebook — notebook.module.css */
 
 .notebook {
-  padding: 0 2px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -179,7 +179,8 @@
 .panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
+  padding: 14px 16px;
 }
 
 .panelTitle {
@@ -265,6 +266,8 @@
 /* Table */
 .tableWrap {
   overflow-x: auto;
+  margin: 0 -4px;
+  padding: 0 4px;
 }
 
 .table {
@@ -493,8 +496,8 @@
 
 /* History section */
 .history {
-  margin: 12px 0 0;
-  padding: 10px 12px;
+  margin: 0;
+  padding: 14px 16px;
   background: #f7f9fb;
   border: 1px solid #dde5ec;
   border-radius: 8px;
@@ -529,8 +532,8 @@
 }
 
 .historyContent {
-  margin-top: 10px;
-  padding: 10px 4px 0;
+  margin-top: 12px;
+  padding-top: 12px;
   border-top: 1px solid #e5edf3;
 }
 

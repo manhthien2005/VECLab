@@ -270,7 +270,7 @@ export function DischargeApparatus({
 
   const composition = calculation.filtrate_mgPerL
 
-  const canMeasure = phase === 'balancing' && !locked && hasStirredSinceLastAdd
+  const canMeasure = phase === 'balancing' && !locked && hasStirredSinceLastAdd && !stirring
 
   const toggleStir = useCallback(() => {
     setStirring((prev) => {
@@ -431,6 +431,29 @@ export function DischargeApparatus({
             fill="#29b6c5" fillOpacity=".25"
           />
           <ellipse cx={BEAKER_CENTER_X} cy={FIXED_LIQUID_TOP_Y} rx={(BEAKER_RIGHT_X - BEAKER_LEFT_X - 4) / 2} ry="3.5" fill="#29b6c5" stroke="#6b8a99" strokeWidth="1" />
+
+          {/* Hiệu ứng xoáy nước khi khuấy */}
+          {stirring && (
+            <g className={styles.vortex} aria-label="Lốc xoáy trên mặt nước">
+              <ellipse cx={BEAKER_CENTER_X} cy={FIXED_LIQUID_TOP_Y + 5} rx="54" ry="8" fill="#d8bd70" fillOpacity=".28" />
+              <path
+                d={`M${BEAKER_LEFT_X + 10} ${FIXED_LIQUID_TOP_Y + 3} Q${BEAKER_CENTER_X} ${FIXED_LIQUID_TOP_Y + 46} ${BEAKER_RIGHT_X - 10} ${FIXED_LIQUID_TOP_Y + 3} Q${BEAKER_CENTER_X} ${FIXED_LIQUID_TOP_Y + 22} ${BEAKER_LEFT_X + 10} ${FIXED_LIQUID_TOP_Y + 3}`}
+                fill="#d2ad54"
+                fillOpacity=".28"
+                stroke="#a88439"
+                strokeOpacity=".5"
+                strokeWidth="1.2"
+              />
+              <path
+                d={`M${BEAKER_CENTER_X - 21} ${FIXED_LIQUID_TOP_Y + 4} Q${BEAKER_CENTER_X} ${FIXED_LIQUID_TOP_Y + 24} ${BEAKER_CENTER_X + 21} ${FIXED_LIQUID_TOP_Y + 4}`}
+                fill="none"
+                stroke="#f5e6ad"
+                strokeOpacity=".75"
+                strokeWidth="2"
+              />
+              <ellipse cx={BEAKER_CENTER_X} cy={FIXED_LIQUID_TOP_Y + 35} rx="12" ry="4" fill="#a56535" fillOpacity=".35" />
+            </g>
+          )}
 
           {/* Stir bar */}
           {stirring && (

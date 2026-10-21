@@ -671,6 +671,7 @@ function WaterTreatmentWorkbenchSession({
             filterHistory={filterHistory}
             sampleCalculation={sampleCalculation}
             sampleStatus={sampleApStatus}
+            ban2Locked={workPhase === 'discharge'}
           />
         </section>
         ) : null}
