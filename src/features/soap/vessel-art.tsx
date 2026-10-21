@@ -2,7 +2,7 @@ import { type CSSProperties, type ReactNode } from 'react'
 import type { SoapMixView, SoapVesselView } from '@/application/scenarios/soap-projection.js'
 import styles from './apparatus.module.css'
 
-export const BEAKER = 'M38 42H142V211Q90 231 38 211Z'
+const BEAKER = 'M38 42H142V211Q90 231 38 211Z'
 const BOTTOM = 221
 const MAX_HEIGHT = 148
 
@@ -24,7 +24,7 @@ export function layersOf(vessel: SoapVesselView, mix: SoapMixView | null): SoapL
 }
 
 /** Major volume ticks for a cup of the given capacity (mL). */
-export function graduationMarks(capacityMl: number): number[] {
+function graduationMarks(capacityMl: number): number[] {
   const step = capacityMl <= 400 ? 50 : capacityMl <= 800 ? 100 : 200
   const marks: number[] = []
   for (let ml = step; ml < capacityMl - step / 2; ml += step) marks.push(ml)

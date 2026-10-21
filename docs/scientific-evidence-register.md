@@ -1,6 +1,6 @@
 # Nguồn và giới hạn khoa học hiện hành
 
-Danh mục bài đang phục vụ được ghi tại [phạm vi hiện hành](ui/current-experiments.md); thẻ hấp phụ chưa có mô hình/nguồn được công bố. Sổ nguồn của bộ trung hòa axit/nhựa/đồng cũ đã gỡ cùng bài.
+Danh mục bài đang phục vụ được ghi tại [phạm vi hiện hành](ui/current-experiments.md). Sổ nguồn của bộ trung hòa axit/nhựa/đồng cũ đã gỡ cùng bài.
 
 ## Jar Test
 

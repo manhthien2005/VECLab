@@ -117,18 +117,6 @@ export function describeAuthError(cause: unknown): string {
   return errors.generic
 }
 
-/**
- * Whether the cause looks like an auth failure carrying credentials meaning.
- *
- * Used by sign-up specifically: an email already taken is worth saying, while the same
- * failure during sign-in must stay vague. Keeping this predicate beside the mapper means the
- * two cannot disagree about what counts as credential-shaped.
- */
-export function isEmailTaken(cause: unknown): boolean {
-  const failure = asFailure(cause)
-  return failure !== null && (failure.code === 'email_exists' || failure.code === 'user_already_exists')
-}
-
 /** Narrow a caught value to the auth error shape, or null when it is not one. */
 function asFailure(cause: unknown): AuthFailure | null {
   if (typeof cause !== 'object' || cause === null) return null

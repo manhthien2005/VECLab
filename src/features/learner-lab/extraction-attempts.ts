@@ -4,7 +4,7 @@ import { EXTRACTION_PROJECTION_VERSION, type ExtractionProjection } from '@/appl
 import type { UUID } from '@/domain/process/contracts.js'
 
 export type ExtractionLabRow = Pick<AttemptSummary, 'attemptId' | 'status' | 'updatedAt' | 'scenarioReleaseId'> & { projection: ExtractionProjection | null }
-export function toExtractionLabRow(summary: AttemptSummary): ExtractionLabRow | null {
+function toExtractionLabRow(summary: AttemptSummary): ExtractionLabRow | null {
   if (summary.scenarioKey !== 'acid-base-extraction') return null
   const value = summary.currentProjection as Partial<ExtractionProjection> | null
   const valid = resolveExtractionProfile(summary.scenarioReleaseId)!==null && value?.scenarioKey === 'acid-base-extraction' &&

@@ -1,6 +1,6 @@
 # Phạm vi sản phẩm VECLab
 
-Quyết định ngày 16/10/2026: tập trung [hai bài hiện hành](ui/current-experiments.md), giữ thẻ hấp phụ chưa triển khai. Tài liệu này thay scope MVP cũ về chuẩn độ/nhựa/đồng.
+Phạm vi ngày 21/10/2026: [năm bài hiện hành](ui/current-experiments.md) — Jar Test, xử lý nước Fe/Zn/Pb, chiết tách axit–bazơ, xà phòng hóa và phân loại nhựa nguyên sinh. Tài liệu này thay scope MVP cũ về chuẩn độ/nhựa/đồng.
 
 ## Jar Test
 
@@ -14,4 +14,4 @@ Tách ba thành phần mô phỏng A/B/N bằng hai pha; thêm thuốc thử, tr
 
 Mô hình học tập, không chứng nhận nước đạt chuẩn hoặc thay quy trình an toàn phòng thí nghiệm. Animation minh họa trạng thái đã commit, không quyết định hóa học. Số đo thiếu/không hợp lệ giữ N/A; câu trả lời đúng chỉ xuất hiện ở phần đánh giá sau hoàn tất.
 
-Landing đã duyệt được giữ. Không tạo route thực hành cho bài hấp phụ khi chưa có engine và profile.
+Giữ landing đã duyệt; bộ chọn giới thiệu đúng năm bài hiện hành và chỉ mở route có trong catalog.

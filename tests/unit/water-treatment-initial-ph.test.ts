@@ -29,7 +29,7 @@ import {
   sliderStepFeZn,
   sliderStepPb,
   solveInitialPh,
-} from '@/features/water-treatment/initial-ph.js'
+} from '../fixtures/water-treatment-initial-ph.js'
 
 describe('solveInitialPh (spec §6.1.2 — charge balance, hydrolysis Fe bậc 1, protonation SO₄)', () => {
   it('trả pH nước nguyên chất ≈ 7 khi composition = 0', () => {

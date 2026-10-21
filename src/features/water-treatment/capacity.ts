@@ -18,10 +18,10 @@
  * chính thức trong evidence register.
  */
 
-import { WT_KSP_LOGK, WT_SOLID_PHASE } from './constants'
+import { WT_KSP_LOGK } from './constants'
 
 /** pKw tại 25 °C theo IAPWS R11-24 (đã pin trong PHREEQC 3.8.6-17100) */
-export const WT_PKW_25C = 13.99
+const WT_PKW_25C = 13.99
 
 /**
  * Hydrolysis constants `log_k` cho Fe³⁺, Zn²⁺, Pb²⁺ theo `minteq.v4.dat`
@@ -34,7 +34,7 @@ export const WT_PKW_25C = 13.99
  *   Zn+2 + j H2O = Zn(OH)_j^{(2-j)+} + j H+    (j=1..4)
  *   Pb+2 + j H2O = Pb(OH)_j^{(2-j)+} + j H+    (j=1..4)
  */
-export const WT_HYDROLYSIS_LOGK = {
+const WT_HYDROLYSIS_LOGK = {
   Fe: [-2.187, -4.594, -12.56, -21.588] as const,
   Zn: [-8.997, -17.794, -28.091, -40.488] as const,
   Pb: [-7.597, -17.094, -28.091, -39.699] as const,
@@ -47,7 +47,7 @@ export type WaterTreatmentMetal = 'Fe' | 'Zn' | 'Pb'
  *
  * @param pH Sample pH (đã ổn định tại pH cuối sau equilibrate)
  */
-export function logOhFromPh(pH: number): number {
+function logOhFromPh(pH: number): number {
   return pH - WT_PKW_25C
 }
 
@@ -62,7 +62,7 @@ export function logOhFromPh(pH: number): number {
  * Approximation: γ_M ≈ γ_OH ≈ 1 cho ionic strength < 0.01 (sample nước
  * thải loãng). Sai số ở I > 0.01 nên dùng Davies để hiệu chỉnh.
  */
-export function freeMetalAtSaturation(
+function freeMetalAtSaturation(
   metal: WaterTreatmentMetal,
   pH: number,
 ): number {
@@ -123,13 +123,6 @@ export function capacityAtSaturation(pH: number): {
     Zn: totalDissolvedMetalAtSaturation('Zn', pH),
     Pb: totalDissolvedMetalAtSaturation('Pb', pH),
   }
-}
-
-/**
- * Trả về tên phase rắn baseline cho mỗi kim loại (theo D4, đã chốt 16/10/2026).
- */
-export function baselineSolidPhase(metal: WaterTreatmentMetal): string {
-  return WT_SOLID_PHASE[metal]
 }
 
 /**

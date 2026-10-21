@@ -15,7 +15,7 @@ import {
 export { SOAP_PROFILE } from './model.js'
 export type { SoapState } from './model.js'
 
-export const SOAP_ACTION_TYPES = [
+const SOAP_ACTION_TYPES = [
   'set_oil', 'discard_oil', 'pour_water', 'pour_naoh', 'cool_lye', 'reset_lye',
   'pour_oil', 'pour_to_mix', 'return_to_source', 'discard_mix', 'stir', 'advance_trace',
   'pour_to_mold', 'advance_gel', 'unmold', 'advance_cure', 'measure_sample', 'complete',

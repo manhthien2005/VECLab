@@ -1,11 +1,11 @@
 # Phạm vi ứng dụng web
 
-Phục vụ [Jar Test và chiết tách axit–bazơ](ui/current-experiments.md), cùng thẻ hấp phụ chưa triển khai. Không còn workbench chuẩn độ hoặc prototype nhựa.
+Phục vụ [năm bài hiện hành](ui/current-experiments.md): Jar Test, xử lý nước Fe/Zn/Pb, chiết tách axit–bazơ, xà phòng hóa và phân loại nhựa nguyên sinh.
 
 ## Màn hình
 
 - Landing, danh mục, chi tiết, hướng dẫn và nguồn khoa học là nội dung công khai.
-- Hai workbench công khai, lưu IndexedDB; tài khoản không thay nơi lưu lượt.
+- Các workbench công khai; Jar Test, chiết tách, xà phòng hóa và phân loại nhựa lưu IndexedDB, xử lý nước giữ trạng thái trong bộ nhớ. Tài khoản không thay nơi lưu lượt.
 - Lab/account liệt kê theo đúng bài. Compare dùng báo cáo Jar đã hoàn tất.
 - Báo cáo/sổ đo do workbench từng bài trình bày; URL lượt/báo cáo chung là entry tương thích đọc metadata rồi chuyển đúng bài.
 - Auth/profile là tính năng riêng, cùng private/no-store, kiểm tra danh tính và same-origin write.

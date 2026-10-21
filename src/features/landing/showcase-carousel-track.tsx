@@ -6,10 +6,11 @@ interface ShowcaseCarouselTrackProps {
   children: React.ReactNode
   totalSlides: number
   headingId?: string
+  slideLabels: readonly string[]
 }
 
-/** Three positions form a circular picker; native card contents retain their actions. */
-export function ShowcaseCarouselTrack({ children, totalSlides, headingId }: ShowcaseCarouselTrackProps) {
+/** The selected card and its neighbours form the visible arc of the ring. */
+export function ShowcaseCarouselTrack({ children, totalSlides, headingId, slideLabels }: ShowcaseCarouselTrackProps) {
   const [activeStep, setActiveStep] = useState(0)
   const trackRef = useRef<HTMLDivElement>(null)
   const gesture = useRef<{ x: number; y: number } | null>(null)
@@ -73,20 +74,24 @@ export function ShowcaseCarouselTrack({ children, totalSlides, headingId }: Show
         {Children.map(children, (child, idx) => {
           if (!isValidElement<Record<string, unknown>>(child)) return child
           const offset = wrap(idx - activeIndex)
+          const rear = offset > 1 && offset < totalSlides - 1
           return cloneElement(child, {
             'data-active': String(idx === activeIndex),
+            'aria-hidden': rear ? true : undefined,
+            inert: rear,
             style: { ...child.props.style as React.CSSProperties, '--ring-angle': `${(idx - activeStep) * slotAngle}deg` } as React.CSSProperties,
-            'data-position': offset === 0 ? 'center' : offset === 1 ? 'right' : 'left',
+            'data-position': offset === 0 ? 'center' : offset === 1 ? 'right' : offset === totalSlides - 1 ? 'left' : 'rear',
           })
         })}
       </div>
+      <p className="showcase-current" aria-hidden="true"><span>{String(activeIndex + 1).padStart(2, '0')} / {String(totalSlides).padStart(2, '0')}</span>{slideLabels[activeIndex]}</p>
       <div className="showcase-controls" aria-label="Điều khiển danh sách thí nghiệm">
         <button type="button" className="showcase-nav-btn" onClick={() => select(activeIndex - 1)} aria-label="Thí nghiệm trước đó">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="m15 18-6-6 6-6" /></svg>
         </button>
         <div className="showcase-dots" role="group" aria-label="Chọn thí nghiệm">
           {Array.from({ length: totalSlides }, (_, idx) => (
-            <button key={idx} type="button" className={`showcase-dot ${idx === activeIndex ? 'is-active' : ''}`} onClick={() => select(idx)} aria-label={`Chuyển đến thí nghiệm ${idx + 1}`} aria-current={idx === activeIndex ? 'true' : undefined} />
+            <button key={idx} type="button" className={`showcase-dot ${idx === activeIndex ? 'is-active' : ''}`} onClick={() => select(idx)} aria-label={`Chuyển đến thí nghiệm ${idx + 1}`} title={slideLabels[idx]} aria-current={idx === activeIndex ? 'true' : undefined}><span className="showcase-dot-label">{slideLabels[idx]}</span></button>
           ))}
         </div>
         <button type="button" className="showcase-nav-btn" onClick={() => select(activeIndex + 1)} aria-label="Thí nghiệm tiếp theo">

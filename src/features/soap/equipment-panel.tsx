@@ -6,7 +6,7 @@ import type { SoapEquipmentKind } from './equipment-art.js'
 import styles from './equipment-panel.module.css'
 
 const REQ = SOAP_PROFILE.requirements
-export const SOAP_EQUIPMENT_KINDS = ['ppe', 'lye', 'oils', 'mold', 'meter'] as const satisfies readonly SoapEquipmentKind[]
+const SOAP_EQUIPMENT_KINDS = ['ppe', 'lye', 'oils', 'mold', 'meter'] as const satisfies readonly SoapEquipmentKind[]
 
 const EQUIPMENT: Record<SoapEquipmentKind, {
   title: string

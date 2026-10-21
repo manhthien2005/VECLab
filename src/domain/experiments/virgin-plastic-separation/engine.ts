@@ -46,7 +46,7 @@ function preconditionFailed(code: string, messageKey?: string): DomainError {
   }
 }
 
-export function validatePlasticAction(
+function validatePlasticAction(
   state: PlasticSeparationState,
   action: SimulationAction,
 ): DomainError | null {

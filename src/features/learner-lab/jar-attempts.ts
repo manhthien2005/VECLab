@@ -12,7 +12,7 @@ function isReading(value: unknown): boolean {
 }
 
 /** List only the current scenario. Foreign/old projections never become fake zero values. */
-export function toJarLabRow(summary: AttemptSummary): JarLabRow | null {
+function toJarLabRow(summary: AttemptSummary): JarLabRow | null {
   if (summary.scenarioKey !== 'jar-test') return null
   const value = summary.currentProjection as Partial<JarProjection> | null
   const valid = summary.scenarioReleaseId === JAR_PROFILE.releaseId && value?.scenarioKey === 'jar-test' &&

@@ -32,7 +32,7 @@ Ba entry point là `veclab-handoff`, `veclab-implement`, `veclab-verify` trong `
 
 Chỉ cập nhật khi workflow gặp lỗi thực, stack/contract đổi hoặc upstream có cải tiến liên quan. Người sửa đọc diff từ SHA đã ghim, ghi lý do/phần chọn dùng/SHA mới, kiểm tra links và frontmatter rồi thử tình huống bị ảnh hưởng. Không chạy installer/hook upstream hoặc tự đồng bộ cả bộ. Thay đổi skill đi cùng PR như thay đổi tài liệu dự án.
 
-Giữ chính sách sản phẩm và contract kỹ thuật ở spec/code; skill chỉ hướng dẫn cách làm. Khi pH hoặc hấp phụ được triển khai, brief trỏ tới spec của bài đó; không sao chép toàn bộ quy trình Jar vào skill chung.
+Giữ chính sách sản phẩm và contract kỹ thuật ở spec/code; skill chỉ hướng dẫn cách làm. Khi có bài mới được triển khai, brief trỏ tới spec của bài đó; không sao chép toàn bộ quy trình Jar vào skill chung.
 
 ## Kiểm tra khi tạo bộ — 13/10/2026
 

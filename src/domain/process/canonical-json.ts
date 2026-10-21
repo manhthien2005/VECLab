@@ -16,9 +16,6 @@
  *   - `undefined`, functions and symbols are rejected, not dropped
  */
 
-type JsonScalar = string | number | boolean | null
-type JsonValue = JsonScalar | JsonValue[] | { [key: string]: JsonValue }
-
 /** UTF-16 code-unit ordering, as JCS requires for object key sorting. */
 function compareCodeUnits(a: string, b: string): number {
   const length = Math.min(a.length, b.length)
@@ -112,13 +109,4 @@ function serialize(value: unknown): string {
 
 export function canonicalize(value: unknown): string {
   return serialize(value)
-}
-
-export function isCanonicalJson(value: JsonValue): boolean {
-  try {
-    serialize(value)
-    return true
-  } catch {
-    return false
-  }
 }

@@ -13,7 +13,7 @@ Quyết định của người dùng ngày 14/10/2026. Owner: TL2 / coder 2.
 
 - Trật tự các chương, bố cục hai vùng của hero, tỷ lệ giữa nội dung và hình sản phẩm, nhận diện teal/navy, light/dark và font Manrope hiện có.
 - Hero có khung sản phẩm chi tiết: dụng cụ, biểu đồ và các panel hỗ trợ. Không thay bằng cốc đơn lẻ kèm đoạn chữ hoặc SVG nét sơ sài.
-- Ba thẻ bài giữ độ chi tiết của hình minh họa và cấu trúc thẻ. Đổi bài cũ sang bài mới không có nghĩa bỏ hình hoặc dùng chung một biểu tượng cốc.
+- Các thẻ bài giữ độ chi tiết của hình minh họa và cấu trúc thẻ. Đổi bài cũ sang bài mới không có nghĩa bỏ hình hoặc dùng chung một biểu tượng cốc.
 - Workbench preview giữ khung thao tác đầy đủ: tiến trình, dụng cụ, số liệu, biểu đồ và phần giải thích. Chỉnh nội dung sai ngay trong panel thay vì xóa panel.
 - Evidence, CTA và footer giữ vai trò và bố cục của bản gốc; rút câu lặp trong từng khối thay vì làm trang trống hoặc xóa toàn bộ khối.
 
@@ -21,7 +21,7 @@ Quyết định của người dùng ngày 14/10/2026. Owner: TL2 / coder 2.
 
 - Font weight, size, leading, khoảng cách và căn chỉnh để đọc tốt tiếng Việt, kể cả khi tăng cỡ chữ.
 - Câu chữ cụ thể, tự nhiên, đúng mục đích giới thiệu toàn dự án; giữ sức nặng của tiêu đề. Không ép tất cả phần thành một câu chung chung.
-- Cập nhật ba bài thành Điều chỉnh pH, Jar Test và Hấp phụ xanh methylene; trạng thái và đường dẫn phải phản ánh tính năng thật tại base của task mới. Không sửa engine/release để làm khớp quảng bá.
+- Theo quyết định 21/10/2026, bộ chọn gồm Jar Test, xử lý nước Fe/Zn/Pb, chiết tách axit–bazơ, xà phòng hóa và phân loại nhựa nguyên sinh; trạng thái và đường dẫn phải phản ánh tính năng thật tại base của task mới. Không sửa engine/release để làm khớp quảng bá.
 - Làm mượt hover/focus/press/entrance có sẵn; giảm hiệu ứng gây vướng mà vẫn giữ phản hồi và reduced motion.
 - Sửa tương phản và lỗi cắt/chồng chữ có bằng chứng. Có thể dùng cách sửa đã kiểm chứng ở R1/R2 khi chuẩn bị task mới, nhưng không tự cherry-pick cả gói UI-02 đã bị từ chối.
 

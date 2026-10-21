@@ -1,3 +1,7 @@
+import { format } from 'node:util'
+
+const report = (...values) => process.stdout.write(format(...values) + '\n')
+
 // verify-wt-capacity.mjs
 //
 // Capacity table verifier cho Water Treatment spec §6.5.2.
@@ -55,21 +59,21 @@ const KSP_SOURCE = {
 };
 
 const VERSION = 'v2026-10-16-D1D2D3';
-console.log(`# verify-wt-capacity ${VERSION}`);
-console.log(`# Constants: Ksp_Fe=${Ksp_Fe.toExponential(6)} (log10=${Math.log10(Ksp_Fe).toFixed(3)}, phase=${SOLID_PHASE.fe}, ${KSP_DECISION_TAG.fe})`);
-console.log(`#            Ksp_Zn=${Ksp_Zn.toExponential(6)} (log10=${Math.log10(Ksp_Zn).toFixed(3)}, phase=${SOLID_PHASE.zn}, ${KSP_DECISION_TAG.zn})`);
-console.log(`#            Ksp_Pb=${Ksp_Pb.toExponential(6)} (log10=${Math.log10(Ksp_Pb).toFixed(3)}, phase=${SOLID_PHASE.pb}, ${KSP_DECISION_TAG.pb})`);
-console.log(`#            pKw=${pKw} (IAPWS R11-24, claim AN-KW-25C)`);
-console.log(`# Sources: ${Object.values(KSP_SOURCE).join(' | ')}`);
-console.log('# Status: source-checked; KHONG cross-checked (P0-D vẫn mở; chờ 7 case chuyên biệt chạy trong PHREEQC).');
-console.log('#');
-console.log('pH | [Fe3+] mol/L | [Fe3+] mg/L | [Zn2+] mol/L | [Zn2+] mg/L | [Pb2+] mol/L | [Pb2+] mg/L');
+report(`# verify-wt-capacity ${VERSION}`);
+report(`# Constants: Ksp_Fe=${Ksp_Fe.toExponential(6)} (log10=${Math.log10(Ksp_Fe).toFixed(3)}, phase=${SOLID_PHASE.fe}, ${KSP_DECISION_TAG.fe})`);
+report(`#            Ksp_Zn=${Ksp_Zn.toExponential(6)} (log10=${Math.log10(Ksp_Zn).toFixed(3)}, phase=${SOLID_PHASE.zn}, ${KSP_DECISION_TAG.zn})`);
+report(`#            Ksp_Pb=${Ksp_Pb.toExponential(6)} (log10=${Math.log10(Ksp_Pb).toFixed(3)}, phase=${SOLID_PHASE.pb}, ${KSP_DECISION_TAG.pb})`);
+report(`#            pKw=${pKw} (IAPWS R11-24, claim AN-KW-25C)`);
+report(`# Sources: ${Object.values(KSP_SOURCE).join(' | ')}`);
+report('# Status: source-checked; KHONG cross-checked (P0-D vẫn mở; chờ 7 case chuyên biệt chạy trong PHREEQC).');
+report('#');
+report('pH | [Fe3+] mol/L | [Fe3+] mg/L | [Zn2+] mol/L | [Zn2+] mg/L | [Pb2+] mol/L | [Pb2+] mg/L');
 for (const pH of [6.0, 7.0, 8.0, 8.5, 9.0, 9.5, 10.0]) {
   const OH = Math.pow(10, pH - pKw);
   const Fe = Ksp_Fe / Math.pow(OH, 3);
   const Zn = Ksp_Zn / Math.pow(OH, 2);
   const Pb = Ksp_Pb / Math.pow(OH, 2);
-  console.log(
+  report(
     pH.toFixed(1) + ' | ' +
     Fe.toExponential(2) + ' | ' +
     (Fe*M_Fe*1000).toExponential(2) + ' | ' +

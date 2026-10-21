@@ -8,13 +8,15 @@ Nền tảng học tập mô phỏng quy trình hóa học bằng TypeScript, Ne
 | --- | --- |
 | Jar Test | Workbench sáu cốc, khuấy/lắng, phép đo NTU, sổ đo, báo cáo và so sánh lượt. |
 | Chiết tách axit–bazơ | Workbench A/B/N, hai pha, thu sản phẩm, phép đo, báo cáo và lưu lượt. |
-| Hấp phụ xanh methylene | Giữ thẻ giới thiệu; chưa có engine hoặc route thực hành. |
+| Xử lý nước Fe, Zn và Pb | Điều chỉnh pH, khuấy, lắng/lọc và đối chiếu chỉ tiêu; trạng thái trong bộ nhớ. |
+| Xà phòng hóa | Pha kiềm, trộn dầu, đổ khuôn, ủ và kiểm tra sản phẩm. |
+| Phân loại nhựa nguyên sinh | Tách nổi–chìm theo khối lượng riêng, cân phân đoạn và xem báo cáo. |
 
-Hai bài thực hành lưu dữ liệu trong IndexedDB của trình duyệt, kể cả khi đăng nhập. Chưa hỗ trợ đồng bộ lượt lên tài khoản. Source của trung hòa axit/chuẩn độ, phân loại nhựa và đặc tả kết tủa đồng đã được gỡ theo quyết định ngày 16/10/2026. Không xóa dữ liệu đã lưu hoặc viết lại migration lịch sử.
+Jar Test, chiết tách, xà phòng hóa và phân loại nhựa lưu IndexedDB của trình duyệt; xử lý nước giữ trạng thái trong bộ nhớ. Đăng nhập không đồng bộ lượt sang thiết bị khác. Source của trung hòa axit/chuẩn độ và đặc tả kết tủa đồng cũ đã được gỡ. Không xóa dữ liệu đã lưu hoặc viết lại migration lịch sử.
 
 ## Chạy local
 
-Yêu cầu Node.js >= 22.13.0. Chạy `npm ci`, rồi `npm run dev`; mở http://localhost:3000. Hai bài thực hành không cần tài khoản.
+Yêu cầu Node.js >= 22.13.0. Chạy `npm ci`, rồi `npm run dev`; mở http://localhost:3000. Các bài thực hành không cần tài khoản.
 
 Auth/profile dùng Supabase theo [.env.example](.env.example). Nhánh phát triển chỉ dùng môi trường local/ephemeral; không đưa khóa đặc quyền production vào source hoặc CI phát triển.
 

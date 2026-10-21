@@ -2,9 +2,7 @@ import { LessonVideos, type LessonVideo } from '@/features/experiment-guide/less
 
 const lessonSource = 'https://rnreqrlrxhykbkjqbuil.supabase.co/storage/v1/object/public/lesson-videos/acid-bazo-extraction-intro-v1.mp4'
 
-// The practice slot uses the lesson until its own recording is supplied.
-// Replace its source, playerLabel and matching captions together when ready.
-export const EXTRACTION_LESSON_VIDEOS = [
+const EXTRACTION_LESSON_VIDEOS = [
   {
     id: 'lesson',
     title: 'Bài học',
@@ -21,9 +19,9 @@ export const EXTRACTION_LESSON_VIDEOS = [
     summary: 'Từ chuyển mẫu đến khai báo sản phẩm',
     description: 'Theo dõi quy trình chuyển mẫu, cấp dung dịch, trộn–xả áp–phân lớp, thu pha, làm khô và cân sản phẩm.',
     playLabel: 'Phát video thực hành chiết tách axit–bazơ',
-    playerLabel: 'Video bài học dùng tạm cho mục thực hành chiết tách axit–bazơ',
+    playerLabel: 'Video thực hành chiết tách axit–bazơ',
     poster: '/assets/extraction-videos/acid-base-extraction-practice-cover.webp',
-    source: lessonSource,
+    youtubeId: 'kUnZ-o2pt4M',
   },
 ] as const satisfies readonly [LessonVideo, ...LessonVideo[]]
 

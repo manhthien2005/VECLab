@@ -94,19 +94,6 @@ export function deleteReport(attemptId: string): void {
 }
 
 /**
- * Delete all reports
- */
-export function clearAllReports(): void {
-  if (typeof window === 'undefined') return
-  
-  try {
-    localStorage.removeItem(STORAGE_KEY)
-  } catch (error) {
-    console.error('Failed to clear Water Treatment reports:', error)
-  }
-}
-
-/**
  * Get summary statistics
  */
 export function getReportStatistics(): {

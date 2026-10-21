@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { WATER_TREATMENT_PROFILE } from '@/domain/experiments/water-treatment/model.js'
 import { parseUUID } from '@/shared/ids.js'
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs.js'
@@ -366,7 +367,7 @@ export default async function WaterTreatmentGuidePage({
               marginBottom: '1rem'
             }}>
               <div>
-                <img 
+                <Image unoptimized width={1145} height={747}
                   src="/assets/experiments/water-treatment/ban_1.png" 
                   alt="Bàn 1 - Pha nước tổng hợp"
                   style={{ 
@@ -386,7 +387,7 @@ export default async function WaterTreatmentGuidePage({
                 </p>
               </div>
               <div>
-                <img 
+                <Image unoptimized width={1133} height={746}
                   src="/assets/experiments/water-treatment/ban_2.png" 
                   alt="Bàn 2 - Xử lý, khuấy, lắng, lọc"
                   style={{ 
@@ -406,7 +407,7 @@ export default async function WaterTreatmentGuidePage({
                 </p>
               </div>
               <div>
-                <img 
+                <Image unoptimized width={1152} height={732}
                   src="/assets/experiments/water-treatment/ban_3.png" 
                   alt="Bàn 3 - Cân bằng pH"
                   style={{ 

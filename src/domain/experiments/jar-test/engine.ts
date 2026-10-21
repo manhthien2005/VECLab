@@ -9,10 +9,10 @@ import {
   type JarCup, type JarState,
 } from './model.js'
 
-export { predictJarRemoval, JAR_PROFILE } from './model.js'
+export { JAR_PROFILE } from './model.js'
 export type { JarProfile, JarState } from './model.js'
 
-export const JAR_ACTION_TYPES = [
+const JAR_ACTION_TYPES = [
   'prepare_cup', 'measure_initial', 'add_coagulant', 'run_phase',
   'measure_final', 'record_result', 'select_result', 'complete',
 ] as const

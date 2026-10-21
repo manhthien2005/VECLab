@@ -60,7 +60,7 @@ Files: `src/features/extraction/report.tsx`; `src/app/experiments/acid-base-extr
 
 ## Giới hạn tích hợp và phát hành
 
-Người dùng đã yêu cầu kích hoạt bài sau bản đầu: catalog, landing, evidence và lab được nối vào đúng route chiết tách. Giữ bài Jar, để hấp phụ ở trạng thái chưa triển khai và thay thẻ pH theo lựa chọn đã chốt. Không merge main/develop, deploy hoặc sửa cloud khi chưa có yêu cầu mới.
+Người dùng đã yêu cầu kích hoạt bài sau bản đầu: catalog, landing, evidence và lab được nối vào đúng route chiết tách. Giữ bài Jar và thay thẻ pH theo lựa chọn đã chốt. Không merge main/develop, deploy hoặc sửa cloud khi chưa có yêu cầu mới.
 
 ## Kết quả triển khai local
 
@@ -75,7 +75,7 @@ Người dùng đã yêu cầu kích hoạt bài sau bản đầu: catalog, land
 ## Polish và kích hoạt — theo yêu cầu tiếp theo của người dùng
 
 - Đồng bộ giao diện bài chiết tách với Jar Test: nền sáng, teal, nút 8px, nhóm thao tác, ô nhập, sổ đo, header/trạng thái lưu, dụng cụ và report. Không sửa engine hoặc UI Jar.
-- Đưa bài vào catalog/thẻ landing và thư viện, thay bài pH độc lập theo lựa chọn đã chốt. Hấp phụ vẫn chưa triển khai.
+- Đưa bài vào catalog/thẻ landing và thư viện, thay bài pH độc lập theo lựa chọn đã chốt.
 - Kết nối lab với các lượt chiết tách thật; mở đúng URL tiếp tục/sổ đo/report và chỉ xóa đúng scenario. Thêm nguồn phương pháp vào trang evidence, không thay đổi ý nghĩa hoặc tính xác thực của mô hình quy ước.
 - Kiểm tra giới hạn ở các đường này: unit catalog/lab, browser desktop/mobile cho mở bài, thao tác, nộp và mở lại báo cáo từ lab; typecheck, lint và build.
 
