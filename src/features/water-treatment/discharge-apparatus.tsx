@@ -533,7 +533,7 @@ export function DischargeApparatus({
           data-active={stirring}
           onClick={toggleStir}
           disabled={locked || phase === 'discharged'}
-          data-testid="wt-toggle-stir"
+          data-testid="wt-discharge-toggle-stir"
         >
           {stirring ? <StopIcon /> : <PlayIcon />}
           {stirring ? 'Dừng khuấy' : 'Bật khuấy'}
@@ -545,6 +545,7 @@ export function DischargeApparatus({
           onClick={measurePH}
           disabled={!canMeasure}
           title={!hasStirredSinceLastAdd && !locked ? 'Thêm thuốc thử, khuấy rồi mới đo.' : canMeasure ? 'Ghi nhận pH sau khi khuấy' : 'Đã khóa'}
+          data-testid="wt-discharge-measure"
         >
           Đo pH
         </button>
@@ -574,6 +575,7 @@ export function DischargeApparatus({
                   title={`Nhỏ ${label}`}
                   data-dropping={isDropping}
                   data-color={color}
+                  data-testid={reagent === 'naoh' ? 'wt-discharge-add-naoh' : 'wt-discharge-add-hcl'}
                 >
                   <PlusIcon /> <span>Thêm</span>
                 </button>
@@ -737,6 +739,7 @@ export function DischargeApparatus({
                 onClick={lockResults}
                 disabled={!allOk}
                 title="Khóa kết quả cân bằng pH"
+                data-testid="wt-discharge-lock"
               >
                 <LockIcon /> Khóa kết quả
               </button>
