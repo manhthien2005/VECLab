@@ -82,7 +82,7 @@ export function WorkbenchTour({ root, step, onStepChange, onClose, steps = WORKB
       window.visualViewport?.removeEventListener('resize', schedule)
       window.visualViewport?.removeEventListener('scroll', schedule)
     }
-  }, [current.area, root])
+  }, [current.area, current.selector, root])
 
   return <dialog ref={dialog} className={styles.tour} aria-label="Làm quen với workbench"
     aria-describedby={uid + '-description'} data-area={current.area}

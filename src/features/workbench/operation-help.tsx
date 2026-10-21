@@ -5,9 +5,10 @@ import type { OperationHelpTopic } from '@/content/operation-help.vi.js'
 import { TheoryIcon } from './icons.js'
 import styles from './operation-help.module.css'
 
-export function OperationHelp({ topic, guideBaseHref }: {
+export function OperationHelp({ topic, guideBaseHref, onTourTrigger }: {
   topic: OperationHelpTopic
   guideBaseHref: string
+  onTourTrigger?: () => void
 }) {
   const [open, setOpen] = useState(false)
   const id = useId()
@@ -21,6 +22,11 @@ export function OperationHelp({ topic, guideBaseHref }: {
       <a className={styles.link} href={guideBaseHref + '#' + topic.guideAnchor} target="_blank" rel="noopener noreferrer">
         Đọc hướng dẫn đầy đủ — mở tab mới
       </a>
+      {onTourTrigger && (
+        <button type="button" className={styles.link} onClick={onTourTrigger} style={{ cursor: 'pointer', padding: '0.25rem 0', background: 'none', border: 'none', color: 'inherit', textDecoration: 'underline' }}>
+          Xem video hướng dẫn — mở hướng dẫn tương tác
+        </button>
+      )}
     </div>
   </div>
 }
