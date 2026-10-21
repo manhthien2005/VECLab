@@ -53,7 +53,7 @@ export const CANONICAL_UNITS: Record<CanonicalQuantity, UnitId> = {
 const MILLI = 1e-3
 const MICRO = 1e-6
 
-export const UNITS: Record<UnitId, UnitDefinition> = {
+const UNITS: Record<UnitId, UnitDefinition> = {
   L: { quantity: 'volume', toCanonical: 1 },
   mL: { quantity: 'volume', toCanonical: MILLI },
   uL: { quantity: 'volume', toCanonical: MICRO },
@@ -77,7 +77,7 @@ export const UNITS: Record<UnitId, UnitDefinition> = {
   bar: { quantity: 'pressure', toCanonical: 0.1 },
 }
 
-export class UnitError extends Error {
+class UnitError extends Error {
   constructor(
     readonly code: 'UNKNOWN_UNIT' | 'QUANTITY_MISMATCH' | 'NOT_CANONICALIZABLE',
     message: string,
@@ -112,7 +112,7 @@ export function toCanonical(value: number, fromUnit: UnitId): number {
   return value * definition.toCanonical
 }
 
-export function fromCanonical(value: number, toUnit: UnitId): number {
+function fromCanonical(value: number, toUnit: UnitId): number {
   const definition = requireUnit(toUnit)
   if (definition.affine) return (value - definition.affine.offset) / definition.affine.scale
   return value / definition.toCanonical
@@ -132,9 +132,5 @@ export function convert(value: number, fromUnit: UnitId, toUnit: UnitId): number
     )
   }
   return fromCanonical(toCanonical(value, fromUnit), toUnit)
-}
-
-export function canonicalUnitOf(unit: UnitId): UnitId {
-  return CANONICAL_UNITS[requireUnit(unit).quantity]
 }
 

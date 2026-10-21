@@ -1,6 +1,6 @@
 import { LessonVideos, type LessonVideo } from '@/features/experiment-guide/lesson-videos.js'
 
-export const WATER_TREATMENT_LESSON_VIDEOS = [
+const WATER_TREATMENT_LESSON_VIDEOS = [
   {
     id: 'lesson',
     title: 'Bài học',

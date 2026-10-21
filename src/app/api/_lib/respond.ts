@@ -21,7 +21,7 @@ export function reject(failure: GuardFailure, authHeaders?: Headers): NextRespon
  * handed to an untrusted client, where a stack trace or a database message would disclose
  * schema and internal state.
  */
-export function serverError(cause: unknown, context: string): NextResponse {
+function serverError(cause: unknown, context: string): NextResponse {
   // `console.error` is allowed by the lint config precisely for this: a failure the
   // server cannot report to the learner still has to reach whoever operates it.
   console.error(`[api] ${context}`, cause)

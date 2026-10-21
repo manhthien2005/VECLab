@@ -2,7 +2,7 @@ import { LessonVideos, type LessonVideo } from '@/features/experiment-guide/less
 
 const lessonSource = 'https://rnreqrlrxhykbkjqbuil.supabase.co/storage/v1/object/public/lesson-videos/acid-bazo-extraction-intro-v1.mp4'
 
-export const EXTRACTION_LESSON_VIDEOS = [
+const EXTRACTION_LESSON_VIDEOS = [
   {
     id: 'lesson',
     title: 'Bài học',

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { WorkbenchFrame, type WorkbenchPane } from '@/features/workbench/frame.js'
@@ -206,7 +207,7 @@ function EquipmentInfoDialog({ item, onClose }: { item: EquipmentId; onClose: ()
         
         <figure>
           <div className={styles.equipmentPhoto}>
-            <img src={(() => {
+            <Image unoptimized fill sizes="(max-width: 600px) 90vw, 500px" src={(() => {
               const imagePathMap: Record<string, string> = {
                 'distilled-water': '/assets/experiments/water-treatment/Nuoc_cat.JPG',
                 'lead-nitrate': '/assets/experiments/water-treatment/Chi_nitrat.jpg',
@@ -487,7 +488,7 @@ function WaterTreatmentWorkbenchSession({
         },
       ]
     })
-  }, [sampleCalculation])
+  }, [sampleCalculation, addActionLog])
 
   const toggleSampleStir = useCallback(() => {
     setSampleApStatus((prev) => {
@@ -834,7 +835,10 @@ function WaterTreatmentWorkbenchSession({
             onClick={() => setEquipmentItem(id)}
           >
             {src ? (
-              <img
+              <Image
+                unoptimized
+                width={40}
+                height={40}
                 src={src}
                 alt={title}
                 className={styles.equipmentIcon}

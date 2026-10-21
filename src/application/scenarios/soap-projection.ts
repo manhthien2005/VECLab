@@ -6,7 +6,7 @@ import {
 } from '@/domain/experiments/soap/model.js'
 
 export const SOAP_PROJECTION_VERSION = 2
-export const SOAP_REPORT_SCHEMA_VERSION = 2
+const SOAP_REPORT_SCHEMA_VERSION = 2
 
 export type SoapVesselView = {
   id: SoapVesselId

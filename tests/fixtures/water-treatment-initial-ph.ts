@@ -24,7 +24,7 @@
  * Output: pH ∈ [0; 14], hoặc null nếu solver không hội tụ.
  */
 
-import { WT_KSP_LOGK } from './constants.js'
+import { WT_KSP_LOGK } from '@/features/water-treatment/constants.js'
 
 /** Khối lượng mol (g/mol) của từng ion kim loại. */
 const MOLAR_MASS = { Fe: 55.845, Zn: 65.38, Pb: 207.2 } as const

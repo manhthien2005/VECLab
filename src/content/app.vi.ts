@@ -308,8 +308,3 @@ export const APP_STRINGS = {
     backHome: 'Về trang chủ',
   },
 } as const
-
-/** Storage-mode label a surface shows next to the save indicator. */
-export function storageModeLabel(mode: 'local' | 'cloud'): string {
-  return mode === 'local' ? APP_STRINGS.storage.localLabel : APP_STRINGS.storage.cloudLabel
-}

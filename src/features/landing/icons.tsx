@@ -133,11 +133,3 @@ export function CalculatorIcon({ className }: IconProps) {
     </svg>
   )
 }
-
-export function SigmaIcon({ className }: IconProps) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M18 5H7l5.5 7L7 19h11" />
-    </svg>
-  )
-}

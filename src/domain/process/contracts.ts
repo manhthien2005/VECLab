@@ -138,23 +138,19 @@ export type AttemptStateEnvelope<TDomainState> = {
   goalStatus: GoalStatus
 }
 
-export const ATTEMPT_STATUSES = ['in_progress', 'completed', 'stopped'] as const
-export type AttemptStatus = (typeof ATTEMPT_STATUSES)[number]
+export type AttemptStatus = 'in_progress' | 'completed' | 'stopped'
 
 /**
  * Stable domain error categories. Presentation maps these to localized text;
  * logic branches on the category, never on message strings.
  */
-export const DOMAIN_ERROR_CATEGORIES = [
-  'invalid_input',
-  'precondition_failed',
-  'model_invalid',
-  'solver_not_converged',
-  'conflict',
-  'unsupported_release',
-] as const
-
-export type DomainErrorCategory = (typeof DOMAIN_ERROR_CATEGORIES)[number]
+export type DomainErrorCategory =
+  | 'invalid_input'
+  | 'precondition_failed'
+  | 'model_invalid'
+  | 'solver_not_converged'
+  | 'conflict'
+  | 'unsupported_release'
 
 export type DomainError = {
   category: DomainErrorCategory

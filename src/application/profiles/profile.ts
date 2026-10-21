@@ -13,10 +13,10 @@
  */
 
 /** The display-name default the database itself uses, mirrored so provisioning agrees. */
-export const DEFAULT_DISPLAY_NAME = 'Người học'
+const DEFAULT_DISPLAY_NAME = 'Người học'
 
 /** §5.3: 1–80 characters AFTER trim. */
-export const DISPLAY_NAME_MIN_LENGTH = 1
+const DISPLAY_NAME_MIN_LENGTH = 1
 export const DISPLAY_NAME_MAX_LENGTH = 80
 
 /** Why a display name was rejected. Maps to copy in the content layer. */

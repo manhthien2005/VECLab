@@ -11,7 +11,7 @@ export type NavItem = {
  * `/simulate`, `/attempts` and `/reports` stay off this list: they are reached
  * from the catalog or the lab, not by guessing an id.
  */
-export const GUEST_NAV_ITEMS: readonly NavItem[] = [
+const GUEST_NAV_ITEMS: readonly NavItem[] = [
   { href: '/experiments', label: APP_STRINGS.nav.experiments },
   { href: '/evidence', label: APP_STRINGS.nav.evidence },
   { href: '/lab', label: APP_STRINGS.nav.labGuest },

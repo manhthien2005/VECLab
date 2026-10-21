@@ -33,11 +33,14 @@ major_version = 17
 # (docs/data-and-state-model.md §21.1).
 schema_paths = []
 
+[db.seed]
+enabled = false
+
 [studio]
 enabled = true
 port = 54323
 
-[inbucket]
+[local_smtp]
 # Local mail catcher for verification/password-reset emails
 # (docs/system-architecture.md §11.1). No hosted mail provider, no secrets.
 enabled = true
