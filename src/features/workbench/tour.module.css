@@ -17,3 +17,7 @@
 @keyframes tourReveal { from { opacity:.6; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
 @media (max-width:400px) { .card { padding:18px; } .actions { gap:2px; } .actions button { padding-inline:6px; } }
 @media (prefers-reduced-motion:reduce) { .content { animation:none; } .actions button { transition:none; } }
+
+/* Only the explicitly interactive water-treatment guides allow apparatus input. */
+.tour[data-interactive='true'] { z-index: 50; pointer-events: none; }
+.tour[data-interactive='true'] .card { pointer-events: auto; }
