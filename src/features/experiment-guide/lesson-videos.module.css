@@ -7,10 +7,12 @@
 .frame { position:relative; aspect-ratio:16/9; background:#0b1f3d; }
 .poster, .frame video { display:block; width:100%; height:100%; }
 .poster { position:relative; padding:0; border:0; background:#eaf1f6; cursor:pointer; }
+.posterPending { cursor:default; pointer-events:none; }
+.posterPending .play { opacity:.72; }
 .poster img { display:block; width:100%; height:100%; object-fit:cover; }
 .play { position:absolute; top:50%; left:50%; display:flex; align-items:center; justify-content:center; gap:9px; min-height:52px; padding:10px 18px 10px 12px; border-radius:8px; background:#0b1f3d; color:#fff; font-size:.9rem; font-weight:650; line-height:1.5; transform:translate(-50%,-50%); white-space:nowrap; }
 .play svg { flex:0 0 32px; width:32px; height:32px; }
-.poster:hover .play { background:#153b5d; }
+.poster:hover:not(.posterPending) .play { background:#153b5d; }
 .frame video { object-fit:contain; }
 .current { padding:20px 24px 22px; }
 .current h3 { margin:0 0 6px; font-size:1.1rem; line-height:1.5; letter-spacing:-.01em; }
