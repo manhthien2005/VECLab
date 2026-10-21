@@ -1,7 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import styles from './tour.module.css'
 
-export type WorkbenchTourStep = { area: 'header' | 'shelf' | 'simulation' | 'controls' | 'notebook'; title: string; description: string; selector?: string }
+export type WorkbenchTourStep = { area: 'header' | 'shelf' | 'simulation' | 'controls' | 'notebook'; title: string; description: string; selector?: string; interactive?: boolean }
 
 export const WORKBENCH_TOUR = [
   { area: 'header', title: 'Mục tiêu & lượt thực hành', description: 'Xem mục tiêu học tập và trạng thái lưu ở đầu trang. Nút Nộp bài kết thúc lượt và khóa các thao tác; bạn vẫn có thể xem lại số liệu.' },
@@ -37,6 +37,24 @@ export function WorkbenchTour({ root, step, onStepChange, onClose, steps = WORKB
     element.showModal()
     return () => { element.close() }
   }, [])
+
+  // Handle interactive steps: auto-advance when user clicks the selector button
+  useEffect(() => {
+    if (!current.selector) return
+
+    const target = root.current?.querySelector<HTMLElement>(current.selector)
+    if (!target) return
+
+    const handleClick = () => {
+      // Auto advance to next step when user clicks the highlighted button
+      if (step < steps.length - 1) {
+        onStepChange(step + 1)
+      }
+    }
+
+    target.addEventListener('click', handleClick)
+    return () => target.removeEventListener('click', handleClick)
+  }, [current.selector, step, steps.length, onStepChange, root])
 
   useEffect(() => {
     const target = root.current?.querySelector<HTMLElement>(

@@ -51,6 +51,14 @@ const SAMPLE_PREPARATION_SIMPLE_TOUR: readonly WorkbenchTourStep[] = [
   { area: 'controls', title: 'Step 6: Nút đặt lại', description: 'Nếu mẫu nước không theo ý muốn hoặc bạn muốn thử lại, bấm "Đặt lại" (Reset) để xóa toàn bộ dữ liệu mẫu và bắt đầu pha mẫu mới từ đầu.', selector: 'button[aria-label="Đặt lại bàn pha mẫu"]' },
 ] as const
 
+const TREATMENT_TABLE_TOUR: readonly WorkbenchTourStep[] = [
+  { area: 'simulation', title: 'Bàn 2 — Xử lý kim loại dư', description: 'Đây là bàn thứ hai nơi bạn xử lý mẫu nước từ bàn 1. Thêm 4ml NaOH để nâng pH và tạo kết tủa kim loại, sau đó khuấy, lắng, lọc để tách pha rắn ra khỏi dung dịch.' },
+  { area: 'controls', title: 'Step 2: Thêm 4ml NaOH', description: 'Hãy bấm nút "Thêm NaOH" để thêm dung dịch kiềm vào mẫu nước. Điều này sẽ nâng pH và tạo ra kết tủa kim loại. Hãy bấm nút ngay bây giờ để tiếp tục.', selector: '[data-testid="wt-add-naoh"]' },
+  { area: 'controls', title: 'Step 3: Khuấy mẫu', description: 'Bây giờ bạn cần khuấy mẫu nước để trộn đều NaOH vừa thêm vào. Hãy tìm nút "Khuấy" hoặc nút bật khuấy và bấm nó để bắt đầu quá trình khuấy.', selector: '[data-testid="wt-toggle-stir"]' },
+  { area: 'controls', title: 'Step 4: Lọc mẫu', description: 'Sau khi khuấy xong, hãy bấm nút "Lọc" để tách pha rắn (kết tủa kim loại) ra khỏi pha lỏng (dung dịch trong). Bước này hoàn thành việc xử lý bàn 2.', selector: '[data-testid="wt-filter"]' },
+  { area: 'controls', title: 'Step 5: Khóa bàn 2', description: 'Cuối cùng, bấm nút "Khóa bàn 2" để hoàn thành quá trình xử lý bàn 2. Sau khi khóa, bạn sẽ chuyển sang bàn 3 (Cân bằng pH & xả thải). Hãy chắc chắn kết quả của bạn trước khi khóa.', selector: '[data-testid="wt-lock-ban2"]' },
+] as const
+
 const EQUIPMENT_LIST = [
   { id: 'distilled-water', title: 'Nước cất', description: 'Dùng để pha dung dịch' },
   { id: 'lead-chemical', title: 'Hóa chất chứa ion Chì (Pb²⁺)', description: 'Để tạo mẫu nước' },
@@ -301,6 +309,7 @@ function WaterTreatmentWorkbenchSession({
   const [busy, setBusy] = useState(false)
   const [tourOpen, setTourOpen] = useState(false)
   const [sampleTourOpen, setSampleTourOpen] = useState(false)
+  const [ban2TourOpen, setBan2TourOpen] = useState(false)
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false)
   const [reportDialogOpen, setReportDialogOpen] = useState(_openReport)
   const [report, setReport] = useState<WaterTreatmentReportSnapshot | null>(() => attemptId ? getReport(attemptId) : null)
@@ -308,6 +317,7 @@ function WaterTreatmentWorkbenchSession({
   const submitTrigger = useRef<HTMLButtonElement>(null)
   const tourTrigger = useRef<HTMLButtonElement>(null)
   const sampleTourTrigger = useRef<HTMLButtonElement>(null)
+  const ban2TourTrigger = useRef<HTMLButtonElement>(null)
   
   // Equipment dialog state (hoisted so header can render the trigger)
   const [equipmentItem, setEquipmentItem] = useState<EquipmentId | null>(null)
@@ -770,10 +780,19 @@ function WaterTreatmentWorkbenchSession({
           open={group === 'treatment'}
           onToggle={() => setGroup(group === 'treatment' ? null : 'treatment')}
         >
-          <OperationHelp 
-            topic={WATER_TREATMENT_OPERATION_HELP.kwh}
-            guideBaseHref={GUIDE_BASE_HREF}
-          />
+          <button 
+            type="button" 
+            className={styles.guideButton} 
+            onClick={() => {
+              if (!sampleCalculation) {
+                alert('Vui lòng hoàn thành bàn 1 (Pha mẫu nước) trước khi xem hướng dẫn bàn 2')
+                return
+              }
+              setBan2TourOpen(true)
+            }}
+          >
+            <GuideIcon />Cách khuấy NaOH
+          </button>
           <p>Thêm NaOH để nâng pH, sau đó khuấy, lắng, lọc.</p>
           <ActionButton 
             className={styles.button}
@@ -927,17 +946,20 @@ function WaterTreatmentWorkbenchSession({
       pane={pane}
       onPaneChange={setPane}
       onShelfInfo={() => router.push('/experiments/water-treatment/guide')}
-      tourOpen={sampleTourOpen ? true : tourOpen}
+      tourOpen={sampleTourOpen || ban2TourOpen ? true : tourOpen}
       onTourClose={() => {
         if (sampleTourOpen) {
           setSampleTourOpen(false)
           requestAnimationFrame(() => sampleTourTrigger.current?.focus({ preventScroll: true }))
+        } else if (ban2TourOpen) {
+          setBan2TourOpen(false)
+          requestAnimationFrame(() => ban2TourTrigger.current?.focus({ preventScroll: true }))
         } else {
           setTourOpen(false)
           requestAnimationFrame(() => tourTrigger.current?.focus({ preventScroll: true }))
         }
       }}
-      tourSteps={sampleTourOpen ? SAMPLE_PREPARATION_SIMPLE_TOUR : WATER_TREATMENT_TOUR}
+      tourSteps={sampleTourOpen ? SAMPLE_PREPARATION_SIMPLE_TOUR : ban2TourOpen ? TREATMENT_TABLE_TOUR : WATER_TREATMENT_TOUR}
     />
     {equipmentItem && (
       <EquipmentInfoDialog 
