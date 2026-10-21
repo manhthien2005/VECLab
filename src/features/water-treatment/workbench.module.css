@@ -334,7 +334,8 @@
 .shelfHelp a { color:var(--accent-hover); display:inline-flex; gap:6px; margin-top:8px; }
 .guideButton { display:flex; align-items:center; gap:8px; width:100%; min-height:44px; padding:12px 0; background:none; border:0; border-top:1px solid var(--border); font:inherit; font-weight:650; text-align:left; color:var(--accent-hover); cursor:pointer; }
 .guideButton svg { width:18px; height:18px; flex-shrink:0; }
-.guideButton:hover { color:var(--accent); text-decoration:underline; text-underline-offset:4px; }
+.guideButton:hover:not(:disabled) { color:var(--accent); text-decoration:underline; text-underline-offset:4px; }
+.guideButton:disabled { color:#607486; cursor:default; }
 .shelfHelp .theoryLink { display:flex; align-items:center; gap:8px; min-height:44px; margin:0; padding:12px 0; border-top:1px solid var(--border); text-decoration:none; font-weight:650; }
 .theoryLink span { flex:1; }
 .theoryLink:hover span { text-decoration:underline; text-underline-offset:4px; }

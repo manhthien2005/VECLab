@@ -1,7 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import styles from './tour.module.css'
 
-export type WorkbenchTourStep = { area: 'header' | 'shelf' | 'simulation' | 'controls' | 'notebook'; title: string; description: string }
+export type WorkbenchTourStep = { area: 'header' | 'shelf' | 'simulation' | 'controls' | 'notebook'; title: string; description: string; selector?: string }
 
 export const WORKBENCH_TOUR = [
   { area: 'header', title: 'Mục tiêu & lượt thực hành', description: 'Xem mục tiêu học tập và trạng thái lưu ở đầu trang. Nút Nộp bài kết thúc lượt và khóa các thao tác; bạn vẫn có thể xem lại số liệu.' },
@@ -14,8 +14,10 @@ export const WORKBENCH_TOUR = [
 type Box = { x: number; y: number; width: number; height: number }
 
 /** An optional orientation tour. It never invokes an experiment command. */
-export function WorkbenchTour({ root, step, onStepChange, onClose, steps = WORKBENCH_TOUR }: {
+export function WorkbenchTour({ root, step, onStepChange, onClose, steps = WORKBENCH_TOUR, interactive = false }: {
   steps?: readonly WorkbenchTourStep[]
+  /** Opt-in for apparatus guides; orientation tours remain modal and read-only. */
+  interactive?: boolean
   root: RefObject<HTMLElement | null>
   step: number
   onStepChange: (step: number) => void
@@ -31,16 +33,52 @@ export function WorkbenchTour({ root, step, onStepChange, onClose, steps = WORKB
   useLayoutEffect(() => {
     const element = dialog.current
     if (!element) return
-    element.showModal()
+    if (interactive) element.show()
+    else element.showModal()
     return () => { element.close() }
-  }, [])
+  }, [interactive])
 
   useEffect(() => {
-    const target = root.current?.querySelector<HTMLElement>('[data-workbench-area="' + current.area + '"]')
+    if (!interactive) return
+    const handleEscape = (event: KeyboardEvent) => {
+      // A nested submission/report dialog owns its own Escape handling.
+      if (event.key !== 'Escape' || document.querySelector('dialog:modal')) return
+      event.preventDefault()
+      onClose()
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [interactive, onClose])
+
+  // Handle interactive steps: auto-advance when user clicks the selector button
+  useEffect(() => {
+    if (!interactive || !current.selector) return
+
+    const target = root.current?.querySelector<HTMLElement>(current.selector)
+    if (!target) return
+
+    const handleClick = () => {
+      // Auto advance to next step when user clicks the highlighted button
+      if (step < steps.length - 1) {
+        onStepChange(step + 1)
+      }
+    }
+
+    target.addEventListener('click', handleClick)
+    return () => target.removeEventListener('click', handleClick)
+  }, [interactive, current.selector, step, steps.length, onStepChange, root])
+
+  useEffect(() => {
+    const areaSelector = '[data-workbench-area="' + current.area + '"]'
+    const targetSelector = current.selector ?? areaSelector
+    const target = root.current?.querySelector<HTMLElement>(targetSelector)
+      ?? root.current?.querySelector<HTMLElement>(areaSelector)
     if (!target) return
     let frame = 0
     const update = () => {
-      const rect = target.getBoundingClientRect()
+      // Async apparatus actions can mount the next target after the step changes.
+      const activeTarget = root.current?.querySelector<HTMLElement>(targetSelector) ?? target
+      const rect = activeTarget.getBoundingClientRect()
       const viewport = window.visualViewport
       const width = viewport?.width ?? window.innerWidth
       const height = viewport?.height ?? window.innerHeight
@@ -55,7 +93,9 @@ export function WorkbenchTour({ root, step, onStepChange, onClose, steps = WORKB
       const cardHeight = card.current?.offsetHeight ?? 270
       const beside = width > 750 && right + cardWidth + 32 < offsetX + width
       const left = beside ? right + 16 : Math.min(Math.max(offsetX + 16, x), offsetX + width - cardWidth - 16)
-      const top = width <= 750 ? offsetY + height - cardHeight - 16
+      const mobileTop = offsetY + height - cardHeight - 16
+      const top = width <= 750 ? interactive && current.selector && y > offsetY + cardHeight + 32
+        ? Math.min(mobileTop, y - cardHeight - 16) : mobileTop
         : beside ? Math.max(offsetY + 16, Math.min(y, offsetY + height - cardHeight - 16))
         : bottom + cardHeight + 32 < offsetY + height ? bottom + 16 : Math.max(offsetY + 16, y - cardHeight - 16)
       setPosition({ left, top })
@@ -67,6 +107,8 @@ export function WorkbenchTour({ root, step, onStepChange, onClose, steps = WORKB
     const observer = new ResizeObserver(schedule)
     observer.observe(target)
     if (card.current) observer.observe(card.current)
+    const mutations = new MutationObserver(schedule)
+    if (interactive && root.current) mutations.observe(root.current, { childList: true, subtree: true })
     window.addEventListener('resize', schedule)
     window.addEventListener('scroll', schedule, true)
     window.visualViewport?.addEventListener('resize', schedule)
@@ -74,21 +116,31 @@ export function WorkbenchTour({ root, step, onStepChange, onClose, steps = WORKB
     return () => {
       cancelAnimationFrame(frame)
       observer.disconnect()
+      mutations.disconnect()
       window.removeEventListener('resize', schedule)
       window.removeEventListener('scroll', schedule, true)
       window.visualViewport?.removeEventListener('resize', schedule)
       window.visualViewport?.removeEventListener('scroll', schedule)
     }
-  }, [current.area, root])
+  }, [current.area, current.selector, interactive, root])
 
   return <dialog ref={dialog} className={styles.tour} aria-label="Làm quen với workbench"
-    aria-describedby={uid + '-description'} data-area={current.area}
+    aria-describedby={uid + '-description'} data-area={current.area} data-interactive={interactive}
     onCancel={(event) => { event.preventDefault(); onClose() }}>
     <svg className={styles.shade} aria-hidden="true">
-      <defs><mask id={uid + '-mask'}><rect width="100%" height="100%" fill="white"/>
-        {box && <rect {...box} rx="12" fill="black"/>}</mask></defs>
-      <rect width="100%" height="100%" fill="#132d40" opacity=".57" mask={'url(#' + uid + '-mask)'} />
-      {box && <rect {...box} rx="12" fill="none" stroke="#007b80" strokeWidth="2" data-testid="workbench-tour-highlight"/>}
+      <defs>
+        <mask id={uid + '-mask'}><rect width="100%" height="100%" fill="white"/>
+          {box && <rect {...box} rx="12" fill="black"/>}</mask>
+        <filter id={uid + '-glow'}>
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      <rect width="100%" height="100%" fill="#132d40" opacity={interactive ? .65 : .57} mask={'url(#' + uid + '-mask)'} />
+      {box && <rect {...box} rx="12" fill="none" stroke={interactive ? '#00d4dd' : '#007b80'} strokeWidth={interactive ? 4 : 2} filter={interactive ? 'url(#' + uid + '-glow)' : undefined} data-testid="workbench-tour-highlight" opacity={interactive ? .9 : 1}/>}
     </svg>
     <div ref={card} className={styles.card} style={position}>
       <div className={styles.progress}><span>Khám phá workbench</span><span>{step + 1} / {steps.length}</span></div>
