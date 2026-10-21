@@ -33,6 +33,24 @@ const WATER_TREATMENT_TOUR: readonly WorkbenchTourStep[] = [
   { area: 'notebook', title: 'Sổ đo & lịch sử', description: 'Sổ đo ghi lại pH, nồng độ kim loại ở từng giai đoạn. Tab Lịch sử thao tác giúp xem lại những gì đã làm. Chưa đo khác với N/A: N/A là phép đo không hợp lệ.' },
 ] as const
 
+const SAMPLE_PREPARATION_TOUR: readonly WorkbenchTourStep[] = [
+  { area: 'simulation', title: 'Bàn pha chế mẫu nước', description: 'Đây là bàn thứ nhất nơi bạn pha chế mẫu nước chứa Fe, Zn, Pb. Thao tác ở đây xác định thành phần và khối lượng mẫu cho bàn xử lý tiếp theo.' },
+  { area: 'controls', title: 'Bảng thao tác pha mẫu', description: 'Mở nhóm "Mô phỏng mẫu nước" để xem các tùy chọn cấp dung dịch Fe, Zn, Pb.' },
+  { area: 'controls', title: 'Cấp dung dịch sắt, kẽm, chì', description: 'Bấm "Thêm Fe" để cấp 20 ml dung dịch sắt, "Thêm Zn" để cấp 50 ml dung dịch kẽm, và "Thêm Pb" để cấp 10 ml dung dịch chì. Xem tổng nồng độ cập nhật trong thực thời.' },
+  { area: 'controls', title: 'Khuấy mẫu', description: 'Sau khi cấp tất cả dung dịch, bấm "Bật khuấy" để khuấy đều mẫu nước. Đợi đến khi hiển thị "Đã dừng khuấy".' },
+  { area: 'controls', title: 'Tính toán thông số', description: 'Bấm "Đo pH ban đầu" để ghi lại pH hiện tại của mẫu. Số liệu này sẽ được sử dụng để đối chiếu với kết quả sau xử lý.' },
+  { area: 'controls', title: 'Đặt lại mẫu', description: 'Nếu mẫu không đạt yêu cầu hoặc bạn muốn thử lại, bấm nút "Đặt lại" (Reset) để xóa toàn bộ dữ liệu và bắt đầu lại từ đầu.' },
+] as const
+
+const SAMPLE_PREPARATION_SIMPLE_TOUR: readonly WorkbenchTourStep[] = [
+  { area: 'simulation', title: 'Step 1: Bàn pha chế mẫu nước', description: 'Đây là bàn pha chế mẫu nước chứa ion sắt (Fe), kẽm (Zn) và chì (Pb). Các thao tác ở đây xác định thành phần của mẫu nước trước khi xử lý.' },
+  { area: 'controls', title: 'Step 2: Bảng thao tác pha mẫu', description: 'Mở nhóm "Mô phỏng mẫu nước" để xem các nút thêm dung dịch và điều khiển.' },
+  { area: 'controls', title: 'Step 3: Thêm dung dịch sắt, kẽm, chì', description: 'Bấm "Thêm Fe" để thêm 20 ml dung dịch sắt, bấm "Thêm Zn" để thêm 50 ml dung dịch kẽm, và bấm "Thêm Pb" để thêm 10 ml dung dịch chì vào cốc.', selector: '[data-testid="sample-add-fe"]' },
+  { area: 'controls', title: 'Step 4: Khuấy mẫu nước', description: 'Bấm "Bật khuấy" để bắt đầu khuấy mẫu. Máy khuấy sẽ trộn đều các ion trong dung dịch. Chờ cho đến khi khuấy hoàn tất.', selector: '[data-testid="sample-toggle-stir"]' },
+  { area: 'controls', title: 'Step 5: Bấm tính toán', description: 'Bấm "Tính toán" để ghi lại pH và nồng độ các ion ban đầu. Dữ liệu này sẽ là cơ sở so sánh cho các bước xử lý tiếp theo.', selector: '[data-testid="sample-calculate"]' },
+  { area: 'controls', title: 'Step 6: Nút đặt lại', description: 'Nếu mẫu nước không theo ý muốn hoặc bạn muốn thử lại, bấm "Đặt lại" (Reset) để xóa toàn bộ dữ liệu mẫu và bắt đầu pha mẫu mới từ đầu.', selector: 'button[aria-label="Đặt lại bàn pha mẫu"]' },
+] as const
+
 const EQUIPMENT_LIST = [
   { id: 'distilled-water', title: 'Nước cất', description: 'Dùng để pha dung dịch' },
   { id: 'lead-chemical', title: 'Hóa chất chứa ion Chì (Pb²⁺)', description: 'Để tạo mẫu nước' },
@@ -282,12 +300,14 @@ function WaterTreatmentWorkbenchSession({
   const [group, setGroup] = useState<string | null>('composition')
   const [busy, setBusy] = useState(false)
   const [tourOpen, setTourOpen] = useState(false)
+  const [sampleTourOpen, setSampleTourOpen] = useState(false)
   const [submitDialogOpen, setSubmitDialogOpen] = useState(false)
   const [reportDialogOpen, setReportDialogOpen] = useState(_openReport)
   const [report, setReport] = useState<WaterTreatmentReportSnapshot | null>(() => attemptId ? getReport(attemptId) : null)
   const [submitted, setSubmitted] = useState(report !== null)
   const submitTrigger = useRef<HTMLButtonElement>(null)
   const tourTrigger = useRef<HTMLButtonElement>(null)
+  const sampleTourTrigger = useRef<HTMLButtonElement>(null)
   
   // Equipment dialog state (hoisted so header can render the trigger)
   const [equipmentItem, setEquipmentItem] = useState<EquipmentId | null>(null)
@@ -720,15 +740,19 @@ function WaterTreatmentWorkbenchSession({
       <>
         <ControlGroup 
           id="composition" 
-          title="Pha nước"
+          title="Mô phỏng mẫu nước"
           summary="Fe/Zn/Pb + Volume"
           open={group === 'composition'}
           onToggle={() => setGroup(group === 'composition' ? null : 'composition')}
         >
-          <OperationHelp 
-            topic={WATER_TREATMENT_OPERATION_HELP.compose}
-            guideBaseHref={GUIDE_BASE_HREF}
-          />
+          <button 
+            ref={sampleTourTrigger} 
+            type="button" 
+            className={styles.guideButton} 
+            onClick={() => setSampleTourOpen(true)}
+          >
+            <GuideIcon />Cách pha mẫu nước
+          </button>
           <p>Nhập nồng độ Fe, Zn, Pb (mg/L) và thể tích (mL).</p>
           <ActionButton 
             className={styles.button}
@@ -761,8 +785,29 @@ function WaterTreatmentWorkbenchSession({
         </ControlGroup>
 
         <ControlGroup 
+          id="balance" 
+          title="Cân bằng pH"
+          summary="Điều chỉnh và kiểm tra"
+          open={group === 'balance'}
+          onToggle={() => setGroup(group === 'balance' ? null : 'balance')}
+        >
+          <OperationHelp 
+            topic={WATER_TREATMENT_OPERATION_HELP.kwh}
+            guideBaseHref={GUIDE_BASE_HREF}
+          />
+          <p>Điều chỉnh pH vào khoảng 6–9 để đạt cân bằng tối ưu.</p>
+          <ActionButton 
+            className={styles.button}
+            reason={null}
+            onClick={() => alert('Action: Balance pH')}
+          >
+            Cân bằng pH
+          </ActionButton>
+        </ControlGroup>
+
+        <ControlGroup 
           id="results" 
-          title="Kiểm tra kết quả"
+          title="Nộp bài và Báo cáo"
           summary="pH & nồng độ sau xử lý"
           open={group === 'results'}
           onToggle={() => setGroup(group === 'results' ? null : 'results')}
@@ -882,12 +927,17 @@ function WaterTreatmentWorkbenchSession({
       pane={pane}
       onPaneChange={setPane}
       onShelfInfo={() => router.push('/experiments/water-treatment/guide')}
-      tourOpen={tourOpen}
+      tourOpen={sampleTourOpen ? true : tourOpen}
       onTourClose={() => {
-        setTourOpen(false)
-        requestAnimationFrame(() => tourTrigger.current?.focus({ preventScroll: true }))
+        if (sampleTourOpen) {
+          setSampleTourOpen(false)
+          requestAnimationFrame(() => sampleTourTrigger.current?.focus({ preventScroll: true }))
+        } else {
+          setTourOpen(false)
+          requestAnimationFrame(() => tourTrigger.current?.focus({ preventScroll: true }))
+        }
       }}
-      tourSteps={WATER_TREATMENT_TOUR}
+      tourSteps={sampleTourOpen ? SAMPLE_PREPARATION_SIMPLE_TOUR : WATER_TREATMENT_TOUR}
     />
     {equipmentItem && (
       <EquipmentInfoDialog 
