@@ -9,7 +9,7 @@ export type WorkbenchPane = 'simulation' | 'controls' | 'notebook'
 
 /** Presentation slots only. Each experiment owns its apparatus, actions and data. */
 export function WorkbenchFrame({ label, header, notices, shelf, simulation, controls, notebook,
-  pane, onPaneChange, notebookRef, tourOpen = false, onTourClose, onShelfInfo, tourSteps, contentSized = false }: {
+  pane, onPaneChange, notebookRef, tourOpen = false, onTourClose, onShelfInfo, tourSteps, interactiveTour = false, stickyControls = false, contentSized = false }: {
   label: string
   header: ReactNode
   notices?: ReactNode
@@ -22,6 +22,8 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
   notebookRef?: RefObject<HTMLDivElement | null>
   tourSteps?: readonly WorkbenchTourStep[]
   contentSized?: boolean
+  interactiveTour?: boolean
+  stickyControls?: boolean
   tourOpen?: boolean
   onTourClose?: () => void
   onShelfInfo?: () => void
@@ -36,7 +38,7 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
   const displayedCollapsed = tourOpen ? false : collapsed
   const shelfId = useId()
   const simulationArea = <div className={styles.simulation} data-workbench-area="simulation">{simulation}</div>
-  const notebookArea = <div ref={notebookRef} tabIndex={-1} className={styles.notebook} data-workbench-area="notebook">{notebook}</div>
+  const notebookArea = <div ref={notebookRef} tabIndex={notebookRef ? -1 : undefined} className={styles.notebook} data-workbench-area="notebook">{notebook}</div>
   return (
     <section ref={root} className={styles.frame} aria-label={label}>
       <header className={styles.header} data-workbench-area="header">{header}</header>
@@ -61,10 +63,10 @@ export function WorkbenchFrame({ label, header, notices, shelf, simulation, cont
           <div className={styles.shelfBody} id={shelfId} hidden={displayedCollapsed && !displayedShelf}>{shelf}</div>
         </aside>
         {contentSized ? <div className={styles.mainColumn}>{simulationArea}{notebookArea}</div> : simulationArea}
-        <aside className={styles.controls} aria-label="Thao tác thí nghiệm" data-workbench-area="controls">{controls}</aside>
+        <aside className={styles.controls} data-sticky={stickyControls} aria-label="Thao tác thí nghiệm" data-workbench-area="controls">{controls}</aside>
         {!contentSized && notebookArea}
       </div>
-      {tourOpen && <WorkbenchTour steps={tourSteps ?? WORKBENCH_TOUR} root={root} step={tourStep} onStepChange={setTourStep}
+      {tourOpen && <WorkbenchTour interactive={interactiveTour} steps={tourSteps ?? WORKBENCH_TOUR} root={root} step={tourStep} onStepChange={setTourStep}
         onClose={() => { setTourStep(0); onTourClose?.() }} />}
     </section>
   )
