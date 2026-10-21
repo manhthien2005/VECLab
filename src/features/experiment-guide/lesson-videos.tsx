@@ -13,8 +13,11 @@ export type LessonVideo = {
   playLabel: string
   playerLabel: string
   poster: string
-  source: string
+  /** Omit or leave empty while the recording is not ready. */
+  source?: string
   captions?: string
+  /** When true, the slot is visible but cannot be played. */
+  pending?: boolean
 }
 
 type Props = {
@@ -33,6 +36,7 @@ export function LessonVideos({ id, title, videos }: Props) {
   const [failed, setFailed] = useState(false)
   const [attempt, setAttempt] = useState(0)
   const selected = videos.find(video => video.id === selectedId) ?? videos[0]
+  const canPlay = !selected.pending && Boolean(selected.source)
 
   function selectVideo(id: 'lesson' | 'practice') {
     setSelectedId(id)
@@ -48,7 +52,7 @@ export function LessonVideos({ id, title, videos }: Props) {
     <div className={styles.workspace}>
       <div className={styles.viewer}>
         <div className={styles.frame} id={`${id}-player`}>
-          {active ? <video
+          {active && canPlay ? <video
             key={`${selected.id}-${attempt}`}
             ref={focusPlayer}
             src={selected.source}
@@ -64,10 +68,13 @@ export function LessonVideos({ id, title, videos }: Props) {
           >
             {selected.captions && <track kind="captions" src={selected.captions} srcLang="vi" label="Tiếng Việt (tự động)" />}
             Trình duyệt chưa hỗ trợ phát video. <a href={selected.source}>Mở video</a>.
-          </video> : <button className={styles.poster} type="button" aria-label={selected.playLabel} onClick={() => setActive(true)}>
+          </video> : canPlay ? <button className={styles.poster} type="button" aria-label={selected.playLabel} onClick={() => setActive(true)}>
             <Image src={selected.poster} alt="" width={1280} height={720} sizes="(max-width: 850px) 92vw, 760px" />
             <span className={styles.play}><PlayIcon /><span>Phát video</span></span>
-          </button>}
+          </button> : <div className={`${styles.poster} ${styles.posterPending}`} role="img" aria-label={`${selected.playLabel}. Video sẽ được bổ sung.`}>
+            <Image src={selected.poster} alt="" width={1280} height={720} sizes="(max-width: 850px) 92vw, 760px" />
+            <span className={styles.play}><PlayIcon /><span>Sắp có</span></span>
+          </div>}
         </div>
         <div className={styles.current} aria-live="polite" aria-atomic="true">
           <h3>{selected.title}</h3>
