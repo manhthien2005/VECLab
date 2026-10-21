@@ -108,3 +108,60 @@ export const EXTRACTION_OPERATION_HELP: Record<'add' | 'program' | 'transfer' | 
     guideAnchor: 'extraction-step-declare',
   },
 }
+
+export const WATER_TREATMENT_OPERATION_HELP: Record<'compose' | 'kwh' | 'settle' | 'filter' | 'balance' | 'check', OperationHelpTopic> = {
+  compose: {
+    label: 'Cách pha mẫu nước',
+    points: [
+      'Bấm Thêm Fe, Zn hoặc Pb để cấp từng muối vào cốc. Xem Tổng nồng độ và thể tích cập nhật.',
+      'Bấm Đo pH ban đầu để ghi số đo mẫu đầu trước khi chuyển sang Bàn 2.',
+      'Thông số mẫu Bàn 1 xác định thành phần cốc Bàn 2.',
+    ],
+    guideAnchor: 'wt-step-compose',
+  },
+  kwh: {
+    label: 'Cách khuấy với NaOH',
+    points: [
+      'Bấm Bật khuấy, đợi đến khi hiển thị "Đã dừng khuấy".',
+      'Chọn thể tích NaOH muốn thêm rồi bấm Thêm NaOH. Xem pH và tổng NaOH cập nhật.',
+      'Lặp lại cho đến khi pH đạt giá trị mong muốn. Fe kết tủa ở pH thấp nhất, Pb cần pH cao nhất.',
+    ],
+    guideAnchor: 'wt-step-kwh',
+  },
+  settle: {
+    label: 'Cách lắng',
+    points: [
+      'Đã khuấy và thêm NaOH. Kết tủa đang lơ lửng.',
+      'Bấm Lắng để cho bông kết tủa lắng xuống đáy. Cốc hiển thị pha rắn (đáy) và pha lỏng (trên).',
+      'Có thể chuyển sang lọc hoặc khóa Bàn 2 sau khi lắng.',
+    ],
+    guideAnchor: 'wt-step-settle',
+  },
+  filter: {
+    label: 'Cách lọc',
+    points: [
+      'Đã lắng. Phần nước trong suốt ở trên có thể chuyển sang cốc mới.',
+      'Bấm Lọc. Pha rắn bám trên giấy lọc, nước trong chảy xuống cốc.',
+      'Sau khi lọc xong, bấm Khóa Bàn 2 để chuyển dữ liệu sang Bàn 3.',
+    ],
+    guideAnchor: 'wt-step-filter',
+  },
+  balance: {
+    label: 'Cách cân bằng pH',
+    points: [
+      'Đã khóa Bàn 2. Nước trong cốc Bàn 3 cần pH 6–9 trước khi đối chiếu QCVN.',
+      'Bấm Đo pH. Nếu pH < 6, thêm NaOH. Nếu pH > 9, thêm HCl. Dùng lượng nhỏ, đo lại sau mỗi lần.',
+      'Khi pH nằm trong khoảng 6–9, kiểm tra bảng đối chiếu QCVN.',
+    ],
+    guideAnchor: 'wt-step-balance',
+  },
+  check: {
+    label: 'Cách đối chiếu QCVN',
+    points: [
+      'Đã cân bằng pH trong khoảng 6–9. Bảng kết quả hiển thị nồng độ kim loại và pH cuối.',
+      'Kiểm tra bảng đối chiếu: Fe ≤ 2,0 mg/L, Zn ≤ 1,0 mg/L, Pb ≤ 0,1 mg/L, pH 6–9.',
+      'Xem lịch sử lọc từ Bàn 2 để hiểu mức giảm kim loại qua từng lần xử lý.',
+    ],
+    guideAnchor: 'wt-step-check',
+  },
+}

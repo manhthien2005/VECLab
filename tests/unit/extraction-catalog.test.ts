@@ -3,8 +3,8 @@ import { listCatalog } from '@/features/experiment-catalog/catalog.js'
 import { EXPERIMENT_OVERVIEWS } from '@/features/experiment-catalog/overviews.js'
 
 it('offers the active lessons, with adsorption still planned', () => {
-  expect(listCatalog().map(entry => entry.scenarioKey)).toEqual(['jar-test', 'acid-base-extraction', 'plastic-density-separation', 'cold-process-soap'])
-  expect(EXPERIMENT_OVERVIEWS.map(entry => entry.scenarioKey)).toEqual(['jar-test', 'acid-base-extraction', 'plastic-density-separation', 'cold-process-soap', 'methylene-blue-adsorption'])
+  expect(listCatalog().map(entry => entry.scenarioKey)).toEqual(['jar-test', 'acid-base-extraction', 'plastic-density-separation', 'cold-process-soap', 'water-treatment'])
+  expect(EXPERIMENT_OVERVIEWS.map(entry => entry.scenarioKey)).toEqual(['jar-test', 'acid-base-extraction', 'water-treatment', 'plastic-density-separation', 'cold-process-soap', 'methylene-blue-adsorption'])
   expect(EXPERIMENT_OVERVIEWS.find(entry => entry.scenarioKey === 'acid-base-extraction')?.input).toContain('A/B/N')
   expect(listCatalog().find(entry => entry.scenarioKey === 'plastic-density-separation')?.releaseId).toBe('plastic-separation@0.2.0')
 })

@@ -1,0 +1,16 @@
+# verify-wt-capacity v2026-10-16-D1D2D3
+# Constants: Ksp_Fe=1.663413e-39 (log10=-38.779, phase=Ferrihydrite, D2)
+#            Ksp_Zn=3.118890e-16 (log10=-15.506, phase=Zn(OH)₂(am), D3)
+#            Ksp_Pb=1.479108e-20 (log10=-19.830, phase=Pb(OH)₂, D1)
+#            pKw=13.99 (IAPWS R11-24, claim AN-KW-25C)
+# Sources: minteq.v4.dat PHREEQC 3.8.6-17100 (SHA-256 a93914e63b0c616f8506cc92739188e50c5b9a15c33b111979652f308457f4ac) | minteq.v4.dat PHREEQC 3.8.6-17100 (cùng SHA-256 ở trên) | minteq.v4.dat + phreeqc.dat PHREEQC 3.8.6-17100 (cùng SHA-256 ở trên)
+# Status: source-checked; KHONG cross-checked (P0-D vẫn mở; chờ 7 case chuyên biệt chạy trong PHREEQC).
+#
+pH | [Fe3+] mol/L | [Fe3+] mg/L | [Zn2+] mol/L | [Zn2+] mg/L | [Pb2+] mol/L | [Pb2+] mg/L
+6.0 | 1.55e-15 | 8.67e-11 | 2.98e+0 | 1.95e+5 | 1.41e-4 | 2.93e+1
+7.0 | 1.55e-18 | 8.67e-14 | 2.98e-2 | 1.95e+3 | 1.41e-6 | 2.93e-1
+8.0 | 1.55e-21 | 8.67e-17 | 2.98e-4 | 1.95e+1 | 1.41e-8 | 2.93e-3
+8.5 | 4.91e-23 | 2.74e-18 | 2.98e-5 | 1.95e+0 | 1.41e-9 | 2.93e-4
+9.0 | 1.55e-24 | 8.67e-20 | 2.98e-6 | 1.95e-1 | 1.41e-10 | 2.93e-5
+9.5 | 4.91e-26 | 2.74e-21 | 2.98e-7 | 1.95e-2 | 1.41e-11 | 2.93e-6
+10.0 | 1.55e-27 | 8.67e-23 | 2.98e-8 | 1.95e-3 | 1.41e-12 | 2.93e-7

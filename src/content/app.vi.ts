@@ -57,8 +57,8 @@ export const APP_STRINGS = {
     ],
 
     showcaseEyebrow: 'Khám phá ngay',
-    showcaseHeading: '3 thí nghiệm mô phỏng',
-    showcaseLede: 'Thực hành Jar Test và chiết tách axit–bazơ. Bài hấp phụ đang được xây dựng.',
+    showcaseHeading: '4 thí nghiệm mô phỏng',
+    showcaseLede: 'Thực hành Jar Test, chiết tách axit–bazơ và xử lý nước Fe, Zn, Pb. Bài hấp phụ đang được xây dựng.',
     showcaseCtaLabel: 'Thử ngay',
     comingSoonBadge: 'Sắp ra mắt',
     comingSoonCta: 'Xem trước',
@@ -73,6 +73,12 @@ export const APP_STRINGS = {
         scenarioKey: 'acid-base-extraction',
         title: 'Chiết tách axit–bazơ',
         summary: 'Chọn hướng tách, thu từng phần mẫu và đối chiếu kết quả.',
+        available: true,
+      },
+      {
+        scenarioKey: 'water-treatment',
+        title: 'Xử lý nước Fe, Zn và Pb',
+        summary: 'Thiết kế chuỗi hydroxide route cho nước nhiều kim loại nặng.',
         available: true,
       },
       {

@@ -1,0 +1,253 @@
+.goal {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  font-size: 0.8rem;
+  min-width: 0;
+}
+
+.goal p {
+  margin: 0;
+}
+
+.goalTitle {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.goalTitle strong {
+  font-weight: 750;
+}
+
+.goalSubtitle {
+  margin-top: 3px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.goalDetails {
+  position: relative;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+
+.goalDetails summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  width: fit-content;
+  min-height: 44px;
+  padding: 8px 12px;
+  list-style: none;
+  border: 1px solid #86babe;
+  border-radius: 8px;
+  color: var(--accent-hover);
+  background: #e4f3f3;
+  font-weight: 700;
+  transition: background 180ms ease-out;
+  white-space: nowrap;
+}
+
+.goalDetails summary::-webkit-details-marker {
+  display: none;
+}
+
+.goalDetails summary:hover,
+.goalDetails[open] summary {
+  background: #cde8e9;
+}
+
+.goalDetails summary svg {
+  width: 19px;
+  height: 19px;
+}
+
+.goalButtonCopy,
+.goalScopeCopy {
+  display: grid;
+  gap: 1px;
+  text-align: left;
+  line-height: 1.35;
+}
+
+.goalButtonCopy strong,
+.goalScopeCopy strong {
+  font-size: 0.8rem;
+}
+
+.goalButtonCopy > span,
+.goalScopeCopy > span {
+  font-size: 0.7rem;
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
+
+.goalDivider {
+  margin-inline: 5px;
+  color: #608f93;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.mobileScopeLabel {
+  display: none;
+}
+
+.goalIntro {
+  padding-top: 16px;
+}
+
+.goalPanel {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 520px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 120px);
+  overflow: auto;
+  z-index: 40;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgb(28 60 80 / 18%);
+  color: var(--ink);
+}
+
+.goalPanelHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.goalPanelHeading h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.goalPanelHeading button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 7px;
+  background: #f0f5f8;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.goalPanelHeading button:hover {
+  background: #e2ecef;
+}
+
+.goalPanelHeading svg {
+  width: 18px;
+  height: 18px;
+}
+
+.goalPanelGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  padding-top: 18px;
+}
+
+.goalPanelGrid h3 {
+  margin: 0 0 8px;
+  font-size: 0.825rem;
+  color: var(--accent-hover);
+  font-weight: 750;
+}
+
+.goalPanelGrid p,
+.goalPanelGrid li,
+.goalPanelGrid dl {
+  font-size: 0.775rem;
+  line-height: 1.75;
+  color: var(--ink-muted);
+}
+
+.goalPanelGrid p + p {
+  margin-top: 10px;
+}
+
+.goalPanelGrid ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.goalPanelGrid dl {
+  margin: 0;
+}
+
+.goalPanelGrid dl > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  justify-content: space-between;
+}
+
+.goalPanelGrid dd {
+  margin: 0;
+  font-weight: 650;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1300px) {
+  .goal {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+  .goalPanel {
+    position: fixed;
+    inset: 80px 12px auto;
+    transform: none;
+    width: 520px;
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 96px);
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .goalTitle {
+    font-size: 0.875rem;
+  }
+  .goalPanel {
+    padding: 16px;
+  }
+  .goalPanelGrid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .goalPanelHeading button {
+    width: 40px;
+    height: 40px;
+  }
+  .goalButtonCopy strong {
+    font-size: 0.65rem;
+  }
+  .goalScopeCopy,
+  .goalDivider {
+    display: none;
+  }
+  .mobileScopeLabel {
+    display: inline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goalDetails summary {
+    transition: none;
+  }
+}

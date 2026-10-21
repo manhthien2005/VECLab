@@ -55,6 +55,19 @@ const PRESENTATION = {
     outcome: 'Nồng độ màu, hiệu suất loại màu',
     procedure: ['Chuẩn bị dung dịch và lượng than hoạt tính', 'Cho tiếp xúc theo điều kiện đã chọn', 'Đo nồng độ và tính hiệu suất loại màu'],
   },
+  'water-treatment': {
+    image: '/assets/auth-laboratory-v2.webp',
+    imageAlt: 'Phòng thí nghiệm ảo với bình khuấy, máy đo và giá đựng mẫu nước',
+    category: 'Kết tủa hydroxide · Xử lý nước',
+    question: 'pH và các bước xử lý ảnh hưởng thế nào đến Fe, Zn, Pb còn lại trong nước?',
+    learning: 'Theo dõi riêng nồng độ kim loại và pH, rồi đối chiếu kết quả mô phỏng với mục tiêu học tập.',
+    tools: 'Bình pha mẫu, máy khuấy, bộ lắng/lọc, NaOH, HCl và thiết bị đo.',
+    prerequisites: 'Hiểu pH, kết tủa hydroxide, tích số tan và đơn vị nồng độ mg/L.',
+    input: 'Mẫu nước tổng hợp Fe/Zn/Pb · 500–2.000 mL',
+    parameters: 'Thành phần kim loại · thể tích · lượng thuốc thử thêm từng giọt',
+    outcome: 'Nồng độ Fe/Zn/Pb sau lọc và pH cuối để đối chiếu riêng từng chỉ tiêu',
+    procedure: ['Pha mẫu và đo pH ban đầu', 'Thêm NaOH, khuấy, lắng và lọc kết tủa', 'Cân bằng pH rồi đối chiếu các chỉ tiêu học tập'],
+  },
 } as const
 
 export const PLASTIC_OVERVIEW = {
