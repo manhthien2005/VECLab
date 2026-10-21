@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { GuideIcon, ReportIcon } from '@/features/workbench/icons.js'
 import type { SampleApStatus, SampleCalculation } from './sample-apparatus.js'
-import type { ApStatus, TreatmentCalculation, FilterHistoryEntry } from './apparatus.js'
+import type { ApStatus, TreatmentCalculation, FilterHistoryEntry, ActionLogEntry } from './apparatus.js'
 import styles from './notebook.module.css'
 
 const fmt = (n: number | null | undefined, digits = 3) => n == null ? '—' : n.toFixed(digits)
@@ -67,6 +67,8 @@ interface Props {
   busy?: boolean
   onSubmit?: () => void
   onReport?: () => void
+  /** Action log */
+  actionLog: ActionLogEntry[]
 }
 
 export function WaterTreatmentNotebook({
@@ -84,6 +86,7 @@ export function WaterTreatmentNotebook({
   busy = false,
   onSubmit,
   onReport,
+  actionLog,
 }: Props) {
   const [activeTab, setActiveTab] = useState<'composition' | 'treatment' | 'results'>('composition')
 
@@ -423,14 +426,41 @@ export function WaterTreatmentNotebook({
 
       {/* Lịch sử thao tác */}
       <details className={styles.history}>
-        <summary>Lịch sử thao tác</summary>
+        <summary>Lịch sử thao tác ({actionLog.length})</summary>
         <div className={styles.historyContent}>
-          <p className={styles.hint}>
-            Lịch sử thao tác chi tiết (khuấy, lắng, lọc, thêm hóa chất) sẽ được bổ sung trong phiên bản tiếp theo.
-          </p>
-          <p className={styles.note}>
-            Hiện tại bạn có thể xem lại các lần lọc trong tab &ldquo;Xử lý hydroxide&rdquo;.
-          </p>
+          {actionLog.length === 0 ? (
+            <p className={styles.hint}>
+              Chưa có thao tác nào được ghi nhận. Bắt đầu thực hiện các bước pha mẫu, thêm hóa chất, khuấy và lọc.
+            </p>
+          ) : (
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <caption>Danh sách các thao tác đã thực hiện</caption>
+                <thead>
+                  <tr>
+                    <th>Thời gian</th>
+                    <th>Bàn</th>
+                    <th>Hành động</th>
+                    <th>Chi tiết</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {actionLog.map((entry, i) => (
+                    <tr key={i}>
+                      <td>{entry.timestamp.toLocaleTimeString('vi-VN')}</td>
+                      <td>
+                        {entry.station === 'sample' ? 'Bàn 1' : 
+                         entry.station === 'treatment' ? 'Bàn 2' : 
+                         'Bàn 3'}
+                      </td>
+                      <td>{entry.action}</td>
+                      <td>{entry.details ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </details>
 

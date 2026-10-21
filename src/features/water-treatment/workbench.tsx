@@ -9,7 +9,7 @@ import { ActionButton } from '@/features/workbench/action-button.js'
 import { FlaskIcon, ArrowRightIcon, CheckCircleIcon } from '@/features/landing/icons.js'
 import { SubmitIcon, CloseIcon, InfoIcon, ControlIcon, GuideIcon, TheoryIcon, SourcesIcon } from '@/features/workbench/icons.js'
 import { WATER_TREATMENT_OPERATION_HELP } from '@/content/operation-help.vi.js'
-import { WaterTreatmentApparatus, type ApStatus, type AcidBase, type TreatmentCalculation, type FilterHistoryEntry } from './apparatus.js'
+import { WaterTreatmentApparatus, type ApStatus, type AcidBase, type TreatmentCalculation, type FilterHistoryEntry, type ActionLogEntry } from './apparatus.js'
 import { SamplePreparationApparatus, type SampleApStatus, type SampleCalculation, type MetalSolution } from './sample-apparatus.js'
 import { DischargeApparatus } from './discharge-apparatus.js'
 import { WaterTreatmentLearningGoal } from './learning-goal.js'
@@ -332,6 +332,8 @@ function WaterTreatmentWorkbenchSession({
   const [treatmentCalculation, setTreatmentCalculation] = useState<TreatmentCalculation | null>(null)
   /** Lịch sử các lần lọc cộng dồn của Bàn 2 */
   const [filterHistory, setFilterHistory] = useState<FilterHistoryEntry[]>([])
+  /** Lịch sử thao tác */
+  const [actionLog, setActionLog] = useState<ActionLogEntry[]>([])
   /** Phase của Bàn 3 cân bằng pH — 'pending' = Bàn 2 chưa khóa, 'balancing' = Bàn 3, 'discharged' = đã thải */
   const [dischargePhase, setDischargePhase] = useState<'pending' | 'balancing' | 'discharged'>('pending')
   /** pH hiện tại của Bàn 3 — được báo về từ DischargeApparatus qua onPHChange */
@@ -345,8 +347,13 @@ function WaterTreatmentWorkbenchSession({
     filterHistory: FilterHistoryEntry[]
   } | null>(null)
 
+  const addActionLog = useCallback((station: 'sample' | 'treatment' | 'discharge', action: string, details?: string) => {
+    setActionLog(prev => [...prev, { timestamp: new Date(), station, action, details }])
+  }, [])
+
   const handleLockBan2 = useCallback(() => {
     if (!treatmentCalculation) return
+    addActionLog('treatment', 'Chuyển sang Bàn 3', `Khóa kết quả Bàn 2 tại pH ${apStatus.pH.toFixed(1)}`)
     setBan2LockedData({
       pH: apStatus.pH,
       calculation: treatmentCalculation,
@@ -354,11 +361,12 @@ function WaterTreatmentWorkbenchSession({
     })
     setDischargePhase('balancing')
     setWorkPhase('discharge')
-  }, [treatmentCalculation, apStatus.pH, filterHistory])
+  }, [treatmentCalculation, apStatus.pH, filterHistory, addActionLog])
 
   const handleDischarge = useCallback(() => {
+    addActionLog('discharge', 'Thải nước', dischargePH ? `pH cuối ${dischargePH.toFixed(1)}` : undefined)
     setDischargePhase('discharged')
-  }, [])
+  }, [addActionLog, dischargePH])
 
   const addDrop = useCallback((reagent: AcidBase, amountMl: number) => {
     setApStatus((prev) => {
@@ -369,15 +377,17 @@ function WaterTreatmentWorkbenchSession({
         const added = prev.naohAddedMl + amountMl
         const target = 12
         const pH = +(prev.pH + (target - prev.pH) * Math.min(1, amountMl * 0.18)).toFixed(6)
+        addActionLog('treatment', 'Thêm NaOH', `${amountMl.toFixed(2)} mL (tổng ${added.toFixed(2)} mL)`)
         return { ...prev, ...resetSeparation, naohAddedMl: added, volumeMl: prev.volumeMl + amountMl, pH }
       } else {
         const added = prev.hclAddedMl + amountMl
         const target = 1.5
         const pH = +(prev.pH + (target - prev.pH) * Math.min(1, amountMl * 0.18)).toFixed(6)
+        addActionLog('treatment', 'Thêm HCl', `${amountMl.toFixed(2)} mL (tổng ${added.toFixed(2)} mL)`)
         return { ...prev, ...resetSeparation, hclAddedMl: added, volumeMl: prev.volumeMl + amountMl, pH }
       }
     })
-  }, [])
+  }, [addActionLog])
 
   const addSampleDrop = useCallback((solution: MetalSolution, amountMl: number) => {
     setSampleApStatus((prev) => {
@@ -386,6 +396,11 @@ function WaterTreatmentWorkbenchSession({
       const currentValue = prev[key]
       const nextValue = Math.min(cap, Math.round((currentValue + amountMl) * 100) / 100)
       if (nextValue === currentValue) return prev
+      
+      // Ghi log thao tác thêm ion
+      const ionName = solution === 'fe' ? 'Fe³⁺' : solution === 'zn' ? 'Zn²⁺' : 'Pb²⁺'
+      addActionLog('sample', `Thêm ${ionName}`, `${amountMl.toFixed(2)} mL (tổng ${nextValue.toFixed(2)} mL)`)
+      
       setSampleCalculation(null)
       setFilterHistory([])
       const added = {
@@ -401,10 +416,14 @@ function WaterTreatmentWorkbenchSession({
         pbAddedMl: added.pb,
       }
     })
-  }, [])
+  }, [addActionLog])
   const toggleStir = useCallback(() => {
-    setApStatus((prev) => ({ ...prev, stirring: !prev.stirring }))
-  }, [])
+    setApStatus((prev) => {
+      const nextStirring = !prev.stirring
+      addActionLog('treatment', nextStirring ? 'Bắt đầu khuấy' : 'Dừng khuấy')
+      return { ...prev, stirring: nextStirring }
+    })
+  }, [addActionLog])
 
   /* Bước lắng: kết tủa đã hình thành ở pH hiện tại. Engine trả về
      `precipitated_mgPerL` + `filtrate_mgPerL` — đưa vào bảng kết quả.
@@ -412,7 +431,8 @@ function WaterTreatmentWorkbenchSession({
   const settleSample = useCallback((result: TreatmentCalculation) => {
     setTreatmentCalculation(result)
     setApStatus((prev) => ({ ...prev, settled: true }))
-  }, [])
+    addActionLog('treatment', 'Lắng hoàn tất', `pH ${result.pH.toFixed(1)}`)
+  }, [addActionLog])
 
   /**
    * Đồng bộ pH cốc Bàn 2 với pH mẫu từ Bàn 1 chỉ trong lần đầu tiên mẫu
@@ -465,10 +485,12 @@ function WaterTreatmentWorkbenchSession({
             Pb: Math.max(0, initial.pb - remaining.Pb),
           }
         : null
+      const nextIndex = prev.length + 1
+      addActionLog('treatment', `Lọc lần ${nextIndex}`, `pH ${result.pH.toFixed(1)}, Fe còn ${remaining.Fe.toFixed(3)} mg/L`)
       return [
         ...prev,
         {
-          index: prev.length + 1,
+          index: nextIndex,
           timestamp: new Date(),
           calculation: result,
           cumulativeRemaining: remaining,
@@ -479,10 +501,15 @@ function WaterTreatmentWorkbenchSession({
   }, [sampleCalculation])
 
   const toggleSampleStir = useCallback(() => {
-    setSampleApStatus((prev) => ({ ...prev, stirring: !prev.stirring }))
-  }, [])
+    setSampleApStatus((prev) => {
+      const nextStirring = !prev.stirring
+      addActionLog('sample', nextStirring ? 'Bắt đầu khuấy' : 'Dừng khuấy')
+      return { ...prev, stirring: nextStirring }
+    })
+  }, [addActionLog])
 
   const resetSampleApparatus = useCallback(() => {
+    addActionLog('sample', 'Reset mẫu', 'Bắt đầu pha mẫu mới')
     setSampleCalculation(null)
     setFilterHistory([])
     setWorkPhase('sample')
@@ -492,7 +519,12 @@ function WaterTreatmentWorkbenchSession({
     setApStatus({ pH: 5.4, volumeMl: 1000, stirring: false, naohAddedMl: 0, hclAddedMl: 0, settled: false, filtered: false, composition: null, filteredSolid: { Fe: 0, Zn: 0, Pb: 0 } })
     setSampleApStatus({ pH: 7.0, targetVolumeMl: 1000, stirring: false, feAddedMl: 0, znAddedMl: 0, pbAddedMl: 0 })
     pHSyncedRef.current = false
-  }, [])
+  }, [addActionLog])
+
+  const handleSampleCalculation = useCallback((result: SampleCalculation) => {
+    addActionLog('sample', 'Tính mẫu', `pH ${result.pH.toFixed(1)}, Fe ${result.dissolvedMgL.fe.toFixed(3)} mg/L`)
+    setSampleCalculation(result)
+  }, [addActionLog])
 
   const handleSubmitConfirm = useCallback(() => {
     setBusy(true)
@@ -617,7 +649,7 @@ function WaterTreatmentWorkbenchSession({
             onAddDrop={addSampleDrop}
             onToggleStir={toggleSampleStir}
             onReset={resetSampleApparatus}
-            onCalculate={setSampleCalculation}
+            onCalculate={handleSampleCalculation}
             calculation={sampleCalculation}
           />
         </section>
@@ -780,6 +812,7 @@ function WaterTreatmentWorkbenchSession({
       busy={busy}
       onSubmit={() => setSubmitDialogOpen(true)}
       onReport={handleOpenReport}
+      actionLog={actionLog}
     />
   ) : (
     <section tabIndex={-1} className={styles.notebook} aria-label="Sổ đo Water Treatment">

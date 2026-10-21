@@ -116,6 +116,14 @@ export type FilterHistoryEntry = {
   cumulativeFiltered: { Fe: number; Zn: number; Pb: number } | null
 }
 
+/** Một bản ghi hành động trong lịch sử thao tác */
+export type ActionLogEntry = {
+  timestamp: Date
+  station: 'sample' | 'treatment' | 'discharge'
+  action: string
+  details?: string
+}
+
 const INITIAL_STATUS: ApStatus = {
   pH: 5.4,
   volumeMl: 1000,
