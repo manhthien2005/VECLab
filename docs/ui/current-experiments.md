@@ -1,6 +1,6 @@
 # Danh sách bài đang phục vụ
 
-Cập nhật ngày 19/10/2026 theo tiến độ phát triển mới nhất.
+Cập nhật ngày 21/10/2026: chỉ phục vụ năm bài trong bảng dưới đây; landing và thư viện dùng cùng danh sách.
 
 | Bài | Route thực hành | Release |
 | --- | --- | --- |
@@ -9,7 +9,6 @@ Cập nhật ngày 19/10/2026 theo tiến độ phát triển mới nhất.
 | Phân loại nhựa nguyên sinh | `/simulate/plastic-density-separation` | `plastic-separation@0.2.0` (đang hoàn thiện trên nhánh Hoang) |
 | Xà phòng hóa (cold process) | `/simulate/cold-process-soap` | `cold-process-soap@0.2.0` |
 | Xử lý nước Fe/Zn/Pb | `/simulate/water-treatment` | `wt-v0-alpha` — trạng thái chỉ giữ trong bộ nhớ; chuẩn bị mẫu dùng PHREEQC đã đóng gói cho Windows x64 và Linux x64 |
-| Hấp phụ xanh methylene | Chỉ thẻ giới thiệu, chưa triển khai | Chưa có |
 
 Jar Test, chiết tách, nhựa và xà phòng cùng lưu IndexedDB, kể cả khi đăng nhập. Lab/account chỉ liệt kê lượt đúng bài; báo cáo và sổ đo mở từ workbench bằng `view=report` và `view=notebook`. `/attempts/[id]` và `/reports/[id]` đọc metadata local rồi chuyển đến đúng bài. Lượt đã nghỉ có thông báo; dữ liệu không bị xóa hoặc đổi nhãn.
 

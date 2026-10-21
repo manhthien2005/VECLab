@@ -4,7 +4,7 @@ Ngày 15/10/2026. Căn cứ source Jar Test production `ea748af1d939c571d7e68496
 
 ## Quyết định được giữ
 
-- Bộ ba mục tiêu: Jar Test, Chiết tách axit–bazơ (thay bài pH độc lập), Hấp phụ xanh methylene. Lượt hiện tại chỉ xây bài chiết; không thay thẻ hay engine bài khác.
+- Task này xây bài Chiết tách axit–bazơ (thay bài pH độc lập), giữ nguyên Jar Test; không thay engine bài khác. Phạm vi sản phẩm hiện hành được cập nhật riêng tại docs/ui/current-experiments.md.
 - Sinh viên không chuyên hóa, có nền tảng cơ bản. Cho tự quyết định và mắc lỗi; giải thích nguyên nhân sau nộp. Có hướng dẫn dụng cụ và lý thuyết theo yêu cầu.
 - Dùng khung workbench sáng của Jar: mẫu/dụng cụ, khu vực thực hành, thao tác theo bình được chọn, sổ đo; desktop và mobile.
 - Local IndexedDB kể cả đăng nhập, lưu/mở lại, chống nhân đôi thao tác, xác nhận nộp và báo cáo bất biến. Không cloud, database migration, AI tutor hoặc dependency mới.

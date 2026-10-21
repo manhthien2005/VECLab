@@ -1,23 +1,28 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { useId } from 'react'
 import { APP_STRINGS } from '@/content/index.js'
+import { listCatalog } from '@/features/experiment-catalog/catalog.js'
 import { FlaskIcon, LayersIcon, MoleculeIcon } from './icons.js'
 import { ShowcaseCarouselTrack } from './showcase-carousel-track.js'
 
 const CARD_ART = {
   'acid-base-extraction': { Icon: FlaskIcon, image: '/assets/experiments/extraction.webp', alt: 'Phễu chiết hai pha và các bình thu mẫu' },
   'jar-test': { Icon: MoleculeIcon, image: '/assets/experiments/jar.webp', alt: 'Hai cốc Jar Test với cánh khuấy và bông cặn đang lắng' },
-  'water-treatment': { Icon: LayersIcon, image: '/assets/auth-laboratory-v2.webp', alt: 'Bình khuấy và máy đo trong phòng thí nghiệm xử lý nước nhiều kim loại nặng' },
-  'methylene-blue-adsorption': { Icon: LayersIcon, image: '/assets/experiments/adsorption.webp', alt: 'Dung dịch xanh methylene và than hoạt tính dùng trong hấp phụ theo mẻ' },
+  'water-treatment': { Icon: FlaskIcon, image: '/assets/water-treatment-videos/water-treatment-lesson-cover.webp', alt: 'Bình khuấy, máy đo pH và bộ lọc trong bài xử lý nước nhiễm kim loại Fe, Zn, Pb' },
+  'cold-process-soap': { Icon: MoleculeIcon, image: '/assets/experiments/soap.jpg', alt: 'Các bánh xà phòng minh họa sản phẩm của phản ứng xà phòng hóa' },
+  'plastic-density-separation': { Icon: LayersIcon, image: '/assets/experiments/plastic-density-separation.webp', alt: 'Bể tách nhựa nổi–chìm, máy ly tâm và các khay thu phân đoạn' },
 } as const
 
 export function ExperimentShowcase() {
   const strings = APP_STRINGS.home
+  const patternId = `showcase-tech-dots-${useId().replaceAll(':', '')}`
+  const served = new Set(listCatalog().map(entry => entry.scenarioKey))
   return (
     <div className="experiment-showcase-section">
       <svg className="showcase-background-art" viewBox="0 0 1440 820" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-        <defs><pattern id="showcase-tech-dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="0.9" fill="currentColor" /></pattern></defs>
-        <g fill="url(#showcase-tech-dots)" opacity="0.28">
+        <defs><pattern id={patternId} width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="0.9" fill="currentColor" /></pattern></defs>
+        <g fill={`url(#${patternId})`} opacity="0.28">
           <rect x="32" y="28" width="250" height="140" /><rect x="1170" y="28" width="238" height="140" />
           <rect x="110" y="690" width="200" height="100" /><rect x="1130" y="690" width="200" height="100" />
         </g>
@@ -40,14 +45,14 @@ export function ExperimentShowcase() {
         <h2 id="showcase-heading" className="showcase-main-heading">{strings.showcaseHeading}</h2>
         <p className="lede showcase-lede">{strings.showcaseLede}</p>
       </div>
-      <ShowcaseCarouselTrack totalSlides={strings.showcaseCards.length} headingId="showcase-heading">
+      <ShowcaseCarouselTrack totalSlides={strings.showcaseCards.length} headingId="showcase-heading" slideLabels={strings.showcaseCards.map(card => card.shortTitle)}>
         {strings.showcaseCards.map((card, idx) => {
           const { Icon, image, alt } = CARD_ART[card.scenarioKey]
           const content = (
             <>
               <div className="showcase-card-head">
                 <span className="showcase-icon-box" aria-hidden="true"><Icon /></span>
-                <div className="showcase-card-title-group"><h3 className="showcase-card-title">{card.title}</h3><p className="showcase-card-summary">{card.summary}</p>{!card.available && <span className="showcase-card-state">Chưa triển khai</span>}</div>
+                <div className="showcase-card-title-group"><h3 className="showcase-card-title">{card.title}</h3><p className="showcase-card-summary">{card.summary}</p></div>
               </div>
               <div className="showcase-media-stage"><Image src={image} alt={alt} fill sizes="(max-width: 42rem) 82vw, (max-width: 66rem) 65vw, 544px" /></div>
             </>
@@ -55,7 +60,7 @@ export function ExperimentShowcase() {
           return (
             <div key={card.scenarioKey} id={`showcase-slide-${idx}`} role="group" aria-roledescription="slide"
               aria-label={`${idx + 1} / ${strings.showcaseCards.length}: ${card.title}`} className="showcase-card" data-active={idx === 0 ? 'true' : undefined}>
-              {card.available ? (
+              {served.has(card.scenarioKey) ? (
                 <Link className="showcase-card-link" href={`/simulate/${card.scenarioKey}`} aria-label={`Mở thí nghiệm ${card.title}`}>{content}</Link>
               ) : (
                 <details className="showcase-card-details">
